@@ -1,0 +1,17 @@
+---
+title: Java 进程 heapdump
+description: 了解如何使用 Java 进程 heapdump 功能
+icon: Database
+---
+
+获取 Java 进程 heapdump：
+
+```bash tab="本地模式"
+./siren jdump <Java Process PID>
+```
+
+```bash tab="远程模式-SIREN Server"
+>>> jdump <Client ID> <Java Process PID>
+```
+
+上传完成后，会在同目录下保存一份名为 `heapdump_<PID>.hprof` 的 heapdump 文件。

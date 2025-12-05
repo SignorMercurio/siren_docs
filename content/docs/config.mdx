@@ -1,0 +1,51 @@
+---
+title: 配置文件
+description: 了解如何通过配置文件进行自定义设置
+icon: Cog
+---
+
+SIREN 客户端与服务端均支持通过配置文件进行自定义设置，默认尝试在当前目录和 `./config` 目录下查找 `config.yaml` 和 `server_config.yaml` 文件，并加载其中的配置。
+
+如需自定义配置文件路径，请在启动时指定 `-c`/`--config` 参数。
+
+## 客户端配置
+
+```yaml title="config.yaml"
+server: 127.0.0.1                       # 服务端地址
+port: 443                               # 服务端端口
+
+recon:
+  commandTimeout: 30                    # 命令执行超时时间
+  user: true                            # 用户信息收集开关
+  # ...other modules
+
+oss:
+  region: cn-hongkong                   # OSS Bucket Region
+  bucketName: ir-transfer-station       # OSS Bucket 名称
+  objectPath: tmp/siren_upload          # 文件上传路径
+  docObjectPath: tmp/siren_upload/docs  # 信息收集文档上传路径
+
+rules:                                  # 信息收集规则
+  IPWhitelist: 140\.205\.11\.\d+|8\.147\.237\.0
+  # ...other rules
+```
+
+## 服务端配置
+
+```yaml title="server_config.yaml"
+listen: 0.0.0.0                         # 服务器监听地址
+port: 443                               # 服务器监听端口
+mcpPort: 8080                           # MCP 服务器监听端口
+cert: certs/cert.pem                    # TLS 证书路径
+key: certs/key.pem                      # TLS 密钥路径
+
+air:
+  cliPath: claude                       # 大模型 CLI 工具路径
+  prompt: 作为资深安全应急响应专家，...  # Agentic 应急响应中提供给 AI 的 prompt
+
+oss:
+  region: cn-hongkong                   # OSS Bucket Region
+  bucketName: ir-transfer-station       # OSS Bucket 名称
+  objectPath: tmp/siren_upload          # 文件上传路径
+  docObjectPath: tmp/siren_upload/docs  # 信息收集文档上传路径
+```

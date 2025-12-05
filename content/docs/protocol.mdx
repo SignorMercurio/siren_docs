@@ -1,0 +1,162 @@
+---
+title: 通信协议
+description: 了解 SIREN 的客户端-服务端通信协议
+icon: Radio
+---
+
+## 标准消息
+
+```go title="internal/protocol/protocol.go"
+type Header struct {
+	MsgType uint8
+	DataLen uint64
+}
+
+type Message struct {
+	Header Header
+	Data   []byte
+}
+```
+
+即：`1 字节消息类型 | 8 字节消息长度 | 消息内容`。
+
+## Raw 消息
+
+顾名思义，Raw 消息无固定格式，客户端发送消息至服务端后，如果消息的首字节不在标准消息类型标识范围内则被视为 Raw 消息，读取至 `\n` 并直接打印，随后切换回读取标准消息的模式。
+
+主要适用于客户端日志直传场景。
+
+## 各命令交互流程
+
+### recon
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant S as Server
+    participant O as OSS
+    participant M as MkDocs
+    S->>C: MsgRecon
+    C-->>C: StartRecon()
+    C->>S: MsgRecon
+    C->>S: MsgFile
+    S->>O: Upload File
+    O->>M: Instant Sync
+```
+
+### shell
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant S as Server
+    S-->>S: startShellSession()
+    S->>C: MsgShell
+    C->>S: MsgShell
+    C-->>C: pty.Start()
+    loop
+        C->>S: io.Copy()
+        S->>C: io.Copy()
+    end
+    S->>C: ...exit / EOF
+    C-->>C: shellCtx.Done()
+    C->>S: __EOF__
+    S-->>S: shellCtx.Done()
+```
+
+### run
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant S as Server (with MCP)
+    participant A as AI Agent
+    A->>S: mcp__siren__ls Request
+    S->>A: mcp__siren_ls Response
+    A->>S: mcp__siren__run Request
+    S->>C: MsgRun
+    C-->>C: ExecuteCommand()
+    C->>S: MsgRun
+    S->>A: mcp__siren__run Response
+```
+
+### upload
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant S as Server
+    participant O as OSS
+    S->>C: MsgUpload
+    C->>S: MsgUpload
+    C->>S: MsgFile
+    S->>O: Upload File
+    O->>S: Object URL
+```
+
+### ti
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant S as Server
+    participant T as Threat Intelligence
+    S->>C: MsgTi
+    C->>S: MsgTi
+    C->>S: MsgFile
+    S->>T: Upload File
+    T->>S: Sandbox URL
+```
+
+### jdump
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant S as Server
+    S->>C: MsgJdump
+    C->>C: Dump()
+```
+
+### forward / stopforward
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant CS as Client-side Service
+    participant C as Client
+    participant S as Server
+    participant L as Local Env
+    S->>S: net.Listen()
+    loop
+        L->>S: listener.Accept()
+        S->>C: MsgPortForward
+        C->>CS: net.Dial()
+        L->>S: [Request]
+        S->>C: MsgPortForwardData
+        C->>CS: [Request]
+        CS->>C: [Response]
+        C->>S: MsgPortForwardData
+        S->>L: [Response]
+    end
+    S->>S: listener.Close()
+    S->>C: MsgPortForwardStop
+    C->>C: conn.Close()
+```
+
+### clean
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant S as Server
+    S->>C: MsgClean
+    C-->>C: cleanAll()
+```

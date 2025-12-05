@@ -1,0 +1,30 @@
+---
+title: 关联基础设施
+description: 了解 SIREN 依赖的相关基础设施与服务
+icon: MonitorCloud
+---
+
+SIREN 无需依赖任何外部基础设施即可使用。但为了更好的使用体验，建议配置以下基础设施：
+
+| 基础设施 | 对应功能 |
+| -------- | -------- |
+| OSS Bucket 及访问凭证 | [信息收集](/recon)、[数据展示](/recon#数据展示)（MkDocs）、[文件上传](/file/upload) |
+| 微步在线威胁情报 API Key | [快速样本分析](/file/ti) |
+| 控制主机 | 所有远程模式功能 |
+
+内部环境额外依赖以下基础设施与服务：
+
+| 基础设施 | 对应功能 |
+| -------- | -------- |
+| 云存储网关与极速同步组 | [数据展示](/recon#数据展示)（MkDocs） |
+| MkDocs 站点 | [数据展示](/recon#数据展示)（MkDocs） |
+| AI 分析 API 服务及相关 Key | [数据展示](/recon#数据展示)（MkDocs） |
+| SOAR 平台及访问凭证 | [云助手一键部署](/index#内部环境通过云助手一键部署)、[自动放行受害主机连接](/index#手动部署)、[AccessKey 调查](/ak)、[MCP 工具 `get_alarm_detail`](/mcp#可用工具) |
+
+## 相关内容
+
+<Cards>
+  <Card title="SIREN 概述-架构设计" href="/overview#架构设计">
+    了解 SIREN 的架构设计
+  </Card>
+</Cards>

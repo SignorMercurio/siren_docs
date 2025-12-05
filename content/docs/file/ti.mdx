@@ -1,0 +1,33 @@
+---
+title: 快速样本分析
+description: 了解如何使用快速样本分析功能
+icon: TriangleAlert
+---
+
+## 设置威胁情报 API Key
+
+SIREN 目前支持调用[微步在线云 API](https://x.threatbook.com/v5/apiDocs#/)，详见 [设置威胁情报 API Key](/credential#设置-威胁情报-api-key)。
+
+## 上传样本
+
+将恶意样本上传至威胁情报平台：
+
+```bash tab="本地模式"
+./siren ti <Client file path>
+```
+
+```bash tab="远程模式-SIREN Server"
+>>> ti <Client ID> <Client file path>
+```
+
+上传完成后，返回类似：
+
+```bash
+[+] Request succeeded. Response:  {
+    "sha256": "6e123e7f3202a8c1e9b1f94d8941580a25135382b99e8d3e34fb858bba311348",
+    "permalink": "https://s.threatbook.cn/search?query=6e123e7f3202a8c1e9b1f94d8941580a25135382b99e8d3e34fb858bba311348&type=sha256"
+}
+```
+
+- `sha256`：样本的 SHA256 哈希值
+- `permalink`：威胁情报平台针对该文件的分析结果链接，可直接通过浏览器访问

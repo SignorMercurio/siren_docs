@@ -1,0 +1,151 @@
+---
+title: 快速开始
+description: 快速上手 SIREN
+icon: Rocket
+---
+
+import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
+import { Info, Sparkles } from 'lucide-react';
+
+欢迎使用 SIREN！本指南将帮助你快速上手。
+
+## 模式选择
+
+SIREN 支持两种运行模式，可根据实际网络环境和应急响应场景灵活选择。
+
+### 本地模式
+
+在受害主机上直接运行 SIREN 客户端，所有数据采集、分析和结果输出均在本地完成。
+
+**适用场景：**
+- 受害主机处于隔离网络或无法访问互联网
+- 对数据安全性要求极高，不允许数据传输到外部
+
+**特点：**
+- ✅ 无需额外部署服务端
+- ✅ 完全离线运行，不依赖网络连接
+- ⚠️ 需要直接登录受害主机操作
+- ⚠️ 不支持多主机统一管理
+
+### 远程模式
+
+在受害主机上运行 SIREN 客户端，通过加密通道连接到控制主机上的 SIREN 服务端。客户端负责数据采集，服务端负责指令下发、数据汇聚和结果展示。
+
+**适用场景：**
+- 受害主机可以访问互联网或控制主机
+- 需要同时处理多台受害主机
+
+**特点：**
+- ✅ 支持多主机统一管理和批量操作
+- ✅ 更丰富的功能支持
+- ⚠️ 需要额外部署服务端
+- ⚠️ 依赖网络连接
+
+<Callout title="模式选择建议" type="info">
+  优先推荐**远程模式**，仅在网络隔离或特殊安全要求下选择本地模式。
+</Callout>
+
+## 服务端部署（可选）
+
+<Callout title="内部预部署环境" type="success">
+  在内部环境已完成 SIREN 控制主机设置，可开箱即用，无需关心凭证与外部工具配置。详见 [内部文档](https://aliyuque.antfin.com/ykozrq/puiz2d/mktg38agsx5bfz9v)。
+</Callout>
+
+仅远程模式下需要部署服务端：
+
+<Accordions>
+  <Accordion title="服务端部署">
+    在控制主机上运行：
+
+    ```bash title="控制主机"
+    (wget -q -O - https://ir-transfer.oss-cn-hongkong.aliyuncs.com/get_siren_server.sh || curl -s https://ir-transfer.oss-cn-hongkong.aliyuncs.com/get_siren_server.sh) | sh
+    ```
+
+    启动服务端：
+
+    ```bash title="控制主机"
+    cd /tmp/siren
+    ./siren_server
+    ```
+
+    SIREN Server 默认监听 443 端口，可通过 `-p` 参数或配置文件指定端口。
+
+  </Accordion>
+</Accordions>
+
+
+## 客户端部署
+
+### 内部环境：通过云助手一键部署
+
+<Callout title="前置条件" type="info">
+  受害主机为阿里云 ECS 且云助手状态正常
+</Callout>
+
+控制主机[设置 SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)（内部环境已设置）后，在 SIREN Server 运行：
+
+```bash title="SIREN Server"
+>>> deploy <Alibaba Cloud UID> <ECS Instance ID>
+```
+
+该命令会自动化执行以下步骤：
+
+1. 从 SOAR 平台获取受害主机信息（地域、操作系统类型、IP 地址）
+2. 允许受害主机 IP 地址访问服务器
+3. 将适当的 SIREN 客户端二进制文件部署到受害主机
+4. 返回部署状态和命令输出
+
+<Accordions>
+  <Accordion title="示例">
+
+    ```bash title="SIREN Server"
+    >>> deploy user123 i-1234567890abcdef0
+    [*] Retrieving victim info...
+    [+] Victim info: region=us-east-1, os_type=linux, ip=203.0.113.10
+    [*] Allowing victim to access server...
+    [+] Successfully allowed 203.0.113.10 -> SIREN Server
+    [*] Deploying SIREN...
+    [+] Deployment completed. Command output:
+    SIREN client deployed successfully to /tmp/siren
+    [+] New client [0] connected: 203.0.113.10:33724
+    ```
+
+  </Accordion>
+</Accordions>
+
+### 手动部署
+
+登录受害主机后，执行：
+
+```bash tab="Linux"
+(wget -q -O - https://ir-transfer.oss-cn-hongkong.aliyuncs.com/get_siren.sh || curl -s https://ir-transfer.oss-cn-hongkong.aliyuncs.com/get_siren.sh) | sh
+```
+
+```bash tab="Windows"
+powershell -ExecutionPolicy Bypass -Command "iwr -Uri 'https://ir-transfer.oss-cn-hongkong.aliyuncs.com/get_siren.ps1' -UseBasicParsing | iex"
+```
+
+此时如需使用远程模式，需要在防火墙中允许受害主机出口 IP 访问 SIREN Server 监听端口。
+
+内部环境可以在 SIREN Server 运行以下命令，自动配置安全组及防火墙规则：
+
+```bash title="SIREN Server"
+>>> allow <Victim IP>
+```
+
+受害主机出口 IP 可以通过 `curl ifconfig.co/ip` 获取。随后以客户端模式运行 SIREN：
+
+```bash title="受害主机"
+./siren client -s <Server IP> -p <Server Port>
+```
+
+## 下一步
+
+<Cards>
+  <Card title="自动化信息收集" href="/recon" icon={<Info />}>
+    了解如何使用自动化信息收集功能
+  </Card>
+  <Card title="功能特性" href="/features" icon={<Sparkles />}>
+    SIREN 的主要功能特性列表
+  </Card>
+</Cards>

@@ -1,0 +1,25 @@
+---
+title: 痕迹清除
+description: 了解如何使用痕迹清除功能
+icon: Eraser
+---
+
+从受害主机上清除痕迹：
+
+```bash tab="本地模式"
+./siren clean
+```
+
+```bash tab="远程模式-SIREN Server"
+>>> clean <Client ID>
+```
+
+随后输入 `y` 即可完成清理，当前清理项：
+
+- 环境变量
+    - OSS 访问凭证
+    - 威胁情报 API Key
+    - SOAR 平台访问凭证
+- 配置文件
+- 可执行文件所在目录（含可执行文件自身）
+- WinPTY DLL 及 agent 可执行文件（仅 Windows 平台）

@@ -1,0 +1,118 @@
+---
+title: 目录结构
+description: 了解 SIREN 代码的目录结构
+icon: FolderTree
+---
+
+<Files>
+  <Folder name="certs" desc="TLS 证书目录" defaultOpen={false}>
+    <File name="cert.pem" />
+    <File name="key.pem" />
+  </Folder>
+  <Folder name="cmd" desc="CLI 程序目录">
+    <Folder name="client" defaultOpen={false}>
+      <Folder name="cli" desc="客户端 CLI 子命令">
+        <File name="clean.go" />
+        <File name="client.go" />
+        <File name="jdump.go" />
+        <File name="recon.go" />
+        <File name="root.go" desc="客户端 CLI 入口"/>
+        <File name="ti.go" />
+        <File name="upload.go" />
+      </Folder>
+      <File name="client.go" desc="客户端主函数" />
+    </Folder>
+    <Folder name="server" defaultOpen={false}>
+      <Folder name="cli" desc="服务端 CLI 子命令">
+        <File name="root.go" desc="服务端 CLI 入口" />
+      </Folder>
+      <File name="server.go" desc="服务端主函数" />
+    </Folder>
+  </Folder>
+  <Folder name="config" desc="配置文件目录">
+    <File name="config_linux.yaml" desc="Linux 客户端配置文件" />
+    <File name="config_windows.yaml" desc="Windows 客户端配置文件" />
+    <File name="server_config.yaml" desc="服务端配置文件" />
+  </Folder>
+  <Folder name="dist" desc="产物目录" defaultOpen={false}>
+    <File name="..." />
+  </Folder>
+  <File name="go.mod" />
+  <File name="go.sum" />
+  <Folder name="internal" desc="内部使用的包目录">
+    <Folder name="clean">
+      <File name="clean_unix.go" desc="Unix 客户端痕迹清理实现" />
+      <File name="clean_windows.go" desc="Windows 客户端痕迹清理实现" />
+      <File name="clean.go" desc="痕迹清理实现" />
+      <Folder name="embedded">
+        <File name="cleanup.bat" desc="Windows 清理脚本（实现自删除）" />
+      </Folder>
+    </Folder>
+    <Folder name="client">
+      <File name="client.go" desc="客户端连接功能与消息接收功能实现" />
+      <File name="handler.go" desc="客户端消息处理功能实现" />
+      <File name="portforward.go" desc="客户端端口转发消息处理功能实现" />
+      <File name="shell_unix.go" desc="Unix 客户端 shell 功能实现" />
+      <File name="shell_windows.go" desc="Windows 客户端 shell 功能实现" />
+    </Folder>
+    <Folder name="jdump">
+      <File name="jdump.go" desc="Java 进程 heapdump 功能实现" />
+    </Folder>
+    <Folder name="protocol">
+      <File name="portforward.go" desc="端口转发相关协议实现" />
+      <File name="portforwardmanager.go" desc="端口转发全局状态维护" />
+      <File name="protocol.go" desc="通信协议实现" />
+      <File name="tls.go" desc="TLS 加密实现" />
+    </Folder>
+    <Folder name="recon" desc="各类信息收集模块实现" defaultOpen={false}>
+      <File name="..." />
+    </Folder>
+    <Folder name="rules">
+      <File name="rules_unix.go" desc="从配置文件导入 Linux 信息收集规则" />
+      <File name="rules_windows.go" desc="从配置文件导入 Windows 信息收集规则" />
+    </Folder>
+    <Folder name="server">
+      <File name="air.go" desc="Agentic 应急响应功能实现" />
+      <File name="client.go" desc="服务端的 Client 对象相关实现" />
+      <File name="commander.go" desc="服务端命令交互功能实现" />
+      <File name="handler.go" desc="服务端与客户端交互功能实现" />
+      <File name="help.go" desc="服务端帮助信息展示实现" />
+      <File name="mcp.go" desc="MCP 服务器功能实现" />
+      <File name="portforward.go" desc="服务端端口转发消息处理功能实现" />
+      <File name="server.go" desc="服务端监听功能实现" />
+    </Folder>
+    <Folder name="shell">
+      <File name="shell.go" desc="用于全交互式 shell 的自定义 Reader 实现" />
+    </Folder>
+  </Folder>
+  <File name="Makefile" />
+  <Folder name="pkg" desc="可供外部使用的包目录">
+    <Folder name="soar" desc="SOAR 平台支持">
+      <File name="playbooks.go" desc="各类 SOAR 剧本调用实现" />
+      <File name="soar.go" desc="SOAR 平台相关基础设施" />
+    </Folder>
+    <Folder name="utils" desc="通用工具代码">
+      <File name="oss.go" desc="OSS 上传功能" />
+      <File name="ti.go" desc="威胁情报上传功能" />
+      <File name="utils_unix.go" desc="其他常用功能（Unix 客户端）" />
+      <File name="utils_windows.go" desc="其他常用功能（Windows 客户端）" />
+      <File name="utils.go" desc="其他常用功能（平台无关）" />
+    </Folder>
+    <Folder name="winpty" desc="WinPTY 支持" defaultOpen={false}>
+      <Folder name="embedded">
+          <File name="README.md" />
+          <File name="winpty-agent.exe" />
+          <File name="winpty.dll" />
+      </Folder>
+      <File name="winpty_unix.go" />
+      <File name="winpty_windows.go" />
+    </Folder>
+  </Folder>
+  <File name="README_zh.md" />
+  <File name="README.md" />
+  <Folder name="scripts" desc="下载脚本目录">
+    <File name="get_siren.ps1" />
+    <File name="get_siren.sh" />
+    <File name="get_siren_server.sh" />
+  </Folder>
+</Files>

@@ -1,0 +1,21 @@
+---
+title: 远程命令执行
+description: 了解如何使用远程命令执行功能
+icon: Terminal
+---
+
+import { Banner } from 'fumadocs-ui/components/banner';
+
+<Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
+
+获取一个**全交互式**的远程 Shell，可以正常使用 vim、top 等交互式命令、方向键、Tab 补全等：
+
+```bash title="SIREN Server"
+>>> shell <Client ID>
+```
+
+运行单条命令：
+
+```bash title="SIREN Server"
+>>> run <Client ID> <Command>
+```

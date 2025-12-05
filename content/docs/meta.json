@@ -1,0 +1,26 @@
+{
+  "title": "SIREN Docs",
+  "pages": [
+    "---介绍---",
+    "index",
+    "overview",
+    "features",
+    "comparison",
+    "---使用指南---",
+    "recon",
+    "ak",
+    "remote",
+    "air",
+    "file",
+    "portforward",
+    "misc",
+    "mcp",
+    "credential",
+    "config",
+    "faq",
+    "---开发参考---",
+    "infra",
+    "dir",
+    "protocol"
+  ]
+}

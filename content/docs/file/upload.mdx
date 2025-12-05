@@ -1,0 +1,23 @@
+---
+title: 文件上传
+description: 了解如何使用文件上传功能
+icon: CloudUpload
+---
+
+## 设置 OSS 访问凭证
+
+详见 [设置 OSS 访问凭证](/credential#设置-oss-访问凭证)。
+
+## 上传文件
+
+将任意文件（重要日志、恶意样本等）上传至 OSS：
+
+```bash tab="本地模式"
+./siren upload <Client file path>
+```
+
+```bash tab="远程模式-SIREN Server"
+>>> upload <Client ID> <Client file path>
+```
+
+上传完成后 OSS 文件路径默认为 `tmp/siren_upload/<file name>`。

@@ -1,0 +1,67 @@
+---
+title: 功能特性
+description: SIREN 的主要功能特性列表
+icon: Sparkles
+---
+
+import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
+import { Card, Cards } from "fumadocs-ui/components/card";
+import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, Cpu, Globe, Package, Eraser, CloudUpload, BookOpen, AlertTriangle, Database, ToggleLeft, Cloud, FileEdit, Radio, Server, Bot, MonitorPlay, Rocket, Key, Brain, Lock, ArrowRightLeft, Plug } from "lucide-react";
+
+## 🔍 信息收集
+
+<Cards>
+    <Card title="基础系统信息" icon={<Info />} href="/recon" />
+    <Card title="用户" icon={<Users />} href="/recon" />
+    <Card title="SSH" icon={<Terminal />} href="/recon" />
+    <Card title="进程" icon={<Activity />} href="/recon" />
+    <Card title="网络" icon={<Network />} href="/recon" />
+    <Card title="计划任务" icon={<Clock />} href="/recon"/>
+    <Card title="服务与启动项" icon={<Play />} href="/recon" />
+    <Card title="环境变量" icon={<Code />} href="/recon" />
+    <Card title="文件" icon={<FileText />} href="/recon" />
+    <Card title="Rootkit" icon={<Cpu />} href="/recon" />
+    <Card title="Webshell" icon={<Globe />} href="/recon" />
+    <Card title="应用" icon={<Package />} href="/recon" />
+    <Card title="痕迹清除" icon={<Eraser />} href="/misc/clean" />
+</Cards>
+
+## 📊 数据展示
+
+<Cards>
+    <Card title="本地 Markdown 文件" icon={<FileText />} href="/recon#数据展示" />
+    <Card title="上传至 OSS" icon={<CloudUpload />} href="/recon#数据展示" />
+    <Card title="自动 MkDocs 展示" icon={<BookOpen />} href="/recon#数据展示" />
+</Cards>
+
+## 📁 文件处理与分析
+
+<Cards>
+    <Card title="重要文件上传至 OSS" icon={<CloudUpload />} href="/file/upload" />
+    <Card title="恶意样本上传至威胁情报分析" icon={<AlertTriangle />} href="/file/ti" />
+    <Card title="Java 进程 heapdump" icon={<Database />} href="/file/jdump" />
+</Cards>
+
+## ⚙️ 配置文件支持
+
+<Cards>
+    <Card title="信息收集项开关" icon={<ToggleLeft />} />
+    <Card title="OSS 信息（不包含敏感信息）" icon={<Cloud />} />
+    <Card title="自定义信息收集规则" icon={<FileEdit />} />
+    <Card title="客户端-服务端通信设置" icon={<Radio />} />
+    <Card title="MCP 服务器设置" icon={<Server />} />
+    <Card title="Agentic 应急响应设置" icon={<Bot />} />
+</Cards>
+
+## 🌐 远程模式支持
+
+<Cards>
+    <Card title="所有本地模式命令" icon={<MonitorPlay />} />
+    <Card title="自动化客户端部署" icon={<Rocket />} href="/index#内部环境通过云助手一键部署" />
+    <Card title="远程执行命令/全交互式远程 Shell" icon={<Terminal />} href="/remote" />
+    <Card title="AccessKey 调查" icon={<Key />} href="/ak" />
+    <Card title="Agentic 应急响应" icon={<Brain />} href="/air" />
+    <Card title="通信流量 TLS 加密" icon={<Lock />} />
+    <Card title="本地端口转发" icon={<ArrowRightLeft />} href="/portforward" />
+    <Card title="MCP 支持" icon={<Plug />} href="/mcp" />
+</Cards>

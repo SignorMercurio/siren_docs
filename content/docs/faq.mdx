@@ -1,0 +1,24 @@
+---
+title: 常见问题
+description: 了解 SIREN 常见问题及解决方法
+icon: BadgeQuestionMark
+---
+
+## 远程模式服务端快捷键
+
+参考 [readline 快捷键](https://github.com/ergochat/readline/blob/master/docs/shortcut.md)。
+
+## 与云安全中心 Agent 兼容性
+
+SIREN 与云安全中心 Agent 兼容性良好，但使用过程中可能会触发告警：
+
+1. 使用远程 Shell 功能时，可能触发 `异常的伪终端Shell创建行为`告警、`反弹Shell` 告警，但不会被拦截。
+2. 使用自动化信息收集功能时，可能触发 `蠕虫病毒命令` 告警，但不会被拦截。
+
+## 容器信息收集
+
+部署在宿主机上的 SIREN 可以直接收集容器内恶意文件、进程、网络连接等从宿主机层面可观测的项；命令执行历史、计划任务等，则需要通过容器内部启动 SIREN 来收集。
+
+## 启动时报错：Error reading config file
+
+SIREN 在默认查找路径下未能找到配置文件，详见 [配置文件](/config)。
