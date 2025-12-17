@@ -18,6 +18,7 @@ icon: FolderTree
         <File name="recon.go" />
         <File name="root.go" desc="客户端 CLI 入口"/>
         <File name="ti.go" />
+        <File name="upgrade.go" />
         <File name="upload.go" />
       </Folder>
       <File name="client.go" desc="客户端主函数" />
@@ -25,6 +26,8 @@ icon: FolderTree
     <Folder name="server" defaultOpen={false}>
       <Folder name="cli" desc="服务端 CLI 子命令">
         <File name="root.go" desc="服务端 CLI 入口" />
+        <File name="shell.go" />
+        <File name="upgrade.go" />
       </Folder>
       <File name="server.go" desc="服务端主函数" />
     </Folder>
@@ -81,8 +84,11 @@ icon: FolderTree
       <File name="portforward.go" desc="服务端端口转发消息处理功能实现" />
       <File name="server.go" desc="服务端监听功能实现" />
     </Folder>
-    <Folder name="shell">
-      <File name="shell.go" desc="用于全交互式 shell 的自定义 Reader 实现" />
+    <Folder name="upgrade">
+      <File name="extract_unix.go" desc="Unix 平台解压功能实现" />
+      <File name="extract_windows.go" desc="Windows 平台解压功能实现" />
+      <File name="replace.go" desc="文件替换功能实现" />
+      <File name="upgrade.go" desc="版本升级功能实现" />
     </Folder>
   </Folder>
   <File name="Makefile" />
