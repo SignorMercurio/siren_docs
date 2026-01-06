@@ -1,0 +1,45 @@
+---
+title: 进程分析
+description: 了解如何使用进程分析功能
+icon: Activity
+---
+
+import { Banner } from 'fumadocs-ui/components/banner';
+
+<Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅 Linux 平台支持</Banner>
+
+基于进程 PID/监听端口/进程名称等信息，快速获取进程详细信息。
+
+![info](../../img/info.png)
+
+## PID 查询
+
+```bash tab="本地模式"
+./siren info <PID>
+```
+
+```bash tab="远程模式-SIREN Server"
+>>> info <Client ID> <PID>
+```
+
+## 监听端口查询
+
+```bash tab="本地模式"
+./siren info -p <Port>
+```
+
+```bash tab="远程模式-SIREN Server"
+>>> info <Client ID> -p <Port>
+```
+
+## 名称查询
+
+支持模糊匹配：
+
+```bash tab="本地模式"
+./siren info -n <Process Name>
+```
+
+```bash tab="远程模式-SIREN Server"
+>>> info <Client ID> -n <Process Name>
+```

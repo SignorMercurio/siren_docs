@@ -14,6 +14,7 @@ icon: FolderTree
       <Folder name="cli" desc="客户端 CLI 子命令">
         <File name="clean.go" />
         <File name="client.go" />
+        <File name="info.go" />
         <File name="jdump.go" />
         <File name="recon.go" />
         <File name="root.go" desc="客户端 CLI 入口"/>
@@ -44,12 +45,12 @@ icon: FolderTree
   <File name="go.sum" />
   <Folder name="internal" desc="内部使用的包目录">
     <Folder name="clean">
-      <File name="clean_unix.go" desc="Unix 客户端痕迹清理实现" />
-      <File name="clean_windows.go" desc="Windows 客户端痕迹清理实现" />
-      <File name="clean.go" desc="痕迹清理实现" />
       <Folder name="embedded">
         <File name="cleanup.bat" desc="Windows 清理脚本（实现自删除）" />
       </Folder>
+      <File name="clean_unix.go" desc="Unix 客户端痕迹清理实现" />
+      <File name="clean_windows.go" desc="Windows 客户端痕迹清理实现" />
+      <File name="clean.go" desc="痕迹清理实现" />
     </Folder>
     <Folder name="client">
       <File name="client.go" desc="客户端连接功能与消息接收功能实现" />
@@ -57,6 +58,14 @@ icon: FolderTree
       <File name="portforward.go" desc="客户端端口转发消息处理功能实现" />
       <File name="shell_unix.go" desc="Unix 客户端 shell 功能实现" />
       <File name="shell_windows.go" desc="Windows 客户端 shell 功能实现" />
+    </Folder>
+    <Folder name="info">
+      <File name="container.go" desc="进程容器信息分析功能实现" />
+      <File name="info_unix.go" desc="Unix 平台进程分析功能实现" />
+      <File name="info_windows.go" desc="Windows 平台进程分析功能实现" />
+      <File name="network.go" desc="进程网络信息分析功能实现" />
+      <File name="process.go" desc="进程信息获取功能实现" />
+      <File name="service.go" desc="进程服务信息分析功能实现" />
     </Folder>
     <Folder name="jdump">
       <File name="jdump.go" desc="Java 进程 heapdump 功能实现" />
@@ -83,6 +92,7 @@ icon: FolderTree
       <File name="mcp.go" desc="MCP 服务器功能实现" />
       <File name="portforward.go" desc="服务端端口转发消息处理功能实现" />
       <File name="server.go" desc="服务端监听功能实现" />
+      <File name="table.go" desc="服务端表格数据展示功能实现" />
     </Folder>
     <Folder name="upgrade">
       <File name="extract_unix.go" desc="Unix 平台解压功能实现" />
@@ -93,6 +103,12 @@ icon: FolderTree
   </Folder>
   <File name="Makefile" />
   <Folder name="pkg" desc="可供外部使用的包目录">
+    <Folder name="e" desc="错误处理" defaultOpen={false}>
+      <File name="error.go" />
+    </Folder>
+    <Folder name="log" desc="日志记录" defaultOpen={false}>
+      <File name="log.go" />
+    </Folder>
     <Folder name="soar" desc="SOAR 平台支持">
       <File name="playbooks.go" desc="各类 SOAR 剧本调用实现" />
       <File name="soar.go" desc="SOAR 平台相关基础设施" />

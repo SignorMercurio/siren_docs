@@ -113,6 +113,18 @@ sequenceDiagram
     T->>S: Sandbox URL
 ```
 
+### info
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant S as Server
+    S->>C: MsgInfo
+    C->>C: GetProcessInfo()
+    C->>S: MsgInfo
+```
+
 ### jdump
 
 ```mermaid

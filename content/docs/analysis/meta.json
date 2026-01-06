@@ -1,0 +1,5 @@
+{
+  "title": "文件与进程分析",
+  "pages": ["upload", "ti", "info", "jdump"],
+  "icon": "Folder"
+}
