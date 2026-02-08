@@ -1,25 +1,35 @@
 ---
-title: Java 进程 heapdump
-description: 了解如何使用 Java 进程 heapdump 功能
+title: Java 堆转储
+description: 了解如何使用 Java 堆转储功能
 icon: Database
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-在应急响应过程中，Java 进程的 heapdump 可用于分析内存中的敏感数据（如数据库凭证、API Key 等），或排查内存马等内存驻留型攻击。
+在应急响应过程中，Java 进程的堆转储（heapdump）可用于：
 
-## 获取 heapdump
+- 分析内存中的敏感数据（如数据库凭证、API Key 等）
+- 排查内存马等内存驻留型攻击
+- 提取恶意代码注入的类和对象
+
+<Callout title="前置条件" type="info">
+  需要目标主机上安装了 JDK（包含 `jmap` 工具），且 SIREN 以与目标 Java 进程相同或更高权限的用户运行。
+</Callout>
+
+## 获取堆转储
 
 ```bash tab="本地模式"
 ./siren jdump <Java Process PID>
 ```
 
-```bash tab="远程模式-SIREN Server"
+```bash tab="远程模式"
 >>> jdump <Client ID> <Java Process PID>
 ```
 
-执行完成后，会在同目录下保存一份名为 `heapdump_<PID>.hprof` 的 heapdump 文件。
+执行完成后，会在客户端同目录下保存一份名为 `heapdump_<PID>.hprof` 的堆转储文件。
 
 <Callout title="注意" type="warn">
-  heapdump 文件大小取决于 Java 进程的堆内存用量，可能较大。请确保磁盘有足够的可用空间。
+  堆转储文件大小取决于 Java 进程的堆内存用量，可能较大。请确保磁盘有足够的可用空间。
 </Callout>
+
+获取堆转储后，可使用 [Eclipse MAT](https://eclipse.dev/mat/)、[VisualVM](https://visualvm.github.io/) 等工具打开分析，或配合 [文件上传](/analysis/upload) 功能将其上传至 OSS 进行证据留存。

@@ -4,24 +4,28 @@ description: 了解如何使用文件上传功能
 icon: CloudUpload
 ---
 
-将受害主机上的重要文件上传至 OSS 进行证据留存，常见使用场景：
+import { Callout } from "fumadocs-ui/components/callout";
 
-- 保存重要日志文件（如 Web 访问日志、系统日志）
-- 保存恶意样本供后续分析
-- 保存配置文件快照
+将受害主机上的重要文件上传至 OSS 进行证据留存。
 
-## 设置 OSS 访问凭证
+**常见使用场景：**
 
-详见 [设置 OSS 访问凭证](/credential#设置-oss-访问凭证)。
+- 保存 Web 访问日志、系统日志等重要日志文件
+- 保存恶意样本供后续离线分析
+- 保存配置文件快照，记录攻击者的修改
+
+<Callout title="前置条件" type="info">
+  需要[设置 OSS 访问凭证](/credential#设置-oss-访问凭证)。
+</Callout>
 
 ## 上传文件
 
 ```bash tab="本地模式"
-./siren upload <Client file path>
+./siren upload <file path>
 ```
 
-```bash tab="远程模式-SIREN Server"
->>> upload <Client ID> <Client file path>
+```bash tab="远程模式"
+>>> upload <Client ID> <file path>
 ```
 
-上传完成后 OSS 文件路径默认为 `tmp/siren_upload/<file name>`，可通过[配置文件](/config#客户端配置)中的 `oss.objectPath` 自定义上传路径。
+上传完成后，文件存储在 OSS 的 `<objectPath>/<file name>` 路径下（默认 `tmp/siren_upload/<file name>`），可通过[配置文件](/config#客户端配置)中的 `oss.objectPath` 自定义上传路径前缀。

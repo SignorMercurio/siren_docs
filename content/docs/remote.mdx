@@ -4,45 +4,83 @@ description: 了解如何使用远程模式下的基础功能
 icon: Terminal
 ---
 
+import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Banner } from 'fumadocs-ui/components/banner';
+import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { ArrowRightLeft, Brain, Key, Plug } from 'lucide-react';
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-远程模式下，SIREN 客户端通过 TLS 加密通道连接到服务端。服务端提供统一的命令行界面来管理所有已连接的客户端。
+远程模式下，SIREN 客户端通过 TLS 加密通道连接到服务端。服务端提供统一的命令行界面（REPL）来管理所有已连接的客户端。
 
 ## 客户端管理
 
-远程模式下，每个客户端都有唯一的 ID，可以通过该 ID 对客户端进行管理。
+每个连接到服务端的客户端都会被分配一个唯一的数字 ID，后续所有操作均通过该 ID 指定目标客户端。
 
-列出所有客户端：
+列出所有已连接的客户端：
 
 ```bash title="SIREN Server"
 >>> ls
 ```
 
-为客户端添加备注信息：
+<Accordions>
+  <Accordion title="示例输出">
+
+```plaintext
++------------+------------+----------------------+--------------------------------+--------------------------------+
+| Client ID  | Client OS  | Client Address       | Note                           | Plugins                        |
++------------+------------+----------------------+--------------------------------+--------------------------------+
+| 0          | Linux      | 203.0.113.10:33724   | -                              | jdump,chkrootkit               |
+| 1          | Linux      | 198.51.100.5:42180   | web01                          | -                              |
++------------+------------+----------------------+--------------------------------+--------------------------------
+```
+
+  </Accordion>
+</Accordions>
+
+为客户端添加备注信息，方便在多客户端场景下快速识别：
 
 ```bash title="SIREN Server"
 >>> note <Client ID> <Note>
 ```
 
-相关备注会在 `ls` 中显示。
-
 ## 远程命令执行
 
-通过 tmux 启动新窗口，获取一个**全交互式**的远程 Shell，可以正常使用 vim、top 等交互式命令、方向键、Tab 补全等：
+### 交互式 Shell
+
+通过 tmux 启动新窗口，获取一个**全交互式**的远程 Shell：
 
 ```bash title="SIREN Server"
 >>> shell <Client ID>
 ```
 
-运行单条命令：
+<Callout title="Shell 特性" type="info">
+  Shell 会话通过独立的 TLS 连接传输，不影响主控制通道。支持 vim、top 等交互式命令、方向键、Tab 补全，使用体验与直接 SSH 登录一致。
+</Callout>
+
+退出 Shell 的方式与退出普通终端相同（输入 `exit` 或按 `Ctrl+D`），退出后自动返回 SIREN Server REPL。
+
+### 单条命令执行
+
+运行单条命令并直接返回结果（适合快速查看信息，结果上限 50KB）：
 
 ```bash title="SIREN Server"
 >>> run <Client ID> <Command>
 ```
+
+<Accordions>
+  <Accordion title="示例">
+
+```bash title="SIREN Server"
+>>> run 0 whoami
+root
+>>> run 0 uname -a
+Linux victim 5.15.0-91-generic #101-Ubuntu SMP x86_64 GNU/Linux
+```
+
+  </Accordion>
+</Accordions>
 
 ## 参考资料
 

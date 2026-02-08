@@ -4,15 +4,17 @@ description: 了解 SIREN 提供的 MCP 集成功能
 icon: Plug
 ---
 
+import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Banner } from 'fumadocs-ui/components/banner';
+import { Callout } from "fumadocs-ui/components/callout";
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-SIREN 服务端内置模型上下文协议 (MCP) 服务器，使 AI 助手能够直接与 SIREN 交互，在受害主机上执行命令、获取安全告警详情等。这是 [Agentic 应急响应](/air) 的基础能力。
+SIREN 服务端内置 [模型上下文协议](https://modelcontextprotocol.io/)（MCP）服务器，使 AI 助手能够直接与 SIREN 交互，在受害主机上执行命令、获取安全告警详情等。这是 [Agentic 应急响应](/air) 的基础能力。
 
 ## 配置
 
-MCP 服务默认监听 `8080` 端口，可通过[配置文件](/config#服务端配置)中的 `mcpPort` 字段修改。
+MCP 服务默认监听 `8080` 端口，可通过[配置文件](/config#服务端配置)中的 `mcpPort` 字段修改。使用 Streamable HTTP 传输协议。
 
 将以下配置添加到 MCP 客户端（如 Claude Desktop、Cursor 等）：
 
@@ -27,17 +29,21 @@ MCP 服务默认监听 `8080` 端口，可通过[配置文件](/config#服务端
 
 ## 可用工具
 
-| 工具 | 描述 |
-| --- | --- |
-| `ls` | 列出已连接的客户端 |
-| `run` | 在指定客户端上执行命令。参数：`Client ID`、`Command` |
-| `get_alarm_detail` | 通过 SOAR 平台获取指定的安全告警详情。参数：`Alibaba Cloud UID`、`Security Center Event ID` |
+| 工具 | 参数 | 描述 |
+| --- | --- | --- |
+| `ls` | 无 | 列出所有已连接的客户端，返回 ID、操作系统、IP 地址、备注、已安装插件等信息 |
+| `run` | `client_id`, `command` | 在指定客户端上执行命令并返回结果（30s 超时，50KB 上限） |
+| `get_alarm_detail` | `uid`, `event_id` | 通过 SOAR 平台获取指定的安全告警详情，返回告警类型、攻击源、受影响资产等 |
+
+<Callout title="提示" type="info">
+  AI 助手可以通过 `ls` 获取客户端列表后，再通过 `run` 在指定客户端上执行任意命令。这使得 AI 能够自主完成信息收集、威胁排查等应急响应任务。
+</Callout>
 
 ## 相关内容
 
 <Cards>
   <Card title="Agentic 应急响应" href="/air">
-    了解 SIREN 的 Agentic 应急响应功能
+    了解如何让 AI Agent 自动化执行应急响应
   </Card>
   <Card title="配置文件" href="/config#服务端配置">
     配置 MCP 服务器端口

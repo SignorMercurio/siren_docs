@@ -18,26 +18,24 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ## 使用方式
 
-调查 AccessKey 调用历史并生成详细报告：
-
 ```bash title="SIREN Server"
 >>> ak <Alibaba Cloud UID> <AccessKey ID>
 ```
 
-该命令执行以下操作：
-1. 查询 SOAR 平台获取 AccessKey 调用历史
-2. 生成包含调查结果的详细 Markdown 报告
-3. 如设置了 OSS 访问凭证，自动将报告上传至 OSS（同样支持 MkDocs 展示）
+执行后，SIREN 将：
+
+1. 通过 SOAR 平台查询 AccessKey 的调用历史
+2. 生成包含调查结果的详细 Markdown 报告（包括调用时间、操作类型、源 IP 等）
+3. 如已设置 OSS 访问凭证，自动将报告上传至 OSS（同样支持 MkDocs 展示）
 
 <Accordions>
-  <Accordion title="示例">
+  <Accordion title="示例输出">
 
-    ```bash title="SIREN Server"
-    >>> ak 1601097845544644 AKIA1234567890123456
-    [*] Investigating AccessKey...
-    [+] Investigation completed. Report saved to: AK_1601097845544644_AKIA1234567890123456_2024-01-15_14:30:25.md
-    ```
-
+```bash title="SIREN Server"
+>>> ak 1601097845544644 AKIA1234567890123456
+[*] Investigating AccessKey...
+[+] Investigation completed. Report saved to: AK_1601097845544644_AKIA1234567890123456_2024-01-15_14:30:25.md
+```
 
   </Accordion>
 </Accordions>

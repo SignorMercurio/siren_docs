@@ -10,22 +10,21 @@ import { Callout } from "fumadocs-ui/components/callout";
   痕迹清除会删除 SIREN 可执行文件及相关文件，此操作不可逆。请确认调查已完成且所有必要数据已保存后再执行。
 </Callout>
 
-从受害主机上清除痕迹并结束进程：
+在应急响应调查完成后，从受害主机上清除 SIREN 相关痕迹并终止客户端进程：
 
 ```bash tab="本地模式"
 ./siren clean
 ```
 
-```bash tab="远程模式-SIREN Server"
+```bash tab="远程模式"
 >>> clean <Client ID>
 ```
 
-随后输入 `y` 即可完成清理，当前清理项：
+输入 `y` 确认后，将清理以下内容：
 
-- 环境变量
-    - OSS 访问凭证
-    - 威胁情报 API Key
-    - SOAR 平台访问凭证
-- 配置文件
-- 可执行文件所在目录（含可执行文件自身）
-- WinPTY DLL 及 agent 可执行文件（仅 Windows 平台）
+| 清理项 | 说明 |
+| --- | --- |
+| 环境变量 | OSS 访问凭证、威胁情报 API Key、SOAR 平台访问凭证 |
+| 配置文件 | `config.yaml` |
+| 可执行文件目录 | SIREN 可执行文件及其所在目录 |
+| WinPTY 文件 | `winpty.dll` 和 `winpty-agent.exe`（仅 Windows） |

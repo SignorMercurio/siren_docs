@@ -6,9 +6,19 @@ icon: Cog
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-SIREN 客户端与服务端均支持通过配置文件进行自定义设置，默认尝试在当前目录和 `./config` 目录下查找 `config.yaml` 和 `server_config.yaml` 文件，并加载其中的配置。
+SIREN 客户端与服务端均支持通过 YAML 配置文件进行自定义设置。
 
-如需自定义配置文件路径，请在启动时指定 `-c`/`--config` 参数。
+### 配置文件查找顺序
+
+启动时，SIREN 会按以下顺序查找配置文件（找到即停止）：
+
+1. 通过 `-c`/`--config` 参数指定的路径
+2. 当前工作目录下的 `config.yaml`（客户端）或 `server_config.yaml`（服务端）
+3. `./config/` 目录下的 `config.yaml` 或 `server_config.yaml`
+
+<Callout title="敏感信息" type="warn">
+  配置文件中**不包含**任何敏感凭证信息（如 AccessKey、API Key 等），所有凭证均通过环境变量设置，详见[凭证设置](/credential)。
+</Callout>
 
 ## 客户端配置
 
@@ -27,6 +37,10 @@ oss:
   objectPath: tmp/siren_upload          # 文件上传路径
   docObjectPath: tmp/siren_upload/docs  # 信息收集文档上传路径
 
+plugins:
+  marketplace: https://example.com/plugins  # 插件市场地址
+  jdump: true                               # 启用 jdump 插件
+
 rules:                                  # 信息收集规则
   IPWhitelist: 140\.205\.11\.\d+|8\.147\.237\.0
   # ...other rules
@@ -39,15 +53,17 @@ rules:                                  # 信息收集规则
 | `server` | string | `127.0.0.1` | 远程模式下连接的服务端地址 |
 | `port` | int | `443` | 远程模式下连接的服务端端口 |
 | `recon.commandTimeout` | int | `30` | 信息收集中每条命令的超时时间（秒） |
-| `recon.<module>` | bool | `true` | 各信息收集模块的开关（如 `user`、`process`、`network` 等） |
+| `recon.<module>` | bool | `true` | 各信息收集模块的开关（如 `user`、`process`、`network` 等），完整列表见[信息收集模块](/recon#信息收集模块) |
 | `oss.region` | string | - | OSS Bucket 所在地域 |
 | `oss.bucketName` | string | - | OSS Bucket 名称 |
 | `oss.objectPath` | string | `tmp/siren_upload` | 文件上传的 OSS 路径前缀 |
 | `oss.docObjectPath` | string | `tmp/siren_upload/docs` | 信息收集文档上传的 OSS 路径前缀 |
+| `plugins.marketplace` | string | - | 插件市场 URL，用于下载和更新插件 |
+| `plugins.<name>` | bool | - | 启用或禁用指定的 command 类型插件 |
 | `rules` | map | - | 信息收集规则，值为正则表达式 |
 
 <Callout title="关于 rules" type="info">
-  `rules` 用于在信息收集结果中标记或过滤特定内容。例如 `IPWhitelist` 可以在网络连接信息中标识已知的白名单 IP 地址，减少排查噪音。规则值支持正则表达式。
+  `rules` 用于在信息收集结果中标记或过滤特定内容。例如 `IPWhitelist` 可以在网络连接信息中标识已知的白名单 IP 地址，减少排查噪音。规则值支持正则表达式，支持白名单（过滤已知正常项）和黑名单（高亮可疑项）两种类型。
 </Callout>
 
 ## 服务端配置

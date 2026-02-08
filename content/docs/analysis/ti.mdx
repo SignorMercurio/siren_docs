@@ -4,23 +4,27 @@ description: 了解如何使用快速样本分析功能
 icon: TriangleAlert
 ---
 
-## 设置威胁情报 API Key
+import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
+import { Callout } from "fumadocs-ui/components/callout";
 
-SIREN 目前支持调用[微步在线云 API](https://x.threatbook.com/v5/apiDocs#/)，详见 [设置威胁情报 API Key](/credential#设置-威胁情报-api-key)。
+将可疑文件上传至威胁情报平台进行自动化分析，快速判断文件是否为恶意样本。
+
+<Callout title="前置条件" type="info">
+  需要[设置威胁情报 API Key](/credential#设置-威胁情报-api-key)。SIREN 目前支持[微步在线云 API](https://x.threatbook.com/v5/apiDocs#/)。
+</Callout>
 
 ## 上传样本
 
-将恶意样本上传至威胁情报平台：
-
 ```bash tab="本地模式"
-./siren ti <Client file path>
+./siren ti <file path>
 ```
 
-```bash tab="远程模式-SIREN Server"
->>> ti <Client ID> <Client file path>
+```bash tab="远程模式"
+>>> ti <Client ID> <file path>
 ```
 
-上传完成后，返回类似：
+<Accordions>
+  <Accordion title="示例输出">
 
 ```bash
 [+] Request succeeded. Response:  {
@@ -29,5 +33,12 @@ SIREN 目前支持调用[微步在线云 API](https://x.threatbook.com/v5/apiDoc
 }
 ```
 
-- `sha256`：样本的 SHA256 哈希值
-- `permalink`：威胁情报平台针对该文件的分析结果链接，可直接通过浏览器访问
+  </Accordion>
+</Accordions>
+
+返回字段说明：
+
+| 字段 | 说明 |
+| --- | --- |
+| `sha256` | 样本的 SHA256 哈希值 |
+| `permalink` | 威胁情报平台的分析结果链接，可直接在浏览器中打开查看详细分析报告 |

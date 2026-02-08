@@ -5,42 +5,44 @@ icon: Server
 ---
 
 import { Banner } from 'fumadocs-ui/components/banner';
+import { Callout } from "fumadocs-ui/components/callout";
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-SIREN Server 提供了一些快捷操作，方便在服务端控制台中直接执行常用操作。
+SIREN Server REPL 提供了一些快捷操作，方便在服务端控制台中直接执行常用操作。
+
+## 命令速查
+
+| 命令 | 用法 | 说明 |
+| --- | --- | --- |
+| `!` | `! <command>` | 在服务端本地执行 Shell 命令 |
+| `env` | `env <KEY>=<VALUE>` | 设置服务端环境变量 |
+| `clear` | `clear` | 清屏 |
+| `help` | `help [command]` | 查看帮助（可指定命令查看详细用法） |
+| `exit` | `exit` | 关闭服务端 |
 
 ## 执行 Shell 命令
 
-使用 `!` 前缀在服务端执行 Shell 命令：
-
-```bash title="SIREN Server"
->>> ! <Command>
-```
-
-例如查看服务端当前目录：
+使用 `!` 前缀在服务端本地执行 Shell 命令：
 
 ```bash title="SIREN Server"
 >>> ! pwd
+/opt/siren
+>>> ! ls -la certs/
+total 8
+-rw-r--r-- 1 root root 1234 Jan  1 00:00 cert.pem
+-rw-r--r-- 1 root root 1234 Jan  1 00:00 key.pem
 ```
 
 ## 设置环境变量
 
-使用 `env` 直接在服务端设置环境变量，常用于配置各类[访问凭证](/credential)：
-
-```bash title="SIREN Server"
->>> env <KEY>=<VALUE>
-```
-
-例如设置 OSS 访问凭证：
+使用 `env` 命令设置环境变量，常用于配置各类[访问凭证](/credential)：
 
 ```bash title="SIREN Server"
 >>> env OSS_ACCESS_KEY_ID=<YOUR_ACCESS_KEY_ID>
 >>> env OSS_ACCESS_KEY_SECRET=<YOUR_ACCESS_KEY_SECRET>
 ```
 
-## 查看帮助
-
-```bash title="SIREN Server"
->>> help
-```
+<Callout title="自动重新初始化" type="info">
+  设置 `OSS_ACCESS_KEY_ID` / `OSS_ACCESS_KEY_SECRET` 后会自动重新初始化 OSS 客户端；设置 `ALIBABA_CLOUD_ACCESS_KEY_ID` / `ALIBABA_CLOUD_ACCESS_KEY_SECRET` 后会自动重新初始化 SOAR 客户端。无需重启服务端。
+</Callout>

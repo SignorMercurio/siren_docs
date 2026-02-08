@@ -4,6 +4,12 @@ description: 了解 SIREN 的客户端-服务端通信协议
 icon: Radio
 ---
 
+import { Callout } from "fumadocs-ui/components/callout";
+
+<Callout title="开发参考" type="info">
+  本页面主要面向开发者，介绍 SIREN 客户端与服务端之间的通信协议细节。
+</Callout>
+
 ## 标准消息
 
 ```go title="internal/protocol/protocol.go"
@@ -27,6 +33,8 @@ type Message struct {
 主要适用于客户端日志直传场景。
 
 ## 各命令交互流程
+
+以下时序图展示了各命令在客户端与服务端之间的交互过程。
 
 ### recon
 

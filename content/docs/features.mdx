@@ -8,61 +8,70 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, Cpu, Globe, Package, Eraser, CloudUpload, BookOpen, AlertTriangle, Database, ToggleLeft, Cloud, FileEdit, Radio, Server, Bot, MonitorPlay, Rocket, Key, Brain, Lock, ArrowRightLeft, Plug } from "lucide-react";
 
-## 🔍 信息收集
+## 信息收集
+
+自动化采集受害主机上的关键安全信息，支持按模块独立开关。
 
 <Cards>
-    <Card title="基础系统信息" icon={<Info />} href="/recon" />
-    <Card title="用户" icon={<Users />} href="/recon" />
-    <Card title="SSH" icon={<Terminal />} href="/recon" />
-    <Card title="进程" icon={<Activity />} href="/recon" />
-    <Card title="网络" icon={<Network />} href="/recon" />
-    <Card title="计划任务" icon={<Clock />} href="/recon"/>
-    <Card title="服务与启动项" icon={<Play />} href="/recon" />
-    <Card title="环境变量" icon={<Code />} href="/recon" />
-    <Card title="文件" icon={<FileText />} href="/recon" />
-    <Card title="Rootkit" icon={<Cpu />} href="/recon" />
-    <Card title="Webshell" icon={<Globe />} href="/recon" />
-    <Card title="应用" icon={<Package />} href="/recon" />
-    <Card title="痕迹清除" icon={<Eraser />} href="/misc/clean" />
+    <Card title="基础系统信息" icon={<Info />} href="/recon">主机名、操作系统、内核版本、CPU、内存、磁盘等</Card>
+    <Card title="用户" icon={<Users />} href="/recon">用户列表、登录历史、sudoers、影子文件等</Card>
+    <Card title="SSH" icon={<Terminal />} href="/recon">SSH 配置、authorized_keys、known_hosts 等</Card>
+    <Card title="进程" icon={<Activity />} href="/recon">进程列表、CPU/内存 Top 20、隐藏进程检测</Card>
+    <Card title="网络" icon={<Network />} href="/recon">网络连接、监听端口、DNS 配置、ARP 表等</Card>
+    <Card title="计划任务" icon={<Clock />} href="/recon">crontab、at 任务、Windows 计划任务等</Card>
+    <Card title="服务与启动项" icon={<Play />} href="/recon">systemd 服务、init 脚本、Windows 服务等</Card>
+    <Card title="环境变量" icon={<Code />} href="/recon">系统环境变量、LD_PRELOAD 等敏感变量检查</Card>
+    <Card title="文件" icon={<FileText />} href="/recon">近期修改文件、大文件、SUID 文件、敏感目录等</Card>
+    <Card title="Rootkit" icon={<Cpu />} href="/recon">内核模块检查、LD_PRELOAD 检查、系统完整性验证</Card>
+    <Card title="Webshell" icon={<Globe />} href="/recon">Web 目录扫描，基于关键字和正则匹配的 Webshell 检测</Card>
+    <Card title="应用" icon={<Package />} href="/recon">已安装软件包、运行中的 Web 应用/中间件</Card>
 </Cards>
 
-## 📊 数据展示
+## 数据展示
+
+信息收集结果支持多种方式查看。
 
 <Cards>
-    <Card title="本地 Markdown 文件" icon={<FileText />} href="/recon#数据展示" />
-    <Card title="上传至 OSS" icon={<CloudUpload />} href="/recon#数据展示" />
-    <Card title="自动 MkDocs 展示" icon={<BookOpen />} href="/recon#数据展示" />
+    <Card title="本地 Markdown 文件" icon={<FileText />} href="/recon#查看数据">采集结束后在本地保存结构化 Markdown 报告，可直接阅读</Card>
+    <Card title="上传至 OSS" icon={<CloudUpload />} href="/recon#查看数据">自动上传报告到 OSS 进行集中存储和共享</Card>
+    <Card title="自动 MkDocs 展示" icon={<BookOpen />} href="/recon#查看数据">内部环境支持自动同步到 MkDocs 站点，提供搜索和 AI 分析</Card>
 </Cards>
 
-## 📁 文件与进程分析
+## 文件与进程分析
+
+对受害主机上的文件和进程进行深度分析。
 
 <Cards>
-    <Card title="重要文件上传至 OSS" icon={<CloudUpload />} href="/analysis/upload" />
-    <Card title="恶意样本上传至威胁情报分析" icon={<AlertTriangle />} href="/analysis/ti" />
-    <Card title="进程分析" icon={<Activity />} href="/analysis/info" />
-    <Card title="Java 进程 heapdump" icon={<Database />} href="/analysis/jdump" />
+    <Card title="文件上传至 OSS" icon={<CloudUpload />} href="/analysis/upload">将日志、样本等重要文件上传到 OSS 进行证据留存</Card>
+    <Card title="快速样本分析" icon={<AlertTriangle />} href="/analysis/ti">上传恶意样本至威胁情报平台，获取分析报告</Card>
+    <Card title="进程分析" icon={<Activity />} href="/analysis/info">基于 PID/端口/名称查询进程详情、进程树、容器和服务信息</Card>
+    <Card title="Java 堆转储" icon={<Database />} href="/analysis/jdump">获取 Java 进程的 heapdump，排查内存马和敏感数据</Card>
 </Cards>
 
-## ⚙️ 配置文件支持
+## 配置文件支持
+
+通过 YAML 配置文件灵活控制 SIREN 的行为。
 
 <Cards>
-    <Card title="信息收集项开关" icon={<ToggleLeft />} href="/config#客户端配置"/>
-    <Card title="OSS 信息（不包含敏感信息）" icon={<Cloud />} href="/config"/>
-    <Card title="自定义信息收集规则" icon={<FileEdit />} href="/config#客户端配置" />
-    <Card title="客户端-服务端通信设置" icon={<Radio />} href="/config" />
-    <Card title="MCP 服务器设置" icon={<Server />} href="/config#服务端配置" />
-    <Card title="Agentic 应急响应设置" icon={<Bot />} href="/config#服务端配置" />
+    <Card title="信息收集项开关" icon={<ToggleLeft />} href="/config#客户端配置">按模块独立控制信息收集项，按需启用或禁用</Card>
+    <Card title="OSS 配置" icon={<Cloud />} href="/config">配置 OSS Bucket 信息（敏感凭证通过环境变量设置）</Card>
+    <Card title="自定义检测规则" icon={<FileEdit />} href="/config#客户端配置">通过正则表达式定义白名单和黑名单规则，降低噪音</Card>
+    <Card title="通信设置" icon={<Radio />} href="/config">配置客户端-服务端的连接地址、端口和 TLS 证书</Card>
+    <Card title="MCP 服务器设置" icon={<Server />} href="/config#服务端配置">配置 MCP 服务器监听端口</Card>
+    <Card title="Agentic 应急响应设置" icon={<Bot />} href="/config#服务端配置">配置大模型 CLI 路径和系统提示词</Card>
 </Cards>
 
-## 🌐 远程模式支持
+## 远程模式专属功能
+
+远程模式在本地模式的基础上，提供以下专属功能。
 
 <Cards>
-    <Card title="所有本地模式命令" icon={<MonitorPlay />} />
-    <Card title="自动化客户端部署" icon={<Rocket />} href="/index#内部环境通过云助手一键部署" />
-    <Card title="远程执行命令/全交互式远程 Shell" icon={<Terminal />} href="/remote#远程命令执行" />
-    <Card title="AccessKey 调查" icon={<Key />} href="/ak" />
-    <Card title="Agentic 应急响应" icon={<Brain />} href="/air" />
-    <Card title="通信流量 TLS 加密" icon={<Lock />} href="/config#服务端配置" />
-    <Card title="本地端口转发" icon={<ArrowRightLeft />} href="/portforward" />
-    <Card title="MCP 支持" icon={<Plug />} href="/mcp" />
+    <Card title="自动化客户端部署" icon={<Rocket />} href="/index#内部环境通过云助手一键部署">通过云助手一键将 SIREN 客户端部署到受害主机</Card>
+    <Card title="远程 Shell" icon={<Terminal />} href="/remote#远程命令执行">全交互式远程 Shell，支持 vim、top 等交互式命令</Card>
+    <Card title="AccessKey 调查" icon={<Key />} href="/ak">调查云上 AccessKey 调用历史，评估影响范围</Card>
+    <Card title="Agentic 应急响应" icon={<Brain />} href="/air">AI Agent 自动化执行应急响应，生成完整报告</Card>
+    <Card title="TLS 加密通信" icon={<Lock />} href="/protocol">所有客户端-服务端通信均通过 TLS 加密保护</Card>
+    <Card title="端口转发" icon={<ArrowRightLeft />} href="/portforward">将受害主机内网服务转发到控制主机进行访问</Card>
+    <Card title="MCP 集成" icon={<Plug />} href="/mcp">通过 MCP 协议接入任意 AI 助手</Card>
+    <Card title="痕迹清除" icon={<Eraser />} href="/misc/clean">远程清除受害主机上的 SIREN 痕迹</Card>
 </Cards>

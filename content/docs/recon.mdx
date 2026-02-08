@@ -4,6 +4,7 @@ description: 了解如何使用自动化信息收集功能
 icon: Info
 ---
 
+import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { Step, Steps } from "fumadocs-ui/components/steps";
@@ -54,13 +55,53 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 </Step>
 </Steps>
 
+## 信息收集模块
+
+所有模块均可通过[配置文件](/config#客户端配置)独立开关。
+
+<Accordions>
+  <Accordion title="Linux 平台模块">
+
+| 模块 | 配置项 | 采集内容 |
+| --- | --- | --- |
+| 基础信息 | `recon.basic` | 主机名、操作系统、内核版本、CPU/内存/磁盘使用率、系统运行时间 |
+| 用户 | `recon.user` | 用户列表、可登录用户、sudoers 配置、近期登录记录、当前登录用户、影子文件 |
+| SSH | `recon.ssh` | SSH 配置、authorized_keys、known_hosts、SSH 密钥文件 |
+| 进程 | `recon.process` | 完整进程列表、CPU/内存 Top 20、隐藏进程检测、/proc 异常检查 |
+| 网络 | `recon.network` | 网络连接、监听端口、DNS 配置、路由表、ARP 缓存、iptables 规则、网卡混杂模式 |
+| 计划任务 | `recon.cron` | 系统级与用户级 crontab、/etc/cron.* 目录、at 任务 |
+| 服务 | `recon.service` | systemd 服务、init.d 脚本、开机自启项、rc.local |
+| 环境变量 | `recon.env` | 系统环境变量、LD_PRELOAD、LD_LIBRARY_PATH 等敏感变量 |
+| 文件 | `recon.file` | 近期变更文件、SUID/SGID 文件、大文件、隐藏文件、敏感目录扫描 |
+| Rootkit | `recon.rootkit` | 内核模块列表及异常检测、LD_PRELOAD 检查、系统命令完整性 |
+| Webshell | `recon.webshell` | Web 目录下的可疑文件扫描（PHP/JSP/ASP 等） |
+| 应用 | `recon.application` | 已安装 RPM/DEB 包、运行中的 Web 应用及中间件 |
+
+  </Accordion>
+  <Accordion title="Windows 平台模块">
+
+| 模块 | 配置项 | 采集内容 |
+| --- | --- | --- |
+| 基础信息 | `recon.basic` | 主机名、操作系统版本、CPU/内存/磁盘使用率 |
+| 用户 | `recon.user` | 本地用户列表、管理员组成员、近期登录记录 |
+| 进程 | `recon.process` | 完整进程列表、CPU/内存 Top 20、可疑进程检测 |
+| 网络 | `recon.network` | 网络连接、监听端口、DNS 配置、路由表、ARP 缓存、防火墙规则 |
+| 计划任务 | `recon.schtask` | Windows 计划任务列表 |
+| 环境变量 | `recon.env` | 系统环境变量 |
+| 文件 | `recon.file` | 近期变更文件、可疑文件扫描 |
+| Webshell | `recon.webshell` | Web 目录下的可疑文件扫描 |
+| 应用 | `recon.application` | 已安装软件、运行中的 Web 应用及中间件 |
+
+  </Accordion>
+</Accordions>
+
 ## 相关内容
 
 <Cards>
-  <Card title="功能特性-信息收集" href="/features#-信息收集">
-    了解 SIREN 的自动化信息收集功能特性
+  <Card title="功能特性" href="/features#信息收集">
+    查看 SIREN 的完整功能特性列表
   </Card>
-  <Card title="SIREN 概述-架构设计" href="/overview#架构设计">
-    了解 SIREN 的架构设计
+  <Card title="架构设计" href="/overview#架构设计">
+    了解 SIREN 的整体架构设计
   </Card>
 </Cards>
