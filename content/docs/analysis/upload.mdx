@@ -4,13 +4,17 @@ description: 了解如何使用文件上传功能
 icon: CloudUpload
 ---
 
+将受害主机上的重要文件上传至 OSS 进行证据留存，常见使用场景：
+
+- 保存重要日志文件（如 Web 访问日志、系统日志）
+- 保存恶意样本供后续分析
+- 保存配置文件快照
+
 ## 设置 OSS 访问凭证
 
 详见 [设置 OSS 访问凭证](/credential#设置-oss-访问凭证)。
 
 ## 上传文件
-
-将任意文件（重要日志、恶意样本等）上传至 OSS：
 
 ```bash tab="本地模式"
 ./siren upload <Client file path>
@@ -20,4 +24,4 @@ icon: CloudUpload
 >>> upload <Client ID> <Client file path>
 ```
 
-上传完成后 OSS 文件路径默认为 `tmp/siren_upload/<file name>`。
+上传完成后 OSS 文件路径默认为 `tmp/siren_upload/<file name>`，可通过[配置文件](/config#客户端配置)中的 `oss.objectPath` 自定义上传路径。

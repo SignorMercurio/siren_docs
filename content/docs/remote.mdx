@@ -5,8 +5,12 @@ icon: Terminal
 ---
 
 import { Banner } from 'fumadocs-ui/components/banner';
+import { Card, Cards } from "fumadocs-ui/components/card";
+import { ArrowRightLeft, Brain, Key, Plug } from 'lucide-react';
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
+
+远程模式下，SIREN 客户端通过 TLS 加密通道连接到服务端。服务端提供统一的命令行界面来管理所有已连接的客户端。
 
 ## 客户端管理
 
@@ -44,3 +48,19 @@ import { Banner } from 'fumadocs-ui/components/banner';
 
 - [A beginner's guide to tmux](https://www.redhat.com/en/blog/introduction-tmux-linux)
 
+## 更多远程模式功能
+
+<Cards>
+  <Card title="端口转发" icon={<ArrowRightLeft />} href="/portforward">
+    将受害主机内网服务转发到控制主机
+  </Card>
+  <Card title="AccessKey 调查" icon={<Key />} href="/ak">
+    调查云上 AccessKey 调用历史
+  </Card>
+  <Card title="Agentic 应急响应" icon={<Brain />} href="/air">
+    AI 驱动的自动化应急响应
+  </Card>
+  <Card title="MCP 集成" icon={<Plug />} href="/mcp">
+    通过 MCP 协议接入 AI 助手
+  </Card>
+</Cards>

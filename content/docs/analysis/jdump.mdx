@@ -4,7 +4,11 @@ description: 了解如何使用 Java 进程 heapdump 功能
 icon: Database
 ---
 
-获取 Java 进程 heapdump：
+import { Callout } from "fumadocs-ui/components/callout";
+
+在应急响应过程中，Java 进程的 heapdump 可用于分析内存中的敏感数据（如数据库凭证、API Key 等），或排查内存马等内存驻留型攻击。
+
+## 获取 heapdump
 
 ```bash tab="本地模式"
 ./siren jdump <Java Process PID>
@@ -14,4 +18,8 @@ icon: Database
 >>> jdump <Client ID> <Java Process PID>
 ```
 
-上传完成后，会在同目录下保存一份名为 `heapdump_<PID>.hprof` 的 heapdump 文件。
+执行完成后，会在同目录下保存一份名为 `heapdump_<PID>.hprof` 的 heapdump 文件。
+
+<Callout title="注意" type="warn">
+  heapdump 文件大小取决于 Java 进程的堆内存用量，可能较大。请确保磁盘有足够的可用空间。
+</Callout>

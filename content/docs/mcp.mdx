@@ -8,11 +8,13 @@ import { Banner } from 'fumadocs-ui/components/banner';
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-SIREN 服务端包含模型上下文协议 (MCP) 服务器，用于与 AI 助手集成。
+SIREN 服务端内置模型上下文协议 (MCP) 服务器，使 AI 助手能够直接与 SIREN 交互，在受害主机上执行命令、获取安全告警详情等。这是 [Agentic 应急响应](/air) 的基础能力。
 
 ## 配置
 
-添加到你的 MCP 客户端配置中（MCP 服务监听端口可配置）：
+MCP 服务默认监听 `8080` 端口，可通过[配置文件](/config#服务端配置)中的 `mcpPort` 字段修改。
+
+将以下配置添加到 MCP 客户端（如 Claude Desktop、Cursor 等）：
 
 ```json title="mcp.json"
 {
@@ -28,13 +30,16 @@ SIREN 服务端包含模型上下文协议 (MCP) 服务器，用于与 AI 助手
 | 工具 | 描述 |
 | --- | --- |
 | `ls` | 列出已连接的客户端 |
-| `run <Client ID> <Command>` | 在指定客户端上执行命令 |
-| `get_alarm_detail <Alibaba Cloud UID> <Security Center Event ID>` | 通过 SOAR 平台获取指定的安全告警详情 |
+| `run` | 在指定客户端上执行命令。参数：`Client ID`、`Command` |
+| `get_alarm_detail` | 通过 SOAR 平台获取指定的安全告警详情。参数：`Alibaba Cloud UID`、`Security Center Event ID` |
 
 ## 相关内容
 
 <Cards>
   <Card title="Agentic 应急响应" href="/air">
     了解 SIREN 的 Agentic 应急响应功能
+  </Card>
+  <Card title="配置文件" href="/config#服务端配置">
+    配置 MCP 服务器端口
   </Card>
 </Cards>

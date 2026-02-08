@@ -6,10 +6,19 @@ icon: Key
 
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
+import { Callout } from "fumadocs-ui/components/callout";
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-内部环境下，在控制主机上 [设置 SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证) 后，支持调查 AccessKey 调用历史并生成详细报告：
+当发现泄露的云上 AccessKey 时，可以快速调查其调用历史以评估影响范围、梳理止血策略。
+
+<Callout title="前置条件" type="info">
+  需要在控制主机上[设置 SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)（内部环境已设置）。
+</Callout>
+
+## 使用方式
+
+调查 AccessKey 调用历史并生成详细报告：
 
 ```bash title="SIREN Server"
 >>> ak <Alibaba Cloud UID> <AccessKey ID>
