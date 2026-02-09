@@ -1,0 +1,29 @@
+{
+  "title": "SIREN 工具",
+  "description": "应急响应工具核心文档",
+  "root": true,
+  "icon": "Shield",
+  "pages": [
+    "---介绍---",
+    "index",
+    "overview",
+    "features",
+    "comparison",
+    "---使用指南---",
+    "recon",
+    "remote",
+    "air",
+    "analysis",
+    "ak",
+    "portforward",
+    "misc",
+    "mcp",
+    "credential",
+    "config",
+    "faq",
+    "---开发参考---",
+    "infra",
+    "dir",
+    "protocol"
+  ]
+}

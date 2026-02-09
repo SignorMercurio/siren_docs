@@ -1,0 +1,101 @@
+---
+title: 插件系统概述
+description: 了解如何使用 SIREN 插件扩展功能
+icon: Blocks
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Card, Cards } from "fumadocs-ui/components/card";
+import { Code, BookOpen } from 'lucide-react';
+
+SIREN 支持通过插件系统扩展功能。插件从远程市场下载并安装到本地，可在本地模式和远程模式下使用。
+
+## 插件类型
+
+SIREN 支持两种类型的插件：
+
+| 类型 | 说明 | 调用方式 |
+| --- | --- | --- |
+| `recon` | 信息收集插件 | 在 `recon` 过程中**自动执行**，输出包含在信息收集报告中 |
+| `command` | 命令插件 | 作为独立命令**手动调用** |
+
+## 管理插件
+
+### 本地模式
+
+```bash tab="查看已安装的插件"
+./siren plugins
+```
+
+```bash tab="安装插件"
+./siren plugins install <Plugin Name>
+```
+
+```bash tab="卸载插件"
+./siren plugins uninstall <Plugin Name>
+```
+
+```bash tab="启用/禁用插件"
+./siren plugins toggle <Plugin Name>
+```
+
+```bash tab="更新插件"
+./siren plugins update <Plugin Name>
+```
+
+### 远程模式
+
+```bash tab="查看客户端已安装的插件"
+>>> plugins <Client ID>
+```
+
+```bash tab="安装插件"
+>>> plugins <Client ID> install <Plugin Name>
+```
+
+```bash tab="卸载插件"
+>>> plugins <Client ID> uninstall <Plugin Name>
+```
+
+```bash tab="启用/禁用插件"
+>>> plugins <Client ID> toggle <Plugin Name>
+```
+
+```bash tab="更新插件"
+>>> plugins <Client ID> update <Plugin Name>
+```
+
+<Callout title="提示" type="info">
+  远程模式下，`ls` 命令的输出中会显示每个客户端已安装的插件列表。
+</Callout>
+
+## 使用插件
+
+### Recon 插件
+
+Recon 插件安装并启用后，会在执行 `recon` 命令时**自动运行**，无需额外操作。插件的输出会以 `Plugin: <name>` 为标题包含在信息收集报告中。
+
+可以通过 `toggle` 命令临时禁用不需要的 recon 插件。
+
+### Command 插件
+
+Command 插件安装后会注册为 SIREN 的子命令，像内置命令一样使用：
+
+```bash tab="本地模式"
+./siren <Plugin Name> [args...]
+```
+
+```bash tab="远程模式"
+>>> <Plugin Name> <Client ID> [args...]
+```
+
+## 相关内容
+
+<Cards>
+  <Card title="已支持的插件" icon={<BookOpen />} href="/plugins/list">
+    查看当前可用的插件列表
+  </Card>
+  <Card title="插件开发指南" icon={<Code />} href="/plugins/development">
+    了解如何开发自定义 SIREN 插件
+  </Card>
+</Cards>

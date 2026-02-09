@@ -1,0 +1,58 @@
+---
+title: "chkrootkit: Rootkit 检测"
+description: 使用 chkrootkit 检测 Rootkit
+icon: Cpu
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+|  |  |
+| --- | --- |
+| 类型 | `recon` |
+| 支持平台 | `linux_amd64`、`linux_arm64` |
+| 依赖 | gcc、make、tar、curl/wget（安装时自动处理） |
+
+使用 [chkrootkit](http://www.chkrootkit.org/) 检测系统中的 Rootkit。作为 recon 插件，安装并启用后会在执行 `recon` 命令时自动运行，检测结果包含在信息收集报告中。
+
+## 安装
+
+```bash tab="本地模式"
+./siren plugins install chkrootkit
+```
+
+```bash tab="远程模式"
+>>> plugins <Client ID> install chkrootkit
+```
+
+安装过程中会自动执行 setup 脚本：
+
+1. 检查系统中是否已安装 chkrootkit
+2. 若未安装，下载 chkrootkit 源码并编译
+3. 若编译依赖缺失，自动安装 `build-essential`（Debian/Ubuntu）或 `glibc-static`（CentOS/RHEL）
+4. 将编译产物安装到 `/usr/local/chkrootkit/`
+
+<Callout title="编译环境" type="info">
+  setup 脚本需要 gcc、make 等编译工具。如果目标主机无法联网安装依赖包，可以提前手动安装 chkrootkit 到 `/usr/local/chkrootkit/`，插件会自动检测并使用。
+</Callout>
+
+## 使用
+
+作为 recon 插件，无需手动调用。执行 `recon` 命令时会自动运行：
+
+```bash tab="本地模式"
+./siren recon
+```
+
+```bash tab="远程模式"
+>>> recon <Client ID>
+```
+
+如需临时跳过该插件，可先禁用：
+
+```bash tab="本地模式"
+./siren plugins toggle chkrootkit
+```
+
+```bash tab="远程模式"
+>>> plugins <Client ID> toggle chkrootkit
+```

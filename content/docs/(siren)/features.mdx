@@ -4,9 +4,8 @@ description: SIREN 的主要功能特性列表
 icon: Sparkles
 ---
 
-import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Card, Cards } from "fumadocs-ui/components/card";
-import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, Cpu, Globe, Package, Eraser, CloudUpload, BookOpen, AlertTriangle, Database, ToggleLeft, Cloud, FileEdit, Radio, Server, Bot, MonitorPlay, Rocket, Key, Brain, Lock, ArrowRightLeft, Plug } from "lucide-react";
+import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, Cpu, Globe, Package, Eraser, CloudUpload, BookOpen, AlertTriangle, ToggleLeft, Cloud, FileEdit, Radio, Server, Bot, Rocket, Key, Brain, Lock, ArrowRightLeft, Plug, Puzzle, Download } from "lucide-react";
 
 ## 信息收集
 
@@ -45,7 +44,6 @@ import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, 
     <Card title="文件上传至 OSS" icon={<CloudUpload />} href="/analysis/upload">将日志、样本等重要文件上传到 OSS 进行证据留存</Card>
     <Card title="快速样本分析" icon={<AlertTriangle />} href="/analysis/ti">上传恶意样本至威胁情报平台，获取分析报告</Card>
     <Card title="进程分析" icon={<Activity />} href="/analysis/info">基于 PID/端口/名称查询进程详情、进程树、容器和服务信息</Card>
-    <Card title="Java 堆转储" icon={<Database />} href="/analysis/jdump">获取 Java 进程的 heapdump，排查内存马和敏感数据</Card>
 </Cards>
 
 ## 配置文件支持
@@ -74,4 +72,15 @@ import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, 
     <Card title="端口转发" icon={<ArrowRightLeft />} href="/portforward">将受害主机内网服务转发到控制主机进行访问</Card>
     <Card title="MCP 集成" icon={<Plug />} href="/mcp">通过 MCP 协议接入任意 AI 助手</Card>
     <Card title="痕迹清除" icon={<Eraser />} href="/misc/clean">远程清除受害主机上的 SIREN 痕迹</Card>
+</Cards>
+
+## 插件系统
+
+通过插件扩展 SIREN 的能力，无需修改核心代码。
+
+<Cards>
+    <Card title="插件管理" icon={<Puzzle />} href="/plugins">安装、卸载、启停插件，支持本地和远程模式</Card>
+    <Card title="插件市场" icon={<Download />} href="/plugins">从插件市场一键下载和更新插件</Card>
+    <Card title="插件列表" icon={<Package />} href="/plugins/list">查看当前可用的插件</Card>
+    <Card title="插件开发" icon={<Code />} href="/plugins/development">了解如何开发自定义插件</Card>
 </Cards>

@@ -1,0 +1,54 @@
+---
+title: "jdump: Java 堆转储"
+description: 获取 Java 进程的堆转储文件
+icon: Database
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+|  |  |
+| --- | --- |
+| 类型 | `command` |
+| 支持平台 | `linux_amd64`、`linux_arm64` |
+| 依赖 | JDK（`jmap` 命令） |
+
+获取 Java 进程的堆转储（heapdump）文件，用于在应急响应中：
+
+- 分析内存中的敏感数据（如数据库凭证、API Key 等）
+- 排查内存马等内存驻留型攻击
+- 提取恶意代码注入的类和对象
+
+## 安装
+
+```bash tab="本地模式"
+./siren plugins install jdump
+```
+
+```bash tab="远程模式"
+>>> plugins <Client ID> install jdump
+```
+
+## 使用
+
+```bash tab="本地模式"
+./siren jdump <Java Process PID>
+```
+
+```bash tab="远程模式"
+>>> jdump <Client ID> <Java Process PID>
+```
+
+执行完成后，会在客户端当前目录保存 `heapdump_<PID>.hprof` 文件。
+
+<Callout title="注意" type="warn">
+  堆转储文件大小取决于 Java 进程的堆内存用量，可能较大。请确保磁盘有足够的可用空间。
+</Callout>
+
+## 分析工具
+
+获取堆转储后，可使用以下工具打开分析：
+
+- [Eclipse MAT](https://eclipse.dev/mat/) — 内存泄漏分析和对象查询
+- [VisualVM](https://visualvm.github.io/) — 可视化堆分析
+
+也可配合[文件上传](/analysis/upload)功能将 heapdump 文件上传至 OSS 进行证据留存。

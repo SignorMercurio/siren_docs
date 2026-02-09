@@ -1,0 +1,272 @@
+---
+title: 插件开发指南
+description: 了解如何开发自定义 SIREN 插件
+icon: Code
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+本指南面向希望为 SIREN 开发自定义插件的开发者。
+
+## 基本概念
+
+SIREN 插件是独立的可执行文件，通过标准输入/输出与 SIREN 交互。插件可以使用任意编程语言开发，只要最终产物是目标平台的可执行二进制文件即可。
+
+每个插件包含以下内容：
+
+| 文件 | 必需 | 说明 |
+| --- | --- | --- |
+| `manifest.json` | 是 | 插件元数据描述文件 |
+| 可执行二进制文件 | 是 | 插件的实际执行程序（需按平台提供） |
+| `setup.sh` | 否 | 安装后自动执行的初始化脚本 |
+
+## manifest.json
+
+`manifest.json` 是插件的核心描述文件，定义插件的元数据和行为：
+
+```json title="manifest.json"
+{
+  "name": "myplugin",
+  "version": "1.0.0",
+  "type": "recon",
+  "description": "A brief description of the plugin",
+  "usage": "myplugin <Client ID> [args]",
+  "clientUsage": "myplugin [args]",
+  "platforms": ["linux_amd64", "linux_arm64"],
+  "entrypoint": "myplugin",
+  "setup": "setup.sh"
+}
+```
+
+### 字段说明
+
+| 字段 | 类型 | 必需 | 说明 |
+| --- | --- | --- | --- |
+| `name` | string | 是 | 插件名称，仅允许字母、数字、`-`、`_`，最长 128 字符 |
+| `version` | string | 是 | 语义化版本号 |
+| `type` | string | 是 | 插件类型：`recon`（信息收集）或 `command`（命令） |
+| `description` | string | 是 | 插件功能描述 |
+| `usage` | string | 否 | 远程模式下的使用说明（展示在服务端帮助信息中） |
+| `clientUsage` | string | 否 | 本地模式下的命令名称（command 插件使用，默认为 `name`） |
+| `platforms` | []string | 是 | 支持的平台列表，格式为 `{os}_{arch}` |
+| `entrypoint` | string | 是 | 可执行文件名（不能包含路径分隔符） |
+| `setup` | string | 否 | 安装后的初始化脚本文件名 |
+
+### 支持的平台
+
+| 平台标识 | 说明 |
+| --- | --- |
+| `linux_amd64` | Linux x86_64 |
+| `linux_arm64` | Linux AArch64 |
+| `windows_amd64` | Windows x86_64 |
+| `darwin_amd64` | macOS x86_64 |
+| `darwin_arm64` | macOS Apple Silicon |
+
+## 开发流程
+
+<Steps>
+<Step>
+
+### 创建插件目录
+
+在 `_plugins/` 下创建以你的插件名命名的目录：
+
+```
+_plugins/
+└── myplugin/
+    ├── main.go          # 插件源代码（以 Go 为例）
+    └── manifest.json    # 插件描述文件
+```
+
+</Step>
+<Step>
+
+### 编写插件逻辑
+
+插件是独立的可执行程序。SIREN 通过命令行参数传递用户输入，并捕获标准输出作为结果。
+
+**对于 recon 插件：**
+- 无需接收参数
+- 将收集到的信息输出到 stdout
+- 输出会自动包含在信息收集报告中
+
+**对于 command 插件：**
+- 通过命令行参数接收用户输入
+- 将执行结果输出到 stdout
+
+<Accordions>
+  <Accordion title="Recon 插件示例（Go）">
+
+```go title="_plugins/chkrootkit/main.go"
+package main
+
+import (
+    "fmt"
+    "os"
+    "os/exec"
+    "runtime"
+)
+
+func main() {
+    if runtime.GOOS != "linux" {
+        fmt.Fprintln(os.Stderr, "this plugin only supports Linux")
+        os.Exit(1)
+    }
+
+    // find chkrootkit binary
+    bin, err := exec.LookPath("chkrootkit")
+    if err != nil {
+        bin = "/usr/local/chkrootkit/chkrootkit"
+    }
+
+    // execute and filter output
+    out, _ := exec.Command("sh", "-c", bin+" | grep -v 'not'").CombinedOutput()
+    fmt.Print(string(out))
+}
+```
+
+  </Accordion>
+  <Accordion title="Command 插件示例（Go）">
+
+```go title="_plugins/jdump/main.go"
+package main
+
+import (
+    "fmt"
+    "os"
+    "os/exec"
+    "regexp"
+    "runtime"
+)
+
+func main() {
+    if runtime.GOOS != "linux" {
+        fmt.Fprintln(os.Stderr, "this plugin only supports Linux")
+        os.Exit(1)
+    }
+
+    if len(os.Args) < 2 {
+        fmt.Fprintln(os.Stderr, "usage: jdump <pid>")
+        os.Exit(1)
+    }
+
+    pid := os.Args[1]
+    if !regexp.MustCompile(`^\d+$`).MatchString(pid) {
+        fmt.Fprintln(os.Stderr, "invalid PID")
+        os.Exit(1)
+    }
+
+    filename := fmt.Sprintf("heapdump_%s.hprof", pid)
+    cmd := exec.Command("jmap",
+        fmt.Sprintf("-dump:live,format=b,file=%s", filename), pid)
+    out, err := cmd.CombinedOutput()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "jmap failed: %s\n%s", err, out)
+        os.Exit(1)
+    }
+
+    fmt.Printf("heap dump saved to %s\n", filename)
+}
+```
+
+  </Accordion>
+</Accordions>
+
+</Step>
+<Step>
+
+### 编译
+
+为每个目标平台交叉编译二进制文件：
+
+```bash
+# Linux amd64
+GOOS=linux GOARCH=amd64 go build -o myplugin .
+
+# Linux arm64
+GOOS=linux GOARCH=arm64 go build -o myplugin .
+```
+
+</Step>
+<Step>
+
+### 编写 setup 脚本（可选）
+
+如果插件依赖外部工具或需要初始化环境，可以提供 `setup.sh`。该脚本在插件安装时自动以 `sh` 执行，超时时间为 5 分钟。
+
+<Callout title="安全约束" type="warn">
+  `setup` 和 `entrypoint` 字段不能包含 `..`、`/` 或 `\`，以防止路径穿越。
+</Callout>
+
+</Step>
+<Step>
+
+### 发布到市场
+
+将编译产物按以下目录结构上传到插件市场（OSS）：
+
+```
+plugins/
+└── myplugin/
+    ├── manifest.json
+    ├── setup.sh              # 可选
+    ├── linux_amd64/
+    │   └── myplugin          # Linux x86_64 二进制
+    └── linux_arm64/
+        └── myplugin          # Linux ARM64 二进制
+```
+
+上传完成后，用户即可通过 `plugins install myplugin` 安装。
+
+</Step>
+</Steps>
+
+## 插件运行机制
+
+### 执行环境
+
+- 工作目录：插件所在目录（`./plugins/<name>/`）
+- 超时时间：与信息收集命令超时一致（默认 30s，可通过 `recon.commandTimeout` 配置）
+- 标准输出和标准错误均会被捕获
+
+### 启用与禁用
+
+插件的启用状态存储在配置文件中：
+
+```yaml title="config.yaml"
+# recon 插件使用 recon.<name> 控制
+recon:
+  chkrootkit: true
+
+# command 插件使用 plugins.<name> 控制
+plugins:
+  jdump: true
+```
+
+### 远程模式交互
+
+在远程模式下，插件管理和调用通过消息协议实现：
+
+1. 客户端启动后，通过 `MsgPluginRegister` 向服务端注册已安装的插件列表
+2. 服务端通过 `MsgPluginManage` 远程管理客户端插件（安装、卸载、更新、启用/禁用）
+3. 服务端通过 `MsgPluginInvoke` 远程调用 command 插件
+4. 客户端通过 `MsgPluginResponse` 返回执行结果
+
+## 市场配置
+
+插件市场地址通过配置文件中的 `plugins.marketplace` 字段指定：
+
+```yaml title="config.yaml"
+plugins:
+  marketplace: https://oss-siren.oss-cn-hongkong.aliyuncs.com/plugins
+```
+
+安装时，SIREN 从以下路径下载文件：
+
+| 文件 | URL |
+| --- | --- |
+| 插件清单 | `{marketplace}/{name}/manifest.json` |
+| 可执行文件 | `{marketplace}/{name}/{platform}/{entrypoint}` |
+| 初始化脚本 | `{marketplace}/{name}/{setup}` |

@@ -133,15 +133,44 @@ sequenceDiagram
     C->>S: MsgInfo
 ```
 
-### jdump
+### plugins install
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant C as Client
     participant S as Server
-    S->>C: MsgJdump
-    C->>C: Dump()
+    participant M as Marketplace
+    S->>C: MsgPluginManage (install)
+    C->>M: Download Plugin
+    M->>C: Plugin Binary
+    C-->>C: Install & Register
+    C->>S: MsgPluginManage (result)
+```
+
+### plugin invoke (command type)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant S as Server
+    S->>C: MsgPluginInvoke
+    C-->>C: Execute Plugin
+    C->>S: MsgPluginResponse
+```
+
+### plugin invoke (recon type)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant S as Server
+    S->>C: MsgRecon
+    C-->>C: StartRecon()
+    C-->>C: Execute Recon Plugins
+    C->>S: MsgRecon
 ```
 
 ### forward / stopforward

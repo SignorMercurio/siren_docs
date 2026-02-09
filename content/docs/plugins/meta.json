@@ -1,0 +1,16 @@
+{
+  "title": "插件系统",
+  "description": "扩展 SIREN 能力的插件",
+  "root": true,
+  "icon": "Puzzle",
+  "pages": [
+    "---介绍---",
+    "index",
+    "---插件列表---",
+    "list",
+    "recon",
+    "command",
+    "---开发参考---",
+    "development"
+  ]
+}

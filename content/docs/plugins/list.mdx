@@ -1,0 +1,28 @@
+---
+title: 插件列表
+description: 当前可用的 SIREN 插件
+icon: List
+---
+
+import { Card, Cards } from "fumadocs-ui/components/card";
+import { Cpu, Database } from 'lucide-react';
+
+## Recon 插件
+
+在 `recon` 过程中自动执行，输出包含在信息收集报告中。
+
+<Cards>
+  <Card title="chkrootkit" icon={<Cpu />} href="/plugins/recon/chkrootkit">
+    使用 chkrootkit 检测 Rootkit
+  </Card>
+</Cards>
+
+## Command 插件
+
+注册为独立命令，按需手动调用。
+
+<Cards>
+  <Card title="jdump" icon={<Database />} href="/plugins/command/jdump">
+    获取 Java 进程的堆转储文件
+  </Card>
+</Cards>
