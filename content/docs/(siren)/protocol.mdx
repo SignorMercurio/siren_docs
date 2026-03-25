@@ -83,11 +83,12 @@ sequenceDiagram
     participant S as Server (with MCP)
     participant A as AI Agent
     A->>S: mcp__siren__ls Request
-    S->>A: mcp__siren_ls Response
+    S->>A: mcp__siren__ls Response
     A->>S: mcp__siren__run Request
-    S->>C: MsgRun
+    S-->>S: checkCmdBlacklist()
+    S->>C: MsgRun [requestID | command]
     C-->>C: ExecuteCommand()
-    C->>S: MsgRun
+    C->>S: MsgRun [requestID | result]
     S->>A: mcp__siren__run Response
 ```
 

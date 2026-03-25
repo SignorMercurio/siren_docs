@@ -32,11 +32,29 @@ MCP 服务默认监听 `8080` 端口，可通过[配置文件](/config#服务端
 | 工具 | 参数 | 描述 |
 | --- | --- | --- |
 | `ls` | 无 | 列出所有已连接的客户端，返回 ID、操作系统、IP 地址、备注、已安装插件等信息 |
-| `run` | `client_id`, `command` | 在指定客户端上执行命令并返回结果（30s 超时，50KB 上限） |
+| `run` | `client_id`, `command` | 在指定客户端上执行命令并返回结果（30s 超时，50KB 上限），支持对同一客户端并发执行 |
 | `get_alarm_detail` | `uid`, `event_id` | 通过 SOAR 平台获取指定的安全告警详情，返回告警类型、攻击源、受影响资产等 |
 
 <Callout title="提示" type="info">
   AI 助手可以通过 `ls` 获取客户端列表后，再通过 `run` 在指定客户端上执行任意命令。这使得 AI 能够自主完成信息收集、威胁排查等应急响应任务。
+</Callout>
+
+## 命令黑名单
+
+`run` 工具在执行命令前会检查命令是否匹配[配置文件](/config#服务端配置)中的 `mcp.cmdBlacklist` 正则表达式列表。匹配到的命令将被拒绝执行，并向 AI 返回错误信息。
+
+默认黑名单包含以下类别的危险操作：
+
+- **文件删除**：`rm`、`rmdir`、`mkfs`、`dd`
+- **进程终止**：`kill`、`killall`、`pkill`
+- **系统关机**：`shutdown`、`reboot`、`halt`、`poweroff`
+- **服务管理**：`systemctl stop/disable/mask`、`service stop`
+- **防火墙清空**：`iptables -F/-X`
+- **权限与用户**：`chmod 000`、`chown`、`userdel`、`passwd`
+- **痕迹清除**：`crontab -r`、`history -c`
+
+<Callout title="自定义" type="info">
+  可根据实际需求在配置文件中添加或移除黑名单规则。规则使用 Go 正则表达式语法。
 </Callout>
 
 ## 相关内容
