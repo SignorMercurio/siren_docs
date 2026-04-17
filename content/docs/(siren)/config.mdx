@@ -69,11 +69,16 @@ rules:                                      # 信息收集规则
 ## 服务端配置
 
 ```yaml title="server_config.yaml"
-listen: 0.0.0.0                                 # 服务器监听地址
-port: 443                                       # 服务器监听端口
-mcpPort: 8080                                   # MCP 服务器监听端口
+listen: 0.0.0.0                                 # 客户端 TLS 服务监听地址
+port: 443                                       # 客户端 TLS 服务监听端口
 cert: certs/cert.pem                            # TLS 证书路径
 key: certs/key.pem                              # TLS 密钥路径
+
+webui:                                          # Web 控制台 + MCP 服务
+  enabled: true                                 # 是否启用
+  listen: 0.0.0.0                               # 监听地址
+  port: 8080                                    # 监听端口（WebUI 与 MCP 共享）
+  userDBPath: data/users.db                     # 可选：WebUI 用户数据库路径
 
 mcp:
   cmdBlacklist:                                 # MCP run 命令黑名单（正则表达式）
@@ -102,14 +107,21 @@ oss:
 
 | 配置项 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `listen` | string | `0.0.0.0` | 服务器监听地址 |
-| `port` | int | `443` | 服务器监听端口 |
-| `mcpPort` | int | `8080` | [MCP 服务器](/mcp)监听端口 |
+| `listen` | string | `0.0.0.0` | 客户端 TLS 服务监听地址 |
+| `port` | int | `443` | 客户端 TLS 服务监听端口 |
 | `cert` | string | `certs/cert.pem` | TLS 证书文件路径 |
 | `key` | string | `certs/key.pem` | TLS 私钥文件路径 |
+| `webui.enabled` | bool | `true` | 是否启用 [Web 控制台](/webui)（同时影响 MCP，因为两者共用端口） |
+| `webui.listen` | string | `0.0.0.0` | WebUI 与 MCP 共享的监听地址 |
+| `webui.port` | int | `8080` | WebUI 与 MCP 共享的监听端口，MCP 通过 `/mcp` 子路径暴露 |
+| `webui.userDBPath` | string | `data/users.db` | WebUI 用户 SQLite 数据库路径（相对路径基于启动 CWD） |
 | `mcp.cmdBlacklist` | list | 见[MCP 集成](/mcp#命令黑名单) | MCP `run` 工具的命令黑名单，值为正则表达式列表 |
 | `air.cliPath` | string | `claude` | [Agentic 应急响应](/air)使用的大模型 CLI 工具路径 |
 | `air.prompt` | string | - | 告警事件模式下的 prompt 模板（支持 `%s` UID、`%s` Event ID、`%d` Client ID） |
 | `air.customPromptPrefix` | string | - | 自定义 prompt 模式下的前缀（支持 `%d` Client ID） |
 | `air.args` | list | - | 传递给大模型 CLI 的额外参数 |
 | `oss.*` | - | - | OSS 配置，与客户端配置相同 |
+
+<Callout title="v1.x 升级提示" type="warn">
+  v2.0.0 合并了 MCP 与 WebUI 端口，顶层 `mcpPort` 字段与 `--mcp-port` 参数已移除。升级后的配置示例如上，`mcpPort` 如有残留不会报错但会被忽略。
+</Callout>

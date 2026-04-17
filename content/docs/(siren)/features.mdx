@@ -5,7 +5,7 @@ icon: Sparkles
 ---
 
 import { Card, Cards } from "fumadocs-ui/components/card";
-import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, Cpu, Globe, Package, Eraser, CloudUpload, BookOpen, AlertTriangle, ToggleLeft, Cloud, FileEdit, Radio, Server, Bot, Rocket, Key, Brain, Lock, ArrowRightLeft, Plug, Puzzle, Download } from "lucide-react";
+import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, Cpu, Globe, Package, Eraser, CloudUpload, BookOpen, AlertTriangle, ToggleLeft, Cloud, FileEdit, Radio, Server, Bot, Rocket, Key, Brain, Lock, ArrowRightLeft, Plug, Puzzle, Download, LayoutDashboard, FolderTree, MousePointerClick } from "lucide-react";
 
 ## 信息收集
 
@@ -55,7 +55,7 @@ import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, 
     <Card title="OSS 配置" icon={<Cloud />} href="/config">配置 OSS Bucket 信息（敏感凭证通过环境变量设置）</Card>
     <Card title="自定义检测规则" icon={<FileEdit />} href="/config#客户端配置">通过正则表达式定义白名单和黑名单规则，降低噪音</Card>
     <Card title="通信设置" icon={<Radio />} href="/config">配置客户端-服务端的连接地址、端口和 TLS 证书</Card>
-    <Card title="MCP 服务器设置" icon={<Server />} href="/config#服务端配置">配置 MCP 服务器监听端口</Card>
+    <Card title="WebUI 与 MCP 端口" icon={<Server />} href="/config#服务端配置">统一配置 WebUI 与 MCP 共享的监听地址和端口</Card>
     <Card title="Agentic 应急响应设置" icon={<Bot />} href="/config#服务端配置">配置大模型 CLI 路径和 prompt 模板</Card>
 </Cards>
 
@@ -72,6 +72,19 @@ import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, 
     <Card title="端口转发" icon={<ArrowRightLeft />} href="/portforward">将受害主机内网服务转发到控制主机进行访问</Card>
     <Card title="MCP 集成" icon={<Plug />} href="/mcp">通过 MCP 协议接入任意 AI 助手</Card>
     <Card title="痕迹清除" icon={<Eraser />} href="/misc/clean">远程清除受害主机上的 SIREN 痕迹</Card>
+</Cards>
+
+## Web 控制台
+
+浏览器图形化操控面板，所有远程模式功能无需 tmux 和 REPL 也能使用。
+
+<Cards>
+    <Card title="浏览器控制台" icon={<LayoutDashboard />} href="/webui">统一入口访问客户端管理、Shell、Agentic IR、取证文件浏览等功能</Card>
+    <Card title="账号鉴权" icon={<Lock />} href="/webui#账号鉴权">SQLite + bcrypt 账号登录，通过 CLI 管理用户</Card>
+    <Card title="多标签 Shell" icon={<Terminal />} href="/webui#shells">WebSocket 承载的交互式终端，切换页面会话不中断</Card>
+    <Card title="浏览器内 AIR" icon={<Brain />} href="/webui#agentic-ir">无需登录控制主机即可启动 AI Agent 完成应急响应</Card>
+    <Card title="取证文件浏览" icon={<FolderTree />} href="/webui#artifacts">Markdown 预览、二进制识别、文件下载，文件树宽度可拖拽</Card>
+    <Card title="SOAR 快捷操作" icon={<MousePointerClick />} href="/webui#clients">allow/deploy/clean 一键调用，带确认与 toast 提示</Card>
 </Cards>
 
 ## 插件系统
