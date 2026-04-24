@@ -1,0 +1,415 @@
+---
+title: 更新日志
+description: SIREN 版本发布记录
+icon: History
+---
+
+export const DateTag = ({ children }) => (
+  <span className="relative -top-[0.2em] ml-3 inline-flex items-center rounded-md bg-fd-muted px-2 py-0.5 text-xs font-mono font-normal text-fd-muted-foreground">
+    {children}
+  </span>
+);
+
+## v2.1.0 <DateTag>2026-04-24</DateTag>
+
+### Feature
+
+- **Artifacts 页面支持整目录打包下载**：文件树每个目录行悬停显示下载图标，点击以 tar.gz 流式下载（使用 `gzip.BestSpeed`，针对应急响应证据目录中常见的二进制文件优化吞吐）。dotfile 与 dotdir 自动排除，与浏览逻辑保持一致
+- **Artifacts 页面原生预览 HTML 报告**：针对 Agentic IR 等场景生成的 HTML 报告，通过 `<iframe src=/api/artifacts/raw/...>` 直接渲染，支持同目录下的 CSS、JS、字体、图片等相对资源
+- 目录下载按钮可键盘导航，默认低调显示，行悬停或按钮聚焦时高亮
+
+### Bugfix
+
+- 修复 Agentic IR 初始化失败时服务端仍继续运行的问题，改为启动时直接退出
+- 修复会话 token 生成失败时 `panic` 的问题，改为返回错误并以 500 响应
+- 修复 Artifacts HTML 预览时 Vite 打包产物中 xterm.js 相关代码被破坏的问题，切换为 terser
+- 修复 WebUI 客户端 shell 与 AIR WebSocket 握手未校验 Origin 头的问题
+- 修复信息收集插件执行错误被吞掉的问题
+- 修复 TI 文件上传可能因无超时导致长时间挂起的问题
+- 修复 OSS 与 SOAR 客户端在凭证重置与消息处理并发时可能出现的 nil 指针与数据竞争问题
+
+---
+
+## v2.0.0 <DateTag>2026-04-17</DateTag>
+
+### Feature
+
+- **全新 WebUI：浏览器访问 SIREN 服务端，支持客户端列表、备注编辑、交互式 Shell、Agentic IR 自动应急响应、SOAR 命令调用(allow/deploy/clean)、Artifacts 取证文件浏览**
+    - Shell 页面支持多标签 WebSocket 终端，切换页面时会话不中断
+    - Agentic IR 页面内嵌 Claude Code CLI，基于 PTY 在浏览器里完成全程自动响应
+    - Artifacts 文件浏览器支持 Markdown 渲染、文件下载，文件树宽度可拖拽调整并持久化
+- 【BREAKING】MCP 服务合并到 WebUI 端口（默认 `:8080`），移除 `mcpPort` 配置和 `--mcp-port` 参数。MCP 客户端 URL 需指向 `http://<host>:8080/mcp`。
+- 服务端、客户端启动时打印 banner 显示版本信息
+
+### Bugfix
+
+- 修复 Artifacts 打开大二进制文件时显示红色"failed to read"错误的问题，改为友好的"不支持预览"提示
+- 修复 Artifacts 浏览 Markdown 时文件树跟随滚动的问题
+- Makefile 目标依赖修正：pack → build、release → pack、deploy → build、update → clean
+
+---
+
+## v1.16.0 <DateTag>2026-04-14</DateTag>
+
+### Feature
+
+- `deploy` 命令支持跳过公网 IP 查询、同时提升了受害主机出口 IP 获取稳定性
+
+### Bugfix
+
+- 修复 MCP 工具 `run` 黑名单过于严格的问题
+- 修复按下 `Ctrl+C` 直接退出服务端的问题
+- 修复自动升级功能中潜在的路径穿越漏洞
+
+---
+
+## v1.15.0 <DateTag>2026-03-25</DateTag>
+
+### Feature
+
+- MCP 工具 `run` 支持配置命令黑名单
+- 服务端支持从 `.env` 加载环境变量
+- 远程模式新增子命令 `reload`：命令客户端主动重载配置
+- `air` 功能支持自由调查模式（使用自定义 prompt，不依赖安全告警）
+- 信息收集新增伪造时间戳相关检测项
+
+### Bugfix
+
+- 修复 MCP 工具 `run` 无法并发调用的问题
+
+---
+
+## v1.14.0 <DateTag>2026-02-08</DateTag>
+
+### Feature
+
+- **新增插件系统，客户端/服务端均可通过 `plugins` 命令管理插件**
+    - 命令插件：为客户端、服务端新增一项子命令
+    - 信息收集插件：为信息收集功能新增一项检查项，可引入外部工具
+- AK 泄露排查信息富化，覆盖更多场景并设置默认 region
+- 支持通过 OpenClaw 调用
+
+### Bugfix
+
+- 修复远程模式下 `env` 命令设置环境变量后不生效的问题
+- 修复 `jdump` 命令中的 PID 参数 bug
+- 修复 MCP 服务中的 `mcpResponse` 在工具调用后未重置的问题
+- 其他多项 bug 修复与代码优化
+
+---
+
+## v1.13.0 <DateTag>2026-01-06</DateTag>
+
+### Feature
+
+- 本地 & 远程模式新增子命令 `info`：展示任意 PID/进程名/端口对应的进程信息
+- 远程模式子命令 `shell` 支持终端尺寸自适应
+- 规避云安全中心"异常的伪终端 Shell 创建行为"等告警
+- 信息收集报告默认上传至 OSS 的 `latest` 目录
+- OSS 上传进度条显示优化
+- 表格显示、日志输出相关代码重构
+
+### Bugfix
+
+- 一键下载脚本 OSS 地址更新
+- MkDocs 站点稳定性与样式优化
+- 修复 `shell` 运行时阻塞客户端响应其他命令的 bug
+
+---
+
+## v1.12.0 <DateTag>2025-12-18</DateTag>
+
+### Feature
+
+- 远程模式子命令 `shell` 使用独立信道和界面
+- 客户端、服务端均支持通过 `upgrade` 命令一键升级
+- 信息收集支持系统软件包完整性校验
+
+### Bugfix
+
+- Linux 下依赖工具安装失败时，避免阻塞后续运行
+
+---
+
+## v1.11.0 <DateTag>2025-12-12</DateTag>
+
+### Feature
+
+- 帮助信息与自动补全优化
+- 远程模式新增子命令 `ak`：基于 SOAR 平台能力，一键调查 AK 调用记录
+- 远程模式新增子命令 `note`：为客户端添加备注，可在 `ls` 中显示
+- 远程模式子命令 `clean` 支持主动终止客户端进程，实现完全清理
+
+### Bugfix
+
+- 修复终端显示尺寸异常问题
+- 修复由云墙规则延迟导致的首次 deploy 无法回连问题
+
+---
+
+## v1.10.0 <DateTag>2025-11-06</DateTag>
+
+### Feature
+
+- 远程模式新增子命令 `deploy`：基于 SOAR 平台能力，通过云助手在阿里云 ECS 上一键部署并启动客户端
+- 远程模式新增子命令 `allow`：基于 SOAR 平台能力，一键放行受害主机出口 IP 访问控制主机
+
+### Bugfix
+
+- 修复子命令 `clean` 在 Windows 下无法删除可执行文件自身的问题，当前在所有平台均会删除整个可执行文件所在目录
+
+---
+
+## v1.9.0 <DateTag>2025-10-30</DateTag>
+
+### Feature
+
+- **【重要】远程模式新增子命令 `air`：使用大模型 CLI 进行自动化应急响应**
+- MCP 服务器新增工具 `get_alarm_detail`，可基于 SOAR 平台能力获取指定的安全告警详情
+- 子命令 `shell` 在 Windows 客户端支持全交互式终端（基于 WinPTY）
+- 优化 Linux 客户端终端大小设置
+
+### Bugfix
+
+- 修复下载脚本中下载链接错误
+- 调整 Windows 平台客户端打包方式，使用 zip 格式
+- 修复子命令 `shell` 在 Windows 客户端的终端交互 bug
+- 修复子命令 `recon` 命令执行超时机制部分情况下失效的问题
+
+---
+
+## v1.8.0 <DateTag>2025-09-12</DateTag>
+
+### Feature
+
+- 子命令 `recon` 全面支持 Windows 客户端
+- Unix/Windows 配置文件分离
+
+### Bugfix
+
+- 修复子命令 `recon` 输出结果模块之间顺序错误的问题
+
+---
+
+## v1.7.0 <DateTag>2025-08-25</DateTag>
+
+### Feature
+
+- 子命令 `run` 添加 Windows 支持
+- 子命令 `recon` 执行命令时新增超时机制，默认 30s 超时
+- Unix/Windows 相关实现代码分离
+- 说明文档与 README 完善
+
+---
+
+## v1.6.0 <DateTag>2025-07-30</DateTag>
+
+### Feature
+
+- 工具下载方式优化，支持命令行一键安装
+- 客户端/服务端添加版本号信息
+- 远程模式新增子命令 `run`：在指定客户端执行命令获取返回结果
+- 新增 MCP 支持，服务端启动时同时启动 MCP 服务器，支持获取客户端信息（对应子命令 `ls`）、在客户端上执行命令（对应子命令 `run`）
+
+### Bugfix
+
+- 修复部分子命令参数解析错误的问题
+
+---
+
+## v1.5.0 <DateTag>2025-06-25</DateTag>
+
+### Feature
+
+- 客户端支持 Windows 平台，当前仅支持远程 shell 功能
+- 客户端列表显示 OS 信息、端口转发列表显示客户端 ID 信息
+- 本地/远程模式新增子命令 `jdump`：对指定 Java 进程进行堆内存转储
+
+---
+
+## v1.4.2 <DateTag>2025-06-03</DateTag>
+
+### Feature
+
+- 端口转发添加并发连接支持、相关代码可维护性优化
+- 网络连接增加超时取消机制
+
+---
+
+## v1.4.0 <DateTag>2025-05-28</DateTag>
+
+### Feature
+
+- 远程模式新增本地端口转发功能相关子命令
+    - `forward`：开始本地端口转发
+    - `stopforward`：停止本地端口转发
+    - `lsforward`：查看本地端口转发列表
+- 子命令 `recon` 生成的文档现在以 `SIREN_` 开头，子命令 `clean` 在清理文档时逻辑一致
+- 代码结构优化
+- 通信协议中 Raw 消息定义调整，避免消息模式切换问题
+
+### Bugfix
+
+- 多项端口转发相关 bug 修复
+
+---
+
+## v1.3.0 <DateTag>2025-05-15</DateTag>
+
+### Feature
+
+- 远程模式-服务端：命令行交互方式优化，支持方向键操作、终端快捷键等
+- 远程模式通信流量默认使用 TLS 协议加密
+- 远程模式-服务端：新增子命令 `!` 支持执行本地命令
+- 远程模式-服务端：新增子命令 `env` 支持直接设置环境变量
+
+---
+
+## v1.2.0 <DateTag>2025-05-13</DateTag>
+
+### Feature
+
+- 可疑文件检查项逻辑更新
+- 远程模式相关参数支持通过配置文件设置
+- 远程模式下客户端-服务器通信支持标准消息、Raw 消息两种消息格式传输
+
+### Bugfix
+
+- 修复 macOS 下打包的 tar.gz 压缩包在 Linux 下解压异常问题
+- 修复远程模式下子命令 `recon` 运行出错的问题
+
+---
+
+## v1.1.0 <DateTag>2025-04-08</DateTag>
+
+### Feature
+
+- 远程模式-服务端：优化 `ls` 命令展示方式
+- 实现了全新的通信协议，提高传输效率、避免特殊字符混淆问题
+- 支持服务端断连时，主动关闭客户端
+- 代码可读性与性能优化
+
+---
+
+## v1.0.0 <DateTag>2025-03-31</DateTag>
+
+### Feature
+
+- **【重要】新增远程模式，支持 C/S 架构，可以从服务端下发信息收集指令至客户端（详见说明文档）**
+- 远程模式新增子命令 `shell`：支持访问客户端主机的**全交互式** shell（支持 vim、top 等交互式命令、方向键等）
+
+### Bugfix
+
+- 修复多处使用 `log.Fatal` 导致 `defer` 失效的问题
+- 错误处理逻辑全部重构
+- 修复键入 Ctrl+D 导致 stdin 关闭但程序未退出的问题
+- 修复输入 `exit` 后服务端阻塞的问题
+- 修复并发场景下信道冲突、协议冲突的问题
+
+---
+
+## v0.7.0 <DateTag>2025-03-26</DateTag>
+
+### Feature
+
+- 部分检查项增加最大输出行数限制
+- 优化 AI 分析 prompt
+- CLI 语言全部使用英语，避免 VNC 等特定场景下的编码问题
+
+### Bugfix
+
+- 修复了 AI 分析异步流式输出效果与同步方式相同的问题
+
+---
+
+## v0.6.0 <DateTag>2025-03-19</DateTag>
+
+### Feature
+
+- MkDocs 结果展示页支持针对每一个检测项的 AI 分析功能
+- 多项信息收集命令查询性能优化、边界情况处理
+- `clean` 支持清理配置文件、生成的文档文件
+
+### Bugfix
+
+- 包含多项信息收集命令与过滤规则 bug 修复，增强对 CentOS/Debian 系统适配
+
+---
+
+## v0.5.0 <DateTag>2025-03-14</DateTag>
+
+### Feature
+
+- 新增配置文件支持：基于 viper 实现，允许读取自定义 YAML 配置文件
+- 信息收集过滤规则、OSS 配置等迁移至配置文件
+- 支持通过配置文件开关信息收集项大类
+- 工具获取方式由公网 OSS 下载二进制文件更新为下载包含二进制文件与配置文件的压缩包
+
+### Bugfix
+
+- 包含多项 bug 修复，包括 grep 正则匹配选项错误、OSS 上传文件本地路径错误、viper 配置加载问题等
+
+---
+
+## v0.4.0 <DateTag>2025-03-11</DateTag>
+
+### Feature
+
+- 新增子命令 `upload`：支持将任意本地文件上传至 OSS
+- 新增子命令 `ti`：支持将任意本地文件上传至威胁情报沙箱分析，返回分析结果 URL
+- `clean` 支持清理威胁情报 API Key 相关环境变量，并新增二次确认过程
+- 容器列表检查项新增 crictl 与 podman 支持
+
+---
+
+## v0.3.0 <DateTag>2025-03-07</DateTag>
+
+### Feature
+
+- 新增信息收集项：常见挖矿进程检测
+- 使用 cobra 重构了代码以支持子命令等功能
+- 新增子命令 `clean`：支持一键痕迹清理功能，可清理 OSS 访问凭证相关环境变量、可执行文件自身
+- 基于云存储网关与极速同步功能，实现信息收集结果上传至 OSS 后 1 分钟内同步至 MkDocs 展示
+
+### Bugfix
+
+- 修复 PHP Webshell 检测模块中引号被误转义的问题
+- 修复可疑命令黑名单过度匹配的问题
+
+---
+
+## v0.2.0 <DateTag>2025-03-05</DateTag>
+
+### Feature
+
+- 新增信息收集项大类：Webshell 检测、应用安全
+- 信息收集结果支持自动上传至 OSS，并通过 MkDocs 展示
+- MkDocs 展示相关样式优化
+- 支持直接通过公网 OSS 链接下载工具
+
+### Bugfix
+
+- 修复 OSS 上传使用 AK 权限问题，并收敛至最小权限
+
+---
+
+## v0.1.0 <DateTag>2025-03-04</DateTag>
+
+### Feature
+
+- 初版发布，支持 Linux 下主机关键信息收集
+    - 基础系统信息
+    - 用户
+    - SSH
+    - 进程
+    - 网络
+    - 计划任务
+    - 服务与启动项
+    - 环境变量
+    - 文件
+    - Rootkit
+- 信息收集结果保存至本地 Markdown
+
+### Bugfix
+
+- 修复部分检查项无结果时直接显示报错信息的问题

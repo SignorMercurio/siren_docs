@@ -25,6 +25,8 @@
     "---开发参考---",
     "infra",
     "dir",
-    "protocol"
+    "protocol",
+    "---版本信息---",
+    "changelog"
   ]
 }
