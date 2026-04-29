@@ -29,7 +29,15 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 >>> recon <Client ID>
 ```
 
+```text tab="WebUI"
+Web 控制台 -> Investigations -> Recon -> 选择客户端 -> Start Recon
+```
+
 信息收集过程中执行的每一条命令默认均有 30s 超时时间（可通过[配置文件](/config#客户端配置)调整）。收集完成后，会在同目录下保存一份 Markdown 文件。如已配置 OSS 访问凭证，该文件会自动上传至 OSS。
+
+<Callout title="WebUI 进度" type="info">
+  在 WebUI 中运行 Recon 时，页面会展示服务端从客户端日志中解析出的阶段列表，例如 `Recon.Basic`、`Recon.User`、`Recon.Process`、`Upload report to OSS`。报告生成后可通过 Open Artifacts 直接打开服务端本地保存的 Markdown 文件。
+</Callout>
 
 </Step>
 <Step>
@@ -100,6 +108,9 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 <Cards>
   <Card title="功能特性" href="/features#信息收集">
     查看 SIREN 的完整功能特性列表
+  </Card>
+  <Card title="Web 控制台" href="/webui#investigations">
+    在浏览器中下发 Recon 并查看阶段进度
   </Card>
   <Card title="架构设计" href="/overview#架构设计">
     了解 SIREN 的整体架构设计

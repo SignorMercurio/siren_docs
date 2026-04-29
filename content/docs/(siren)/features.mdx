@@ -66,7 +66,7 @@ import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, 
 <Cards>
     <Card title="自动化客户端部署" icon={<Rocket />} href="/index#内部环境通过云助手一键部署">通过云助手一键将 SIREN 客户端部署到受害主机</Card>
     <Card title="远程 Shell" icon={<Terminal />} href="/remote#远程命令执行">全交互式远程 Shell，支持 vim、top 等交互式命令</Card>
-    <Card title="AccessKey 调查" icon={<Key />} href="/ak">调查云上 AccessKey 调用历史，评估影响范围</Card>
+    <Card title="AccessKey 调查" icon={<Key />} href="/ak">通过 CLI 或 WebUI 调查云上 AccessKey 调用历史，生成 Markdown 报告</Card>
     <Card title="Agentic 应急响应" icon={<Brain />} href="/air">AI Agent 自动化执行应急响应，生成完整报告</Card>
     <Card title="TLS 加密通信" icon={<Lock />} href="/protocol">所有客户端-服务端通信均通过 TLS 加密保护</Card>
     <Card title="端口转发" icon={<ArrowRightLeft />} href="/portforward">将受害主机内网服务转发到控制主机进行访问</Card>
@@ -83,7 +83,8 @@ import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, 
     <Card title="账号鉴权" icon={<Lock />} href="/webui#账号鉴权">SQLite + bcrypt 账号登录，通过 CLI 管理用户</Card>
     <Card title="多标签 Shell" icon={<Terminal />} href="/webui#shells">WebSocket 承载的交互式终端，切换页面会话不中断</Card>
     <Card title="浏览器内 AIR" icon={<Brain />} href="/webui#agentic-ir">无需登录控制主机即可启动 AI Agent 完成应急响应</Card>
-    <Card title="取证文件浏览" icon={<FolderTree />} href="/webui#artifacts">Markdown 预览、二进制识别、文件下载，文件树宽度可拖拽</Card>
+    <Card title="浏览器内调查" icon={<Key />} href="/webui#investigations">执行 AccessKey 调查和 Recon，查看真实阶段进度并跳转报告</Card>
+    <Card title="取证文件浏览" icon={<FolderTree />} href="/webui#artifacts">Markdown 预览、悬浮目录、二进制识别、文件下载，文件树宽度可拖拽</Card>
     <Card title="SOAR 快捷操作" icon={<MousePointerClick />} href="/webui#clients">allow/deploy/clean 一键调用，带确认与 toast 提示</Card>
 </Cards>
 

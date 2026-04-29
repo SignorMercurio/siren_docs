@@ -7,6 +7,7 @@ icon: Key
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Callout } from "fumadocs-ui/components/callout";
+import { Card, Cards } from "fumadocs-ui/components/card";
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
@@ -17,6 +18,16 @@ import { Callout } from "fumadocs-ui/components/callout";
 </Callout>
 
 ## 使用方式
+
+### WebUI
+
+打开 [Web 控制台](/webui) 的 Investigations 页面，填写 UID、AccessKey ID 和 Region 后点击 Run。调查完成后，页面会显示报告文件名和 Open Artifacts 按钮，可直接跳转到 Artifacts 页面阅读完整 Markdown 报告。
+
+<Callout title="运行状态" type="info">
+  AccessKey 调查由服务端调用 SOAR playbook 完成。WebUI 会显示真实的 playbook 运行状态；SOAR 内部子步骤不可见时不会展示虚构进度。
+</Callout>
+
+### Server CLI
 
 ```bash title="SIREN Server"
 >>> ak <Alibaba Cloud UID> <AccessKey ID>
@@ -39,3 +50,14 @@ import { Callout } from "fumadocs-ui/components/callout";
 
   </Accordion>
 </Accordions>
+
+## 相关内容
+
+<Cards>
+  <Card title="Web 控制台" href="/webui#investigations">
+    在浏览器中执行 AccessKey 调查
+  </Card>
+  <Card title="Artifacts" href="/webui#artifacts">
+    查看生成的 Markdown 调查报告
+  </Card>
+</Cards>
