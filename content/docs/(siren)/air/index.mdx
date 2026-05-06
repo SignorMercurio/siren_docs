@@ -28,8 +28,12 @@ Agentic 应急响应（AIR）让 AI Agent 自动化实施完整的应急响应�
 当有明确的阿里云安全中心告警事件时，使用此模式：
 
 ```bash title="SIREN Server"
->>> air <Client ID> <Alibaba Cloud UID> <Security Center Event ID>
+>>> air <Client ID> <Alibaba Cloud UID> <Security Center Alert ID>
 ```
+
+<Callout title="Security Center Alert ID" type="info">
+  这里的 `Security Center Alert ID` 指阿里云安全中心告警详情页「基础信息」中的「告警ID」，不是页面下方「关联安全事件」里的「事件ID」。
+</Callout>
 
 服务端会通过 tmux 启动一个新面板并自动运行配置的大模型 CLI（e.g. Claude Code）并提供预定义的 prompt 作为输入：
 
