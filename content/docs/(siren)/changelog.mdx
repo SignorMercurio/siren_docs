@@ -10,6 +10,24 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.4.0 <DateTag>2026-05-11</DateTag>
+
+### Feature
+
+- **服务端 REPL 新增 `deploy-batch` 命令**：支持对同一 Alibaba Cloud UID 下的 2-20 台 ECS 批量部署 SIREN 客户端，目标格式为 `instanceId` 或 `instanceId,publicIp`
+- **WebUI Clients 页面支持批量部署**：Deploy SIREN 区域新增 Single / Batch 模式切换，Batch 模式可按行输入实例 ID 与可选公网 IP，运行结果按目标逐台流式展示
+
+### Improvement
+
+- 批量部署固定并发 3 台，单台失败不会中断后续目标，最终按输入顺序汇总成功/失败结果
+- Clients 页面的 allow 与 deploy 操作区重新布局，放行、单机部署、批量部署的输入和运行状态更易扫描
+
+### Bugfix
+
+- Artifacts HTML 预览 iframe 支持同源资源与下载能力，便于打开带相对资源和下载链接的 HTML 报告
+
+---
+
 ## v2.3.0 <DateTag>2026-04-29</DateTag>
 
 ### Feature

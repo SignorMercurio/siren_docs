@@ -8,8 +8,7 @@ import { Banner } from 'fumadocs-ui/components/banner';
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { Step, Steps } from "fumadocs-ui/components/steps";
-import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
-import { Users, Terminal, Brain, FolderTree, Lock, Plug, Key } from 'lucide-react';
+import { Users, Terminal, Brain, Files, FolderTree, Lock, Plug, Key } from 'lucide-react';
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
@@ -89,33 +88,34 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
 ## 功能页面
 
 <Cards>
-  <Card title="Clients" icon={<Users />}>客户端列表、在线状态、备注编辑、SOAR 放行/部署、清理痕迹</Card>
+  <Card title="Clients" icon={<Users />}>客户端列表、在线状态、备注编辑、SOAR 放行、单机/批量部署、清理痕迹</Card>
   <Card title="Shells" icon={<Terminal />}>多标签交互式终端，切换页面会话不中断</Card>
   <Card title="Agentic IR" icon={<Brain />}>在浏览器中启动 AI Agent 自动化应急响应</Card>
   <Card title="Investigations" icon={<Key />}>AccessKey 调查、客户端 Recon、阶段进度与报告入口</Card>
-  <Card title="Artifacts" icon={<FolderTree />}>取证文件浏览，支持 Markdown 预览、二进制识别、文件下载</Card>
+  <Card title="Files" icon={<Files />}>在线浏览客户端文件系统，支持预览、下载和上传</Card>
+  <Card title="Artifacts" icon={<FolderTree />}>服务端取证文件浏览，支持 Markdown/HTML 预览、二进制识别、文件下载</Card>
 </Cards>
 
 ### Clients
 
-![Clients](../../img/webui_clients.png)
-
 等价于服务端 REPL 的 `ls`、`note`、`allow`、`deploy`、`clean` 命令。每行展示一个客户端，支持：
 
 - **备注编辑**：点击备注直接在行内修改
+- **Files 快捷入口**：从客户端行直接打开该客户端的 Files 页面
 - **放行**（allow）：调用 SOAR 将受害主机出口 IP 加入安全组白名单
-- **部署**（deploy）：通过云助手一键部署 SIREN 客户端
+- **单机部署**（deploy）：输入 Alibaba Cloud UID、ECS Instance ID 与可选 Public IP，通过云助手一键部署 SIREN 客户端
+- **批量部署**（deploy-batch）：切换到 Batch 模式后，每行输入 `instanceId` 或 `instanceId,publicIp`，同一 UID 下支持 2-20 台机器；WebUI 会流式展示每台机器的运行状态和最终汇总
 - **清理**（clean）：远程清除受害主机上的 SIREN 痕迹（带二次确认）
 
-### Shells
+<Callout title="批量部署规则" type="info">
+  批量部署默认并发 3 台，单台失败不会中断其他目标。运行日志按实际完成顺序出现，每条消息都带有目标前缀；最终汇总按输入顺序统计成功与失败，便于后续重试失败目标。
+</Callout>
 
-![Shells](../../img/webui_shells.png)
+### Shells
 
 每个客户端可开启多个终端标签。底层通过 WebSocket 桥接到服务端，服务端再以 TLS 转发到受害主机 PTY。切换到其他页面（Clients/AIR/Artifacts）时 Shell 会话保持活动，回到 Shells 页可继续输入。
 
 ### Agentic IR
-
-![Agentic IR](../../img/webui_air.png)
 
 等价于服务端 REPL 的 `air` 命令，在浏览器里启动 AI Agent 完成 [Agentic 应急响应](/air)。选择目标客户端后可选两种模式：
 
@@ -125,8 +125,6 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
 Agent 在服务端本地 PTY 里运行，输出流式推送到浏览器。
 
 ### Investigations
-
-![Investigations](../../img/webui_investigations.png)
 
 Investigations 页面用于承载需要等待结果的调查工具，目前包含 AccessKey 调查和客户端 Recon。
 
@@ -138,16 +136,32 @@ Investigations 页面用于承载需要等待结果的调查工具，目前包�
   WebUI 只展示服务端能真实观测到的阶段。AccessKey 调查的 SOAR 子步骤不可见，因此只显示 playbook 正在运行；Recon 阶段来自客户端实际回传日志。
 </Callout>
 
-### Artifacts
+### Files
 
-![Artifacts](../../img/webui_artifacts.png)
+Files 页面用于浏览在线客户端本机文件系统。可以从左侧导航进入后选择客户端，也可以在 Clients 列表中点击某个客户端行的 Files 快捷入口直接打开。
+
+特性：
+
+- **客户端选择**：按 Client ID 选择目标客户端；从 Clients 页面跳转时会自动选中对应客户端
+- **默认根目录**：Linux/macOS 默认从 `/` 打开，Windows 默认从 `C:\` 打开
+- **路径直达**：可以在 Path 输入框中输入任意路径并打开
+- **文件树可拖拽**：与 Artifacts 使用同一套文件浏览交互，目录树宽度可调整并持久化
+- **文本预览**：文本文件可直接在线预览，二进制文件会显示不可预览提示
+- **文件下载**：普通文件和目录都可下载，目录会打包为 `tar.gz`
+- **文件上传**：可上传单个文件到当前目标目录，单文件上限 100 MiB；目标文件已存在时会要求确认覆盖
+
+<Callout title="远程文件操作" type="warn">
+  Files 页面读写的是客户端主机上的真实文件系统，上传和覆盖操作会直接修改远端文件。执行前请确认目标客户端与上传目录。
+</Callout>
+
+### Artifacts
 
 浏览服务端工作目录下的文件，典型使用场景是查看 [信息收集报告](/recon#查看数据)。特性：
 
 - **文件树可拖拽**：拖动树与预览之间的分隔条调整宽度（180–600 px），宽度持久化到 localStorage
 - **Markdown 渲染**：`.md` / `.markdown` 自动渲染
 - **Markdown 悬浮目录**：包含多个标题的 Markdown 报告会自动生成 TOC，点击目录项跳转到对应章节
-- **HTML 报告预览**：`.html` 文件直接在沙箱 iframe 内渲染，可正常加载同目录下的 CSS、JS、字体、图片等相对资源，适合查看 [Agentic IR](/air) 等生成的报告
+- **HTML 报告预览**：`.html` 文件直接在沙箱 iframe 内渲染，可正常加载同目录下的 CSS、JS、字体、图片等相对资源，并支持报告内下载链接，适合查看 [Agentic IR](/air) 等生成的报告
 - **二进制识别**：非文本文件显示"不支持预览"提示，不会报错
 - **文件下载**：任意文件可通过右上角下载按钮下载
 - **目录打包下载**：鼠标悬停文件树中的目录行，点击下载图标即可以 `tar.gz` 流式下载整个目录，自动排除点号开头的文件和子目录
