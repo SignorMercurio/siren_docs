@@ -10,6 +10,24 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.5.0 <DateTag>2026-05-14</DateTag>
+
+### Feature
+
+- **WebUI 新增 Dossier 直接入口**：左侧导航可直接打开 `/dossier/`，无需先在 Artifacts 中选中 Markdown 文件再进入编辑器
+- **Artifacts Markdown 报告接入 Dossier**：`.md` / `.markdown` 报告可从 Artifacts 打开到 Dossier，直接进入编辑流程
+
+### Improvement
+
+- Dossier 未部署或路径配置错误时，WebUI 会显示错误提示，不再让用户直接进入浏览器 404 页面
+
+### Upgrade Notes
+
+- 使用 Dossier 前需要先部署 Dossier 编辑器文件，默认目录为 `/opt/siren/dossier`，自定义路径请参考 WebUI 文档
+- Artifacts 不再直接预览 HTML 报告；历史 HTML 报告可下载后查看，新的应急报告建议使用 Markdown + Dossier
+
+---
+
 ## v2.4.0 <DateTag>2026-05-11</DateTag>
 
 ### Feature
@@ -24,7 +42,7 @@ export const DateTag = ({ children }) => (
 
 ### Bugfix
 
-- Artifacts HTML 预览 iframe 支持同源资源与下载能力，便于打开带相对资源和下载链接的 HTML 报告
+- Artifacts 的 HTML 报告预览支持同目录资源与下载链接，打开旧报告时更稳定
 
 ---
 
@@ -75,14 +93,14 @@ export const DateTag = ({ children }) => (
 ### Feature
 
 - **Artifacts 页面支持整目录打包下载**：文件树每个目录行悬停显示下载图标，点击以 tar.gz 流式下载（使用 `gzip.BestSpeed`，针对应急响应证据目录中常见的二进制文件优化吞吐）。dotfile 与 dotdir 自动排除，与浏览逻辑保持一致
-- **Artifacts 页面原生预览 HTML 报告**：针对 Agentic IR 等场景生成的 HTML 报告，通过 `<iframe src=/api/artifacts/raw/...>` 直接渲染，支持同目录下的 CSS、JS、字体、图片等相对资源
+- **Artifacts 页面原生预览 HTML 报告**：针对 Agentic IR 等场景生成的 HTML 报告，可直接在浏览器中查看，并支持同目录下的 CSS、JS、字体、图片等相对资源
 - 目录下载按钮可键盘导航，默认低调显示，行悬停或按钮聚焦时高亮
 
 ### Bugfix
 
 - 修复 Agentic IR 初始化失败时服务端仍继续运行的问题，改为启动时直接退出
 - 修复会话 token 生成失败时 `panic` 的问题，改为返回错误并以 500 响应
-- 修复 Artifacts HTML 预览时 Vite 打包产物中 xterm.js 相关代码被破坏的问题，切换为 terser
+- 修复部分 HTML 报告在 Artifacts 中预览异常的问题
 - 修复 WebUI 客户端 shell 与 AIR WebSocket 握手未校验 Origin 头的问题
 - 修复信息收集插件执行错误被吞掉的问题
 - 修复 TI 文件上传可能因无超时导致长时间挂起的问题

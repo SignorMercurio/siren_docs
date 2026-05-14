@@ -8,7 +8,7 @@ import { Banner } from 'fumadocs-ui/components/banner';
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { Step, Steps } from "fumadocs-ui/components/steps";
-import { Users, Terminal, Brain, Files, FolderTree, Lock, Plug, Key } from 'lucide-react';
+import { Users, Terminal, Brain, Files, FolderTree, Lock, Plug, Key, BookOpenText } from 'lucide-react';
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
@@ -93,7 +93,8 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
   <Card title="Agentic IR" icon={<Brain />}>在浏览器中启动 AI Agent 自动化应急响应</Card>
   <Card title="Investigations" icon={<Key />}>AccessKey 调查、客户端 Recon、阶段进度与报告入口</Card>
   <Card title="Files" icon={<Files />}>在线浏览客户端文件系统，支持预览、下载和上传</Card>
-  <Card title="Artifacts" icon={<FolderTree />}>服务端取证文件浏览，支持 Markdown/HTML 预览、二进制识别、文件下载</Card>
+  <Card title="Artifacts" icon={<FolderTree />}>服务端取证文件浏览，支持 Markdown 预览、Dossier 编辑、二进制识别、文件下载</Card>
+  <Card title="Dossier" icon={<BookOpenText />}>独立报告编辑器，可从左侧导航直接打开，也可从 Artifacts 的 Markdown 报告进入</Card>
 </Cards>
 
 ### Clients
@@ -161,11 +162,26 @@ Files 页面用于浏览在线客户端本机文件系统。可以从左侧导�
 - **文件树可拖拽**：拖动树与预览之间的分隔条调整宽度（180–600 px），宽度持久化到 localStorage
 - **Markdown 渲染**：`.md` / `.markdown` 自动渲染
 - **Markdown 悬浮目录**：包含多个标题的 Markdown 报告会自动生成 TOC，点击目录项跳转到对应章节
-- **HTML 报告预览**：`.html` 文件直接在沙箱 iframe 内渲染，可正常加载同目录下的 CSS、JS、字体、图片等相对资源，并支持报告内下载链接，适合查看 [Agentic IR](/air) 等生成的报告
+- **Dossier 编辑**：`.md` / `.markdown` 报告可直接在 Dossier 中打开，适合编辑应急报告正文、截图和结论
 - **二进制识别**：非文本文件显示"不支持预览"提示，不会报错
 - **文件下载**：任意文件可通过右上角下载按钮下载
 - **目录打包下载**：鼠标悬停文件树中的目录行，点击下载图标即可以 `tar.gz` 流式下载整个目录，自动排除点号开头的文件和子目录
 - **隐藏文件保护**：`.env`、`.ssh` 等点号开头的文件既不列出也不允许直接访问，避免敏感信息泄露
+
+### Dossier
+
+Dossier 是独立的 Markdown 报告编辑器，有两种打开方式：
+
+- 从左侧导航点击 **Dossier**，直接打开编辑器
+- 在 Artifacts 中选中 `.md` / `.markdown` 报告后，点击 Dossier 按钮编辑该报告
+
+Dossier 未部署或路径配置错误时，WebUI 会显示错误提示，但不影响其他功能。
+
+<Callout title="常见问题" type="warn">
+  - 点击 Dossier 后提示不可用：通常是 Dossier 编辑器文件未部署，或 `webui.dossierDir` 指向了错误目录。
+  - Artifacts 中没有 Dossier 按钮：只有 `.md` / `.markdown` 报告支持在 Dossier 中编辑。
+  - 旧 HTML 报告无法直接预览：Artifacts 不再内置 HTML 预览，可下载后查看；新的应急报告建议使用 Markdown。
+</Callout>
 
 ## 配置
 
@@ -177,6 +193,7 @@ webui:
   listen: 0.0.0.0                       # 监听地址
   port: 8080                            # 监听端口（与 MCP 共享）
   userDBPath: /opt/siren/data/users.db  # 可选：用户数据库绝对路径
+  dossierDir: /opt/siren/dossier        # 可选：Dossier 编辑器文件目录
 ```
 
 详见 [配置文件](/config#服务端配置)。
@@ -190,6 +207,21 @@ webui:
   - 或至少通过 iptables / 安全组限制访问 IP
   - 部署前必须已创建至少一个用户账号（否则 WebUI 零鉴权）
 </Callout>
+
+### Dossier 部署
+
+默认配置会从 `/opt/siren/dossier` 读取 Dossier 编辑器文件。可以在控制主机上构建并复制：
+
+```bash title="控制主机"
+cd /path/to/dossier
+npm install
+npm run build
+
+sudo mkdir -p /opt/siren/dossier
+sudo rsync -av index.html editor.css editor.js report.md assets/ /opt/siren/dossier/
+```
+
+如果修改了 `webui.dossierDir`，重启 `siren_server` 后再访问 WebUI。反向代理部署时，建议把同一域名整体转发到 WebUI 端口；如果只代理了部分路径，可能出现 Dossier 页面能打开但报告无法保存的问题。不要把报告文件放进 `webui.dossierDir`，报告仍应保留在 SIREN 服务端工作目录下，并通过 Artifacts 查看。
 
 ## 相关内容
 
