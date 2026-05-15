@@ -14,7 +14,7 @@ export const DateTag = ({ children }) => (
 
 ### Feature
 
-- **WebUI 新增 Dossier 直接入口**：左侧导航可直接打开 `/dossier/`，无需先在 Artifacts 中选中 Markdown 文件再进入编辑器
+- **WebUI 新增 Dossier 直接入口**：左侧导航可直接打开 Dossier，无需先在 Artifacts 中选中 Markdown 文件再进入编辑器
 - **Artifacts Markdown 报告接入 Dossier**：`.md` 报告可从 Artifacts 打开到 Dossier，直接进入编辑流程
 
 ### Improvement
@@ -23,7 +23,7 @@ export const DateTag = ({ children }) => (
 
 ### Upgrade Notes
 
-- 使用 Dossier 前需要先部署 Dossier 编辑器文件，默认目录为 `/opt/siren/dossier`，自定义路径请参考 WebUI 文档
+- 使用 Dossier 前需要先部署 Dossier 编辑器文件和默认 `report.md`，默认目录为 `/opt/siren/dossier`，自定义路径请参考 WebUI 文档
 - Artifacts 不再直接预览 HTML 报告；历史 HTML 报告可下载后查看，新的应急报告建议使用 Markdown + Dossier
 
 ---

@@ -82,7 +82,7 @@ SIREN 支持两种运行模式，可根据实际网络环境和应急响应场�
     ./siren_server user add admin
     ```
 
-    如需从 WebUI 直接打开 Dossier 报告编辑器，还需要把 Dossier 编辑器文件部署到控制主机。默认目录为 `/opt/siren/dossier`：
+    如需从 WebUI 直接打开 Dossier 报告编辑器，还需要把 Dossier 编辑器文件和默认报告部署到控制主机。默认目录为 `/opt/siren/dossier`：
 
     ```bash title="控制主机"
     cd /path/to/dossier
@@ -93,7 +93,7 @@ SIREN 支持两种运行模式，可根据实际网络环境和应急响应场�
     sudo rsync -av index.html editor.css editor.js report.md assets/ /opt/siren/dossier/
     ```
 
-    如果使用其他目录，在 `server_config.yaml` 中同步设置 `webui.dossierDir`。反向代理部署时，建议把同一域名整体转发到 WebUI 端口，避免 Dossier 页面能打开但保存报告失败。
+    左侧 Dossier 入口会默认编辑 `webui.dossierDir/report.md`。该目录可以在服务端工作目录外；如果使用其他目录，在 `server_config.yaml` 中同步设置 `webui.dossierDir`。Artifacts 仍浏览服务端工作目录下的文件，其他案件报告可从 Artifacts 中打开。反向代理部署时，建议把同一域名整体转发到 WebUI 端口，避免 Dossier 页面能打开但保存报告失败。
 
   </Accordion>
 </Accordions>

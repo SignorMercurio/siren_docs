@@ -172,13 +172,14 @@ Files 页面用于浏览在线客户端本机文件系统。可以从左侧导�
 
 Dossier 是独立的 Markdown 报告编辑器，有两种打开方式：
 
-- 从左侧导航点击 **Dossier**，直接打开编辑器
+- 从左侧导航点击 **Dossier**，打开 `webui.dossierDir/report.md` 作为默认报告
 - 在 Artifacts 中选中 `.md` 报告后，点击 Dossier 按钮编辑该报告
 
-Dossier 未部署或路径配置错误时，WebUI 会显示错误提示，但不影响其他功能。
+Dossier 未部署、路径配置错误或默认 `report.md` 缺失时，WebUI 会显示错误提示，但不影响其他功能。
 
 <Callout title="常见问题" type="warn">
   - 点击 Dossier 后提示不可用：通常是 Dossier 编辑器文件未部署，或 `webui.dossierDir` 指向了错误目录。
+  - 点击 Dossier 后提示默认报告不可用：确认 `webui.dossierDir/report.md` 存在。`webui.dossierDir` 可以使用绝对路径，也可以放在 `siren_server` 工作目录外。
   - Artifacts 中没有 Dossier 按钮：只有 `.md` 报告支持在 Dossier 中编辑。
   - 旧 HTML 报告无法直接预览：Artifacts 不再内置 HTML 预览，可下载后查看；新的应急报告建议使用 Markdown。
 </Callout>
@@ -210,7 +211,7 @@ webui:
 
 ### Dossier 部署
 
-默认配置会从 `/opt/siren/dossier` 读取 Dossier 编辑器文件。可以在控制主机上构建并复制：
+默认配置会从 `/opt/siren/dossier` 读取 Dossier 编辑器文件，并把 `/opt/siren/dossier/report.md` 作为左侧导航的默认报告。可以在控制主机上构建并复制：
 
 ```bash title="控制主机"
 cd /path/to/dossier
@@ -221,7 +222,7 @@ sudo mkdir -p /opt/siren/dossier
 sudo rsync -av index.html editor.css editor.js report.md assets/ /opt/siren/dossier/
 ```
 
-如果修改了 `webui.dossierDir`，重启 `siren_server` 后再访问 WebUI。反向代理部署时，建议把同一域名整体转发到 WebUI 端口；如果只代理了部分路径，可能出现 Dossier 页面能打开但报告无法保存的问题。不要把报告文件放进 `webui.dossierDir`，报告仍应保留在 SIREN 服务端工作目录下，并通过 Artifacts 查看。
+如果修改了 `webui.dossierDir`，重启 `siren_server` 后再访问 WebUI。左侧 Dossier 入口会编辑该目录下的 `report.md`，该目录可以在服务端工作目录外；其他案件报告仍可放在服务端工作目录中的任意可访问位置，并从 Artifacts 中打开。反向代理部署时，建议把同一域名整体转发到 WebUI 端口；如果只代理了部分路径，可能出现 Dossier 页面能打开但报告无法保存的问题。
 
 ## 相关内容
 
