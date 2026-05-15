@@ -1,5 +1,5 @@
 {
-  "title": "文件与进程分析",
-  "pages": ["upload", "ti", "info"],
+  "title": "文件与进程管理",
+  "pages": ["upload", "info"],
   "icon": "Folder"
 }

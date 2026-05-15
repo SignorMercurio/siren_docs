@@ -6,7 +6,7 @@ icon: CloudUpload
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-将受害主机上的重要文件上传至 OSS 进行证据留存。
+将重要文件保存到集中位置进行证据留存。本地模式上传当前主机文件到 OSS；远程模式从在线客户端拉取文件，并保存到 SIREN 服务端 Artifacts。
 
 **常见使用场景：**
 
@@ -15,7 +15,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 - 保存配置文件快照，记录攻击者的修改
 
 <Callout title="前置条件" type="info">
-  需要[设置 OSS 访问凭证](/credential#设置-oss-访问凭证)。
+  本地模式需要[设置 OSS 访问凭证](/credential#设置-oss-访问凭证)。远程模式不需要 OSS 凭证，但目标客户端必须在线。
 </Callout>
 
 ## 上传文件
@@ -28,4 +28,8 @@ import { Callout } from "fumadocs-ui/components/callout";
 >>> upload <Client ID> <file path>
 ```
 
-上传完成后，文件存储在 OSS 的 `<objectPath>/<file name>` 路径下（默认 `tmp/siren_upload/<file name>`），可通过[配置文件](/config#客户端配置)中的 `oss.objectPath` 自定义上传路径前缀。
+本地模式上传完成后，文件存储在 OSS 的 `<objectPath>/<file name>` 路径下（默认 `tmp/siren_upload/<file name>`），可通过[配置文件](/config#客户端配置)中的 `oss.objectPath` 自定义上传路径前缀。
+
+远程模式完成后，文件保存在服务端工作目录下的 `uploads/client-<Client ID>/<file name>`，可在 WebUI 的 Artifacts 页面查看和下载。
+
+如果需要在浏览器中管理文件，可使用 WebUI 的 [Files](/webui#files) 页面操作客户端文件，使用 [Artifacts](/webui#artifacts) 页面管理服务端结果文档与取证文件。

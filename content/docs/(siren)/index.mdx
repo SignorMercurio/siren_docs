@@ -59,7 +59,7 @@ SIREN 支持两种运行模式，可根据实际网络环境和应急响应场�
     准备一台主机作为部署服务端的控制主机，需要满足以下条件：
 
     - 受害主机能够访问控制主机（控制主机有公网 IP，或受害主机与控制主机处于同一内网网段）
-    - 已安装 tmux
+    - 如果需要通过服务端 REPL 使用交互式 Shell 或 `air` 命令，需安装 tmux；只使用 WebUI Shell/AIR 时不依赖 tmux
 
     在控制主机上运行：
 
@@ -201,7 +201,7 @@ powershell -ExecutionPolicy Bypass -Command "iwr -Uri 'https://oss-siren.oss-cn-
     部署完成后，运行信息收集开始你的第一次应急排查
   </Card>
   <Card title="Web 控制台" href="/webui" icon={<LayoutDashboard />}>
-    通过浏览器访问 SIREN 服务端，图形化操控所有远程模式功能
+    通过浏览器访问 SIREN 服务端，图形化处理常用远程工作流
   </Card>
   <Card title="功能特性" href="/features" icon={<Sparkles />}>
     了解 SIREN 提供的完整功能列表

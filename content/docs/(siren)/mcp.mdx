@@ -14,7 +14,9 @@ SIREN 服务端内置 [模型上下文协议](https://modelcontextprotocol.io/)�
 
 ## 配置
 
-MCP 服务与 [Web 控制台](/webui) 共享同一 HTTP 端口（默认 `8080`），通过 `/mcp` 子路径暴露，使用 Streamable HTTP 传输协议。端口由[配置文件](/config#服务端配置)中的 `webui.port` 字段控制。
+MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制，默认启用。它与 [Web 控制台](/webui) 共享同一 HTTP 监听地址和端口（默认 `0.0.0.0:8080`），并通过 `/mcp` 子路径暴露。监听地址和端口分别由 `webui.listen`、`webui.port` 控制。
+
+`mcp.enabled` 与 `webui.enabled` 相互独立：关闭 WebUI 后，只要 `mcp.enabled` 仍为 `true`，MCP 客户端仍可访问 `http://<host>:<port>/mcp`；关闭 MCP 后，WebUI 可以继续独立运行。
 
 <Callout title="从 v1.x 升级" type="warn">
   v2.0.0 起 `mcpPort` 配置项与 `--mcp-port` 参数已删除，MCP 不再占用独立端口。升级后 MCP 客户端 URL 无需修改（仍是 `http://<host>:<port>/mcp`），只需确认端口对齐 `webui.port`。
@@ -71,6 +73,6 @@ MCP 服务与 [Web 控制台](/webui) 共享同一 HTTP 端口（默认 `8080`�
     与 MCP 共用同一端口的浏览器图形化入口
   </Card>
   <Card title="配置文件" href="/config#服务端配置">
-    配置 MCP 与 WebUI 共享的监听端口
+    配置 MCP 开关与共享监听端口
   </Card>
 </Cards>

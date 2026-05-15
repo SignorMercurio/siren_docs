@@ -17,7 +17,7 @@ Agentic 应急响应（AIR）让 AI Agent 自动化实施完整的应急响应�
 <Callout title="前置条件" type="warn">
   使用前需确保：
   - 已在服务端配置文件中设置 `air.cliPath`（大模型 CLI 工具路径），详见[配置文件](/config#服务端配置)
-  - 控制主机已安装 tmux
+  - 服务端 REPL 的 `air` 命令需要 tmux；WebUI AIR 不依赖 tmux
   - （仅告警事件模式）已设置 [SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)
 </Callout>
 
@@ -35,7 +35,7 @@ Agentic 应急响应（AIR）让 AI Agent 自动化实施完整的应急响应�
   这里的 `Security Center Alert ID` 指阿里云安全中心告警详情页「基础信息」中的「告警ID」，不是页面下方「关联安全事件」里的「事件ID」。
 </Callout>
 
-服务端会通过 tmux 启动一个新面板并自动运行配置的大模型 CLI（e.g. Claude Code）并提供预定义的 prompt 作为输入：
+通过服务端 REPL 使用 `air` 命令时，SIREN 会通过 tmux 启动一个新面板并自动运行配置的大模型 CLI（e.g. Claude Code）并提供预定义的 prompt 作为输入：
 
 ![air](../../../img/air.webp)
 
@@ -79,7 +79,7 @@ SIREN 通过 SOAR 平台获取指定安全告警的详细信息，包括告警�
 
 ### 启动 AI Agent
 
-将告警信息和预定义 prompt 一起传递给配置的大模型 CLI（如 Claude Code），在 tmux 新面板中启动 Agent。
+将告警信息和预定义 prompt 一起传递给配置的大模型 CLI（如 Claude Code），在服务端启动 Agent。服务端 REPL 模式使用 tmux 新面板；WebUI 模式在浏览器中连接服务端本地 PTY。
 
 </Step>
 <Step>

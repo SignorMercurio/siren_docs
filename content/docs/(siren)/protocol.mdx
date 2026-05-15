@@ -43,15 +43,14 @@ sequenceDiagram
     autonumber
     participant C as Client
     participant S as Server
-    participant O as OSS
-    participant M as MkDocs
     S->>C: MsgRecon
     C-->>C: StartRecon()
-    C->>S: MsgRecon
-    C->>S: MsgFile
-    S->>O: Upload File
-    O->>M: Instant Sync
+    C->>S: MsgRecon [file name]
+    C->>S: MsgFile [report bytes]
+    S->>S: Save to server artifact
 ```
+
+远程 `recon` 与 `upload` 都采用“命令响应帧 + `MsgFile` 内容帧”的边界。服务端会校验第二帧必须是 `MsgFile`；如果收到其他消息类型，会关闭当前连接，避免把错误帧继续当作协议流解析。
 
 ### shell
 
@@ -99,27 +98,10 @@ sequenceDiagram
     autonumber
     participant C as Client
     participant S as Server
-    participant O as OSS
     S->>C: MsgUpload
-    C->>S: MsgUpload
-    C->>S: MsgFile
-    S->>O: Upload File
-    O->>S: Object URL
-```
-
-### ti
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant C as Client
-    participant S as Server
-    participant T as Threat Intelligence
-    S->>C: MsgTi
-    C->>S: MsgTi
-    C->>S: MsgFile
-    S->>T: Upload File
-    T->>S: Sandbox URL
+    C->>S: MsgUpload [file name]
+    C->>S: MsgFile [file bytes]
+    S->>S: Save to uploads/client-<id>/
 ```
 
 ### info

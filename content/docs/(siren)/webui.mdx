@@ -12,7 +12,7 @@ import { Users, Terminal, Brain, Files, FolderTree, Lock, Plug, Key, BookOpenTex
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-SIREN 服务端内置 Web 控制台，提供所有远程模式功能的图形化入口。无需登录控制主机、无需 tmux 操作，通过浏览器即可完成客户端管理、交互式 Shell、Agentic 应急响应、SOAR 命令调用以及取证文件浏览。
+SIREN 服务端内置 Web 控制台，提供常用远程工作流的图形化入口。无需登录控制主机操作 tmux 或 REPL，通过浏览器即可完成客户端管理、交互式 Shell、Agentic 应急响应、SOAR 命令调用以及取证文件浏览。
 
 ## 启动与访问
 
@@ -29,7 +29,7 @@ http://<SIREN Server IP>:8080
 ```
 
 <Callout title="端口统一" type="info">
-  从 v2.0.0 起，WebUI 与 [MCP 服务](/mcp) 共享同一端口（默认 `8080`）。MCP 客户端通过 `/mcp` 子路径访问，WebUI 通过根路径访问。
+  从 v2.0.0 起，WebUI 与 [MCP 服务](/mcp) 共享同一端口（默认 `8080`）。MCP 客户端通过 `/mcp` 子路径访问，WebUI 通过根路径访问；两者的启停开关分别是 `webui.enabled` 和 `mcp.enabled`。
 </Callout>
 
 ## 账号鉴权
@@ -118,19 +118,19 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
 
 ### Agentic IR
 
-等价于服务端 REPL 的 `air` 命令，在浏览器里启动 AI Agent 完成 [Agentic 应急响应](/air)。选择目标客户端后可选两种模式：
+功能上等价于服务端 REPL 的 `air` 命令，在浏览器里启动 AI Agent 完成 [Agentic 应急响应](/air)。选择目标客户端后可选两种模式：
 
 - **告警事件模式**：输入阿里云 UID + 云安全中心告警 ID，自动拉取告警详情
 - **自定义 Prompt**：自由输入应急响应指令
 
-Agent 在服务端本地 PTY 里运行，输出流式推送到浏览器。
+Agent 在服务端本地 PTY 里运行，输出流式推送到浏览器。WebUI AIR 不依赖 tmux；服务端 REPL 的 `air` 命令仍会使用 tmux。
 
 ### Investigations
 
 Investigations 页面用于承载需要等待结果的调查工具，目前包含 AccessKey 调查和客户端 Recon。
 
 - **AccessKey**：输入 Alibaba Cloud UID、AccessKey ID 与 Region 后，服务端调用现有 SOAR 剧本生成 Markdown 报告。WebUI 只展示真实的 playbook 运行状态，完成后可直接打开 Artifacts 查看报告。
-- **Recon**：选择在线客户端并下发信息收集命令。页面展示服务端从客户端日志中解析出的阶段列表，例如 `Recon.Basic`、`Recon.User`、`Recon.Process`、`Upload report to OSS`，不再暴露原始彩色日志。
+- **Recon**：选择在线客户端并下发信息收集命令。页面展示服务端从客户端日志中解析出的阶段列表，例如 `Recon.Basic`、`Recon.User`、`Recon.Process`、`Save report to Artifacts`，不再暴露原始彩色日志。
 - **报告入口**：调查结束后会显示 Open Artifacts 按钮，直接跳转到生成的报告文件；报告也会保留在服务端工作目录中，方便远程部署环境查看。
 
 <Callout title="进度展示原则" type="info">
@@ -157,7 +157,7 @@ Files 页面用于浏览在线客户端本机文件系统。可以从左侧导�
 
 ### Artifacts
 
-浏览服务端工作目录下的文件，典型使用场景是查看 [信息收集报告](/recon#查看数据)。特性：
+浏览服务端工作目录下的文件，典型使用场景是查看远程 Recon 和 AIR 产出的 Markdown 结果文档，以及上传/拉取到服务端的取证文件。特性：
 
 - **文件树可拖拽**：拖动树与预览之间的分隔条调整宽度（180–600 px），宽度持久化到 localStorage
 - **Markdown 渲染**：`.md` / `.markdown` 自动渲染
@@ -191,13 +191,16 @@ Dossier 未部署、路径配置错误或默认 `report.md` 缺失时，WebUI �
 ```yaml title="server_config.yaml"
 webui:
   enabled: true                         # 是否启用 WebUI
-  listen: 0.0.0.0                       # 监听地址
+  listen: 0.0.0.0                       # 共享 HTTP 监听地址
   port: 8080                            # 监听端口（与 MCP 共享）
   userDBPath: /opt/siren/data/users.db  # 可选：用户数据库绝对路径
   dossierDir: /opt/siren/dossier        # 可选：Dossier 编辑器文件目录
+
+mcp:
+  enabled: true                         # 是否启用 MCP 服务
 ```
 
-详见 [配置文件](/config#服务端配置)。
+WebUI 与 MCP 共用监听地址和端口，但启停开关相互独立。详见 [配置文件](/config#服务端配置)。
 
 ## 生产部署建议
 
