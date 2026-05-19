@@ -10,6 +10,48 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.8.0 <DateTag>2026-05-18</DateTag>
+
+### Feature
+
+- **客户端自动重连与稳定身份**：客户端会持久化本机身份，服务端短暂下线或升级重启后自动重新连接
+
+### Improvement
+
+- 客户端备注按稳定身份持久化，重连后会恢复此前设置的备注
+- WebUI Shell 与 AIR 终端启动、尺寸同步、滚轮和隐藏标签页切换更加稳定
+- Recon 模块复用统一的命令执行与输出处理逻辑，减少不同平台模块之间的错误处理差异
+
+### Bugfix
+
+- 修复 WebUI AIR 终端文本选择和剪贴板复制在部分场景下失效的问题
+- 修复升级包解压、二进制替换和 SOAR 调用中的部分错误处理路径，失败时返回更明确的错误
+
+### Upgrade Notes
+
+- 自动重连只恢复客户端连接和备注元数据；交互式 Shell、端口转发和正在执行的命令属于当前连接上的活动会话，服务端重启后需要重新打开
+
+---
+
+## v2.7.0 <DateTag>2026-05-15</DateTag>
+
+### Breaking Change
+
+- 移除本地与远程 `ti` 威胁情报沙箱上传入口，相关上传能力不再出现在 CLI、协议处理和 WebUI 调查流程中
+
+### Improvement
+
+- WebUI 与 MCP 的启停开关拆分：`mcp.enabled` 可在浏览器 WebUI 关闭时继续提供 `/mcp`，WebUI 也可在 MCP 关闭时单独运行
+- Dossier 左侧入口改为打开 `webui.dossierDir/report.md`，该目录可以位于服务端工作目录外；报告正文和粘贴图片仍通过受保护的 WebUI 报告接口读写
+
+### Bugfix
+
+- 修复 MCP 在 Windows PowerShell 命令中丢失 `$_`，以及执行错误被吞掉的问题
+- 修复客户端文件浏览中 UTF-16 文本文件被当作二进制文件而无法预览的问题
+- 修复外部 Dossier 路径、默认报告路径和报告侧边资源解析中的边界问题
+
+---
+
 ## v2.5.0 <DateTag>2026-05-14</DateTag>
 
 ### Feature

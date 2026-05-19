@@ -42,7 +42,7 @@ SIREN 将本地报告、服务端 Artifacts 和 Dossier 报告编辑分成不同
 
 <Cards>
     <Card title="客户端文件管理" icon={<FolderTree />} href="/webui#files">在线浏览客户端文件系统，支持预览、下载、目录打包和单文件上传</Card>
-    <Card title="服务端 Artifacts 管理" icon={<Server />} href="/webui#artifacts">管理服务端工作目录中的报告、取证文件和上传文件，支持预览、下载和上传</Card>
+    <Card title="服务端 Artifacts 管理" icon={<Server />} href="/webui#artifacts">管理服务端工作目录中的报告、取证文件和上传文件，支持预览、下载、上传、重命名和删除</Card>
     <Card title="本地文件上传" icon={<CloudUpload />} href="/analysis/upload">本地文件可上传至 OSS，远程 CLI 上传会拉取客户端文件并保存到服务端 Artifacts</Card>
     <Card title="进程分析" icon={<Activity />} href="/analysis/info">基于 PID/端口/名称查询进程详情、进程树、容器和服务信息</Card>
 </Cards>
@@ -66,6 +66,7 @@ SIREN 将本地报告、服务端 Artifacts 和 Dossier 报告编辑分成不同
 
 <Cards>
     <Card title="自动化客户端部署" icon={<Rocket />} href="/index#内部环境通过云助手一键部署">通过云助手单机或批量部署 SIREN 客户端到受害主机</Card>
+    <Card title="自动重连与备注恢复" icon={<Radio />} href="/remote">客户端保存稳定身份，服务端重启后自动重连并恢复已设置备注</Card>
     <Card title="远程 Shell" icon={<Terminal />} href="/remote#远程命令执行">全交互式远程 Shell，支持 vim、top 等交互式命令</Card>
     <Card title="AccessKey 调查" icon={<Key />} href="/ak">通过 CLI 或 WebUI 调查云上 AccessKey 调用历史，生成 Markdown 报告</Card>
     <Card title="Agentic 应急响应" icon={<Brain />} href="/air">AI Agent 自动化执行应急响应，生成完整报告</Card>
@@ -86,7 +87,7 @@ SIREN 将本地报告、服务端 Artifacts 和 Dossier 报告编辑分成不同
     <Card title="浏览器内 AIR" icon={<Brain />} href="/webui#agentic-ir">无需登录控制主机即可启动 AI Agent 完成应急响应</Card>
     <Card title="浏览器内调查" icon={<Key />} href="/webui#investigations">执行 AccessKey 调查和 Recon，查看真实阶段进度并跳转报告</Card>
     <Card title="客户端文件浏览" icon={<FolderTree />} href="/webui#files">在线浏览客户端文件系统，支持预览、下载、目录打包和单文件上传</Card>
-    <Card title="取证文件浏览" icon={<FolderTree />} href="/webui#artifacts">服务端 Artifacts 支持 Markdown 预览、悬浮目录、Dossier 编辑、二进制识别、文件下载</Card>
+    <Card title="取证文件浏览" icon={<FolderTree />} href="/webui#artifacts">服务端 Artifacts 支持 Markdown 预览、Dossier 编辑、上传、下载、重命名和删除</Card>
     <Card title="Dossier 报告编辑" icon={<BookOpen />} href="/webui#dossier">从 WebUI 直接打开 Dossier 编辑器，编辑 Markdown 应急报告和附件</Card>
     <Card title="SOAR 快捷操作" icon={<MousePointerClick />} href="/webui#clients">allow、单机/批量 deploy、clean 一键调用，运行日志流式展示</Card>
 </Cards>
