@@ -90,7 +90,7 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
 <Cards>
   <Card title="Clients" icon={<Users />}>客户端列表、在线状态、备注编辑、SOAR 放行、单机/批量部署、清理痕迹</Card>
   <Card title="Shells" icon={<Terminal />}>多标签交互式终端，切换页面会话不中断</Card>
-  <Card title="Agentic IR" icon={<Brain />}>在浏览器中启动 AI Agent 自动化应急响应</Card>
+  <Card title="Agentic IR" icon={<Brain />}>在浏览器中启动 AI Agent 应急响应会话</Card>
   <Card title="Investigations" icon={<Key />}>AccessKey 调查、客户端 Recon、阶段进度与报告入口</Card>
   <Card title="Files" icon={<Files />}>在线浏览客户端文件系统，支持预览、下载和上传</Card>
   <Card title="Artifacts" icon={<FolderTree />}>服务端取证文件浏览，支持 Markdown 预览、Dossier 编辑、上传、下载、重命名和删除</Card>
@@ -124,7 +124,7 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
 - **告警事件模式**：输入阿里云 UID + 云安全中心告警 ID，自动拉取告警详情
 - **自定义 Prompt**：自由输入应急响应指令
 
-Agent 在服务端本地 PTY 里运行，输出流式推送到浏览器。WebUI AIR 不依赖 tmux；服务端 REPL 的 `air` 命令仍会使用 tmux。
+页面会按顺序展示 AI 回复、工具调用和结果，并支持在同一会话继续追问。WebUI AIR 会使用 SIREN MCP 工具，请确认 [MCP 服务](/mcp#配置)已启用。它不依赖 tmux，服务端 REPL 的 `air` 命令仍保持原有交互式体验。
 
 ### Investigations
 
