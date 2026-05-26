@@ -119,10 +119,18 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
 
 ### Agentic IR
 
-功能上等价于服务端 REPL 的 `air` 命令，在浏览器里启动 AI Agent 完成 [Agentic 应急响应](/air)。选择目标客户端后可选两种模式：
+功能上等价于服务端 REPL 的 `air` 命令，在浏览器里启动 AI Agent 完成 [Agentic 应急响应](/air)。支持新建会话和恢复当前项目的 Claude Code 历史会话。
+
+选择目标客户端后可选两种新建模式：
 
 - **告警事件模式**：输入阿里云 UID + 云安全中心告警 ID，自动拉取告警详情
 - **自定义 Prompt**：自由输入应急响应指令
+
+也可以切换到 **Resume** 模式，搜索并选择当前 `siren_server` 工作目录对应的 Claude Code 历史会话。WebUI 会先展示解析出的历史 user / assistant 消息，再用原 Claude session ID 继续会话，行为类似 `claude -r <session-id>`。
+
+<Callout title="恢复范围" type="info">
+  Resume 只读取 `siren_server` 当前工作目录对应的 Claude Code history，不会跨项目列出其他目录的历史会话，也不会向浏览器暴露本机 JSONL 文件路径。
+</Callout>
 
 页面会按顺序展示 AI 回复、工具调用和结果，并支持在同一会话继续追问。WebUI AIR 会使用 SIREN MCP 工具，请确认 [MCP 服务](/mcp#配置)已启用。它不依赖 tmux，服务端 REPL 的 `air` 命令仍保持原有交互式体验。
 
