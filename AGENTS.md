@@ -8,6 +8,13 @@ This repository contains the official SIREN documentation site.
 - Keep release notes and feature docs evidence-based. Verify behavior against `/Users/merc/Projects/siren` when documenting implementation-driven changes.
 - Write user-facing documentation, not internal implementation notes, unless the page is explicitly about architecture or development.
 
+## Project Map
+
+- `content/docs/(siren)/`: official SIREN end-user MDX documentation.
+- `content/img/`: screenshots and other documentation images.
+- `app/`, `components/`, `lib/`: Next.js/Fumadocs site shell and shared UI code.
+- `source.config.ts`: Fumadocs content source configuration.
+
 ## Editing
 
 - Prefer small, focused documentation changes that match the existing MDX style.
