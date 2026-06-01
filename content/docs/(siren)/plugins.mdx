@@ -1,0 +1,125 @@
+---
+title: 插件系统
+description: 通过插件扩展 SIREN 的能力
+icon: Puzzle
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Card, Cards } from "fumadocs-ui/components/card";
+
+插件用于在不修改核心代码的前提下扩展 SIREN 的能力。已安装的插件存放在工作目录下的 `plugins/` 目录中，每个插件占一个子目录，包含 `manifest.json` 清单与可执行文件。
+
+## 插件类型
+
+插件通过清单中的 `type` 字段区分为两类，二者的启用开关和调用方式不同：
+
+| 类型 | 配置开关 | 调用方式 |
+| --- | --- | --- |
+| `command` | `plugins.<name>` | 作为独立命令按需调用，输出立即返回 |
+| `recon` | `recon.<name>` | 在运行[信息收集](/recon)时自动执行，结果并入 Recon 报告 |
+
+<Callout title="插件名称规则" type="info">
+  插件名称必须为 1–128 个字符，且只能包含字母、数字、短横线（`-`）和下划线（`_`）。
+</Callout>
+
+## 管理插件
+
+安装、卸载、更新和启停插件，本地模式与远程模式均支持。
+
+```bash tab="本地模式"
+./siren plugins                  # 列出已安装插件（NAME / VERSION / TYPE / ENABLED）
+./siren plugins install <name>   # 从插件市场下载并安装，安装后默认启用
+./siren plugins uninstall <name> # 卸载插件
+./siren plugins update <name>    # 重新下载更新，保留当前启用/禁用状态
+./siren plugins toggle <name>    # 启用或禁用插件
+```
+
+```bash tab="远程模式"
+>>> plugins <Client ID>                  # 列出该客户端上的插件
+>>> plugins <Client ID> install <name>
+>>> plugins <Client ID> uninstall <name>
+>>> plugins <Client ID> update <name>
+>>> plugins <Client ID> toggle <name>
+```
+
+远程模式下，每个客户端已安装的插件也会显示在 `ls` 命令输出的 Plugins 列中。
+
+`command` 类型插件安装并启用后，可以直接作为命令调用：
+
+```bash tab="本地模式"
+./siren <plugin_name> [args]
+```
+
+```bash tab="远程模式"
+>>> <plugin_name> <Client ID> [args]
+```
+
+## 插件市场
+
+`install` 与 `update` 从[配置文件](/config#客户端配置)中的 `plugins.marketplace` 地址下载插件。SIREN 会依次获取插件的 `manifest.json` 清单、与当前平台匹配的入口二进制文件，以及可选的 `setup` 安装脚本（如有，安装时执行，超时 5 分钟）。
+
+```yaml title="config.yaml"
+plugins:
+  marketplace: https://oss-siren.oss-cn-hongkong.aliyuncs.com/plugins
+```
+
+<Callout title="提示" type="info">
+  `update` 会先卸载再重新安装，并保留插件原有的启用/禁用状态；安装或更新失败时会回滚，不会残留半安装的插件目录。
+</Callout>
+
+## 内置示例插件
+
+SIREN 仓库提供了两个示例插件，可作为开发参考：
+
+| 插件 | 类型 | 说明 | 调用方式 |
+| --- | --- | --- | --- |
+| `jdump` | `command` | 导出 Java 进程的堆内存 | 本地 `jdump <PID>`；远程 `jdump <Client ID> <PID>` |
+| `chkrootkit` | `recon` | 运行 chkrootkit 检测 Rootkit | 启用后随 `recon` 自动执行 |
+
+## 插件开发
+
+每个插件目录下需包含一个 `manifest.json` 清单：
+
+```json title="manifest.json"
+{
+  "name": "jdump",
+  "version": "1.0.0",
+  "type": "command",
+  "description": "Dump the Java heap memory",
+  "usage": "jdump <Client ID> <PID>",
+  "clientUsage": "jdump <pid>",
+  "platforms": ["linux_amd64", "linux_arm64"],
+  "entrypoint": "jdump",
+  "setup": "setup.sh"
+}
+```
+
+| 字段 | 说明 |
+| --- | --- |
+| `name` | 插件名称，须符合上文的命名规则 |
+| `version` | 插件版本 |
+| `type` | `command` 或 `recon` |
+| `description` | 插件描述 |
+| `usage` | 远程模式（服务端 REPL）下的用法提示 |
+| `clientUsage` | 本地模式（客户端 CLI）下的命令用法 |
+| `platforms` | 支持的平台列表，如 `linux_amd64`、`linux_arm64`、`darwin_arm64` |
+| `entrypoint` | 入口可执行文件名 |
+| `setup` | 可选，安装时执行的脚本文件名 |
+
+<Callout title="安全约束" type="warn">
+  `entrypoint` 与 `setup` 必须是纯文件名，不能包含路径分隔符或 `..`。SIREN 在加载与下载前会校验清单，校验不通过的插件会被跳过，以防被篡改的清单触发任意路径写入。
+</Callout>
+
+## 相关内容
+
+<Cards>
+  <Card title="信息收集" href="/recon">
+    recon 类型插件会并入信息收集报告
+  </Card>
+  <Card title="配置文件" href="/config#客户端配置">
+    配置 `plugins.marketplace` 与插件开关
+  </Card>
+  <Card title="常见问题" href="/faq">
+    查看插件管理常见问题
+  </Card>
+</Cards>

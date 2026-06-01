@@ -10,13 +10,17 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-SIREN 服务端内置 [模型上下文协议](https://modelcontextprotocol.io/)（MCP）服务器，使 AI 助手能够直接与 SIREN 交互，在受害主机上执行命令、获取安全告警详情等。这是 [Agentic 应急响应](/air) 的基础能力。
+SIREN 服务端内置 [模型上下文协议](https://modelcontextprotocol.io/)（MCP）服务，使 AI 助手能够直接与 SIREN 交互，在受害主机上执行命令、获取安全告警详情等。这是 [Agentic 应急响应](/air) 的基础能力。
 
 ## 配置
 
 MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制，默认启用。它与 [Web 控制台](/webui) 共享同一 HTTP 监听地址和端口（默认 `0.0.0.0:8080`），并通过 `/mcp` 子路径暴露。监听地址和端口分别由 `webui.listen`、`webui.port` 控制。
 
 `mcp.enabled` 与 `webui.enabled` 相互独立：关闭 WebUI 后，只要 `mcp.enabled` 仍为 `true`，MCP 客户端仍可访问 `http://<host>:<port>/mcp`；关闭 MCP 后，WebUI 可以继续独立运行。
+
+<Callout title="`/mcp` 端点不鉴权" type="warn">
+  MCP 客户端不携带浏览器会话，因此 `/mcp` 不经 WebUI 鉴权中间件——**即使创建了 WebUI 账号也无法保护它**。任何能访问该端口的人都可以通过 `run` 工具在受害主机上执行命令。请务必将 `webui.listen` 限制在可信网络（如 `127.0.0.1` 或内网），或在反向代理加网络 ACL 之后再暴露监听端口。
+</Callout>
 
 <Callout title="从 v1.x 升级" type="warn">
   v2.0.0 起 `mcpPort` 配置项与 `--mcp-port` 参数已删除，MCP 不再占用独立端口。升级后 MCP 客户端 URL 无需修改（仍是 `http://<host>:<port>/mcp`），只需确认端口对齐 `webui.port`。
@@ -37,7 +41,7 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 
 | 工具 | 参数 | 描述 |
 | --- | --- | --- |
-| `ls` | 无 | 列出所有已连接的客户端，返回 ID、操作系统、IP 地址、备注、已安装插件等信息 |
+| `ls` | 无 | 列出所有已连接的客户端，返回 ID、操作系统、连接地址（host:port）、备注、已安装插件等信息 |
 | `run` | `client_id`, `command` | 在指定客户端上执行命令并返回结果（30s 超时，50KB 上限），支持对同一客户端并发执行 |
 | `get_alarm_detail` | `uid`, `event_id` | 通过 SOAR 平台获取指定的安全告警详情，返回告警类型、攻击源、受影响资产等 |
 
@@ -51,9 +55,9 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 
 默认黑名单包含以下类别的危险操作：
 
-- **文件删除**：`rm`、`rmdir`、`mkfs`、`dd`
+- **文件删除与磁盘写入**：`rm`、`rmdir`、`mkfs`、`dd if=`、向块设备重定向（如 `> /dev/sda`）
 - **进程终止**：`kill`、`killall`、`pkill`
-- **系统关机**：`shutdown`、`reboot`、`halt`、`poweroff`
+- **系统关机与运行级别**：`shutdown`、`reboot`、`halt`、`poweroff`、`init 0-6`
 - **服务管理**：`systemctl stop/disable/mask`、`service stop`
 - **防火墙清空**：`iptables -F/-X`
 - **权限与用户**：`chmod 000`、`chown`、`userdel`、`passwd`

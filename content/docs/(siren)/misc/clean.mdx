@@ -24,7 +24,11 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 | 清理项 | 说明 |
 | --- | --- |
-| 环境变量 | OSS 访问凭证、SOAR 平台访问凭证 |
-| 配置文件 | `config.yaml` |
+| 环境变量 | 当前进程中的 OSS 与阿里云 AccessKey 环境变量（`OSS_ACCESS_KEY_*`、`ALIBABA_CLOUD_ACCESS_KEY_*`） |
+| 配置文件 | 当前加载的配置文件（如 `config.yaml`） |
 | 可执行文件目录 | SIREN 可执行文件及其所在目录 |
-| WinPTY 文件 | `winpty.dll` 和 `winpty-agent.exe`（仅 Windows） |
+| 临时文件 | 运行期释放的 WinPTY 临时目录 `%TEMP%\winpty-*`（仅 Windows） |
+
+<Callout title="清理范围说明" type="info">
+  环境变量清理仅作用于当前运行的 SIREN 进程，不会移除写入 shell 配置或其他位置的持久化凭证，也不清除 `SOAR_ACCESS_KEY_*`。Windows 下可执行文件目录的删除为延迟执行：SIREN 进程退出后，由后台脚本完成目录与临时文件的清理。
+</Callout>

@@ -29,6 +29,7 @@ icon: FolderTree
         <File name="root.go" desc="服务端 CLI 入口" />
         <File name="shell.go" />
         <File name="upgrade.go" />
+        <File name="user.go" desc="WebUI 用户管理子命令（add/list/delete）" />
       </Folder>
       <File name="server.go" desc="服务端主函数" />
     </Folder>
@@ -37,6 +38,8 @@ icon: FolderTree
     <File name="config_linux.yaml" desc="Linux 客户端配置文件" />
     <File name="config_windows.yaml" desc="Windows 客户端配置文件" />
     <File name="server_config.yaml" desc="服务端配置文件" />
+    <File name="config_dist_linux.yaml" desc="Linux 客户端发布变体" />
+    <File name="config_dist_windows.yaml" desc="Windows 客户端发布变体" />
   </Folder>
   <Folder name="dist" desc="产物目录" defaultOpen={false}>
     <File name="..." />
@@ -44,6 +47,9 @@ icon: FolderTree
   <File name="go.mod" />
   <File name="go.sum" />
   <Folder name="internal" desc="内部使用的包目录">
+    <Folder name="auth">
+      <File name="store.go" desc="WebUI 用户存储（SQLite + bcrypt）" />
+    </Folder>
     <Folder name="clean">
       <Folder name="embedded">
         <File name="cleanup.bat" desc="Windows 清理脚本（实现自删除）" />
@@ -85,15 +91,32 @@ icon: FolderTree
       <File name="rules_windows.go" desc="从配置文件导入 Windows 信息收集规则" />
     </Folder>
     <Folder name="server">
+      <Folder name="webui" desc="Web 控制台后端与前端" defaultOpen={false}>
+        <File name="webui.go" desc="共享 HTTP 服务与路由（含 /mcp）" />
+        <File name="auth.go" desc="登录、会话与鉴权中间件" />
+        <File name="webui_shell.go" desc="WebSocket 交互式 Shell" />
+        <File name="webui_air.go" desc="浏览器内 AIR 接口" />
+        <File name="webui_artifacts.go" desc="Artifacts 浏览与管理接口" />
+        <File name="webui_soar.go" desc="allow/deploy/clean/AccessKey 调查接口" />
+        <File name="..." desc="其他 webui_*.go 接口与 frontend/ 前端" />
+      </Folder>
       <File name="air.go" desc="Agentic 应急响应功能实现" />
+      <File name="air_headless.go" desc="无头（WebUI）AIR 会话实现" />
+      <File name="air_history.go" desc="AIR 历史会话恢复实现" />
       <File name="client.go" desc="服务端的 Client 对象相关实现" />
+      <File name="client_files.go" desc="客户端文件浏览与拉取实现" />
+      <File name="client_notes.go" desc="客户端备注管理实现" />
       <File name="commander.go" desc="服务端命令交互功能实现" />
+      <File name="deploy_batch.go" desc="批量部署实现" />
       <File name="handler.go" desc="服务端与客户端交互功能实现" />
       <File name="help.go" desc="服务端帮助信息展示实现" />
-      <File name="mcp.go" desc="MCP 服务器功能实现" />
+      <File name="mcp.go" desc="MCP 服务功能实现" />
       <File name="portforward.go" desc="服务端端口转发消息处理功能实现" />
+      <File name="recon_events.go" desc="Recon 阶段事件解析实现" />
       <File name="server.go" desc="服务端监听功能实现" />
       <File name="table.go" desc="服务端表格数据展示功能实现" />
+      <File name="webui_bridge.go" desc="WebUI 与服务端核心的桥接层" />
+      <File name="..." desc="artifact_rename_*.go 等平台相关文件" />
     </Folder>
     <Folder name="upgrade">
       <File name="extract_unix.go" desc="Unix 平台解压功能实现" />
@@ -104,6 +127,9 @@ icon: FolderTree
   </Folder>
   <File name="Makefile" />
   <Folder name="pkg" desc="可供外部使用的包目录">
+    <Folder name="banner" desc="启动 Banner" defaultOpen={false}>
+      <File name="banner.go" />
+    </Folder>
     <Folder name="e" desc="错误处理" defaultOpen={false}>
       <File name="error.go" />
     </Folder>
@@ -129,5 +155,6 @@ icon: FolderTree
     <File name="get_siren.sh" />
     <File name="get_siren_server.sh" />
     <File name="release.go" desc="发布产物上传脚本" />
+    <File name="daily-review.sh" desc="每日代码审查脚本" />
   </Folder>
 </Files>

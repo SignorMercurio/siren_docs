@@ -26,9 +26,9 @@ SIREN 客户端与服务端均支持一键版本升级。服务端启动时会�
 
 </Accordion>
 
-<Accordion title="启动时报错：Error reading config file">
+<Accordion title='启动时报错：Config File "config" Not Found'>
 
-SIREN 在默认查找路径下未能找到配置文件。请确认以下路径之一存在配置文件：
+该报错（服务端为 `Config File "server_config" Not Found in ...`）表示 SIREN 在默认查找路径下未能找到配置文件。请确认以下路径之一存在配置文件：
 
 - 当前目录下的 `config.yaml`（客户端）或 `server_config.yaml`（服务端）
 - `./config/` 目录下的 `config.yaml` 或 `server_config.yaml`
@@ -50,7 +50,7 @@ SIREN 在默认查找路径下未能找到配置文件。请确认以下路径�
 1. 确认服务端已启动且正在监听指定端口
 2. 确认受害主机能够访问控制主机的 IP 和端口（防火墙 / 安全组规则）
 3. 确认客户端配置文件中的 `server` 和 `port` 与服务端配置一致
-4. 确认服务端 TLS 证书文件存在且路径正确
+4. 确认服务端 `certs/` 下的 TLS 证书与私钥存在且路径正确——证书是服务端启动的前置条件（客户端不校验服务端证书）
 
 </Accordion>
 
@@ -123,10 +123,12 @@ SIREN 支持通过命令行管理插件的安装、卸载、更新和启停：
 ```bash tab="远程模式"
 >>> plugins <Client ID> install <name>
 >>> plugins <Client ID> uninstall <name>
+>>> plugins <Client ID> update <name>
+>>> plugins <Client ID> toggle <name>
 ```
 
 插件从配置文件中指定的 `plugins.marketplace` 地址下载。
-更新插件会保留该插件当前的启用或禁用状态。
+更新插件会保留该插件当前的启用或禁用状态。完整说明见[插件系统](/plugins)。
 
 </Accordion>
 

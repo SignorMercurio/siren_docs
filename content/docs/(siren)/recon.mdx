@@ -51,40 +51,40 @@ Web 控制台 -> Investigations -> Recon -> 选择客户端 -> Start Recon
 
 ## 信息收集模块
 
-所有模块均可通过[配置文件](/config#客户端配置)独立开关。
+除基础信息外，下列模块均可通过[配置文件](/config#客户端配置)独立开关；基础信息每次运行都会采集，没有开关项。
 
 <Accordions>
   <Accordion title="Linux 平台模块">
 
 | 模块 | 配置项 | 采集内容 |
 | --- | --- | --- |
-| 基础信息 | `recon.basic` | 主机名、操作系统、内核版本、CPU/内存/磁盘使用率、系统运行时间 |
-| 用户 | `recon.user` | 用户列表、可登录用户、sudoers 配置、近期登录记录、当前登录用户、影子文件 |
-| SSH | `recon.ssh` | SSH 配置、authorized_keys、known_hosts、SSH 密钥文件 |
-| 进程 | `recon.process` | 完整进程列表、CPU/内存 Top 20、隐藏进程检测、/proc 异常检查 |
-| 网络 | `recon.network` | 网络连接、监听端口、DNS 配置、路由表、ARP 缓存、iptables 规则、网卡混杂模式 |
-| 计划任务 | `recon.cron` | 系统级与用户级 crontab、/etc/cron.* 目录、at 任务 |
-| 服务 | `recon.service` | systemd 服务、init.d 脚本、开机自启项、rc.local |
-| 环境变量 | `recon.env` | 系统环境变量、LD_PRELOAD、LD_LIBRARY_PATH 等敏感变量 |
-| 文件 | `recon.file` | 近期变更文件、SUID/SGID 文件、大文件、隐藏文件、敏感目录扫描 |
-| Rootkit | `recon.rootkit` | 内核模块列表及异常检测、LD_PRELOAD 检查、系统命令完整性 |
-| Webshell | `recon.webshell` | Web 目录下的可疑文件扫描（PHP/JSP/ASP 等） |
-| 应用 | `recon.application` | 已安装 RPM/DEB 包、运行中的 Web 应用及中间件 |
+| 基础信息 | 始终采集 | 当前时间、OS 发行版、主机名、当前用户、IP 地址、CPU 核数、CPU/内存/磁盘使用率、磁盘挂载（/etc/fstab） |
+| 用户 | `recon.user` | 非默认用户、可登录用户、Root 权限用户、sudoers 用户、最近登录记录、`w`/`lastlog` 输出、登录 IP、新增用户记录、`/etc/passwd` 属性 |
+| SSH | `recon.ssh` | SSH 暴力破解记录、`~/.ssh/config` 后门、`authorized_keys`、PAM/inetd/软链接后门、`sshd_config` 与 `sshd` 二进制属性 |
+| 进程 | `recon.process` | CPU/内存占用 Top 20、systemd 启动进程、bash 反弹 shell、常见挖矿程序、其他非默认进程 |
+| 网络 | `recon.network` | 监听端口、全 0 开放端口、已建立 TCP 连接、`/etc/hosts`、DNS 服务器、路由表、iptables 规则 |
+| 计划任务 | `recon.cron` | 用户级与系统级 cron 任务、cron 可疑命令、cron 日志 |
+| 服务 | `recon.service` | 运行中服务、非默认服务文件、`/etc/rc.local`、init.d/rc.d 启动项、启动项可疑命令 |
+| 环境变量 | `recon.env` | 环境变量、`LD_PRELOAD`/`LD_LIBRARY_PATH` 等敏感变量、进程环境与 `/etc/ld.so.preload`、profile/rc/environment、`profile.d` 非默认脚本、alias |
+| 文件 | `recon.file` | 历史命令及可疑命令、临时目录、SUID 文件、被进程锁定文件、近 1 天变更文件（mtime/ctime）、时间戳篡改、大文件（>200M）、coreutils 与系统软件包完整性、关键二进制属性 |
+| Rootkit | `recon.rootkit` | 非默认内核模块、可疑内核模块（kallsyms）、可疑 `.ko` 模块 |
+| Webshell | `recon.webshell` | Web 目录下 PHP/JSP 可疑文件扫描 |
+| 应用 | `recon.application` | Redis 配置、JDWP 调试进程、Python 2/3 恶意软件包、容器列表 |
 
   </Accordion>
   <Accordion title="Windows 平台模块">
 
 | 模块 | 配置项 | 采集内容 |
 | --- | --- | --- |
-| 基础信息 | `recon.basic` | 主机名、操作系统版本、CPU/内存/磁盘使用率 |
-| 用户 | `recon.user` | 本地用户列表、管理员组成员、近期登录记录 |
-| 进程 | `recon.process` | 完整进程列表、CPU/内存 Top 20、可疑进程检测 |
-| 网络 | `recon.network` | 网络连接、监听端口、DNS 配置、路由表、ARP 缓存、防火墙规则 |
-| 计划任务 | `recon.schtask` | Windows 计划任务列表 |
-| 环境变量 | `recon.env` | 系统环境变量 |
-| 文件 | `recon.file` | 近期变更文件、可疑文件扫描 |
-| Webshell | `recon.webshell` | Web 目录下的可疑文件扫描 |
-| 应用 | `recon.application` | 已安装软件、运行中的 Web 应用及中间件 |
+| 基础信息 | 始终采集 | 当前时间、OS 版本、主机名、当前用户、IP 地址、CPU 核数、CPU/内存/磁盘使用率 |
+| 用户 | `recon.user` | 非默认用户、可登录用户、管理员组成员、服务账户、禁用/隐藏账户、远程桌面用户、最近登录记录、当前登录用户、新增用户记录 |
+| 进程 | `recon.process` | CPU/内存占用 Top 20、进程列表、PowerShell 反弹 shell、可疑进程、无文件进程 |
+| 网络 | `recon.network` | 监听 TCP 端口、已建立 TCP 连接、hosts 文件、DNS 服务器、网络共享（SMB） |
+| 计划任务 | `recon.schtask` | 计划任务、启动文件夹、系统启动项、注册表启动项（Run/RunOnce）、服务启动项 |
+| 环境变量 | `recon.env` | 环境变量、PATH、PowerShell 配置文件、Windows Defender 排除项 |
+| 文件 | `recon.file` | PowerShell 历史及可疑命令、临时目录、最近访问文件、近 30 天变更的系统目录可执行文件、近 1 天变更的系统日志、启动目录文件、卷影副本 |
+| Webshell | `recon.webshell` | Web 目录下 PHP/JSP/ASP 可疑文件扫描、近 3 天 IIS 日志 |
+| 应用 | `recon.application` | JDWP 调试进程、Python 2/3 恶意软件包、远程桌面配置、IIS 配置、Windows Defender 状态 |
 
   </Accordion>
 </Accordions>

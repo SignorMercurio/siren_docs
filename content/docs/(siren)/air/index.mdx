@@ -17,7 +17,7 @@ Agentic 应急响应（AIR）让 AI Agent 自动化实施完整的应急响应�
 <Callout title="前置条件" type="warn">
   使用前需确保：
   - 已在服务端配置文件中设置 `air.cliPath`（大模型 CLI 工具路径），详见[配置文件](/config#服务端配置)
-  - WebUI AIR 会使用 SIREN MCP 工具，请确认 [MCP 服务](/mcp#配置)已启用
+  - AIR 会使用 SIREN MCP 工具，请确认 [MCP 服务](/mcp#配置)已启用
   - 服务端 REPL 的 `air` 命令需要 tmux；WebUI AIR 不依赖 tmux
   - （仅告警事件模式）已设置 [SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)
 </Callout>
@@ -36,9 +36,7 @@ Agentic 应急响应（AIR）让 AI Agent 自动化实施完整的应急响应�
   这里的 `Security Center Alert ID` 指阿里云安全中心告警详情页「基础信息」中的「告警ID」，不是页面下方「关联安全事件」里的「事件ID」。
 </Callout>
 
-通过服务端 REPL 使用 `air` 命令时，SIREN 会通过 tmux 启动一个新面板并自动运行配置的大模型 CLI（e.g. Claude Code）并提供预定义的 prompt 作为输入：
-
-![air](../../../img/air.webp)
+通过服务端 REPL 使用 `air` 命令时，SIREN 会通过 tmux 启动一个新面板并自动运行配置的大模型 CLI（如 Claude Code）并提供预定义的 prompt 作为输入。
 
 ### 自定义 Prompt
 
@@ -63,7 +61,7 @@ Agentic 应急响应（AIR）让 AI Agent 自动化实施完整的应急响应�
 </Accordions>
 
 <Callout title="提示" type="info">
-  建议结合应急响应 Skills 使用，避免直接使用复杂的 prompt。
+  建议借助预置的应急响应技能（skill）来引导 Agent，而不是直接编写复杂的 prompt。
 </Callout>
 
 ### WebUI AIR

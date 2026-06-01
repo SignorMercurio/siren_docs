@@ -138,7 +138,7 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
 
 Investigations 页面用于承载需要等待结果的调查工具，目前包含 AccessKey 调查和客户端 Recon。
 
-- **AccessKey**：输入 Alibaba Cloud UID、AccessKey ID 与 Region 后，服务端调用现有 SOAR 剧本生成 Markdown 报告。WebUI 只展示真实的 playbook 运行状态，完成后可直接打开 Artifacts 查看报告。
+- **AccessKey**：输入 Alibaba Cloud UID、AccessKey ID（Region 可选，留空默认 `cn-hangzhou`）后，服务端调用现有 SOAR 剧本生成 Markdown 报告。WebUI 只展示真实的 playbook 运行状态，完成后可直接打开 Artifacts 查看报告。
 - **Recon**：选择在线客户端并下发信息收集命令。页面展示服务端从客户端日志中解析出的阶段列表，例如 `Recon.Basic`、`Recon.User`、`Recon.Process`、`Save report to Artifacts`，不再暴露原始彩色日志。
 - **报告入口**：调查结束后会显示 Open Artifacts 按钮，直接跳转到生成的报告文件；报告也会保留在服务端工作目录中，方便远程部署环境查看。
 
@@ -222,7 +222,7 @@ WebUI 与 MCP 共用监听地址和端口，但启停开关相互独立。详见
 <Callout title="公网暴露场景" type="warn">
   WebUI 本身使用 HTTP（非 TLS），Session Cookie 虽然是 `HttpOnly`，但在公网环境下明文传输仍有风险。强烈建议：
 
-  - 将 WebUI 继续绑定到 `127.0.0.1`，前置 Nginx / Caddy 做 TLS 终止和反向代理
+  - 将 `webui.listen` 改为绑定 `127.0.0.1`（默认 `0.0.0.0`），前置 Nginx / Caddy 做 TLS 终止和反向代理
   - 或至少通过 iptables / 安全组限制访问 IP
   - 部署前必须已创建至少一个用户账号（否则 WebUI 零鉴权）
 </Callout>

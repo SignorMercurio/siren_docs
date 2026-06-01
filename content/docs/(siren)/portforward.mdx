@@ -31,13 +31,13 @@ graph LR
 假设受害主机侧目标服务运行在 `localhost:8000`，期望通过控制主机的 `8080` 端口访问：
 
 ```bash title="SIREN Server"
->>> forward <Client ID> 8080:localhost:8000
+>>> fwd <Client ID> 8080:localhost:8000
 ```
 
 或省略 `localhost`：
 
 ```bash title="SIREN Server"
->>> forward <Client ID> 8080:8000
+>>> fwd <Client ID> 8080:8000
 ```
 
 此时访问控制主机 `8080` 端口的流量就会被转发到受害主机的 `localhost:8000`。
@@ -49,13 +49,13 @@ graph LR
 ## 查看端口转发
 
 ```bash title="SIREN Server"
->>> lsforward
+>>> lsfwd
 ```
 
 ## 停止端口转发
 
 ```bash title="SIREN Server"
->>> stopforward <Client ID> <Forward ID>
+>>> stopfwd <Forward ID>
 ```
 
-其中 `Forward ID` 可通过 `lsforward` 查看。
+其中 `Forward ID` 可通过 `lsfwd` 查看。

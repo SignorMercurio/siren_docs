@@ -111,11 +111,11 @@ air:
 | `webui.listen` | string | `0.0.0.0` | WebUI 与 MCP 共享的监听地址；只要 `webui.enabled` 或 `mcp.enabled` 有一个启用就会启动监听 |
 | `webui.port` | int | `8080` | WebUI 与 MCP 共享的监听端口，MCP 通过 `/mcp` 子路径暴露 |
 | `webui.userDBPath` | string | `data/users.db` | WebUI 用户 SQLite 数据库路径（相对路径基于启动 CWD） |
-| `webui.dossierDir` | string | `/opt/siren/dossier` | Dossier 编辑器文件目录，可位于服务端工作目录外；左侧 Dossier 入口默认打开该目录下的 `report.md`。留空、目录不可用或默认报告不可访问时，WebUI 会提示错误 |
+| `webui.dossierDir` | string | -（示例配置为 `/opt/siren/dossier`） | Dossier 编辑器文件目录，可位于服务端工作目录外；左侧 Dossier 入口默认打开该目录下的 `report.md`。默认为空，留空、目录不可用或默认报告不可访问时，WebUI 会提示错误 |
 | `mcp.enabled` | bool | `true` | 是否启用 [MCP 服务](/mcp)，独立于 `webui.enabled` |
 | `mcp.cmdBlacklist` | list | 见 [MCP 集成](/mcp#命令黑名单) | MCP `run` 工具的命令黑名单，值为正则表达式列表 |
 | `air.cliPath` | string | `claude` | [Agentic 应急响应](/air)使用的大模型 CLI 工具路径 |
-| `air.prompt` | string | - | 告警事件模式下的 prompt 模板（支持 `%s` UID、`%s` 云安全中心告警 ID、`%d` Client ID） |
+| `air.prompt` | string | - | 告警事件模式下的 prompt 模板，依次填入 `%s` UID、`%s` 安全中心告警 ID、`%d` Client ID（告警 ID 即 `air` 命令的 Security Center Alert ID，详见 [Agentic 应急响应](/air)） |
 | `air.customPromptPrefix` | string | - | 自定义 prompt 模式下的前缀（支持 `%d` Client ID） |
 | `air.args` | list | - | 传递给大模型 CLI 的额外参数 |
 

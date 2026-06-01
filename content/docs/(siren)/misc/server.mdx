@@ -9,19 +9,56 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-SIREN Server REPL 提供了一些快捷操作，方便在服务端控制台中直接执行常用操作。
+SIREN Server REPL 提供了完整的命令集，用于管理客户端、下发远程操作，以及在服务端本地执行快捷操作。在 REPL 中输入 `help` 可查看分类帮助，`help <命令>` 查看单个命令的详细用法。
 
 ## 命令速查
 
-| 命令 | 用法 | 说明 |
-| --- | --- | --- |
-| `!` | `! <command>` | 在服务端本地执行 Shell 命令 |
-| `env` | `env <KEY>=<VALUE>` | 设置服务端环境变量 |
-| `clear` | `clear` | 清屏 |
-| `help` | `help [command]` | 查看帮助（可指定命令查看详细用法） |
-| `exit` | `exit` | 关闭服务端 |
+下表汇总了 REPL 的全部命令，详细用法见对应功能页。
 
-## 执行 Shell 命令
+| 命令 | 用法 | 说明 | 详见 |
+| --- | --- | --- | --- |
+| `ls` | `ls` | 列出所有已连接客户端 | — |
+| `note` | `note <Client ID> <Note>` | 为客户端设置备注 | [远程模式](/remote) |
+| `allow` | `allow <IP>` | 放行受害主机出口 IP 访问 SIREN Server | [凭证设置](/credential) |
+| `deploy` | `deploy <UID> <Instance ID> [Public IP]` | 通过云助手部署客户端 | [快速开始](/index) |
+| `deploy-batch` | `deploy-batch <UID> <instanceId[,publicIp]>...` | 批量部署（2–20 台） | [快速开始](/index) |
+| `shell` | `shell <Client ID>` | 启动交互式远程 Shell | [远程模式](/remote#远程命令执行) |
+| `run` | `run <Client ID> <Command>` | 在客户端执行单条命令并返回结果 | [本页](#在客户端执行命令) |
+| `air` | `air <Client ID> <UID> <Alert ID>`／`air <Client ID> <Prompt>` | 启动 Agentic 应急响应 | [Agentic 应急响应](/air) |
+| `recon` | `recon <Client ID>` | 启动自动化信息收集 | [信息收集](/recon) |
+| `ak` | `ak <UID> <AccessKey ID> [Region]` | 调查 AccessKey 调用历史 | [AccessKey 调查](/ak) |
+| `info` | `info <Client ID> <PID \| -p Port \| -n Name>` | 查看进程详情（仅 Linux） | [进程分析](/analysis/info) |
+| `upload` | `upload <Client ID> <Client file path>` | 将客户端文件保存到服务端 Artifacts | [文件上传](/analysis/upload) |
+| `clean` | `clean <Client ID>` | 清除客户端痕迹并终止客户端 | [痕迹清除](/misc/clean) |
+| `reload` | `reload <Client ID>` | 不重连即重新加载客户端配置 | [本页](#重新加载客户端配置) |
+| `fwd` | `fwd <Client ID> <src_port:target_addr>` | 建立端口转发 | [端口转发](/portforward) |
+| `lsfwd` | `lsfwd` | 列出所有端口转发 | [端口转发](/portforward) |
+| `stopfwd` | `stopfwd <Forward ID>` | 停止指定端口转发 | [端口转发](/portforward) |
+| `plugins` | `plugins <Client ID> [install\|uninstall\|update\|toggle <Name>]` | 列出或管理客户端插件 | [插件系统](/plugins) |
+| `!` | `! <Command>` | 在服务端本地执行 Shell 命令 | [本页](#在服务端执行命令) |
+| `env` | `env <KEY>=<VALUE>` | 设置服务端环境变量 | [本页](#设置环境变量) |
+| `clear` | `clear` | 清屏 | — |
+| `help` | `help [command]` | 查看帮助（可指定命令查看详细用法） | — |
+| `exit` | `exit` | 退出并关闭服务端 | — |
+
+## 在客户端执行命令
+
+`run` 在指定客户端上执行单条命令并返回输出，适合非交互式的快速排查；需要持续交互（如 `vim`、`top`）时请改用 [`shell`](/remote#远程命令执行)。
+
+```bash title="SIREN Server"
+>>> run 0 whoami
+>>> run 1 ps aux
+```
+
+## 重新加载客户端配置
+
+修改客户端配置文件（如调整[信息收集模块开关](/recon#信息收集模块)或插件状态）后，可用 `reload` 让客户端重新加载配置，无需断开重连。
+
+```bash title="SIREN Server"
+>>> reload 0
+```
+
+## 在服务端执行命令
 
 使用 `!` 前缀在服务端本地执行 Shell 命令：
 

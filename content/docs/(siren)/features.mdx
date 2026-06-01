@@ -12,18 +12,18 @@ import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, 
 自动化采集受害主机上的关键安全信息，支持按模块独立开关。
 
 <Cards>
-    <Card title="基础系统信息" icon={<Info />} href="/recon">主机名、操作系统、内核版本、CPU、内存、磁盘等</Card>
-    <Card title="用户" icon={<Users />} href="/recon">用户列表、登录历史、sudoers、影子文件等</Card>
-    <Card title="SSH" icon={<Terminal />} href="/recon">SSH 配置、authorized_keys、known_hosts 等</Card>
-    <Card title="进程" icon={<Activity />} href="/recon">进程列表、CPU/内存 Top 20、隐藏进程检测</Card>
-    <Card title="网络" icon={<Network />} href="/recon">网络连接、监听端口、DNS 配置、ARP 表等</Card>
-    <Card title="计划任务" icon={<Clock />} href="/recon">crontab、at 任务、Windows 计划任务等</Card>
+    <Card title="基础系统信息" icon={<Info />} href="/recon">主机名、操作系统、CPU、内存、磁盘等</Card>
+    <Card title="用户" icon={<Users />} href="/recon">用户列表、登录历史、sudoers、新增用户记录等</Card>
+    <Card title="SSH" icon={<Terminal />} href="/recon">SSH 配置、authorized_keys、暴力破解与后门检测等</Card>
+    <Card title="进程" icon={<Activity />} href="/recon">进程列表、CPU/内存 Top 20、反弹 shell 与挖矿检测</Card>
+    <Card title="网络" icon={<Network />} href="/recon">网络连接、监听端口、DNS 配置、路由表等</Card>
+    <Card title="计划任务" icon={<Clock />} href="/recon">crontab、cron 日志、Windows 计划任务与启动项等</Card>
     <Card title="服务与启动项" icon={<Play />} href="/recon">systemd 服务、init 脚本、Windows 服务等</Card>
     <Card title="环境变量" icon={<Code />} href="/recon">系统环境变量、LD_PRELOAD 等敏感变量检查</Card>
-    <Card title="文件" icon={<FileText />} href="/recon">近期修改文件、大文件、SUID 文件、敏感目录等</Card>
-    <Card title="Rootkit" icon={<Cpu />} href="/recon">内核模块检查、LD_PRELOAD 检查、系统完整性验证</Card>
+    <Card title="文件" icon={<FileText />} href="/recon">近期修改文件、大文件、SUID 文件、文件完整性等</Card>
+    <Card title="Rootkit" icon={<Cpu />} href="/recon">内核模块检查、可疑符号与 .ko 模块检测</Card>
     <Card title="Webshell" icon={<Globe />} href="/recon">Web 目录扫描，基于关键字和正则匹配的 Webshell 检测</Card>
-    <Card title="应用" icon={<Package />} href="/recon">已安装软件包、运行中的 Web 应用/中间件</Card>
+    <Card title="应用" icon={<Package />} href="/recon">Redis/JDWP/恶意软件包检测、容器、IIS 等</Card>
 </Cards>
 
 ## 报告与取证文件
@@ -81,7 +81,7 @@ SIREN 将本地报告、服务端 Artifacts 和 Dossier 报告编辑分成不同
 浏览器图形化入口，用于处理常用远程工作流；无需直接登录控制主机操作 tmux 或 REPL。
 
 <Cards>
-    <Card title="浏览器控制台" icon={<LayoutDashboard />} href="/webui">统一入口访问客户端管理、Shell、Agentic IR、客户端文件与取证文件浏览等功能</Card>
+    <Card title="Web 控制台" icon={<LayoutDashboard />} href="/webui">统一入口访问客户端管理、Shell、Agentic IR、客户端文件与取证文件浏览等功能</Card>
     <Card title="账号鉴权" icon={<Lock />} href="/webui#账号鉴权">SQLite + bcrypt 账号登录，通过 CLI 管理用户</Card>
     <Card title="多标签 Shell" icon={<Terminal />} href="/webui#shells">WebSocket 承载的交互式终端，切换页面会话不中断</Card>
     <Card title="浏览器内 AIR" icon={<Brain />} href="/webui#agentic-ir">在浏览器中查看 AI 回复、工具调用和结果，并继续追问</Card>
@@ -97,8 +97,8 @@ SIREN 将本地报告、服务端 Artifacts 和 Dossier 报告编辑分成不同
 通过插件扩展 SIREN 的能力，无需修改核心代码。
 
 <Cards>
-    <Card title="插件管理" icon={<Puzzle />} href="/plugins">安装、卸载、启停插件，支持本地和远程模式</Card>
-    <Card title="插件市场" icon={<Download />} href="/plugins">从插件市场一键下载和更新插件</Card>
-    <Card title="插件列表" icon={<Package />} href="/plugins/list">查看当前可用的插件</Card>
-    <Card title="插件开发" icon={<Code />} href="/plugins/development">了解如何开发自定义插件</Card>
+    <Card title="插件管理" icon={<Puzzle />} href="/plugins#管理插件">安装、卸载、启停插件，支持本地和远程模式</Card>
+    <Card title="插件市场" icon={<Download />} href="/plugins#插件市场">从插件市场一键下载和更新插件</Card>
+    <Card title="内置示例插件" icon={<Package />} href="/plugins#内置示例插件">jdump、chkrootkit 等开箱即用的示例插件</Card>
+    <Card title="插件开发" icon={<Code />} href="/plugins#插件开发">了解如何编写自定义插件清单</Card>
 </Cards>
