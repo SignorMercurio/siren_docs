@@ -1,0 +1,81 @@
+---
+title: 配置
+description: Dossier 与 SIREN WebUI 的配置项
+icon: Settings
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+## server_config.yaml
+
+在 SIREN 服务端配置文件的 `webui` 段落设置 Dossier 静态目录：
+
+```yaml title="server_config.yaml"
+webui:
+  enabled: true
+  listen: 0.0.0.0
+  port: 8080
+  dossierDir: /opt/siren/dossier
+```
+
+| 配置项 | 说明 |
+| --- | --- |
+| `webui.dossierDir` | Dossier 编辑器文件目录。可以是绝对路径，也可以位于 `siren_server` 工作目录外 |
+| `webui.dossierDir/report.md` | WebUI 左侧 Dossier 入口默认打开的报告 |
+| `/dossier/` | SIREN 用于提供 Dossier 静态文件的路径 |
+
+## 可用性检查
+
+WebUI 会在打开 Dossier 前检查：
+
+- `webui.dossierDir` 已配置
+- 目录下存在 `index.html`
+- 左侧 Dossier 默认入口需要目录下存在 `report.md`
+
+如果 Dossier 未部署、路径配置错误或默认报告缺失，WebUI 会显示错误提示，不影响 Clients、Shells、AIR、Artifacts 等其他功能。
+
+## 报告源文件
+
+SIREN 中的 Dossier 报告源文件必须以 `.md` 结尾。WebUI 对报告源文件有以下边界：
+
+- 源文件读写走受保护的 `/api/reports/source` 接口
+- 单个报告源文件最大 10 MiB
+- 默认报告通过内部保留路径 `__dossier__/report.md` 映射到 `webui.dossierDir/report.md`
+- Artifacts 中的其他 `.md` 报告仍位于 `siren_server` 工作目录下
+
+<Callout title="默认报告边界" type="info">
+  默认 Dossier 报告可以位于服务端工作目录外，但必须在 `webui.dossierDir` 目录内。SIREN 会解析符号链接，阻止默认报告逃逸到 Dossier 目录外。
+</Callout>
+
+## 附件目录
+
+在 WebUI 中粘贴图片时，SIREN 会把图片保存到报告同目录的同名附件目录：
+
+```text
+IR-20260513-01.md
+IR-20260513-01.assets/pasted/paste-....png
+```
+
+默认报告 `report.md` 的粘贴图片会保存到：
+
+```text
+report.assets/pasted/
+```
+
+附件路径会写回 Markdown，例如：
+
+```md
+![](report.assets/pasted/paste-....png)
+```
+
+SIREN 只接受图片附件，并限制附件路径留在对应报告的 `.assets/` 目录内。
+
+## 静态目录保护
+
+SIREN 提供 `/dossier/` 静态文件时会：
+
+- 禁止目录列表
+- 隐藏点号开头的路径组件
+- 对 Dossier 静态响应设置 `no-store`
+
+因此不要把 `.env`、密钥或其他敏感文件放进 Dossier 目录。

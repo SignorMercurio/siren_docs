@@ -1,0 +1,131 @@
+---
+title: 语法
+description: Dossier Markdown 速查
+icon: BookOpenText
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+Dossier Markdown 是普通 Markdown 风格正文加少量报告专用 `:::` 指令。它不是 MDX，不支持 JSX 组件语法。
+
+## Frontmatter
+
+文件顶部的 `---` 块用于同步封面、页眉和页脚信息：
+
+```md
+---
+date: 20250507
+sir-seq: 01
+version: 1.0
+client: 客户名称
+---
+```
+
+后续正文中的 `---` 只作为普通分隔线，不会再次进入 frontmatter。
+
+## 标题与分页
+
+```md
+## 事件概述 / Event Overview
+### 事件结论 / Incident Conclusion {page slot=2.3}
+#### 覆盖说明 / Coverage Notes
+```
+
+- `##` 表示报告章节
+- `###` 表示小节
+- `####` 表示嵌套小节
+- `###` 后加 `{page}` 可让该小节独立成页
+- `slot=2.3` 可固定显示的小节编号
+- 英文标题可选，格式为 `中文 / English`
+
+强制换页时，把 `{break}` 单独放一行：
+
+```md
+上一页最后一段正文。
+
+{break}
+
+下一页第一段正文。
+```
+
+## 正文
+
+正文支持常见 Markdown 写法：
+
+```md
+- [x] 已完成动作
+- [/] 进行中动作
+- [ ] 未开始动作
+
+这是一段包含 **重点**、*斜体*、`code` 和 [链接](https://example.com) 的正文。
+
+> 引用客户原始描述、处置备注或需要单独标示的限制说明。
+
+![证据截图](assets/example.png){size=md}
+```
+
+图片 `size` 可选 `sm`、`md` 或 `full`。
+
+相邻的 `field :: value` 行会渲染为键值表：
+
+```md
+事件定性 :: 凭证泄露导致的云侧异常操作。
+影响范围 :: 写明受影响资产、账号、业务和时间范围。
+```
+
+HTML 注释只留在源文件中，不会渲染到报告：
+
+```md
+<!-- 写作提示：没有证据时写“未观察到”，不要补猜测。 -->
+```
+
+## 指令块
+
+指令名使用小写 ASCII。未知指令会保留正文内容，并在编辑器中提示解析警告。
+
+```md
+::: callout
+label :: 核心结论
+headline :: 云侧凭证疑似泄露
+body :: 攻击者使用访问密钥完成异常枚举与写入尝试。
+:::
+```
+
+根级指令放在第一个 `##` 章节之前：
+
+- `::: cover-hero`
+- `::: cover-meta`
+- `::: rev`
+
+章节内可使用：
+
+- `::: kv`
+- `::: rev`
+- `::: asset`
+- `::: timeline`
+- `::: phase`
+- `::: attack`
+- `::: callout`
+- `::: html`
+
+<Callout title="少用 html" type="warn">
+  `::: html` 只用于迁移旧报告或处理一次性布局。新报告优先使用正文、图片、键值表、callout、timeline、phase、attack 等结构化写法。
+</Callout>
+
+## 常用示例
+
+```md
+::: asset
+name :: prod-web-01
+type :: ECS
+ip :: 203.0.113.10
+status :: affected
+:::
+
+::: timeline
+2026-05-13 09:12 :: 首次观察到异常访问密钥调用。
+2026-05-13 09:40 :: 完成受影响实例隔离。
+:::
+
+![攻击链路](assets/attack-chain.png){size=full}
+```

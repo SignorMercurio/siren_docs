@@ -24,6 +24,12 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 进程分析支持三种查询方式，可根据已知信息灵活选择。
 
+### WebUI 查询
+
+在 [Web 控制台](/webui#investigations) 的 Investigations 页面中选择 **Process Analysis**，选择 Linux 客户端后按 PID、监听端口或进程名查询。也可以在 Clients 列表中点击目标客户端的 Process 快捷入口，WebUI 会自动选中该客户端并打开进程分析表单。
+
+WebUI 会展示同样的进程详情、进程树、网络连接、容器和服务信息。按进程名匹配到多个结果时，会先列出候选进程，点击候选 PID 可继续查询完整详情。
+
 ### 按 PID 查询
 
 ```bash tab="本地模式"

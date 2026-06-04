@@ -10,10 +10,31 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
-## v2.9.11 <DateTag>2026-06-01</DateTag>
+## v2.11.0 <DateTag>2026-06-04</DateTag>
 
 ### Feature
 
+- **WebUI Agentic IR 支持 Claude / Codex Provider 选择**：新建或恢复 AIR 会话时可选择 Claude 或 Codex；Claude 仍是默认 Provider，Codex 会使用同一会话视图展示 AI 回复、工具调用和结果
+
+### Improvement
+
+- AIR 配置改为 `air.providers.<name>` 结构，Claude 与 Codex 可分别配置 CLI 路径、模型、推理强度和额外参数；示例配置默认 Claude `claude-opus-4-8[1m]`，Codex `gpt-5.5` + `xhigh`
+- WebUI AIR 继续使用结构化 `/api/air/stream` 会话；旧的浏览器 PTY AIR 路由已移除，服务端 REPL 的 `air` 命令保持原有交互式体验
+
+### Bugfix
+
+- 修复 MCP `run` 工具在慢命令场景下提前判定超时的问题；等待时间现在跟随 `recon.commandTimeout` 并保留额外缓冲
+- 修复客户端 Files 中指向目录的 symlink 被标记为普通文件的问题，浏览器文件树可继续按目录展开和下载
+- 修复 WebUI 进程分析错误状态不准确的问题：非 Linux 客户端返回 422，超时返回 504，其他通信失败返回 502
+
+---
+
+## v2.10.0 <DateTag>2026-06-02</DateTag>
+
+### Feature
+
+- **WebUI Investigations 新增进程分析**：可在浏览器中对 Linux 客户端按 PID、监听端口或进程名查询进程详情，结果包含进程树、网络连接、容器信息、systemd 服务信息和可疑信号标记
+- Clients 列表新增进程分析快捷入口，可从指定客户端直接跳转到 Investigations 的 Process Analysis 查询
 - **WebUI Agentic IR 支持恢复 Claude 历史会话**：Resume 模式会列出当前服务端工作目录对应的 Claude Code 会话，展示历史 transcript，并使用原 session ID 继续对话
 
 ### Improvement
@@ -22,9 +43,12 @@ export const DateTag = ({ children }) => (
 - 内部日志、SOAR 调用、升级、插件下载、IP 校验和 Shell 引号处理复用 `log0-core` 共享实现，减少 SIREN 本地重复工具代码
 - `plugins update` 会保留插件原有启用/禁用状态，并在配置写入失败时返回明确错误，避免更新 disabled 插件后被短暂启用
 - CLI 命令执行失败时会按错误边界退出；客户端收到中断信号后会主动关闭当前连接并等待处理协程退出，减少退出时的悬挂连接
+- WebUI deploy-batch 请求体上限提升到 8 KiB，可覆盖 20 台目标的真实实例 ID 与公网 IP 输入
 
 ### Bugfix
 
+- 修复部分 AIR stream 状态、重复错误提示和 Artifacts 大文件下载错误处理问题
+- 加强插件安装/更新、WebUI 请求处理和客户端协议边界的错误处理
 - 修复 WebUI Shell 与 Agentic IR 在浏览器连接半断开时可能长时间阻塞输出转发的问题；Recon 进度事件拉取失败时会显示错误并停止轮询
 - 修复 Windows 文件 Recon 中最近修改事件日志命令的异常引号，避免 PowerShell 路径解析失败
 - 修复进程分析中启动时间缓存的并发访问问题，并补齐用户删除、用户计数、插件注册等错误处理路径
@@ -98,7 +122,7 @@ export const DateTag = ({ children }) => (
 
 ### Upgrade Notes
 
-- 使用 Dossier 前需要先部署 Dossier 编辑器文件和默认 `report.md`，默认目录为 `/opt/siren/dossier`，自定义路径请参考 WebUI 文档
+- 使用 Dossier 前需要先部署 Dossier 编辑器文件和默认 `report.md`，默认目录为 `/opt/siren/dossier`，自定义路径请参考 [Dossier 配置文档](/dossier/config)
 - Artifacts 不再直接预览 HTML 报告；历史 HTML 报告可下载后查看，新的应急报告建议使用 Markdown + Dossier
 
 ---

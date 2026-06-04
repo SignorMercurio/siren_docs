@@ -1,0 +1,74 @@
+---
+title: 工作流
+description: 编辑、校样、保存和导出 Dossier 报告
+icon: WandSparkles
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+## 推荐流程
+
+<Steps>
+<Step>
+
+### 打开报告
+
+从 WebUI 左侧点击 **Dossier** 打开默认 `report.md`，或在 Artifacts 中选中 `.md` 报告后点击 Dossier。
+
+</Step>
+<Step>
+
+### 编辑源文件
+
+在左侧源码面板编辑 Dossier Markdown，右侧会同步渲染 A4 报告预览。桌面浏览器适合完整编辑，移动端只建议预览。
+
+</Step>
+<Step>
+
+### 粘贴证据图片
+
+在编辑器中粘贴图片时，Dossier 会保存图片并插入 Markdown 引用。通过 SIREN WebUI 打开的报告会把图片放在报告同名的 `.assets/pasted/` 目录下；本地离线打开时通常保存到 `assets/pasted/`。
+
+</Step>
+<Step>
+
+### 校样
+
+打开工具栏的 **校样** 开关，检查每一页是否按真实 PDF 高度裁切。溢出的页面会被标记，修完后再导出。
+
+</Step>
+<Step>
+
+### 保存与导出
+
+保存 Markdown 源文件后，可以通过浏览器打印导出 PDF，也可以下载可编辑 HTML 快照或当前 Markdown 源文件。
+
+</Step>
+</Steps>
+
+## 浏览器建议
+
+优先使用 Chrome 或 Edge。Dossier 的分页、打印和粘贴图片流程依赖浏览器能力，不建议把 PDF 导出作为服务器端任务处理。
+
+## 自动保存
+
+Dossier 会把草稿自动保存到浏览器 IndexedDB。自动保存用于防止编辑中断，不替代正式保存。
+
+<Callout title="正式交付前" type="warn">
+  导出 PDF 或归档 HTML 前，先保存 Markdown 源文件，并用校样模式检查页面溢出、图片尺寸和章节分页。
+</Callout>
+
+## 多报告管理
+
+- 默认报告固定为 `webui.dossierDir/report.md`
+- 案件报告可以放在 SIREN 服务端工作目录中，从 Artifacts 打开
+- 报告附件建议使用同名 `.assets/` 目录，避免多个案件的截图混在一起
+- 历史 HTML 报告可下载后查看，新的应急报告建议继续维护 `.md` 源文件
+
+## 写作建议
+
+- 用 `##`、`###`、`####` 表达报告结构，不要只靠加粗文字模拟标题
+- 使用 `field :: value` 写事件定性、影响范围、时间窗口等键值信息
+- 使用 `timeline` 表达关键时间线，使用 `asset` 表达受影响资产
+- 没有证据时写“未观察到”或“当前证据不足”，不要补猜测

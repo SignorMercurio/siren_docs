@@ -1,0 +1,15 @@
+{
+  "title": "Dossier",
+  "description": "应急报告编辑器",
+  "root": true,
+  "icon": "BookOpenText",
+  "pages": [
+    "---介绍---",
+    "index",
+    "---使用指南---",
+    "deploy",
+    "config",
+    "syntax",
+    "workflow"
+  ]
+}

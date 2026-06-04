@@ -68,7 +68,7 @@ icon: FolderTree
     <Folder name="info">
       <File name="container.go" desc="进程容器信息分析功能实现" />
       <File name="info_unix.go" desc="Unix 平台进程分析功能实现" />
-      <File name="info_windows.go" desc="Windows 平台进程分析功能实现" />
+      <File name="info_unsupported.go" desc="非 Linux 平台进程分析占位实现" />
       <File name="network.go" desc="进程网络信息分析功能实现" />
       <File name="process.go" desc="进程信息获取功能实现" />
       <File name="service.go" desc="进程服务信息分析功能实现" />
@@ -80,6 +80,7 @@ icon: FolderTree
       <File name="plugin.go" desc="插件管理器与清单定义" />
     </Folder>
     <Folder name="protocol">
+      <File name="info.go" desc="进程分析请求/响应协议" />
       <File name="portforward.go" desc="端口转发相关协议实现" />
       <File name="portforwardmanager.go" desc="端口转发全局状态维护" />
       <File name="protocol.go" desc="通信协议实现" />
@@ -95,14 +96,18 @@ icon: FolderTree
         <File name="webui.go" desc="共享 HTTP 服务与路由（含 /mcp）" />
         <File name="auth.go" desc="登录、会话与鉴权中间件" />
         <File name="webui_shell.go" desc="WebSocket 交互式 Shell" />
-        <File name="webui_air.go" desc="浏览器内 AIR 接口" />
+        <File name="webui_air_stream.go" desc="结构化 AIR WebSocket 接口" />
+        <File name="webui_air_history.go" desc="AIR 历史会话接口" />
         <File name="webui_artifacts.go" desc="Artifacts 浏览与管理接口" />
         <File name="webui_soar.go" desc="allow/deploy/clean/AccessKey 调查接口" />
         <File name="..." desc="其他 webui_*.go 接口与 frontend/ 前端" />
       </Folder>
       <File name="air.go" desc="Agentic 应急响应功能实现" />
+      <File name="air_provider.go" desc="AIR Provider 分发实现" />
+      <File name="air_codex.go" desc="Codex AIR Provider 与事件转换实现" />
       <File name="air_headless.go" desc="无头（WebUI）AIR 会话实现" />
       <File name="air_history.go" desc="AIR 历史会话恢复实现" />
+      <File name="info_requests.go" desc="WebUI 进程分析请求转发实现" />
       <File name="client.go" desc="服务端的 Client 对象相关实现" />
       <File name="client_files.go" desc="客户端文件浏览与拉取实现" />
       <File name="client_notes.go" desc="客户端备注管理实现" />

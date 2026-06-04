@@ -16,7 +16,7 @@ Agentic 应急响应（AIR）让 AI Agent 自动化实施完整的应急响应�
 
 <Callout title="前置条件" type="warn">
   使用前需确保：
-  - 已在服务端配置文件中设置 `air.cliPath`（大模型 CLI 工具路径），详见[配置文件](/config#服务端配置)
+  - 已在服务端配置文件中设置 `air.providers.<name>.cliPath`（Claude / Codex CLI 工具路径），详见[配置文件](/config#服务端配置)
   - AIR 会使用 SIREN MCP 工具，请确认 [MCP 服务](/mcp#配置)已启用
   - 服务端 REPL 的 `air` 命令需要 tmux；WebUI AIR 不依赖 tmux
   - （仅告警事件模式）已设置 [SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)
@@ -36,7 +36,7 @@ Agentic 应急响应（AIR）让 AI Agent 自动化实施完整的应急响应�
   这里的 `Security Center Alert ID` 指阿里云安全中心告警详情页「基础信息」中的「告警ID」，不是页面下方「关联安全事件」里的「事件ID」。
 </Callout>
 
-通过服务端 REPL 使用 `air` 命令时，SIREN 会通过 tmux 启动一个新面板并自动运行配置的大模型 CLI（如 Claude Code）并提供预定义的 prompt 作为输入。
+通过服务端 REPL 使用 `air` 命令时，SIREN 会通过 tmux 启动一个新面板并自动运行 Claude Provider 中配置的大模型 CLI，并提供预定义的 prompt 作为输入。
 
 ### 自定义 Prompt
 
@@ -66,7 +66,9 @@ Agentic 应急响应（AIR）让 AI Agent 自动化实施完整的应急响应�
 
 ### WebUI AIR
 
-在 [Web 控制台](/webui#agentic-ir) 的 Agentic IR 页面中选择客户端后，也可以使用告警事件模式或自定义 Prompt 启动 AIR。WebUI 会按顺序展示 AI 回复、工具调用和结果，并支持在同一会话中继续追问。
+在 [Web 控制台](/webui#agentic-ir) 的 Agentic IR 页面中选择客户端后，也可以使用告警事件模式或自定义 Prompt 启动 AIR。WebUI 支持选择 Claude 或 Codex Provider，会按顺序展示 AI 回复、工具调用和结果，并支持在同一会话中继续追问。
+
+也可以切换到 Resume 模式，恢复当前 `siren_server` 工作目录对应的历史会话。Claude 会读取 Claude Code history；Codex 会读取当前项目下的 Codex session history。WebUI 只展示解析后的历史消息，不会向浏览器暴露本机 JSONL 文件路径。
 
 服务端 REPL 的 `air` 命令仍保持 tmux 中的交互式体验，适合直接登录控制主机时使用。
 
@@ -84,7 +86,7 @@ SIREN 通过 SOAR 平台获取指定安全告警的详细信息，包括告警�
 
 ### 启动 AI Agent
 
-将告警信息和预定义 prompt 一起传递给配置的大模型 CLI（如 Claude Code），在服务端启动 Agent。服务端 REPL 模式使用 tmux 新面板；WebUI 模式会把运行过程整理成浏览器中的会话视图。
+将告警信息和预定义 prompt 一起传递给配置的大模型 CLI，在服务端启动 Agent。服务端 REPL 模式使用 tmux 新面板；WebUI 模式会按所选 Provider 启动 Claude 或 Codex，并把运行过程整理成浏览器中的会话视图。
 
 </Step>
 <Step>

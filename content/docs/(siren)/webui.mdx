@@ -91,7 +91,7 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
   <Card title="Clients" icon={<Users />}>客户端列表、在线状态、备注编辑、SOAR 放行、单机/批量部署、清理痕迹</Card>
   <Card title="Shells" icon={<Terminal />}>多标签交互式终端，切换页面会话不中断</Card>
   <Card title="Agentic IR" icon={<Brain />}>在浏览器中启动 AI Agent 应急响应会话</Card>
-  <Card title="Investigations" icon={<Key />}>AccessKey 调查、客户端 Recon、阶段进度与报告入口</Card>
+  <Card title="Investigations" icon={<Key />}>AccessKey 调查、客户端 Recon、进程分析、阶段进度与报告入口</Card>
   <Card title="Files" icon={<Files />}>在线浏览客户端文件系统，支持预览、下载和上传</Card>
   <Card title="Artifacts" icon={<FolderTree />}>服务端取证文件浏览，支持 Markdown 预览、Dossier 编辑、上传、下载、重命名和删除</Card>
   <Card title="Dossier" icon={<BookOpenText />}>独立报告编辑器，可从左侧导航直接打开，也可从 Artifacts 的 Markdown 报告进入</Card>
@@ -104,6 +104,7 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
 - **备注编辑**：点击备注直接在行内修改
 - **备注恢复**：备注会绑定到客户端稳定身份，客户端重连后自动恢复
 - **Files 快捷入口**：从客户端行直接打开该客户端的 Files 页面
+- **Process 快捷入口**：从客户端行直接打开该客户端的进程分析表单
 - **放行**（allow）：调用 SOAR 将受害主机出口 IP 加入安全组白名单
 - **单机部署**（deploy）：输入 Alibaba Cloud UID、ECS Instance ID 与可选 Public IP，通过云助手一键部署 SIREN 客户端
 - **批量部署**（deploy-batch）：切换到 Batch 模式后，每行输入 `instanceId` 或 `instanceId,publicIp`，同一 UID 下支持 2-20 台机器；WebUI 会流式展示每台机器的运行状态和最终汇总
@@ -119,31 +120,32 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
 
 ### Agentic IR
 
-功能上等价于服务端 REPL 的 `air` 命令，在浏览器里启动 AI Agent 完成 [Agentic 应急响应](/air)。支持新建会话和恢复当前项目的 Claude Code 历史会话。
+在浏览器里启动 AI Agent 完成 [Agentic 应急响应](/air)。支持选择 Claude 或 Codex Provider，新建会话，或恢复当前项目的历史会话。
 
 选择目标客户端后可选两种新建模式：
 
 - **告警事件模式**：输入阿里云 UID + 云安全中心告警 ID，自动拉取告警详情
 - **自定义 Prompt**：自由输入应急响应指令
 
-也可以切换到 **Resume** 模式，搜索并选择当前 `siren_server` 工作目录对应的 Claude Code 历史会话。WebUI 会先展示解析出的历史 user / assistant 消息，再用原 Claude session ID 继续会话，行为类似 `claude -r <session-id>`。
+也可以切换到 **Resume** 模式，搜索并选择当前 `siren_server` 工作目录对应的历史会话。Claude 会恢复 Claude Code session；Codex 会恢复 Codex session。WebUI 会先展示解析出的历史 user / assistant 消息，再用原 session ID 继续会话。
 
 <Callout title="恢复范围" type="info">
-  Resume 只读取 `siren_server` 当前工作目录对应的 Claude Code history，不会跨项目列出其他目录的历史会话，也不会向浏览器暴露本机 JSONL 文件路径。
+  Resume 只读取 `siren_server` 当前工作目录对应的 Provider history，不会跨项目列出其他目录的历史会话，也不会向浏览器暴露本机 JSONL 文件路径。
 </Callout>
 
 页面会按顺序展示 AI 回复、工具调用和结果，并支持在同一会话继续追问。WebUI AIR 会使用 SIREN MCP 工具，请确认 [MCP 服务](/mcp#配置)已启用。它不依赖 tmux，服务端 REPL 的 `air` 命令仍保持原有交互式体验。
 
 ### Investigations
 
-Investigations 页面用于承载需要等待结果的调查工具，目前包含 AccessKey 调查和客户端 Recon。
+Investigations 页面用于承载需要等待结果的调查工具，目前包含 AccessKey 调查、客户端 Recon 和进程分析。
 
 - **AccessKey**：输入 Alibaba Cloud UID、AccessKey ID（Region 可选，留空默认 `cn-hangzhou`）后，服务端调用现有 SOAR 剧本生成 Markdown 报告。WebUI 只展示真实的 playbook 运行状态，完成后可直接打开 Artifacts 查看报告。
 - **Recon**：选择在线客户端并下发信息收集命令。页面展示服务端从客户端日志中解析出的阶段列表，例如 `Recon.Basic`、`Recon.User`、`Recon.Process`、`Save report to Artifacts`，不再暴露原始彩色日志。
+- **Process Analysis**：选择 Linux 客户端后，可按 PID、监听端口或进程名查询进程详情。按名称匹配到多个进程时，WebUI 会列出候选项，可点击候选 PID 继续深入分析。
 - **报告入口**：调查结束后会显示 Open Artifacts 按钮，直接跳转到生成的报告文件；报告也会保留在服务端工作目录中，方便远程部署环境查看。
 
 <Callout title="进度展示原则" type="info">
-  WebUI 只展示服务端能真实观测到的阶段。AccessKey 调查的 SOAR 子步骤不可见，因此只显示 playbook 正在运行；Recon 阶段来自客户端实际回传日志。
+  WebUI 只展示服务端能真实观测到的阶段。AccessKey 调查的 SOAR 子步骤不可见，因此只显示 playbook 正在运行；Recon 阶段来自客户端实际回传日志；Process Analysis 是一次同步查询，完成后直接展示结果或错误。
 </Callout>
 
 ### Files
@@ -192,6 +194,8 @@ Dossier 是独立的 Markdown 报告编辑器，有两种打开方式：
 
 Dossier 未部署、路径配置错误或默认 `report.md` 缺失时，WebUI 会显示错误提示，但不影响其他功能。
 
+详细部署、配置、语法和编辑流程见 [Dossier 文档](/dossier)。
+
 <Callout title="常见问题" type="warn">
   - 点击 Dossier 后提示不可用：通常是 Dossier 编辑器文件未部署，或 `webui.dossierDir` 指向了错误目录。
   - 点击 Dossier 后提示默认报告不可用：确认 `webui.dossierDir/report.md` 存在。`webui.dossierDir` 可以使用绝对路径，也可以放在 `siren_server` 工作目录外。
@@ -227,21 +231,6 @@ WebUI 与 MCP 共用监听地址和端口，但启停开关相互独立。详见
   - 部署前必须已创建至少一个用户账号（否则 WebUI 零鉴权）
 </Callout>
 
-### Dossier 部署
-
-默认配置会从 `/opt/siren/dossier` 读取 Dossier 编辑器文件，并把 `/opt/siren/dossier/report.md` 作为左侧导航的默认报告。可以在控制主机上构建并复制：
-
-```bash title="控制主机"
-cd /path/to/dossier
-npm install
-npm run build
-
-sudo mkdir -p /opt/siren/dossier
-sudo rsync -av index.html editor.css editor.js report.md assets/ /opt/siren/dossier/
-```
-
-如果修改了 `webui.dossierDir`，重启 `siren_server` 后再访问 WebUI。左侧 Dossier 入口会编辑该目录下的 `report.md`，该目录可以在服务端工作目录外；其他案件报告仍可放在服务端工作目录中的任意可访问位置，并从 Artifacts 中打开。反向代理部署时，建议把同一域名整体转发到 WebUI 端口；如果只代理了部分路径，可能出现 Dossier 页面能打开但报告无法保存的问题。
-
 ## 相关内容
 
 <Cards>
@@ -250,6 +239,9 @@ sudo rsync -av index.html editor.css editor.js report.md assets/ /opt/siren/doss
   </Card>
   <Card title="配置文件" icon={<Lock />} href="/config#服务端配置">
     完整的 WebUI 配置项说明
+  </Card>
+  <Card title="Dossier" icon={<BookOpenText />} href="/dossier">
+    Dossier 部署、配置、语法和编辑流程
   </Card>
   <Card title="Agentic 应急响应" icon={<Brain />} href="/air">
     了解 AIR 的完整工作流

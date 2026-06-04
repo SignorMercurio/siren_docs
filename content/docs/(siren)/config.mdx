@@ -52,7 +52,7 @@ rules:                                      # 信息收集规则
 | --- | --- | --- | --- |
 | `server` | string | `127.0.0.1` | 远程模式下连接的服务端地址 |
 | `port` | int | `443` | 远程模式下连接的服务端端口 |
-| `recon.commandTimeout` | int | `30` | 信息收集中每条命令的超时时间（秒） |
+| `recon.commandTimeout` | int | `30` | 信息收集和客户端远程命令执行的基础超时时间（秒）；MCP / AIR 慢命令建议服务端也设置相同值 |
 | `recon.<module>` | bool | `true` | 各信息收集模块的开关（如 `user`、`process`、`network` 等），完整列表见[信息收集模块](/recon#信息收集模块) |
 | `oss.region` | string | - | OSS Bucket 所在地域 |
 | `oss.bucketName` | string | - | OSS Bucket 名称 |
@@ -91,12 +91,34 @@ mcp:
     # ...more patterns
 
 air:
-  cliPath: claude                               # 大模型 CLI 工具路径
+  provider: claude                             # 默认 WebUI AIR Provider：claude / codex
   prompt: 启动安全应急响应，UID：%s，...        # 告警事件模式的 prompt 模板
   customPromptPrefix: 在 SIREN Client %d 上...  # 自定义 prompt 模式的前缀
-  args:                                         # 传递给大模型 CLI 的额外参数
-    - --allowedTools
-    - "mcp__siren__run,Read,Bash(ls *),..."
+  providers:
+    claude:
+      cliPath: claude                          # Claude Code CLI 路径
+      model: "claude-opus-4-8[1m]"
+      strictMCPConfig: true
+      allowedTools:
+        - mcp__siren__ls
+        - mcp__siren__run
+        - mcp__siren__get_alarm_detail
+        - Read
+        - Bash(ls *)
+        - Bash(grep *)
+      effort: xhigh
+      args: []                                 # 额外 Claude CLI 参数
+    codex:
+      cliPath: codex                           # Codex CLI 路径
+      model: gpt-5.5
+      effort: xhigh
+      sandbox: read-only
+      approval: never
+      enabledTools:
+        - ls
+        - run
+        - get_alarm_detail
+      args: []                                 # 额外 Codex CLI 参数
 ```
 
 ### 配置项说明
@@ -111,13 +133,29 @@ air:
 | `webui.listen` | string | `0.0.0.0` | WebUI 与 MCP 共享的监听地址；只要 `webui.enabled` 或 `mcp.enabled` 有一个启用就会启动监听 |
 | `webui.port` | int | `8080` | WebUI 与 MCP 共享的监听端口，MCP 通过 `/mcp` 子路径暴露 |
 | `webui.userDBPath` | string | `data/users.db` | WebUI 用户 SQLite 数据库路径（相对路径基于启动 CWD） |
-| `webui.dossierDir` | string | -（示例配置为 `/opt/siren/dossier`） | Dossier 编辑器文件目录，可位于服务端工作目录外；左侧 Dossier 入口默认打开该目录下的 `report.md`。默认为空，留空、目录不可用或默认报告不可访问时，WebUI 会提示错误 |
+| `webui.dossierDir` | string | -（示例配置为 `/opt/siren/dossier`） | Dossier 编辑器文件目录，可位于服务端工作目录外；左侧 Dossier 入口默认打开该目录下的 `report.md`。默认为空，留空、目录不可用或默认报告不可访问时，WebUI 会提示错误。详见 [Dossier 配置](/dossier/config) |
 | `mcp.enabled` | bool | `true` | 是否启用 [MCP 服务](/mcp)，独立于 `webui.enabled` |
 | `mcp.cmdBlacklist` | list | 见 [MCP 集成](/mcp#命令黑名单) | MCP `run` 工具的命令黑名单，值为正则表达式列表 |
-| `air.cliPath` | string | `claude` | [Agentic 应急响应](/air)使用的大模型 CLI 工具路径 |
+| `air.provider` | string | `claude` | WebUI [Agentic 应急响应](/air)默认使用的 Provider，可选 `claude` 或 `codex`；页面中也可在每次启动会话时选择 |
 | `air.prompt` | string | - | 告警事件模式下的 prompt 模板，依次填入 `%s` UID、`%s` 安全中心告警 ID、`%d` Client ID（告警 ID 即 `air` 命令的 Security Center Alert ID，详见 [Agentic 应急响应](/air)） |
 | `air.customPromptPrefix` | string | - | 自定义 prompt 模式下的前缀（支持 `%d` Client ID） |
-| `air.args` | list | - | 传递给大模型 CLI 的额外参数 |
+| `air.providers.claude.cliPath` | string | `claude` | Claude Code CLI 路径；服务端 REPL 的 `air` 命令也使用 Claude Provider 配置 |
+| `air.providers.claude.model` | string | `claude-opus-4-8[1m]` | Claude Provider 使用的模型 |
+| `air.providers.claude.strictMCPConfig` | bool | `true` | 是否对 Claude Code 启用严格 MCP 配置 |
+| `air.providers.claude.allowedTools` | list | 见示例 | Claude Provider 允许调用的工具列表 |
+| `air.providers.claude.effort` | string | `xhigh` | 传递给 Claude CLI 的推理强度 |
+| `air.providers.claude.args` | list | `[]` | 传递给 Claude CLI 的额外参数 |
+| `air.providers.codex.cliPath` | string | `codex` | Codex CLI 路径 |
+| `air.providers.codex.model` | string | `gpt-5.5` | Codex Provider 使用的模型 |
+| `air.providers.codex.effort` | string | `xhigh` | Codex 推理强度 |
+| `air.providers.codex.sandbox` | string | `read-only` | Codex 沙箱模式 |
+| `air.providers.codex.approval` | string | `never` | Codex approval 模式 |
+| `air.providers.codex.enabledTools` | list | `ls`, `run`, `get_alarm_detail` | Codex AIR 注入的 SIREN MCP 工具 |
+| `air.providers.codex.args` | list | `[]` | 传递给 Codex CLI 的额外参数 |
+
+<Callout title="v2.10.2 AIR 配置更新" type="info">
+  AIR CLI 配置已统一放到 `air.providers.<name>` 下。旧的 `air.cliPath` / `air.args` 不再作为 WebUI AIR 的配置入口；升级后请按上方示例迁移到 `air.providers.claude.*` 或 `air.providers.codex.*`。
+</Callout>
 
 <Callout title="v1.x 升级提示" type="warn">
   v2.0.0 合并了 MCP 与 WebUI 端口，顶层 `mcpPort` 字段与 `--mcp-port` 参数已移除。升级后的配置示例如上，`mcpPort` 如有残留不会报错但会被忽略。

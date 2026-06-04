@@ -42,8 +42,12 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 | 工具 | 参数 | 描述 |
 | --- | --- | --- |
 | `ls` | 无 | 列出所有已连接的客户端，返回 ID、操作系统、连接地址（host:port）、备注、已安装插件等信息 |
-| `run` | `client_id`, `command` | 在指定客户端上执行命令并返回结果（30s 超时，50KB 上限），支持对同一客户端并发执行 |
+| `run` | `client_id`, `command` | 在指定客户端上执行命令并返回结果（超时跟随 `recon.commandTimeout` 并保留额外缓冲，50KB 上限），支持对同一客户端并发执行 |
 | `get_alarm_detail` | `uid`, `event_id` | 通过 SOAR 平台获取指定的安全告警详情，返回告警类型、攻击源、受影响资产等 |
+
+<Callout title="慢命令超时" type="info">
+  如果需要让 MCP / AIR 执行更慢的排查命令，请在服务端和客户端配置中保持 `recon.commandTimeout` 一致或至少让服务端等待时间不短于客户端执行时间。
+</Callout>
 
 <Callout title="提示" type="info">
   AI 助手可以通过 `ls` 获取客户端列表后，再通过 `run` 在指定客户端上执行任意命令。这使得 AI 能够自主完成信息收集、威胁排查等应急响应任务。

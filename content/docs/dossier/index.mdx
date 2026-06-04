@@ -1,0 +1,53 @@
+---
+title: Dossier
+description: SIREN 配套的应急报告编辑器
+icon: BookOpenText
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Card, Cards } from "fumadocs-ui/components/card";
+import { BookOpenText, FileText, Settings, Upload, WandSparkles } from "lucide-react";
+
+Dossier 是 SIREN 配套的浏览器报告编辑器，用 Dossier Markdown 编写 `report.md`，生成可打印 PDF 和可归档 HTML 的应急响应报告。
+
+<Cards>
+  <Card title="部署" icon={<Upload />} href="/dossier/deploy">把 Dossier 静态编辑器部署到 SIREN 控制主机</Card>
+  <Card title="配置" icon={<Settings />} href="/dossier/config">配置 WebUI 入口、默认报告和附件目录</Card>
+  <Card title="语法" icon={<BookOpenText />} href="/dossier/syntax">编写章节、结论、时间线、图示和结构化组件</Card>
+  <Card title="工作流" icon={<WandSparkles />} href="/dossier/workflow">编辑、校样、保存、粘贴图片和导出报告</Card>
+</Cards>
+
+## 入口
+
+Dossier 有三种常见使用方式：
+
+- 在 SIREN WebUI 左侧点击 **Dossier**，打开 `webui.dossierDir/report.md` 作为默认报告
+- 在 WebUI Artifacts 中选中 `.md` 报告，点击 Dossier 按钮编辑该报告
+- 在本地把 Dossier 静态文件作为普通 HTTP 目录打开，用于离线写作和交付
+
+<Callout title="文件类型" type="info">
+  SIREN 当前只把 `.md` 文件作为 Dossier 可编辑源文件。`.markdown` 文件可以在 Artifacts 中预览，但不会显示 Dossier 编辑入口。
+</Callout>
+
+## 核心文件
+
+| 文件或目录 | 用途 |
+| --- | --- |
+| `index.html` | Dossier 编辑器入口页面 |
+| `editor.js` / `editor.css` | 编辑器运行时资源 |
+| `report.md` | 默认报告源文件，也是 WebUI 左侧 Dossier 入口打开的文件 |
+| `assets/` | Dossier 模板内置图片、字体和静态资源 |
+| `<report>.assets/pasted/` | SIREN WebUI 中粘贴图片后的报告附件目录 |
+
+## 与 SIREN 的关系
+
+Dossier 是外部静态编辑器，不会打包进 `siren_server` 二进制。SIREN 通过 `webui.dossierDir` 指向一个控制主机上的目录，并在 `/dossier/` 下提供访问。
+
+报告正文和粘贴图片仍通过 SIREN WebUI 的受保护接口保存。反向代理部署时，应把同一域名整体转发到 WebUI 端口，避免 Dossier 页面能打开但报告无法保存。
+
+## 相关页面
+
+<Cards>
+  <Card title="Web 控制台" icon={<FileText />} href="/webui">了解 Dossier 在 WebUI 中的入口</Card>
+  <Card title="服务端配置" icon={<Settings />} href="/config#服务端配置">查看 `webui.dossierDir` 所在配置段落</Card>
+</Cards>
