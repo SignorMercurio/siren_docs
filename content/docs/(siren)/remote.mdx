@@ -39,10 +39,10 @@ import { ArrowRightLeft, Brain, Key, Plug } from 'lucide-react';
   </Accordion>
 </Accordions>
 
-为客户端添加备注信息，方便在多客户端场景下快速识别：
+为客户端添加备注信息，方便在多客户端场景下快速识别；省略备注内容可清空已有备注：
 
 ```bash title="SIREN Server"
->>> note <Client ID> <Note>
+>>> note <Client ID> [Note]
 ```
 
 客户端会保存一个稳定的本机身份标识。服务端短暂下线或升级后，客户端会自动重连；客户端成功连接过一次后，后续短暂断线会更快重连。已设置的备注会在重连后恢复。交互式 Shell、端口转发和正在执行的命令属于当前连接上的活动会话，服务端重启后需要重新打开。

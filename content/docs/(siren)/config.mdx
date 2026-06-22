@@ -84,11 +84,12 @@ webui:                                          # Web 控制台
 mcp:
   enabled: true                                 # 是否启用 MCP 服务
   cmdBlacklist:                                 # MCP run 命令黑名单（正则表达式）
-    - rm\\s
-    - kill\\s
-    - shutdown
-    - reboot
-    # ...more patterns
+    - '(?:^|[;|&\n]\s*)(?:sudo\s+)?rm(?:\s|$)'
+    - '(?:^|[;|&\n]\s*)(?:sudo\s+)?find(?:\s|$)[^;|&\n]*\s-delete(?:\s|$)'
+    - '(?:^|[;|&\n]\s*)(?:sudo\s+)?dd(?:\s|$)[^;|&\n]*\bof=/dev/(?:sd|hd|vd|xvd|nvme|mapper|dm-|loop|md|ram)'
+    - '(?:^|[;|&\n]\s*)(?:sudo\s+)?systemctl\s+(stop|disable|mask|restart|reload)(?:\s|$)'
+    - '(?:^|[;|&\n]\s*)(?:sudo\s+)?(?:useradd|usermod|userdel|groupadd|groupmod|groupdel)(?:\s|$)'
+    # ...more destructive-action patterns
 
 air:
   provider: claude                             # 默认 WebUI AIR Provider：claude / codex
@@ -97,7 +98,7 @@ air:
   providers:
     claude:
       cliPath: claude                          # Claude Code CLI 路径
-      model: "claude-opus-4-8[1m]"
+      model: "claude-opus-4-8"
       strictMCPConfig: true
       allowedTools:
         - mcp__siren__ls
@@ -112,8 +113,9 @@ air:
       cliPath: codex                           # Codex CLI 路径
       model: gpt-5.5
       effort: xhigh
-      sandbox: read-only
+      sandbox: workspace-write
       approval: never
+      mcpApproval: approve
       enabledTools:
         - ls
         - run
@@ -140,7 +142,7 @@ air:
 | `air.prompt` | string | - | 告警事件模式下的 prompt 模板，依次填入 `%s` UID、`%s` 安全中心告警 ID、`%d` Client ID（告警 ID 即 `air` 命令的 Security Center Alert ID，详见 [Agentic 应急响应](/air)） |
 | `air.customPromptPrefix` | string | - | 自定义 prompt 模式下的前缀（支持 `%d` Client ID） |
 | `air.providers.claude.cliPath` | string | `claude` | Claude Code CLI 路径；服务端 REPL 的 `air` 命令也使用 Claude Provider 配置 |
-| `air.providers.claude.model` | string | `claude-opus-4-8[1m]` | Claude Provider 使用的模型 |
+| `air.providers.claude.model` | string | `claude-opus-4-8` | Claude Provider 使用的模型 |
 | `air.providers.claude.strictMCPConfig` | bool | `true` | 是否对 Claude Code 启用严格 MCP 配置 |
 | `air.providers.claude.allowedTools` | list | 见示例 | Claude Provider 允许调用的工具列表 |
 | `air.providers.claude.effort` | string | `xhigh` | 传递给 Claude CLI 的推理强度 |
@@ -148,8 +150,9 @@ air:
 | `air.providers.codex.cliPath` | string | `codex` | Codex CLI 路径 |
 | `air.providers.codex.model` | string | `gpt-5.5` | Codex Provider 使用的模型 |
 | `air.providers.codex.effort` | string | `xhigh` | Codex 推理强度 |
-| `air.providers.codex.sandbox` | string | `read-only` | Codex 沙箱模式 |
+| `air.providers.codex.sandbox` | string | `workspace-write` | Codex 沙箱模式 |
 | `air.providers.codex.approval` | string | `never` | Codex approval 模式 |
+| `air.providers.codex.mcpApproval` | string | `approve` | Codex 访问 SIREN MCP 工具时使用的默认审批模式 |
 | `air.providers.codex.enabledTools` | list | `ls`, `run`, `get_alarm_detail` | Codex AIR 注入的 SIREN MCP 工具 |
 | `air.providers.codex.args` | list | `[]` | 传递给 Codex CLI 的额外参数 |
 

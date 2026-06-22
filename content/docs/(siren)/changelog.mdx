@@ -10,22 +10,33 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
-## v2.11.0 <DateTag>2026-06-04</DateTag>
+## v2.11.0 <DateTag>2026-06-22</DateTag>
 
 ### Feature
 
 - **WebUI Agentic IR 支持 Claude / Codex Provider 选择**：新建或恢复 AIR 会话时可选择 Claude 或 Codex；Claude 仍是默认 Provider，Codex 会使用同一会话视图展示 AI 回复、工具调用和结果
+- **Artifacts 支持新建目录**：Artifacts 页面新增 New Folder 操作，可在当前目标目录下创建服务端目录，并复用同一套路径安全校验
+- **批量部署支持目标备注**：服务端 REPL 与 WebUI deploy-batch 目标格式扩展为 `instanceId[,publicIp[,note]]`，可在部署时为目标预置备注；只填写备注时可写成 `instanceId,,note`
 
 ### Improvement
 
-- AIR 配置改为 `air.providers.<name>` 结构，Claude 与 Codex 可分别配置 CLI 路径、模型、推理强度和额外参数；示例配置默认 Claude `claude-opus-4-8[1m]`，Codex `gpt-5.5` + `xhigh`
+- AIR 配置改为 `air.providers.<name>` 结构，Claude 与 Codex 可分别配置 CLI 路径、模型、推理强度和额外参数；示例配置默认 Claude `claude-opus-4-8`，Codex `gpt-5.5` + `xhigh`，Codex 使用 `workspace-write` sandbox 与 `mcpApproval: approve`
 - WebUI AIR 继续使用结构化 `/api/air/stream` 会话；旧的浏览器 PTY AIR 路由已移除，服务端 REPL 的 `air` 命令保持原有交互式体验
+- AIR 状态展示补齐工具调用状态、Claude rate-limit 百分比和更清晰的流式错误提示，便于判断会话是否仍在运行
+- WebUI 进程分析详情面板展示更清晰，并限制为 Linux 客户端入口，避免 Windows 客户端触发不可用查询
+- 服务端 REPL 的 `note <Client ID>` 现在可省略备注内容来清空已有备注，同时保留多词备注
 
 ### Bugfix
 
 - 修复 MCP `run` 工具在慢命令场景下提前判定超时的问题；等待时间现在跟随 `recon.commandTimeout` 并保留额外缓冲
+- 加强 MCP `run` 默认命令黑名单：阻断 `find -delete`、`truncate`、`shred`、`wipefs`、块设备写入、服务重启/重载、防火墙清空、账号/组变更等破坏性操作，并检查 `sh` / `bash` / `dash` / `zsh` / `ksh -c '...'` 包装后的 payload
+- 修复 MCP 黑名单对普通引号说明文本的误报，例如 `echo "rm -rf /tmp/x"` 不再因为字符串内容被拒绝
 - 修复客户端 Files 中指向目录的 symlink 被标记为普通文件的问题，浏览器文件树可继续按目录展开和下载
 - 修复 WebUI 进程分析错误状态不准确的问题：非 Linux 客户端返回 422，超时返回 504，其他通信失败返回 502
+- 修复 Recon 报告文件名校验，服务端只接受 `.md` 报告文件名，避免回传报告覆盖服务端工作目录中的非报告文件
+- 修复 Recon 文件完整性检查中的包管理器检测偏差，并移除 SSH 暴力破解排查命令中的异常字面量
+- 修复生成的 artifact 文件名可能包含 `:` 导致跨平台路径不兼容的问题
+- 修复部分协议输出和文件预览中的二进制内容识别边界，减少错误预览和挂起风险
 
 ---
 

@@ -57,15 +57,17 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 
 `run` 工具在执行命令前会检查命令是否匹配[配置文件](/config#服务端配置)中的 `mcp.cmdBlacklist` 正则表达式列表。匹配到的命令将被拒绝执行，并向 AI 返回错误信息。
 
-默认黑名单包含以下类别的危险操作：
+默认黑名单用于阻断破坏性变更，保留 `cat`、`grep`、`journalctl`、`systemctl status`、`iptables -L` 等只读排查命令。默认包含以下类别的危险操作：
 
-- **文件删除与磁盘写入**：`rm`、`rmdir`、`mkfs`、`dd if=`、向块设备重定向（如 `> /dev/sda`）
+- **文件删除与磁盘写入**：`rm`、`rmdir`、`find -delete`、`truncate`、`shred`、`wipefs`、`mkfs`、`dd ... of=/dev/...`、向块设备重定向或通过 `tee` / `cp` 写入块设备
 - **进程终止**：`kill`、`killall`、`pkill`
 - **系统关机与运行级别**：`shutdown`、`reboot`、`halt`、`poweroff`、`init 0-6`
-- **服务管理**：`systemctl stop/disable/mask`、`service stop`
-- **防火墙清空**：`iptables -F/-X`
-- **权限与用户**：`chmod 000`、`chown`、`userdel`、`passwd`
+- **服务管理**：`systemctl stop/disable/mask/restart/reload`、`service <name> stop/restart/reload`
+- **防火墙清空**：`iptables` / `ip6tables` 的 `-F`、`-X`、`-Z` 或对应长参数，以及 `nft flush ruleset`
+- **权限与账号变更**：`chmod 000`、`chown`、`passwd`、`chpasswd`、`useradd`、`usermod`、`userdel`、`groupadd`、`groupmod`、`groupdel`
 - **痕迹清除**：`crontab -r`、`history -c`
+
+为了减少误报，`run` 会先屏蔽普通引号中的说明文本，例如 `echo "rm -rf /tmp/x"` 不会因为字符串内容被拒绝。若命令通过 `sh`、`bash`、`dash`、`zsh` 或 `ksh -c '...'` 包装执行，引号中的 payload 会被提取出来再次检查，因此 `bash -c 'rm -rf /tmp/x'` 仍会被拒绝。
 
 <Callout title="自定义" type="info">
   可根据实际需求在配置文件中添加或移除黑名单规则。规则使用 Go 正则表达式语法。

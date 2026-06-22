@@ -93,7 +93,7 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
   <Card title="Agentic IR" icon={<Brain />}>在浏览器中启动 AI Agent 应急响应会话</Card>
   <Card title="Investigations" icon={<Key />}>AccessKey 调查、客户端 Recon、进程分析、阶段进度与报告入口</Card>
   <Card title="Files" icon={<Files />}>在线浏览客户端文件系统，支持预览、下载和上传</Card>
-  <Card title="Artifacts" icon={<FolderTree />}>服务端取证文件浏览，支持 Markdown 预览、Dossier 编辑、上传、下载、重命名和删除</Card>
+  <Card title="Artifacts" icon={<FolderTree />}>服务端取证文件浏览，支持 Markdown 预览、Dossier 编辑、新建目录、上传、下载、重命名和删除</Card>
   <Card title="Dossier" icon={<BookOpenText />}>独立报告编辑器，可从左侧导航直接打开，也可从 Artifacts 的 Markdown 报告进入</Card>
 </Cards>
 
@@ -101,13 +101,13 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
 
 等价于服务端 REPL 的 `ls`、`note`、`allow`、`deploy`、`clean` 命令。每行展示一个客户端，支持：
 
-- **备注编辑**：点击备注直接在行内修改
+- **备注编辑**：点击备注直接在行内修改；清空备注后会同步到服务端
 - **备注恢复**：备注会绑定到客户端稳定身份，客户端重连后自动恢复
 - **Files 快捷入口**：从客户端行直接打开该客户端的 Files 页面
 - **Process 快捷入口**：从客户端行直接打开该客户端的进程分析表单
 - **放行**（allow）：调用 SOAR 将受害主机出口 IP 加入安全组白名单
 - **单机部署**（deploy）：输入 Alibaba Cloud UID、ECS Instance ID 与可选 Public IP，通过云助手一键部署 SIREN 客户端
-- **批量部署**（deploy-batch）：切换到 Batch 模式后，每行输入 `instanceId` 或 `instanceId,publicIp`，同一 UID 下支持 2-20 台机器；WebUI 会流式展示每台机器的运行状态和最终汇总
+- **批量部署**（deploy-batch）：切换到 Batch 模式后，每行输入 `instanceId`、`instanceId,publicIp` 或 `instanceId,publicIp,note`；只填写备注时可使用 `instanceId,,note`。同一 UID 下支持 2-20 台机器，WebUI 会流式展示每台机器的运行状态和最终汇总
 - **清理**（clean）：远程清除受害主机上的 SIREN 痕迹（带二次确认）
 
 <Callout title="批量部署规则" type="info">
@@ -177,6 +177,7 @@ Files 页面用于浏览在线客户端本机文件系统。可以从左侧导�
 - **二进制识别**：非文本文件显示"不支持预览"提示，不会报错
 - **文件下载**：任意文件可通过右上角下载按钮下载
 - **目录打包下载**：在文件树中右键目录并选择 Download，即可以 `tar.gz` 流式下载整个目录，自动排除点号开头的文件和子目录
+- **新建目录**：点击 New Folder 在当前目标目录下创建子目录；目录名会经过同一套路径安全校验，不能覆盖已有文件或目录
 - **文件上传**：可上传单个文件到当前目标目录，单文件上限 100 MiB；目标文件已存在时会要求确认覆盖
 - **重命名与删除**：文件树右键可重命名或删除文件/目录；删除非空目录会递归移除目录下所有内容
 - **隐藏文件保护**：`.env`、`.ssh` 等点号开头的文件既不列出也不允许直接访问，避免敏感信息泄露

@@ -18,10 +18,10 @@ SIREN Server REPL 提供了完整的命令集，用于管理客户端、下发�
 | 命令 | 用法 | 说明 | 详见 |
 | --- | --- | --- | --- |
 | `ls` | `ls` | 列出所有已连接客户端 | — |
-| `note` | `note <Client ID> <Note>` | 为客户端设置备注 | [远程模式](/remote) |
+| `note` | `note <Client ID> [Note]` | 设置或清空客户端备注 | [远程模式](/remote) |
 | `allow` | `allow <IP>` | 放行受害主机出口 IP 访问 SIREN Server | [凭证设置](/credential) |
 | `deploy` | `deploy <UID> <Instance ID> [Public IP]` | 通过云助手部署客户端 | [快速开始](/index) |
-| `deploy-batch` | `deploy-batch <UID> <instanceId[,publicIp]>...` | 批量部署（2–20 台） | [快速开始](/index) |
+| `deploy-batch` | `deploy-batch <UID> <instanceId[,publicIp[,note]]>...` | 批量部署（2–20 台） | [快速开始](/index) |
 | `shell` | `shell <Client ID>` | 启动交互式远程 Shell | [远程模式](/remote#远程命令执行) |
 | `run` | `run <Client ID> <Command>` | 在客户端执行单条命令并返回结果 | [本页](#在客户端执行命令) |
 | `air` | `air <Client ID> <UID> <Alert ID>`／`air <Client ID> <Prompt>` | 启动 Agentic 应急响应 | [Agentic 应急响应](/air) |

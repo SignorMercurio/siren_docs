@@ -32,7 +32,7 @@ SIREN 将本地报告、服务端 Artifacts 和 Dossier 报告编辑分成不同
 
 <Cards>
     <Card title="本地 Recon 报告" icon={<FileText />} href="/recon#查看数据">本地模式生成结构化 Markdown 文件，可直接阅读，也可按客户端配置上传 OSS</Card>
-    <Card title="服务端 Artifacts" icon={<FolderTree />} href="/webui#artifacts">集中查看远程 Recon 与 AIR 产出的结果文档，以及上传/拉取到服务端的取证文件</Card>
+    <Card title="服务端 Artifacts" icon={<FolderTree />} href="/webui#artifacts">集中查看远程 Recon 与 AIR 产出的结果文档，以及上传、整理和拉取到服务端的取证文件</Card>
     <Card title="Dossier 报告编辑" icon={<BookOpen />} href="/dossier">面向 Markdown 应急报告编辑和附件保存，可直接打开默认报告或从 Artifacts 打开报告</Card>
 </Cards>
 
@@ -42,7 +42,7 @@ SIREN 将本地报告、服务端 Artifacts 和 Dossier 报告编辑分成不同
 
 <Cards>
     <Card title="客户端文件管理" icon={<FolderTree />} href="/webui#files">在线浏览客户端文件系统，支持预览、下载、目录打包和单文件上传</Card>
-    <Card title="服务端 Artifacts 管理" icon={<Server />} href="/webui#artifacts">管理服务端工作目录中的报告、取证文件和上传文件，支持预览、下载、上传、重命名和删除</Card>
+    <Card title="服务端 Artifacts 管理" icon={<Server />} href="/webui#artifacts">管理服务端工作目录中的报告、取证文件和上传文件，支持预览、下载、上传、新建目录、重命名和删除</Card>
     <Card title="本地文件上传" icon={<CloudUpload />} href="/analysis/upload">本地文件可上传至 OSS，远程 CLI 上传会拉取客户端文件并保存到服务端 Artifacts</Card>
     <Card title="进程分析" icon={<Activity />} href="/analysis/info">基于 PID/端口/名称查询进程详情、进程树、容器和服务信息</Card>
 </Cards>
@@ -87,7 +87,7 @@ SIREN 将本地报告、服务端 Artifacts 和 Dossier 报告编辑分成不同
     <Card title="浏览器内 AIR" icon={<Brain />} href="/webui#agentic-ir">选择 Claude 或 Codex，查看 AI 回复、工具调用和结果，并继续追问</Card>
     <Card title="浏览器内调查" icon={<Key />} href="/webui#investigations">执行 AccessKey 调查、Recon 和进程分析，查看真实阶段进度并跳转报告</Card>
     <Card title="客户端文件浏览" icon={<FolderTree />} href="/webui#files">在线浏览客户端文件系统，支持预览、下载、目录打包和单文件上传</Card>
-    <Card title="取证文件浏览" icon={<FolderTree />} href="/webui#artifacts">服务端 Artifacts 支持 Markdown 预览、Dossier 编辑、上传、下载、重命名和删除</Card>
+    <Card title="取证文件浏览" icon={<FolderTree />} href="/webui#artifacts">服务端 Artifacts 支持 Markdown 预览、Dossier 编辑、新建目录、上传、下载、重命名和删除</Card>
     <Card title="Dossier 报告编辑" icon={<BookOpen />} href="/dossier">从 WebUI 直接打开 Dossier 编辑器，编辑 Markdown 应急报告和附件</Card>
     <Card title="SOAR 快捷操作" icon={<MousePointerClick />} href="/webui#clients">allow、单机/批量 deploy、clean 一键调用，运行日志流式展示</Card>
 </Cards>
