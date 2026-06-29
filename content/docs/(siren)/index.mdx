@@ -84,6 +84,8 @@ SIREN 支持两种运行模式，可根据实际网络环境和应急响应场�
 
     如需从 WebUI 直接打开 Dossier 报告编辑器，还需要把 Dossier 编辑器文件和默认报告部署到控制主机。左侧 Dossier 入口会默认编辑 `webui.dossierDir/report.md`，默认目录为 `/opt/siren/dossier`。完整步骤见 [Dossier 部署](/dossier/deploy)，语法、配置和编辑流程见 [Dossier 文档](/dossier)。
 
+    如需按应急响应项目隔离客户端和取证目录，可在 WebUI 中创建 [Projects](/webui#projects)。建议在 `server_config.yaml` 中显式配置 `webui.projectsBaseDir`，例如 `/opt/siren/projects`，新建 Project 时会在该目录下创建固定工作目录。
+
   </Accordion>
 </Accordions>
 

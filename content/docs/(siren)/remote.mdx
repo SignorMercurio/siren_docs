@@ -8,7 +8,7 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
-import { ArrowRightLeft, Brain, Key, Plug } from 'lucide-react';
+import { ArrowRightLeft, Brain, FolderKanban, Key, Plug } from 'lucide-react';
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
@@ -45,7 +45,7 @@ import { ArrowRightLeft, Brain, Key, Plug } from 'lucide-react';
 >>> note <Client ID> [Note]
 ```
 
-客户端会保存一个稳定的本机身份标识。服务端短暂下线或升级后，客户端会自动重连；客户端成功连接过一次后，后续短暂断线会更快重连。已设置的备注会在重连后恢复。交互式 Shell、端口转发和正在执行的命令属于当前连接上的活动会话，服务端重启后需要重新打开。
+客户端会保存一个稳定的本机身份标识。服务端短暂下线或升级后，客户端会自动重连；客户端成功连接过一次后，后续短暂断线会更快重连。已设置的备注和 WebUI Project 归属会在重连后恢复。交互式 Shell、端口转发和正在执行的命令属于当前连接上的活动会话，服务端重启后需要重新打开。
 
 ## 远程命令执行
 
@@ -99,6 +99,9 @@ Linux victim 5.15.0-91-generic #101-Ubuntu SMP x86_64 GNU/Linux
   </Card>
   <Card title="Agentic 应急响应" icon={<Brain />} href="/air">
     AI 驱动的自动化应急响应
+  </Card>
+  <Card title="Projects 工作区" icon={<FolderKanban />} href="/webui#projects">
+    按应急响应项目隔离客户端视图和取证目录
   </Card>
   <Card title="MCP 集成" icon={<Plug />} href="/mcp">
     通过 MCP 协议接入 AI 助手

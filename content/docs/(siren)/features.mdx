@@ -5,7 +5,7 @@ icon: Sparkles
 ---
 
 import { Card, Cards } from "fumadocs-ui/components/card";
-import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, Cpu, Globe, Package, Eraser, CloudUpload, BookOpen, ToggleLeft, Cloud, FileEdit, Radio, Server, Bot, Rocket, Key, Brain, Lock, ArrowRightLeft, Plug, Puzzle, Download, LayoutDashboard, FolderTree, MousePointerClick } from "lucide-react";
+import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, Cpu, Globe, Package, Eraser, CloudUpload, BookOpen, ToggleLeft, Cloud, FileEdit, Radio, Server, Bot, Rocket, Key, Brain, Lock, ArrowRightLeft, Plug, Puzzle, Download, LayoutDashboard, FolderKanban, FolderTree, MousePointerClick } from "lucide-react";
 
 ## 信息收集
 
@@ -33,6 +33,7 @@ SIREN 将本地报告、服务端 Artifacts 和 Dossier 报告编辑分成不同
 <Cards>
     <Card title="本地 Recon 报告" icon={<FileText />} href="/recon#查看数据">本地模式生成结构化 Markdown 文件，可直接阅读，也可按客户端配置上传 OSS</Card>
     <Card title="服务端 Artifacts" icon={<FolderTree />} href="/webui#artifacts">集中查看远程 Recon 与 AIR 产出的结果文档，以及上传、整理和拉取到服务端的取证文件</Card>
+    <Card title="Project 取证目录" icon={<FolderKanban />} href="/webui#projects">按应急响应项目固定服务端目录，Project 视图下 Artifacts、AIR 和 Recon 都落到对应目录</Card>
     <Card title="Dossier 报告编辑" icon={<BookOpen />} href="/dossier">面向 Markdown 应急报告编辑和附件保存，可直接打开默认报告或从 Artifacts 打开报告</Card>
 </Cards>
 
@@ -42,7 +43,7 @@ SIREN 将本地报告、服务端 Artifacts 和 Dossier 报告编辑分成不同
 
 <Cards>
     <Card title="客户端文件管理" icon={<FolderTree />} href="/webui#files">在线浏览客户端文件系统，支持预览、下载、目录打包和单文件上传</Card>
-    <Card title="服务端 Artifacts 管理" icon={<Server />} href="/webui#artifacts">管理服务端工作目录中的报告、取证文件和上传文件，支持预览、下载、上传、新建目录、重命名和删除</Card>
+    <Card title="服务端 Artifacts 管理" icon={<Server />} href="/webui#artifacts">管理 Global 工作目录或 Project 目录中的报告、取证文件和上传文件，支持预览、下载、上传、新建目录、重命名和删除</Card>
     <Card title="本地文件上传" icon={<CloudUpload />} href="/analysis/upload">本地文件可上传至 OSS，远程 CLI 上传会拉取客户端文件并保存到服务端 Artifacts</Card>
     <Card title="进程分析" icon={<Activity />} href="/analysis/info">基于 PID/端口/名称查询进程详情、进程树、容器和服务信息</Card>
 </Cards>
@@ -57,6 +58,7 @@ SIREN 将本地报告、服务端 Artifacts 和 Dossier 报告编辑分成不同
     <Card title="自定义检测规则" icon={<FileEdit />} href="/config#客户端配置">通过正则表达式定义白名单和黑名单规则，降低噪音</Card>
     <Card title="通信设置" icon={<Radio />} href="/config">配置客户端-服务端的连接地址、端口和 TLS 证书</Card>
     <Card title="WebUI 与 MCP 端口" icon={<Server />} href="/config#服务端配置">统一配置 WebUI 与 MCP 共享的监听地址和端口</Card>
+    <Card title="Project 目录基准路径" icon={<FolderKanban />} href="/config#服务端配置">通过 webui.projectsBaseDir 限制 WebUI Project 目录创建位置</Card>
     <Card title="Agentic 应急响应设置" icon={<Bot />} href="/config#服务端配置">配置 Claude / Codex Provider、模型和 prompt 模板</Card>
 </Cards>
 
@@ -82,6 +84,7 @@ SIREN 将本地报告、服务端 Artifacts 和 Dossier 报告编辑分成不同
 
 <Cards>
     <Card title="Web 控制台" icon={<LayoutDashboard />} href="/webui">统一入口访问客户端管理、Shell、Agentic IR、客户端文件与取证文件浏览等功能</Card>
+    <Card title="Projects 工作区" icon={<FolderKanban />} href="/webui#projects">在 Global 与 Project 视图间切换，隔离客户端列表、操作目标和取证目录</Card>
     <Card title="账号鉴权" icon={<Lock />} href="/webui#账号鉴权">SQLite + bcrypt 账号登录，通过 CLI 管理用户</Card>
     <Card title="多标签 Shell" icon={<Terminal />} href="/webui#shells">WebSocket 承载的交互式终端，切换页面会话不中断</Card>
     <Card title="浏览器内 AIR" icon={<Brain />} href="/webui#agentic-ir">选择 Claude 或 Codex，查看 AI 回复、工具调用和结果，并继续追问</Card>

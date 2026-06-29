@@ -68,7 +68,11 @@ Agentic 应急响应（AIR）让 AI Agent 自动化实施完整的应急响应�
 
 在 [Web 控制台](/webui#agentic-ir) 的 Agentic IR 页面中选择客户端后，也可以使用告警事件模式或自定义 Prompt 启动 AIR。WebUI 支持选择 Claude 或 Codex Provider，会按顺序展示 AI 回复、工具调用和结果，并支持在同一会话中继续追问。
 
-也可以切换到 Resume 模式，恢复当前 `siren_server` 工作目录对应的历史会话。Claude 会读取 Claude Code history；Codex 会读取当前项目下的 Codex session history。WebUI 只展示解析后的历史消息，不会向浏览器暴露本机 JSONL 文件路径。
+也可以切换到 Resume 模式，恢复当前 WebUI 视图工作目录对应的历史会话。Global 视图使用 `siren_server` 工作目录；Project 视图使用该 Project 的固定目录。Claude 会读取 Claude Code history；Codex 会读取对应目录下的 Codex session history。WebUI 只展示解析后的历史消息，不会向浏览器暴露本机 JSONL 文件路径。
+
+<Callout title="Project 作用域" type="info">
+  在 Project 视图下启动 WebUI AIR 时，Provider working directory 会切到当前 Project 目录，历史会话也只按该目录过滤。WebUI 注入的 SIREN MCP 工具只会列出当前 Project 客户端，并拒绝对其他 Project 客户端执行命令。Global 视图保持全局行为。
+</Callout>
 
 服务端 REPL 的 `air` 命令仍保持 tmux 中的交互式体验，适合直接登录控制主机时使用。
 
@@ -100,7 +104,7 @@ AI Agent 通过 [MCP 集成](/mcp) 自动调用 SIREN 提供的工具，在受�
 
 ### 生成报告
 
-Agent 完成排查后，自动生成包含攻击时间线、影响评估、IOC 指标、修复建议等内容的完整应急响应报告。
+Agent 完成排查后，自动生成包含攻击时间线、影响评估、IOC 指标、修复建议等内容的完整应急响应报告。WebUI AIR 在 Project 视图下生成或整理的报告默认落在当前 Project 目录；Global 视图继续使用服务端工作目录。
 
 报告效果详见 [示例报告](/air/example)。
 

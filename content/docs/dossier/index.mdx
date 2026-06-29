@@ -22,7 +22,7 @@ Dossier 是 SIREN 配套的浏览器报告编辑器，用 Dossier Markdown 编�
 Dossier 有三种常见使用方式：
 
 - 在 SIREN WebUI 左侧点击 **Dossier**，打开 `webui.dossierDir/report.md` 作为默认报告
-- 在 WebUI Artifacts 中选中 `.md` 报告，点击 Dossier 按钮编辑该报告
+- 在 WebUI Artifacts 中选中 `.md` 报告，点击 Dossier 按钮编辑该报告；Project 视图下打开的是当前 Project 目录内的报告
 - 在本地把 Dossier 静态文件作为普通 HTTP 目录打开，用于离线写作和交付
 
 <Callout title="文件类型" type="info">
@@ -44,6 +44,10 @@ Dossier 有三种常见使用方式：
 Dossier 是外部静态编辑器，不会打包进 `siren_server` 二进制。SIREN 通过 `webui.dossierDir` 指向一个控制主机上的目录，并在 `/dossier/` 下提供访问。
 
 报告正文和粘贴图片仍通过 SIREN WebUI 的受保护接口保存。反向代理部署时，应把同一域名整体转发到 WebUI 端口，避免 Dossier 页面能打开但报告无法保存。
+
+<Callout title="Project 边界" type="info">
+  WebUI 左侧 Dossier 入口始终打开 `webui.dossierDir/report.md`。Project 只影响从 Artifacts 打开的 Markdown 报告：报告源文件和粘贴图片会保存在当前 Project 目录内。
+</Callout>
 
 ## 相关页面
 

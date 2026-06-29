@@ -8,11 +8,11 @@ import { Banner } from 'fumadocs-ui/components/banner';
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { Step, Steps } from "fumadocs-ui/components/steps";
-import { Users, Terminal, Brain, Files, FolderTree, Lock, Plug, Key, BookOpenText } from 'lucide-react';
+import { Users, Terminal, Brain, Files, FolderKanban, FolderTree, Lock, Plug, Key, BookOpenText } from 'lucide-react';
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-SIREN 服务端内置 Web 控制台，提供常用远程工作流的图形化入口。无需登录控制主机操作 tmux 或 REPL，通过浏览器即可完成客户端管理、交互式 Shell、Agentic 应急响应、SOAR 命令调用以及取证文件浏览。
+SIREN 服务端内置 Web 控制台，提供常用远程工作流的图形化入口。无需登录控制主机操作 tmux 或 REPL，通过浏览器即可完成 Project 工作区管理、客户端管理、交互式 Shell、Agentic 应急响应、SOAR 命令调用以及取证文件浏览。
 
 ## 启动与访问
 
@@ -88,6 +88,7 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
 ## 功能页面
 
 <Cards>
+  <Card title="Projects" icon={<FolderKanban />}>按应急响应项目隔离客户端视图、Artifacts 目录、AIR 工作目录和调查目标</Card>
   <Card title="Clients" icon={<Users />}>客户端列表、在线状态、备注编辑、SOAR 放行、单机/批量部署、清理痕迹</Card>
   <Card title="Shells" icon={<Terminal />}>多标签交互式终端，切换页面会话不中断</Card>
   <Card title="Agentic IR" icon={<Brain />}>在浏览器中启动 AI Agent 应急响应会话</Card>
@@ -97,12 +98,31 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
   <Card title="Dossier" icon={<BookOpenText />}>独立报告编辑器，可从左侧导航直接打开，也可从 Artifacts 的 Markdown 报告进入</Card>
 </Cards>
 
+### Projects
+
+Project 是一个应急响应工作区，用于把客户端、Artifacts 目录和 WebUI 操作目标放到同一个项目上下文中。每个 Project 创建时都会固定一个服务端目录，例如 `/opt/siren/my-project`；之后重命名 Project 只改变显示名，不移动已有目录。
+
+Projects 页面支持：
+
+- **创建 Project**：输入名称和可选目录名；目录名只能是一个 basename，最终目录必须位于 `webui.projectsBaseDir` 下
+- **复制目录路径**：快速拿到该 Project 的服务端工作目录，便于在控制主机上查看或归档
+- **重命名 Project**：只修改显示名称，保留原目录和文件
+- **删除 Project**：只删除元数据并解除客户端归属，Project 目录和其中的文件会保留
+- **切换视图**：Global 视图显示所有资源；Project 视图只显示该 Project 的客户端和取证目录
+
+客户端最多归属到一个 Project。未归属客户端只在 Global 视图中出现；进入 Project 视图后，Clients、Shells、Agentic IR、Files 和 Investigations 都只允许选择当前 Project 的客户端。
+
+<Callout title="部署归属" type="info">
+  在 Project 视图下通过 WebUI 单机或批量部署 SIREN 客户端时，服务端会记录本次部署目标的 Allow IP。客户端下一次从该 IP 连接后会自动归属到当前 Project。服务端 REPL 部署不带 Project 上下文，仍保持原有全局行为。
+</Callout>
+
 ### Clients
 
 等价于服务端 REPL 的 `ls`、`note`、`allow`、`deploy`、`clean` 命令。每行展示一个客户端，支持：
 
 - **备注编辑**：点击备注直接在行内修改；清空备注后会同步到服务端
 - **备注恢复**：备注会绑定到客户端稳定身份，客户端重连后自动恢复
+- **Project 归属**：在 Global 视图中可把客户端分配到某个 Project 或移回未归属；Project 视图中只显示当前 Project 的客户端
 - **Files 快捷入口**：从客户端行直接打开该客户端的 Files 页面
 - **Process 快捷入口**：从客户端行直接打开该客户端的进程分析表单
 - **放行**（allow）：调用 SOAR 将受害主机出口 IP 加入安全组白名单
@@ -118,31 +138,33 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
 
 每个客户端可开启多个终端标签。底层通过 WebSocket 桥接到服务端，服务端再以 TLS 转发到受害主机 PTY。切换到其他页面（Clients/AIR/Artifacts）时 Shell 会话保持活动，回到 Shells 页可继续输入。
 
+在 Project 视图下，Shell 只能连接当前 Project 的客户端。切换 Project 或切回 Global 时，WebUI 会关闭不属于新视图的活动 Shell，避免继续操作错误项目中的主机。
+
 ### Agentic IR
 
-在浏览器里启动 AI Agent 完成 [Agentic 应急响应](/air)。支持选择 Claude 或 Codex Provider，新建会话，或恢复当前项目的历史会话。
+在浏览器里启动 AI Agent 完成 [Agentic 应急响应](/air)。支持选择 Claude 或 Codex Provider，新建会话，或恢复当前视图工作目录对应的历史会话。
 
 选择目标客户端后可选两种新建模式：
 
 - **告警事件模式**：输入阿里云 UID + 云安全中心告警 ID，自动拉取告警详情
 - **自定义 Prompt**：自由输入应急响应指令
 
-也可以切换到 **Resume** 模式，搜索并选择当前 `siren_server` 工作目录对应的历史会话。Claude 会恢复 Claude Code session；Codex 会恢复 Codex session。WebUI 会先展示解析出的历史 user / assistant 消息，再用原 session ID 继续会话。
+也可以切换到 **Resume** 模式，搜索并选择当前视图工作目录对应的历史会话。WebUI 会先展示解析出的历史 user / assistant 消息，再用原 session ID 继续会话。
 
 <Callout title="恢复范围" type="info">
-  Resume 只读取 `siren_server` 当前工作目录对应的 Provider history，不会跨项目列出其他目录的历史会话，也不会向浏览器暴露本机 JSONL 文件路径。
+  Resume 只读取当前视图工作目录对应的 Provider history，不会跨 Project 列出其他目录的历史会话，也不会向浏览器暴露本机 JSONL 文件路径。
 </Callout>
 
-页面会按顺序展示 AI 回复、工具调用和结果，并支持在同一会话继续追问。WebUI AIR 会使用 SIREN MCP 工具，请确认 [MCP 服务](/mcp#配置)已启用。它不依赖 tmux，服务端 REPL 的 `air` 命令仍保持原有交互式体验。
+页面会按顺序展示 AI 回复、工具调用和结果，并支持在同一会话继续追问。WebUI AIR 会使用 SIREN MCP 工具，请确认 [MCP 服务](/mcp#配置)已启用。Project 视图下的工作目录、历史恢复和 MCP scope 规则见 [Agentic 应急响应](/air#webui-air)。WebUI AIR 不依赖 tmux，服务端 REPL 的 `air` 命令仍保持原有交互式体验。
 
 ### Investigations
 
 Investigations 页面用于承载需要等待结果的调查工具，目前包含 AccessKey 调查、客户端 Recon 和进程分析。
 
-- **AccessKey**：输入 Alibaba Cloud UID、AccessKey ID（Region 可选，留空默认 `cn-hangzhou`）后，服务端调用现有 SOAR 剧本生成 Markdown 报告。WebUI 只展示真实的 playbook 运行状态，完成后可直接打开 Artifacts 查看报告。
+- **AccessKey**：输入 Alibaba Cloud UID、AccessKey ID（Region 可选，留空默认 `cn-hangzhou`）后，服务端调用现有 SOAR 剧本生成 Markdown 报告。AccessKey 调查不绑定客户端，报告保存在 Global Artifacts；WebUI 只展示真实的 playbook 运行状态。
 - **Recon**：选择在线客户端并下发信息收集命令。页面展示服务端从客户端日志中解析出的阶段列表，例如 `Recon.Basic`、`Recon.User`、`Recon.Process`、`Save report to Artifacts`，不再暴露原始彩色日志。
 - **Process Analysis**：选择 Linux 客户端后，可按 PID、监听端口或进程名查询进程详情。按名称匹配到多个进程时，WebUI 会列出候选项，可点击候选 PID 继续深入分析。
-- **报告入口**：调查结束后会显示 Open Artifacts 按钮，直接跳转到生成的报告文件；报告也会保留在服务端工作目录中，方便远程部署环境查看。
+- **报告入口**：调查结束后会显示 Open Artifacts 按钮。Recon 报告跟随客户端 Project 归属保存；已归属客户端写入 Project 目录，未归属客户端写入 Global Artifacts。
 
 <Callout title="进度展示原则" type="info">
   WebUI 只展示服务端能真实观测到的阶段。AccessKey 调查的 SOAR 子步骤不可见，因此只显示 playbook 正在运行；Recon 阶段来自客户端实际回传日志；Process Analysis 是一次同步查询，完成后直接展示结果或错误。
@@ -150,7 +172,7 @@ Investigations 页面用于承载需要等待结果的调查工具，目前包�
 
 ### Files
 
-Files 页面用于浏览在线客户端本机文件系统。可以从左侧导航进入后选择客户端，也可以在 Clients 列表中点击某个客户端行的 Files 快捷入口直接打开。
+Files 页面用于浏览在线客户端本机文件系统。可以从左侧导航进入后选择客户端，也可以在 Clients 列表中点击某个客户端行的 Files 快捷入口直接打开。Project 视图下只能选择当前 Project 的客户端。
 
 特性：
 
@@ -168,7 +190,7 @@ Files 页面用于浏览在线客户端本机文件系统。可以从左侧导�
 
 ### Artifacts
 
-浏览服务端工作目录下的文件，典型使用场景是查看远程 Recon 和 AIR 产出的 Markdown 结果文档，以及上传/拉取到服务端的取证文件。特性：
+浏览服务端取证目录下的文件，典型使用场景是查看远程 Recon 和 AIR 产出的 Markdown 结果文档，以及上传/拉取到服务端的取证文件。Global 视图使用 `siren_server` 工作目录；Project 视图使用当前 Project 创建时固定的目录。特性：
 
 - **文件树可拖拽**：拖动树与预览之间的分隔条调整宽度（180–600 px），宽度持久化到 localStorage
 - **Markdown 渲染**：`.md` / `.markdown` 自动渲染
@@ -183,15 +205,15 @@ Files 页面用于浏览在线客户端本机文件系统。可以从左侧导�
 - **隐藏文件保护**：`.env`、`.ssh` 等点号开头的文件既不列出也不允许直接访问，避免敏感信息泄露
 
 <Callout title="Artifacts 删除操作" type="warn">
-  Artifacts 操作的是服务端工作目录下的真实文件。删除目录会递归删除其中内容，无法从 WebUI 撤销；执行前请确认目标路径。
+  Artifacts 操作的是服务端真实文件。删除目录会递归删除其中内容，无法从 WebUI 撤销；执行前请确认当前视图和目标路径。
 </Callout>
 
 ### Dossier
 
 Dossier 是独立的 Markdown 报告编辑器，有两种打开方式：
 
-- 从左侧导航点击 **Dossier**，打开 `webui.dossierDir/report.md` 作为默认报告
-- 在 Artifacts 中选中 `.md` 报告后，点击 Dossier 按钮编辑该报告
+- 从左侧导航点击 **Dossier**，始终打开 `webui.dossierDir/report.md` 作为默认报告；即使当前处于 Project 视图，也不会自动改成 Project 目录下的 `report.md`
+- 在 Artifacts 中选中 `.md` 报告后，点击 Dossier 按钮编辑该报告；如果当前是 Project 视图，报告文件和粘贴资源会保留在 Project 目录内
 
 Dossier 未部署、路径配置错误或默认 `report.md` 缺失时，WebUI 会显示错误提示，但不影响其他功能。
 
@@ -215,6 +237,7 @@ webui:
   port: 8080                            # 监听端口（与 MCP 共享）
   userDBPath: /opt/siren/data/users.db  # 可选：用户数据库绝对路径
   dossierDir: /opt/siren/dossier        # 可选：Dossier 编辑器文件目录
+  projectsBaseDir: /opt/siren/projects  # 可选：Project 目录创建基准路径
 
 mcp:
   enabled: true                         # 是否启用 MCP 服务

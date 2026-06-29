@@ -6,7 +6,7 @@ icon: BookOpen
 
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { Callout } from "fumadocs-ui/components/callout";
-import { Search, Radio, Brain, Shield, Feather, Zap, Globe, Puzzle, LayoutDashboard } from 'lucide-react';
+import { Search, Radio, Brain, Shield, Feather, Zap, Globe, Puzzle, FolderKanban, LayoutDashboard } from 'lucide-react';
 
 <Callout title="注意" type="warn">
   此工具专为合法的应急响应和安全分析目的而设计。所有侦察和系统访问功能均面向有权调查受损系统的授权安全专业人员。
@@ -52,6 +52,9 @@ SIREN (**S**wift **I**ncident **R**esponse **E**vidence **N**avigator) 是新一
   </Card>
   <Card title="Web 控制台" icon={<LayoutDashboard />} href="/webui">
     浏览器图形化入口，统一承载客户端管理、交互式 Shell、Agentic IR、取证文件浏览等常用远程工作流
+  </Card>
+  <Card title="Projects 工作区" icon={<FolderKanban />} href="/webui#projects">
+    按应急响应项目隔离客户端视图、操作目标、Artifacts 目录和 AIR 工作目录
   </Card>
 </Cards>
 

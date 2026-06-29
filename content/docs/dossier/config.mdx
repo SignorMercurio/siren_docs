@@ -41,10 +41,10 @@ SIREN 中的 Dossier 报告源文件必须以 `.md` 结尾。WebUI 对报告源�
 - 源文件读写走受保护的 `/api/reports/source` 接口
 - 单个报告源文件最大 10 MiB
 - 默认报告通过内部保留路径 `__dossier__/report.md` 映射到 `webui.dossierDir/report.md`
-- Artifacts 中的其他 `.md` 报告仍位于 `siren_server` 工作目录下
+- Artifacts 中的其他 `.md` 报告位于当前 Artifacts 作用域：Global 视图是 `siren_server` 工作目录，Project 视图是对应 Project 目录
 
 <Callout title="默认报告边界" type="info">
-  默认 Dossier 报告可以位于服务端工作目录外，但必须在 `webui.dossierDir` 目录内。SIREN 会解析符号链接，阻止默认报告逃逸到 Dossier 目录外。
+  默认 Dossier 报告可以位于服务端工作目录外，但必须在 `webui.dossierDir` 目录内。即使当前处于 WebUI Project 视图，左侧 Dossier 入口也不会自动改成 Project 目录下的 `report.md`。SIREN 会解析符号链接，阻止默认报告逃逸到 Dossier 目录外。
 </Callout>
 
 ## 附件目录

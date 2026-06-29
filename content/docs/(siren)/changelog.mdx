@@ -10,16 +10,24 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
-## v2.11.0 <DateTag>2026-06-22</DateTag>
+## v2.11.0 <DateTag>2026-06-29</DateTag>
 
 ### Feature
 
+- **WebUI 新增 Projects 工作区**：可创建、重命名、删除 Project，并为每个 Project 固定一个服务端目录；Global 视图保留全局资源视角，Project 视图只显示和操作该 Project 的客户端与取证目录
+- **客户端 Project 归属管理**：Clients 列表可手动把客户端归属到某个 Project 或移回未归属；归属绑定客户端稳定 AgentID，客户端重连后继续生效
+- **Project 视图下部署自动归属**：在某个 Project 视图中执行 WebUI 单机或批量部署时，部署目标下一次连接会自动归属到该 Project；服务端 REPL 部署保持原有全局行为
 - **WebUI Agentic IR 支持 Claude / Codex Provider 选择**：新建或恢复 AIR 会话时可选择 Claude 或 Codex；Claude 仍是默认 Provider，Codex 会使用同一会话视图展示 AI 回复、工具调用和结果
 - **Artifacts 支持新建目录**：Artifacts 页面新增 New Folder 操作，可在当前目标目录下创建服务端目录，并复用同一套路径安全校验
 - **批量部署支持目标备注**：服务端 REPL 与 WebUI deploy-batch 目标格式扩展为 `instanceId[,publicIp[,note]]`，可在部署时为目标预置备注；只填写备注时可写成 `instanceId,,note`
 
 ### Improvement
 
+- Artifacts 支持 Project 作用域：Global 视图继续浏览 `siren_server` 工作目录；Project 视图只浏览该 Project 的固定目录，并沿用绝对路径、穿越、点文件、symlink 和特殊文件防护
+- WebUI AIR 在 Project 视图下使用 Project 目录作为 Provider working directory，并按该目录过滤历史会话；注入给 AIR 的 SIREN MCP 会限制 `ls` / `run` 只能访问当前 Project 客户端，Global MCP 行为不变
+- Recon 客户端回传报告时会按客户端 Project 归属保存：已归属客户端写入 Project 目录并保留原始 `SIREN_*.md` 文件名，未归属客户端继续写入全局工作目录
+- Dossier 左侧默认入口继续打开 `webui.dossierDir/report.md`；从 Project Artifacts 打开的 Markdown 报告仍可进入 Dossier 编辑，并保持文件和粘贴资源在 Project 目录内
+- 新增 `webui.projectsBaseDir` 配置和 `--webui-projects-base-dir` 参数，用于限制 Project 目录创建位置；Project 重命名只改显示名，不移动已有目录
 - AIR 配置改为 `air.providers.<name>` 结构，Claude 与 Codex 可分别配置 CLI 路径、模型、推理强度和额外参数；示例配置默认 Claude `claude-opus-4-8`，Codex `gpt-5.5` + `xhigh`，Codex 使用 `workspace-write` sandbox 与 `mcpApproval: approve`
 - WebUI AIR 继续使用结构化 `/api/air/stream` 会话；旧的浏览器 PTY AIR 路由已移除，服务端 REPL 的 `air` 命令保持原有交互式体验
 - AIR 状态展示补齐工具调用状态、Claude rate-limit 百分比和更清晰的流式错误提示，便于判断会话是否仍在运行
@@ -34,6 +42,8 @@ export const DateTag = ({ children }) => (
 - 修复客户端 Files 中指向目录的 symlink 被标记为普通文件的问题，浏览器文件树可继续按目录展开和下载
 - 修复 WebUI 进程分析错误状态不准确的问题：非 Linux 客户端返回 422，超时返回 504，其他通信失败返回 502
 - 修复 Recon 报告文件名校验，服务端只接受 `.md` 报告文件名，避免回传报告覆盖服务端工作目录中的非报告文件
+- 修复 Project 视图下 Recon 报告仍落到全局工作目录的问题
+- 修复移动端底部导航中 Files 与 Artifacts 标签重复的问题
 - 修复 Recon 文件完整性检查中的包管理器检测偏差，并移除 SSH 暴力破解排查命令中的异常字面量
 - 修复生成的 artifact 文件名可能包含 `:` 导致跨平台路径不兼容的问题
 - 修复部分协议输出和文件预览中的二进制内容识别边界，减少错误预览和挂起风险

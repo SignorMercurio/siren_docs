@@ -23,6 +23,8 @@ import { Card, Cards } from "fumadocs-ui/components/card";
 
 打开 [Web 控制台](/webui) 的 Investigations 页面，填写 UID、AccessKey ID（Region 可选，留空默认 `cn-hangzhou`）后点击 Run。调查完成后，页面会显示报告文件名和 Open Artifacts 按钮，可直接跳转到 Artifacts 页面阅读完整 Markdown 报告。
 
+AccessKey 调查不绑定客户端或 Project，报告始终写入 Global Artifacts，也就是 `siren_server` 当前工作目录。
+
 <Callout title="运行状态" type="info">
   AccessKey 调查由服务端调用 SOAR playbook 完成。WebUI 会显示真实的 playbook 运行状态；SOAR 内部子步骤不可见时不会展示虚构进度。
 </Callout>
@@ -39,7 +41,7 @@ import { Card, Cards } from "fumadocs-ui/components/card";
 
 1. 通过 SOAR 平台查询 AccessKey 的调用历史
 2. 生成包含调查结果的详细 Markdown 报告（包括调用时间、操作类型、源 IP 等）
-3. 将报告保存在服务端工作目录中，可通过 WebUI Artifacts 查看
+3. 将报告保存在服务端工作目录中，可通过 WebUI Global Artifacts 查看
 
 <Accordions>
   <Accordion title="示例输出">

@@ -14,7 +14,7 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 
 ### 准备凭证
 
-本地模式 `./siren recon` 会把当前主机生成的报告上传至 OSS，因此需要先[设置 OSS 访问凭证](/credential#设置-oss-访问凭证)。远程模式和 WebUI Recon 不需要 OSS，报告会保存到 SIREN 服务端工作目录，并可通过 Artifacts 查看。
+本地模式 `./siren recon` 会把当前主机生成的报告上传至 OSS，因此需要先[设置 OSS 访问凭证](/credential#设置-oss-访问凭证)。远程模式和 WebUI Recon 不需要 OSS，报告会保存到 SIREN 服务端 Artifacts，并可通过 WebUI 查看。
 
 </Step>
 <Step>
@@ -39,12 +39,16 @@ Web 控制台 -> Investigations -> Recon -> 选择客户端 -> Start Recon
   在 WebUI 中运行 Recon 时，页面会展示服务端从客户端日志中解析出的阶段列表，例如 `Recon.Basic`、`Recon.User`、`Recon.Process`、`Save report to Artifacts`。报告生成后可通过 Open Artifacts 直接打开服务端本地保存的 Markdown 文件。
 </Callout>
 
+<Callout title="Project 作用域" type="info">
+  Recon 报告会保留客户端生成的原始 Markdown 文件名，通常形如 `SIREN_<host>_<timestamp>.md`，不会统一改名为 `report.md`。如果客户端已归属某个 WebUI Project，报告会写入该 Project 的固定目录；未归属客户端继续写入服务端当前工作目录。
+</Callout>
+
 </Step>
 <Step>
 
 ### 查看数据
 
-本地模式输出的 Markdown 可使用任何 Markdown 阅读器/编辑器打开。远程模式和 WebUI 生成的报告会保存在服务端工作目录中，可直接从 WebUI 的 Artifacts 页面打开、预览或下载。
+本地模式输出的 Markdown 可使用任何 Markdown 阅读器/编辑器打开。远程模式和 WebUI 生成的报告会保存在服务端 Artifacts 中，可直接从 WebUI 的 Artifacts 页面打开、预览或下载。Global 视图查看服务端工作目录；Project 视图查看当前 Project 目录。
 
 </Step>
 </Steps>

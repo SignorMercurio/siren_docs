@@ -45,6 +45,10 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 | `run` | `client_id`, `command` | 在指定客户端上执行命令并返回结果（超时跟随 `recon.commandTimeout` 并保留额外缓冲，50KB 上限），支持对同一客户端并发执行 |
 | `get_alarm_detail` | `uid`, `event_id` | 通过 SOAR 平台获取指定的安全告警详情，返回告警类型、攻击源、受影响资产等 |
 
+<Callout title="WebUI Project 作用域" type="info">
+  直接访问 `/mcp` 的外部 MCP 客户端保持全局行为，`ls` 会列出所有已连接客户端。WebUI AIR 在 Project 视图下会为本次会话注入带 Project 上下文的 SIREN MCP：`ls` 只列出当前 Project 客户端，`run` 会拒绝不属于当前 Project 的客户端。
+</Callout>
+
 <Callout title="慢命令超时" type="info">
   如果需要让 MCP / AIR 执行更慢的排查命令，请在服务端和客户端配置中保持 `recon.commandTimeout` 一致或至少让服务端等待时间不短于客户端执行时间。
 </Callout>
