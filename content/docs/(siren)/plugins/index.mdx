@@ -15,8 +15,8 @@ import { Card, Cards } from "fumadocs-ui/components/card";
 
 | 类型 | 配置开关 | 调用方式 |
 | --- | --- | --- |
-| `command` | `plugins.<name>` | 作为独立命令按需调用，输出立即返回 |
 | `recon` | `recon.<name>` | 在运行[信息收集](/recon)时自动执行，结果并入 Recon 报告 |
+| `command` | `plugins.<name>` | 作为独立命令按需调用，输出立即返回 |
 
 <Callout title="插件名称规则" type="info">
   插件名称必须为 1–128 个字符，且只能包含字母、数字、短横线（`-`）和下划线（`_`）。
@@ -73,8 +73,10 @@ SIREN 仓库提供了两个示例插件，可作为开发参考：
 
 | 插件 | 类型 | 说明 | 调用方式 |
 | --- | --- | --- | --- |
-| `jdump` | `command` | 导出 Java 进程的堆内存 | 本地 `jdump <PID>`；远程 `jdump <Client ID> <PID>` |
-| `chkrootkit` | `recon` | 运行 chkrootkit 检测 Rootkit | 启用后随 `recon` 自动执行 |
+| [`chkrootkit`](/plugins/recon/chkrootkit) | `recon` | 运行 chkrootkit 检测 Rootkit | 启用后随 `recon` 自动执行 |
+| [`jdump`](/plugins/command/jdump) | `command` | 获取 Java 进程的堆转储文件 | 本地 `jdump <PID>`；远程 `jdump <Client ID> <PID>` |
+
+查看全部已支持插件见[插件列表](/plugins/list)。
 
 ## 插件开发
 
@@ -94,25 +96,21 @@ SIREN 仓库提供了两个示例插件，可作为开发参考：
 }
 ```
 
-| 字段 | 说明 |
-| --- | --- |
-| `name` | 插件名称，须符合上文的命名规则 |
-| `version` | 插件版本 |
-| `type` | `command` 或 `recon` |
-| `description` | 插件描述 |
-| `usage` | 远程模式（服务端 REPL）下的用法提示 |
-| `clientUsage` | 本地模式（客户端 CLI）下的命令用法 |
-| `platforms` | 支持的平台列表，如 `linux_amd64`、`linux_arm64`、`darwin_arm64` |
-| `entrypoint` | 入口可执行文件名 |
-| `setup` | 可选，安装时执行的脚本文件名 |
-
 <Callout title="安全约束" type="warn">
   `entrypoint` 与 `setup` 必须是纯文件名，不能包含路径分隔符或 `..`。SIREN 在加载与下载前会校验清单，校验不通过的插件会被跳过，以防被篡改的清单触发任意路径写入。
 </Callout>
 
+完整的 `manifest.json` 字段说明、支持平台列表和开发流程见[插件开发指南](/plugins/development)。
+
 ## 相关内容
 
 <Cards>
+  <Card title="插件列表" href="/plugins/list">
+    查看当前可用的全部插件
+  </Card>
+  <Card title="插件开发指南" href="/plugins/development">
+    了解 manifest.json 字段、支持平台与发布流程
+  </Card>
   <Card title="信息收集" href="/recon">
     recon 类型插件会并入信息收集报告
   </Card>

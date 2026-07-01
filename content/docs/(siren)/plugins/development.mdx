@@ -30,7 +30,7 @@ SIREN 插件是独立的可执行文件，通过标准输入/输出与 SIREN 交
 {
   "name": "myplugin",
   "version": "1.0.0",
-  "type": "recon",
+  "type": "command",
   "description": "A brief description of the plugin",
   "usage": "myplugin <Client ID> [args]",
   "clientUsage": "myplugin [args]",
@@ -49,7 +49,7 @@ SIREN 插件是独立的可执行文件，通过标准输入/输出与 SIREN 交
 | `type` | string | 是 | 插件类型：`recon`（信息收集）或 `command`（命令） |
 | `description` | string | 是 | 插件功能描述 |
 | `usage` | string | 否 | 远程模式下的使用说明（展示在服务端帮助信息中） |
-| `clientUsage` | string | 否 | 本地模式下的命令名称（command 插件使用，默认为 `name`） |
+| `clientUsage` | string | 否 | 本地模式下的使用说明，与 `usage` 类似但用于客户端 CLI（command 插件使用） |
 | `platforms` | []string | 是 | 支持的平台列表，格式为 `{os}_{arch}` |
 | `entrypoint` | string | 是 | 可执行文件名（不能包含路径分隔符） |
 | `setup` | string | 否 | 安装后的初始化脚本文件名 |
