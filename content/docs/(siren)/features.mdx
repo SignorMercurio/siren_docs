@@ -59,7 +59,7 @@ SIREN 将本地报告、服务端 Artifacts 和 Dossier 报告编辑分成不同
     <Card title="通信设置" icon={<Radio />} href="/config">配置客户端-服务端的连接地址、端口和 TLS 证书</Card>
     <Card title="WebUI 与 MCP 端口" icon={<Server />} href="/config#服务端配置">统一配置 WebUI 与 MCP 共享的监听地址和端口</Card>
     <Card title="Project 目录基准路径" icon={<FolderKanban />} href="/config#服务端配置">通过 webui.projectsBaseDir 限制 WebUI Project 目录创建位置</Card>
-    <Card title="Agentic 应急响应设置" icon={<Bot />} href="/config#服务端配置">配置 Claude / Codex Provider、模型和 prompt 模板</Card>
+    <Card title="Agentic 应急响应设置" icon={<Bot />} href="/config#服务端配置">配置 Claude / Codex Provider CLI 路径与 prompt 模板</Card>
 </Cards>
 
 ## 远程模式专属功能
@@ -87,7 +87,7 @@ SIREN 将本地报告、服务端 Artifacts 和 Dossier 报告编辑分成不同
     <Card title="Projects 工作区" icon={<FolderKanban />} href="/webui#projects">在 Global 与 Project 视图间切换，隔离客户端列表、操作目标和取证目录</Card>
     <Card title="账号鉴权" icon={<Lock />} href="/webui#账号鉴权">SQLite + bcrypt 账号登录，通过 CLI 管理用户</Card>
     <Card title="多标签 Shell" icon={<Terminal />} href="/webui#shells">WebSocket 承载的交互式终端，切换页面会话不中断</Card>
-    <Card title="浏览器内 AIR" icon={<Brain />} href="/webui#agentic-ir">选择 Claude 或 Codex，查看 AI 回复、工具调用和结果，并继续追问</Card>
+    <Card title="浏览器内 AIR" icon={<Brain />} href="/webui#agentic-ir">在浏览器内嵌终端里运行 Claude 或 Codex，会话托管在服务端、断连可重连</Card>
     <Card title="浏览器内调查" icon={<Key />} href="/webui#investigations">执行 AccessKey 调查、Recon 和进程分析，查看真实阶段进度并跳转报告</Card>
     <Card title="客户端文件浏览" icon={<FolderTree />} href="/webui#files">在线浏览客户端文件系统，支持预览、下载、目录打包和单文件上传</Card>
     <Card title="取证文件浏览" icon={<FolderTree />} href="/webui#artifacts">服务端 Artifacts 支持 Markdown 预览、Dossier 编辑、新建目录、上传、下载、重命名和删除</Card>

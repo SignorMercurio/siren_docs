@@ -16,9 +16,11 @@ Agentic 应急响应（AIR）让 AI Agent 自动化实施完整的应急响应�
 
 <Callout title="前置条件" type="warn">
   使用前需确保：
-  - 已在服务端配置文件中设置 `air.providers.<name>.cliPath`（Claude / Codex CLI 工具路径），详见[配置文件](/config#服务端配置)
+  - 已在服务端配置文件中设置对应 Provider 的 CLI 路径（`air.providers.<name>.cliPath`，Manual 模式也复用它），详见[配置文件](/config#服务端配置)
+  - WebUI 浏览器终端和浏览器 Shell 一样只受 WebUI 全局鉴权保护，无需单独开启
   - AIR 会使用 SIREN MCP 工具，请确认 [MCP 服务](/mcp#配置)已启用
-  - 服务端 REPL 的 `air` 命令需要 tmux；WebUI AIR 不依赖 tmux
+  - 模型、推理强度、权限、沙箱与审批沿用 Claude Code / Codex 自身的配置，SIREN 不再覆盖
+  - 服务端 REPL 的 `air` 命令需要 tmux；WebUI 浏览器终端不依赖 tmux
   - （仅告警事件模式）已设置 [SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)
 </Callout>
 
@@ -66,12 +68,19 @@ Agentic 应急响应（AIR）让 AI Agent 自动化实施完整的应急响应�
 
 ### WebUI AIR
 
-在 [Web 控制台](/webui#agentic-ir) 的 Agentic IR 页面中选择客户端后，也可以使用告警事件模式或自定义 Prompt 启动 AIR。WebUI 支持选择 Claude 或 Codex Provider，会按顺序展示 AI 回复、工具调用和结果，并支持在同一会话中继续追问。
+在 [Web 控制台](/webui#agentic-ir) 的 Agentic IR 页面中，AIR 直接以浏览器内嵌终端运行真实的 Claude Code / Codex TUI。选择 Provider（Claude 或 Codex）后，可用以下入口模式启动会话：
 
-也可以切换到 Resume 模式，恢复当前 WebUI 视图工作目录对应的历史会话。Global 视图使用 `siren_server` 工作目录；Project 视图使用该 Project 的固定目录。Claude 会读取 Claude Code history；Codex 会读取对应目录下的 Codex session history。WebUI 只展示解析后的历史消息，不会向浏览器暴露本机 JSONL 文件路径。
+- **Manual**：启动不带 SIREN 上下文的裸 CLI 终端，用于临时的通用操作
+- **Custom**：选择客户端并输入自定义 prompt
+- **Event**：选择客户端并输入阿里云 UID + 云安全中心告警 ID，自动拉取告警详情
+- **Resume**：恢复当前 WebUI 视图工作目录对应的历史会话
+
+会话托管在服务端并持续运行：刷新浏览器、切换页面或短暂断连后可重新接入并回放此前的终端输出，Agent 进程不中断。除 Manual 外，SIREN 只为会话注入项目作用域的 SIREN MCP 服务、种子 prompt 和恢复会话 ID；模型、推理强度、权限、沙箱和审批都沿用操作者自己的 Claude Code / Codex 配置。
+
+Resume 模式下，Global 视图使用 `siren_server` 工作目录，Project 视图使用该 Project 的固定目录；Claude 读取 Claude Code history，Codex 读取对应目录下的 Codex session history。History 列表以最初的 prompt 作为标题供选择，选中后用原 session ID 在终端中继续该会话，不会向浏览器暴露本机 JSONL 文件路径。
 
 <Callout title="Project 作用域" type="info">
-  在 Project 视图下启动 WebUI AIR 时，Provider working directory 会切到当前 Project 目录，历史会话也只按该目录过滤。WebUI 注入的 SIREN MCP 工具只会列出当前 Project 客户端，并拒绝对其他 Project 客户端执行命令。Global 视图保持全局行为。
+  在 Project 视图下启动 WebUI AIR 时，Provider working directory 会切到当前 Project 目录，历史会话也只按该目录过滤。SIREN 注入的 MCP 工具只会列出当前 Project 客户端，并拒绝对其他 Project 客户端执行命令。Global 视图保持全局行为。
 </Callout>
 
 服务端 REPL 的 `air` 命令仍保持 tmux 中的交互式体验，适合直接登录控制主机时使用。
@@ -90,7 +99,7 @@ SIREN 通过 SOAR 平台获取指定安全告警的详细信息，包括告警�
 
 ### 启动 AI Agent
 
-将告警信息和预定义 prompt 一起传递给配置的大模型 CLI，在服务端启动 Agent。服务端 REPL 模式使用 tmux 新面板；WebUI 模式会按所选 Provider 启动 Claude 或 Codex，并把运行过程整理成浏览器中的会话视图。
+将告警信息和预定义 prompt 一起传递给配置的大模型 CLI，在服务端启动 Agent。服务端 REPL 模式使用 tmux 新面板；WebUI 模式会按所选 Provider 在浏览器内嵌终端中启动 Claude 或 Codex 的真实 TUI，会话托管在服务端并可断连重连。
 
 </Step>
 <Step>

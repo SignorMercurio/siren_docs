@@ -10,6 +10,29 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.12.0 <DateTag>2026-07-01</DateTag>
+
+### Feature
+
+- **WebUI Agentic IR 改为浏览器内嵌终端**：Agentic IR 页面直接在浏览器中运行真实的 Claude Code / Codex 终端（TUI），替代原先的结构化对话视图；可以像在本地终端一样与 Agent 交互、回答其提问并查看完整输出
+- **AIR 会话由服务端托管并持续运行**：刷新浏览器、切换页面或短暂断连后可重新接入并回放此前的终端输出，Agent 进程不中断；仅在主动停止或进程自身结束后才回收
+- **Agentic IR 入口整合为 Manual / Custom / Event / Resume 四种模式**：Manual 启动不带 SIREN 上下文的裸 Claude / Codex 终端用于临时 CLI 操作，Custom 传入自定义 prompt，Event 拉取告警事件，Resume 恢复历史会话；四种模式均可选择 Claude 或 Codex Provider
+- **WebUI 浏览器终端零额外配置**：与浏览器 Shell 一致，只受 WebUI 全局鉴权保护，复用 `air.providers.<name>` 的 CLI 配置(Manual 模式取 `cliPath` + `args`)，没有单独的 enable / 鉴权 / Provider 开关
+
+### Improvement
+
+- **AIR 不再替操作者决定大模型 CLI 的行为**：SIREN 只注入项目作用域的 SIREN MCP 服务、种子 prompt 与恢复会话 ID；模型、推理强度、权限、沙箱、审批（含 MCP 工具审批）一律沿用操作者自己的 Claude Code / Codex 配置
+- **精简 AIR 配置**：移除 `air.providers.claude` 的 `model` / `effort` / `allowedTools` 与 `air.providers.codex` 的 `model` / `effort` / `sandbox` / `approval` / `mcpApproval` / `enabledTools`；Claude 仅保留 `cliPath` / `strictMCPConfig` / `args`，Codex 仅保留 `cliPath` / `args`。`strictMCPConfig` 现在只作用于 WebUI 终端注入的 `--mcp-config`
+- 移除旧的结构化 AIR 会话接口 `/api/air/stream` 与浏览器端对话组件，改由内嵌终端承载
+- Running / History 列表以最初的 prompt 作为主标题（时间随后展示）；恢复某条历史会话后，它会从 History 去重并出现在 Running，标题沿用原 prompt
+- 服务端 REPL 的 `air` 命令继续保持 tmux 交互式体验，并同样改为继承环境的 MCP 配置（不再单独传 `--strict-mcp-config`）
+- Agentic IR 表单控件（含 Client 选择器）统一为深色设计系统样式
+
+### Bugfix
+
+- 修复切换到尚未在服务端创建目录的 Project 时，Agentic IR 历史列表报 `resolve project directory ... no such file or directory` 的问题；此类 Project 现在展示为空历史
+- 修复停止已自行结束的 AIR 会话时可能返回错误的问题（终端关闭改为幂等）
+
 ## v2.11.0 <DateTag>2026-06-29</DateTag>
 
 ### Feature

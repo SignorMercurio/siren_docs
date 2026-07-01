@@ -93,34 +93,18 @@ mcp:
     # ...more destructive-action patterns
 
 air:
-  provider: claude                             # 默认 WebUI AIR Provider：claude / codex
+  # 服务端 REPL air 命令与 WebUI 浏览器终端的默认 Provider；也可逐会话在页面上选择
+  provider: claude                             # claude / codex
   prompt: 启动安全应急响应，UID：%s，...        # 告警事件模式的 prompt 模板
   customPromptPrefix: 在 SIREN Client %d 上...  # 自定义 prompt 模式的前缀
+  # providers.<name> 同时用于 SIREN 上下文 AIR（注入 MCP）与 Manual 裸终端
   providers:
     claude:
       cliPath: claude                          # Claude Code CLI 路径
-      model: claude-opus-4-8
-      strictMCPConfig: true
-      allowedTools:
-        - mcp__siren__ls
-        - mcp__siren__run
-        - mcp__siren__get_alarm_detail
-        - Read
-        - Bash(ls *)
-        - Bash(grep *)
-      effort: xhigh
+      strictMCPConfig: true                    # 仅 WebUI 终端：注入 --mcp-config 时是否只暴露 SIREN MCP
       args: []                                 # 额外 Claude CLI 参数
     codex:
       cliPath: codex                           # Codex CLI 路径
-      model: gpt-5.5
-      effort: xhigh
-      sandbox: workspace-write
-      approval: never
-      mcpApproval: approve
-      enabledTools:
-        - ls
-        - run
-        - get_alarm_detail
       args: []                                 # 额外 Codex CLI 参数
 ```
 
@@ -140,26 +124,19 @@ air:
 | `webui.projectsBaseDir` | string | `""`（服务端当前工作目录） | WebUI Project 目录创建基准路径。创建 Project 时只允许在该目录下创建一个 basename 子目录；Project 重命名不会移动目录，删除 Project 只删除元数据并保留目录文件 |
 | `mcp.enabled` | bool | `true` | 是否启用 [MCP 服务](/mcp)，独立于 `webui.enabled` |
 | `mcp.cmdBlacklist` | list | 见 [MCP 集成](/mcp#命令黑名单) | MCP `run` 工具的命令黑名单，值为正则表达式列表 |
-| `air.provider` | string | `claude` | WebUI [Agentic 应急响应](/air)默认使用的 Provider，可选 `claude` 或 `codex`；页面中也可在每次启动会话时选择 |
+| `air.provider` | string | `claude` | AIR 历史会话与服务端 REPL `air` 命令默认使用的 Provider，可选 `claude` 或 `codex`；WebUI 终端页面中也可在每次启动会话时选择 |
 | `air.prompt` | string | - | 告警事件模式下的 prompt 模板，依次填入 `%s` UID、`%s` 安全中心告警 ID、`%d` Client ID（告警 ID 即 `air` 命令的 Security Center Alert ID，详见 [Agentic 应急响应](/air)） |
 | `air.customPromptPrefix` | string | - | 自定义 prompt 模式下的前缀（支持 `%d` Client ID） |
-| `air.providers.claude.cliPath` | string | `claude` | Claude Code CLI 路径；服务端 REPL 的 `air` 命令也使用 Claude Provider 配置 |
-| `air.providers.claude.model` | string | `claude-opus-4-8` | Claude Provider 使用的模型 |
-| `air.providers.claude.strictMCPConfig` | bool | `true` | 是否对 Claude Code 启用严格 MCP 配置 |
-| `air.providers.claude.allowedTools` | list | 见示例 | Claude Provider 允许调用的工具列表 |
-| `air.providers.claude.effort` | string | `xhigh` | 传递给 Claude CLI 的推理强度 |
+| `air.providers.claude.cliPath` | string | `claude` | Custom / Event / Resume 模式的 Claude Code CLI 路径；服务端 REPL 的 `air` 命令也使用该配置 |
+| `air.providers.claude.strictMCPConfig` | bool | `true` | 仅作用于 WebUI 终端：SIREN 注入 `--mcp-config` 时，`true` 只暴露 SIREN MCP 服务，`false` 同时加载环境已有的 MCP 配置；tmux REPL 忽略此项 |
 | `air.providers.claude.args` | list | `[]` | 传递给 Claude CLI 的额外参数 |
-| `air.providers.codex.cliPath` | string | `codex` | Codex CLI 路径 |
-| `air.providers.codex.model` | string | `gpt-5.5` | Codex Provider 使用的模型 |
-| `air.providers.codex.effort` | string | `xhigh` | Codex 推理强度 |
-| `air.providers.codex.sandbox` | string | `workspace-write` | Codex 沙箱模式 |
-| `air.providers.codex.approval` | string | `never` | Codex approval 模式 |
-| `air.providers.codex.mcpApproval` | string | `approve` | Codex 访问 SIREN MCP 工具时使用的默认审批模式 |
-| `air.providers.codex.enabledTools` | list | `ls`, `run`, `get_alarm_detail` | Codex AIR 注入的 SIREN MCP 工具 |
+| `air.providers.codex.cliPath` | string | `codex` | Custom / Event / Resume 模式的 Codex CLI 路径 |
 | `air.providers.codex.args` | list | `[]` | 传递给 Codex CLI 的额外参数 |
 
-<Callout title="v2.10.2 AIR 配置更新" type="info">
-  AIR CLI 配置已统一放到 `air.providers.<name>` 下。旧的 `air.cliPath` / `air.args` 不再作为 WebUI AIR 的配置入口；升级后请按上方示例迁移到 `air.providers.claude.*` 或 `air.providers.codex.*`。
+> WebUI 浏览器终端复用上面的 `air.providers.<name>`（Manual 模式取 `cliPath` + `args`），无需单独配置；Provider 在每次启动会话时选择，默认 Claude。它和浏览器 Shell 一样只受 WebUI 全局鉴权保护。
+
+<Callout title="v2.12.0 AIR 配置更新" type="info">
+  AIR 改为浏览器内嵌终端后，SIREN 不再覆盖大模型 CLI 的行为：`air.providers.claude` 的 `model` / `effort` / `allowedTools` 与 `air.providers.codex` 的 `model` / `effort` / `sandbox` / `approval` / `mcpApproval` / `enabledTools` 均已移除，改由 Claude Code / Codex 自身配置决定。如需对 Claude 限定拒绝调用的工具，可选配 `air.providers.claude.disallowedTools`。WebUI 浏览器终端不再有独立配置块：它复用 `air.providers.<name>` 并与浏览器 Shell 一样只受 WebUI 全局鉴权保护，因此原 `agentTerminal.*`（`enabled` / `requireAuth` / `allowWithoutAuth` / `defaultProvider` / `replayBufferBytes` / `providers`）已全部移除。
 </Callout>
 
 <Callout title="v1.x 升级提示" type="warn">

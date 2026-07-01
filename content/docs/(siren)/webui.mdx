@@ -142,20 +142,21 @@ Projects 页面支持：
 
 ### Agentic IR
 
-在浏览器里启动 AI Agent 完成 [Agentic 应急响应](/air)。支持选择 Claude 或 Codex Provider，新建会话，或恢复当前视图工作目录对应的历史会话。
+在浏览器内嵌终端里运行 Claude Code / Codex 完成 [Agentic 应急响应](/air)。支持选择 Claude 或 Codex Provider，新建会话，或恢复当前视图工作目录对应的历史会话。
 
-选择目标客户端后可选两种新建模式：
+新建会话可选以下入口模式：
 
-- **告警事件模式**：输入阿里云 UID + 云安全中心告警 ID，自动拉取告警详情
-- **自定义 Prompt**：自由输入应急响应指令
+- **Manual**：不带 SIREN 上下文的裸 CLI 终端，用于临时的通用操作
+- **Custom**：选择客户端并自由输入应急响应指令
+- **Event**：选择客户端并输入阿里云 UID + 云安全中心告警 ID，自动拉取告警详情
 
-也可以切换到 **Resume** 模式，搜索并选择当前视图工作目录对应的历史会话。WebUI 会先展示解析出的历史 user / assistant 消息，再用原 session ID 继续会话。
+也可以切换到 **Resume** 模式，搜索并选择当前视图工作目录对应的历史会话，用原 session ID 在终端中继续该会话。
 
 <Callout title="恢复范围" type="info">
   Resume 只读取当前视图工作目录对应的 Provider history，不会跨 Project 列出其他目录的历史会话，也不会向浏览器暴露本机 JSONL 文件路径。
 </Callout>
 
-页面会按顺序展示 AI 回复、工具调用和结果，并支持在同一会话继续追问。WebUI AIR 会使用 SIREN MCP 工具，请确认 [MCP 服务](/mcp#配置)已启用。Project 视图下的工作目录、历史恢复和 MCP scope 规则见 [Agentic 应急响应](/air#webui-air)。WebUI AIR 不依赖 tmux，服务端 REPL 的 `air` 命令仍保持原有交互式体验。
+会话托管在服务端并持续运行，刷新或切换页面后可重新接入并回放此前输出，进程不中断。除 Manual 外，SIREN 会为会话注入项目作用域的 SIREN MCP 服务，请确认 [MCP 服务](/mcp#配置)已启用；模型、权限、沙箱等沿用大模型 CLI 自身配置。Project 视图下的工作目录、历史恢复和 MCP scope 规则见 [Agentic 应急响应](/air#webui-air)。WebUI 浏览器终端不依赖 tmux，服务端 REPL 的 `air` 命令仍保持原有交互式体验。
 
 ### Investigations
 

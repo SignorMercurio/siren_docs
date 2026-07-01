@@ -96,18 +96,18 @@ icon: FolderTree
         <File name="webui.go" desc="共享 HTTP 服务与路由（含 /mcp）" />
         <File name="auth.go" desc="登录、会话与鉴权中间件" />
         <File name="webui_shell.go" desc="WebSocket 交互式 Shell" />
-        <File name="webui_air_stream.go" desc="结构化 AIR WebSocket 接口" />
+        <File name="webui_agent_terminal.go" desc="浏览器 Agent 终端 WebSocket 接口" />
         <File name="webui_air_history.go" desc="AIR 历史会话接口" />
         <File name="webui_artifacts.go" desc="Artifacts 浏览与管理接口" />
         <File name="webui_projects.go" desc="Projects 管理与客户端归属接口" />
         <File name="webui_soar.go" desc="allow/deploy/clean/AccessKey 调查接口" />
         <File name="..." desc="其他 webui_*.go 接口与 frontend/ 前端" />
       </Folder>
-      <File name="air.go" desc="Agentic 应急响应功能实现" />
-      <File name="air_provider.go" desc="AIR Provider 分发实现" />
-      <File name="air_codex.go" desc="Codex AIR Provider 与事件转换实现" />
-      <File name="air_headless.go" desc="无头（WebUI）AIR 会话实现" />
-      <File name="air_history.go" desc="AIR 历史会话恢复实现" />
+      <File name="agent_session_registry.go" desc="浏览器 Agent 终端会话注册表（PTY 复用与断连重连回放）" />
+      <File name="agent_terminal.go" desc="Agent 终端运行时与 Provider 配置" />
+      <File name="air.go" desc="Agentic 应急响应 prompt 构建" />
+      <File name="air_terminal_cmd.go" desc="AIR 终端命令构建（MCP 注入、种子 prompt、resume）" />
+      <File name="air_history.go" desc="AIR 历史会话列表与恢复实现" />
       <File name="info_requests.go" desc="WebUI 进程分析请求转发实现" />
       <File name="client.go" desc="服务端的 Client 对象相关实现" />
       <File name="client_files.go" desc="客户端文件浏览与拉取实现" />
