@@ -23,7 +23,7 @@ SIREN Server REPL 提供了完整的命令集，用于管理客户端、下发�
 | `deploy` | `deploy <UID> <Instance ID> [Public IP]` | 通过云助手部署客户端 | [快速开始](/index) |
 | `deploy-batch` | `deploy-batch <UID> <instanceId[,publicIp[,note]]>...` | 批量部署（2–20 台） | [快速开始](/index) |
 | `shell` | `shell <Client ID>` | 启动交互式远程 Shell | [远程模式](/remote#远程命令执行) |
-| `run` | `run <Client ID> <Command>` | 在客户端执行单条命令并返回结果 | [本页](#在客户端执行命令) |
+| `run` | `run <Client ID> <Command>` | 在客户端执行单条命令并返回结果 | [远程模式](/remote#单条命令执行) |
 | `air` | `air <Client ID> <UID> <Alert ID>`／`air <Client ID> <Prompt>` | 启动 Agentic 应急响应 | [Agentic 应急响应](/air) |
 | `recon` | `recon <Client ID>` | 启动自动化信息收集 | [信息收集](/recon) |
 | `ak` | `ak <UID> <AccessKey ID> [Region]` | 调查 AccessKey 调用历史 | [AccessKey 调查](/ak) |
@@ -40,15 +40,6 @@ SIREN Server REPL 提供了完整的命令集，用于管理客户端、下发�
 | `clear` | `clear` | 清屏 | — |
 | `help` | `help [command]` | 查看帮助（可指定命令查看详细用法） | — |
 | `exit` | `exit` | 退出并关闭服务端 | — |
-
-## 在客户端执行命令
-
-`run` 在指定客户端上执行单条命令并返回输出，适合非交互式的快速排查；需要持续交互（如 `vim`、`top`）时请改用 [`shell`](/remote#远程命令执行)。
-
-```bash title="SIREN Server"
->>> run 0 whoami
->>> run 1 ps aux
-```
 
 ## 重新加载客户端配置
 

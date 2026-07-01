@@ -45,7 +45,7 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
 <Steps>
 <Step>
 
-### 创建账号
+#### 创建账号
 
 ```bash title="控制主机"
 ./siren_server user add <username>
@@ -56,7 +56,7 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
 </Step>
 <Step>
 
-### 列出账号
+#### 列出账号
 
 ```bash title="控制主机"
 ./siren_server user list
@@ -65,7 +65,7 @@ WebUI 使用基于 Session Cookie 的账号鉴权机制，密码通过 bcrypt �
 </Step>
 <Step>
 
-### 删除账号
+#### 删除账号
 
 ```bash title="控制主机"
 ./siren_server user delete <username>
@@ -136,7 +136,7 @@ Projects 页面支持：
 
 ### Shells
 
-每个客户端可开启多个终端标签。底层通过 WebSocket 桥接到服务端，服务端再以 TLS 转发到受害主机 PTY。切换到其他页面（Clients/AIR/Artifacts）时 Shell 会话保持活动，回到 Shells 页可继续输入。
+每个客户端可开启多个终端标签。底层通过 WebSocket 桥接到服务端，服务端再以 TLS 转发到受害主机 PTY。切换到其他页面（Clients/Agentic IR/Artifacts）时 Shell 会话保持活动，回到 Shells 页可继续输入。
 
 在 Project 视图下，Shell 只能连接当前 Project 的客户端。切换 Project 或切回 Global 时，WebUI 会关闭不属于新视图的活动 Shell，避免继续操作错误项目中的主机。
 

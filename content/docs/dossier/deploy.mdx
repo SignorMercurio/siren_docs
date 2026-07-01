@@ -86,4 +86,4 @@ make dist
 
 如果 WebUI 通过 Nginx 或 Caddy 暴露，建议把同一域名完整转发到 SIREN WebUI 端口，包括 `/dossier/`、`/api/reports/*` 和 `/api/dossier/status`。
 
-只代理 `/dossier/` 会导致编辑器页面可访问，但保存正文、粘贴图片或读取默认报告失败。
+只代理 `/dossier/` 会导致编辑器页面可访问，但保存正文、粘贴图片或读取默认报告失败。`/api/dossier/status` 用于探测 `webui.dossierDir` 是否已正确配置并可用，未一并转发会导致编辑器误判 Dossier 不可用。

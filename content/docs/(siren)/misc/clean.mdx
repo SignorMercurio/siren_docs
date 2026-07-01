@@ -30,5 +30,5 @@ import { Callout } from "fumadocs-ui/components/callout";
 | 临时文件 | 运行期释放的 WinPTY 临时目录 `%TEMP%\winpty-*`（仅 Windows） |
 
 <Callout title="清理范围说明" type="info">
-  环境变量清理仅作用于当前运行的 SIREN 进程，不会移除写入 shell 配置或其他位置的持久化凭证，也不清除 `SOAR_ACCESS_KEY_*`。Windows 下可执行文件目录的删除为延迟执行：SIREN 进程退出后，由后台脚本完成目录与临时文件的清理。
+  环境变量清理仅作用于当前运行的 SIREN 进程，不会移除写入 shell 配置或其他位置的持久化凭证，也不清除 `SOAR_ACCESS_KEY_*`。清理完成后客户端进程会主动退出：Linux 下删除可执行文件目录后直接退出；Windows 下可执行文件目录的删除为延迟执行，进程先退出，再由后台脚本完成目录与临时文件的清理。
 </Callout>
