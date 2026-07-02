@@ -6,18 +6,20 @@ icon: Cog
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-SIREN 客户端与服务端均支持通过 YAML 配置文件进行自定义设置。
+SIREN 客户端与服务端启动时都会读取 YAML 配置文件。找不到配置文件时会直接退出，因此建议把客户端配置保存为 `config.yaml`，服务端配置保存为 `server_config.yaml`。
 
-### 配置文件查找顺序
+## 查找顺序
 
 启动时，SIREN 会按以下顺序查找配置文件（找到即停止）：
 
-1. 通过 `-c`/`--config` 参数指定的路径
+1. `-c` / `--config` 指定的路径
 2. 当前工作目录下的 `config.yaml`（客户端）或 `server_config.yaml`（服务端）
-3. `./config/` 目录下的 `config.yaml` 或 `server_config.yaml`
+3. 当前工作目录的 `config/` 子目录
+
+部分命令行参数会覆盖对应配置项。客户端远程模式可用 `siren client -s/-p` 指定服务端地址和端口；服务端可用 `siren_server -l/-p --cert --key --webui-dossier-dir --webui-projects-base-dir` 覆盖常用启动项。
 
 <Callout title="敏感信息" type="warn">
-  配置文件中**不包含**任何敏感凭证信息（如 AccessKey、API Key 等），所有凭证均通过环境变量设置，详见[凭证设置](/credential)。
+  不要把 AccessKey、API Key 等敏感凭证写入配置文件。OSS 与 SOAR 凭证均通过环境变量读取，详见[凭证设置](/credential)。
 </Callout>
 
 ## 客户端配置
@@ -35,11 +37,11 @@ oss:
   region: cn-hongkong                       # OSS Bucket Region
   bucketName: ir-transfer-station           # OSS Bucket 名称
   objectPath: tmp/siren_upload              # 本地 upload 文件上传路径
-  docObjectPath: tmp/siren_upload/docs      # 本地 recon 文档上传路径
+  docObjectPath: tmp/siren_upload/docs/latest # 本地 recon 文档上传路径前缀
 
 plugins:
   marketplace: https://example.com/plugins  # 插件市场地址
-  jdump: true                               # 启用 jdump 插件
+  jdump: true                               # command 插件开关示例
 
 rules:                                      # 信息收集规则
   IPWhitelist: 140\.205\.11\.\d+|8\.147\.237\.0
@@ -53,17 +55,17 @@ rules:                                      # 信息收集规则
 | `server` | string | `127.0.0.1` | 远程模式下连接的服务端地址 |
 | `port` | int | `443` | 远程模式下连接的服务端端口 |
 | `recon.commandTimeout` | int | `30` | 信息收集和客户端远程命令执行的基础超时时间（秒）；MCP / AIR 慢命令建议服务端也设置相同值 |
-| `recon.<module>` | bool | `true` | 各信息收集模块的开关（如 `user`、`process`、`network` 等），完整列表见[信息收集模块](/recon#信息收集模块) |
+| `recon.<module>` | bool | 示例配置为 `true` | 内置信息收集模块或 recon 类型插件的开关（如 `user`、`process`、`network` 等），完整列表见[信息收集模块](/recon#信息收集模块)。未设置时不会执行 |
 | `oss.region` | string | - | OSS Bucket 所在地域 |
 | `oss.bucketName` | string | - | OSS Bucket 名称 |
 | `oss.objectPath` | string | `tmp/siren_upload` | 本地 `siren upload` 的 OSS 路径前缀 |
-| `oss.docObjectPath` | string | `tmp/siren_upload/docs` | 本地 `siren recon` 文档上传的 OSS 路径前缀 |
+| `oss.docObjectPath` | string | `tmp/siren_upload/docs/latest` | 本地 `siren recon` 文档上传的 OSS 路径前缀 |
 | `plugins.marketplace` | string | - | 插件市场 URL，用于下载和更新插件 |
-| `plugins.<name>` | bool | - | 启用或禁用指定的 command 类型插件 |
+| `plugins.<name>` | bool | - | 启用或禁用 command 类型插件；recon 类型插件使用 `recon.<name>` |
 | `rules` | map | - | 信息收集规则，值为正则表达式 |
 
 <Callout title="关于 rules" type="info">
-  `rules` 用于在信息收集结果中标记或过滤特定内容。例如 `IPWhitelist` 可以在网络连接信息中标识已知的白名单 IP 地址，减少排查噪音。规则值支持正则表达式，支持白名单（过滤已知正常项）和黑名单（高亮可疑项）两种类型。
+  `rules` 用于在信息收集结果中标记或过滤内容。白名单规则减少已知正常项带来的噪音，黑名单规则高亮可疑项；规则值使用正则表达式。
 </Callout>
 
 ## 服务端配置
@@ -80,7 +82,7 @@ webui:                                          # Web 控制台
   port: 8080                                    # 监听端口（WebUI 与 MCP 共享）
   userDBPath: data/users.db                     # 可选：WebUI 用户数据库路径
   dossierDir: /opt/siren/dossier                # 可选：Dossier 编辑器文件目录
-  projectsBaseDir: /opt/siren/projects          # 可选：WebUI Project 目录创建基准路径
+  projectsBaseDir: ""                           # 可选：Project 目录创建基准路径
 
 mcp:
   enabled: true                                 # 是否启用 MCP 服务
@@ -93,15 +95,14 @@ mcp:
     # ...more destructive-action patterns
 
 air:
-  # 服务端 REPL air 命令与 WebUI 浏览器终端的默认 Provider；也可逐会话在页面上选择
+  # WebUI AIR 与 Agent 终端的默认 Provider；也可逐会话在页面上选择
   provider: claude                             # claude / codex
   prompt: 启动安全应急响应，UID：%s，...        # 告警事件模式的 prompt 模板
   customPromptPrefix: 在 SIREN Client %d 上...  # 自定义 prompt 模式的前缀
-  # providers.<name> 同时用于 SIREN 上下文 AIR（注入 MCP）与 Manual 裸终端
+  # providers.<name> 用于 WebUI AIR、Manual 裸终端和服务端 REPL air 命令
   providers:
     claude:
       cliPath: claude                          # Claude Code CLI 路径
-      strictMCPConfig: true                    # 仅 WebUI 终端：注入 --mcp-config 时是否只暴露 SIREN MCP
       args: []                                 # 额外 Claude CLI 参数
     codex:
       cliPath: codex                           # Codex CLI 路径
@@ -124,19 +125,18 @@ air:
 | `webui.projectsBaseDir` | string | `""`（服务端当前工作目录） | WebUI Project 目录创建基准路径。创建 Project 时只允许在该目录下创建一个 basename 子目录；Project 重命名不会移动目录，删除 Project 只删除元数据并保留目录文件 |
 | `mcp.enabled` | bool | `true` | 是否启用 [MCP 服务](/mcp)，独立于 `webui.enabled` |
 | `mcp.cmdBlacklist` | list | 见 [MCP 集成](/mcp#命令黑名单) | MCP `run` 工具的命令黑名单，值为正则表达式列表 |
-| `air.provider` | string | `claude` | AIR 历史会话与服务端 REPL `air` 命令默认使用的 Provider，可选 `claude` 或 `codex`；WebUI 终端页面中也可在每次启动会话时选择 |
-| `air.prompt` | string | - | 告警事件模式下的 prompt 模板，依次填入 `%s` UID、`%s` 安全中心告警 ID、`%d` Client ID（告警 ID 即 `air` 命令的 Security Center Alert ID，详见 [Agentic 应急响应](/air)） |
-| `air.customPromptPrefix` | string | - | 自定义 prompt 模式下的前缀（支持 `%d` Client ID） |
-| `air.providers.claude.cliPath` | string | `claude` | Custom / Event / Resume 模式的 Claude Code CLI 路径；服务端 REPL 的 `air` 命令也使用该配置 |
-| `air.providers.claude.strictMCPConfig` | bool | `true` | 仅作用于 WebUI 终端：SIREN 注入 `--mcp-config` 时，`true` 只暴露 SIREN MCP 服务，`false` 同时加载环境已有的 MCP 配置；tmux REPL 忽略此项 |
+| `air.provider` | string | `claude` | WebUI AIR 与 Agent 终端默认 Provider，可选 `claude` 或 `codex`；页面中也可在每次启动会话时选择。服务端 REPL 的 `air` 命令固定使用 Claude Provider 配置 |
+| `air.prompt` | string | 见示例配置 | 告警事件模式下的 prompt 模板，依次填入 `%s` UID、`%s` 安全中心告警 ID、`%d` Client ID（告警 ID 即 `air` 命令的 Security Center Alert ID，详见 [Agentic 应急响应](/air)） |
+| `air.customPromptPrefix` | string | 见示例配置 | 自定义 prompt 模式下的前缀（支持 `%d` Client ID） |
+| `air.providers.claude.cliPath` | string | `claude` | WebUI Claude Provider 和服务端 REPL `air` 命令使用的 Claude Code CLI 路径 |
 | `air.providers.claude.args` | list | `[]` | 传递给 Claude CLI 的额外参数 |
-| `air.providers.codex.cliPath` | string | `codex` | Custom / Event / Resume 模式的 Codex CLI 路径 |
+| `air.providers.codex.cliPath` | string | `codex` | WebUI Codex Provider 使用的 Codex CLI 路径 |
 | `air.providers.codex.args` | list | `[]` | 传递给 Codex CLI 的额外参数 |
 
-> WebUI 浏览器终端复用上面的 `air.providers.<name>`（Manual 模式取 `cliPath` + `args`），无需单独配置；Provider 在每次启动会话时选择，默认 Claude。它和浏览器 Shell 一样只受 WebUI 全局鉴权保护。
+> WebUI 浏览器终端复用 `air.providers.<name>`。Manual 模式只取 `cliPath` 和 `args`；Custom、Event、Resume 模式会额外注入 SIREN MCP、种子 prompt 或恢复会话 ID。它和浏览器 Shell 一样只受 WebUI 全局鉴权保护。
 
 <Callout title="v2.12.0 AIR 配置更新" type="info">
-  AIR 改为浏览器内嵌终端后，SIREN 不再覆盖大模型 CLI 的行为：`air.providers.claude` 的 `model` / `effort` / `allowedTools` 与 `air.providers.codex` 的 `model` / `effort` / `sandbox` / `approval` / `mcpApproval` / `enabledTools` 均已移除，改由 Claude Code / Codex 自身配置决定。如需对 Claude 限定拒绝调用的工具，可选配 `air.providers.claude.disallowedTools`。WebUI 浏览器终端不再有独立配置块：它复用 `air.providers.<name>` 并与浏览器 Shell 一样只受 WebUI 全局鉴权保护，因此原 `agentTerminal.*`（`enabled` / `requireAuth` / `allowWithoutAuth` / `defaultProvider` / `replayBufferBytes` / `providers`）已全部移除。
+  AIR 现在只保留 Provider、prompt、CLI 路径和额外参数。模型、权限、沙箱、审批等行为由 Claude Code / Codex 自身配置决定；旧版 AIR 细分字段和独立的 `agentTerminal.*` 配置块已移除，残留时不会生效。
 </Callout>
 
 <Callout title="v1.x 升级提示" type="warn">

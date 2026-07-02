@@ -14,62 +14,50 @@ export const DateTag = ({ children }) => (
 
 ### Feature
 
-- **WebUI Agentic IR 改为浏览器内嵌终端**：Agentic IR 页面直接在浏览器中运行真实的 Claude Code / Codex 终端（TUI），替代原先的结构化对话视图；可以像在本地终端一样与 Agent 交互、回答其提问并查看完整输出
-- **AIR 会话由服务端托管并持续运行**：刷新浏览器、切换页面或短暂断连后可重新接入并回放此前的终端输出，Agent 进程不中断；仅在主动停止或进程自身结束后才回收
-- **Agentic IR 入口整合为 Manual / Custom / Event / Resume 四种模式**：Manual 启动不带 SIREN 上下文的裸 Claude / Codex 终端用于临时 CLI 操作，Custom 传入自定义 prompt，Event 拉取告警事件，Resume 恢复历史会话；四种模式均可选择 Claude 或 Codex Provider
-- **WebUI 浏览器终端零额外配置**：与浏览器 Shell 一致，只受 WebUI 全局鉴权保护，复用 `air.providers.<name>` 的 CLI 配置(Manual 模式取 `cliPath` + `args`)，没有单独的 enable / 鉴权 / Provider 开关
+- **Agentic IR 改为浏览器内嵌终端**：可直接在 WebUI 中操作 Claude Code / Codex，回答提问并查看完整终端输出
+- **AIR 会话由服务端托管**：刷新页面、切换页面或短暂断连后，可重新接入并回放此前输出
+- **Agentic IR 入口整合为四种模式**：支持 Manual、Custom、Event 和 Resume，并可在 Claude / Codex 间选择 Provider
 
 ### Improvement
 
-- **AIR 不再替操作者决定大模型 CLI 的行为**：SIREN 只注入项目作用域的 SIREN MCP 服务、种子 prompt 与恢复会话 ID；模型、推理强度、权限、沙箱、审批（含 MCP 工具审批）一律沿用操作者自己的 Claude Code / Codex 配置
-- **精简 AIR 配置**：移除 `air.providers.claude` 的 `model` / `effort` / `allowedTools` 与 `air.providers.codex` 的 `model` / `effort` / `sandbox` / `approval` / `mcpApproval` / `enabledTools`；Claude 仅保留 `cliPath` / `strictMCPConfig` / `args`，Codex 仅保留 `cliPath` / `args`。`strictMCPConfig` 现在只作用于 WebUI 终端注入的 `--mcp-config`
-- 移除旧的结构化 AIR 会话接口 `/api/air/stream` 与浏览器端对话组件，改由内嵌终端承载
-- Running / History 列表以最初的 prompt 作为主标题（时间随后展示）；恢复某条历史会话后，它会从 History 去重并出现在 Running，标题沿用原 prompt
-- 服务端 REPL 的 `air` 命令继续保持 tmux 交互式体验，并同样改为继承环境的 MCP 配置（不再单独传 `--strict-mcp-config`）
-- Agentic IR 表单控件（含 Client 选择器）统一为深色设计系统样式
+- AIR 默认沿用操作者自己的 Claude Code / Codex 配置，不再替用户固定模型、权限或沙箱策略
+- AIR Provider 配置更简洁，只保留 CLI 路径和额外参数等必要项
+- Running / History 列表以原始 prompt 展示会话，恢复历史会话后会回到 Running
+- Agentic IR 表单和 Client 选择器统一为深色界面样式
 
 ### Bugfix
 
-- 修复切换到尚未在服务端创建目录的 Project 时，Agentic IR 历史列表报 `resolve project directory ... no such file or directory` 的问题；此类 Project 现在展示为空历史
-- 修复停止已自行结束的 AIR 会话时可能返回错误的问题（终端关闭改为幂等）
+- 修复切换到尚未创建目录的 Project 时，Agentic IR 历史列表报错的问题
+- 修复停止已结束 AIR 会话时可能返回错误的问题
 
 ## v2.11.0 <DateTag>2026-06-29</DateTag>
 
 ### Feature
 
-- **WebUI 新增 Projects 工作区**：可创建、重命名、删除 Project，并为每个 Project 固定一个服务端目录；Global 视图保留全局资源视角，Project 视图只显示和操作该 Project 的客户端与取证目录
-- **客户端 Project 归属管理**：Clients 列表可手动把客户端归属到某个 Project 或移回未归属；归属绑定客户端稳定 AgentID，客户端重连后继续生效
-- **Project 视图下部署自动归属**：在某个 Project 视图中执行 WebUI 单机或批量部署时，部署目标下一次连接会自动归属到该 Project；服务端 REPL 部署保持原有全局行为
-- **WebUI Agentic IR 支持 Claude / Codex Provider 选择**：新建或恢复 AIR 会话时可选择 Claude 或 Codex；Claude 仍是默认 Provider，Codex 会使用同一会话视图展示 AI 回复、工具调用和结果
-- **Artifacts 支持新建目录**：Artifacts 页面新增 New Folder 操作，可在当前目标目录下创建服务端目录，并复用同一套路径安全校验
-- **批量部署支持目标备注**：服务端 REPL 与 WebUI deploy-batch 目标格式扩展为 `instanceId[,publicIp[,note]]`，可在部署时为目标预置备注；只填写备注时可写成 `instanceId,,note`
+- **WebUI 新增 Projects 工作区**：可按项目隔离客户端、AIR 会话和服务端取证目录
+- **客户端支持 Project 归属管理**：可在 Clients 页面分配或移出 Project，客户端重连后继续保持归属
+- **Project 视图下部署自动归属**：在 Project 中发起 WebUI 部署后，新连接的目标会自动归入当前 Project
+- **Agentic IR 支持 Claude / Codex 选择**：新建或恢复 AIR 会话时可选择 Provider
+- **Artifacts 支持新建目录**：可在当前取证目录中创建子目录
+- **批量部署支持目标备注**：可在批量部署时为目标预置备注
 
 ### Improvement
 
-- Artifacts 支持 Project 作用域：Global 视图继续浏览 `siren_server` 工作目录；Project 视图只浏览该 Project 的固定目录，并沿用绝对路径、穿越、点文件、symlink 和特殊文件防护
-- WebUI AIR 在 Project 视图下使用 Project 目录作为 Provider working directory，并按该目录过滤历史会话；注入给 AIR 的 SIREN MCP 会限制 `ls` / `run` 只能访问当前 Project 客户端，Global MCP 行为不变
-- Recon 客户端回传报告时会按客户端 Project 归属保存：已归属客户端写入 Project 目录并保留原始 `SIREN_*.md` 文件名，未归属客户端继续写入全局工作目录
-- Dossier 左侧默认入口继续打开 `webui.dossierDir/report.md`；从 Project Artifacts 打开的 Markdown 报告仍可进入 Dossier 编辑，并保持文件和粘贴资源在 Project 目录内
-- 新增 `webui.projectsBaseDir` 配置和 `--webui-projects-base-dir` 参数，用于限制 Project 目录创建位置；Project 重命名只改显示名，不移动已有目录
-- AIR 配置改为 `air.providers.<name>` 结构，Claude 与 Codex 可分别配置 CLI 路径、模型、推理强度和额外参数；示例配置默认 Claude `claude-opus-4-8`，Codex `gpt-5.5` + `xhigh`，Codex 使用 `workspace-write` sandbox 与 `mcpApproval: approve`
-- WebUI AIR 继续使用结构化 `/api/air/stream` 会话；旧的浏览器 PTY AIR 路由已移除，服务端 REPL 的 `air` 命令保持原有交互式体验
-- AIR 状态展示补齐工具调用状态、Claude rate-limit 百分比和更清晰的流式错误提示，便于判断会话是否仍在运行
-- WebUI 进程分析详情面板展示更清晰，并限制为 Linux 客户端入口，避免 Windows 客户端触发不可用查询
-- 服务端 REPL 的 `note <Client ID>` 现在可省略备注内容来清空已有备注，同时保留多词备注
+- Artifacts、AIR、Recon 和 Dossier 均支持 Project 作用域，项目内报告、会话和粘贴资源会留在对应目录
+- 新增 `webui.projectsBaseDir` 和 `--webui-projects-base-dir`，用于设置 Project 目录基准路径
+- AIR 状态展示更清晰，便于判断会话是否仍在运行
+- WebUI 进程分析详情面板更易读，并只在 Linux 客户端上开放入口
+- 服务端 REPL 的 `note` 命令支持清空客户端备注
 
 ### Bugfix
 
-- 修复 MCP `run` 工具在慢命令场景下提前判定超时的问题；等待时间现在跟随 `recon.commandTimeout` 并保留额外缓冲
-- 加强 MCP `run` 默认命令黑名单：阻断 `find -delete`、`truncate`、`shred`、`wipefs`、块设备写入、服务重启/重载、防火墙清空、账号/组变更等破坏性操作，并检查 `sh` / `bash` / `dash` / `zsh` / `ksh -c '...'` 包装后的 payload
-- 修复 MCP 黑名单对普通引号说明文本的误报，例如 `echo "rm -rf /tmp/x"` 不再因为字符串内容被拒绝
-- 修复客户端 Files 中指向目录的 symlink 被标记为普通文件的问题，浏览器文件树可继续按目录展开和下载
-- 修复 WebUI 进程分析错误状态不准确的问题：非 Linux 客户端返回 422，超时返回 504，其他通信失败返回 502
-- 修复 Recon 报告文件名校验，服务端只接受 `.md` 报告文件名，避免回传报告覆盖服务端工作目录中的非报告文件
-- 修复 Project 视图下 Recon 报告仍落到全局工作目录的问题
-- 修复移动端底部导航中 Files 与 Artifacts 标签重复的问题
-- 修复 Recon 文件完整性检查中的包管理器检测偏差，并移除 SSH 暴力破解排查命令中的异常字面量
-- 修复生成的 artifact 文件名可能包含 `:` 导致跨平台路径不兼容的问题
-- 修复部分协议输出和文件预览中的二进制内容识别边界，减少错误预览和挂起风险
+- 修复 MCP 慢命令被提前判定超时的问题，并加强高风险命令防护
+- 修复 MCP 黑名单对普通说明文本的误报
+- 修复客户端 Files 中目录 symlink 无法按目录展开和下载的问题
+- 修复 WebUI 进程分析错误状态不准确的问题
+- 修复 Recon 报告文件名校验和 Project 落盘边界问题
+- 修复移动端 Files 与 Artifacts 标签重复的问题
+- 修复部分 artifact 文件名和二进制预览的兼容性问题
 
 ---
 
@@ -77,25 +65,24 @@ export const DateTag = ({ children }) => (
 
 ### Feature
 
-- **WebUI Investigations 新增进程分析**：可在浏览器中对 Linux 客户端按 PID、监听端口或进程名查询进程详情，结果包含进程树、网络连接、容器信息、systemd 服务信息和可疑信号标记
-- Clients 列表新增进程分析快捷入口，可从指定客户端直接跳转到 Investigations 的 Process Analysis 查询
-- **WebUI Agentic IR 支持恢复 Claude 历史会话**：Resume 模式会列出当前服务端工作目录对应的 Claude Code 会话，展示历史 transcript，并使用原 session ID 继续对话
+- **WebUI Investigations 新增进程分析**：可按 PID、监听端口或进程名查询 Linux 客户端进程详情
+- Clients 列表新增进程分析入口，可从指定客户端直接发起查询
+- **Agentic IR 支持恢复 Claude 历史会话**：可在 Resume 模式中继续已有 Claude Code 会话
 
 ### Improvement
 
-- SOAR 平台凭证优先支持独立的 `SOAR_ACCESS_KEY_ID` / `SOAR_ACCESS_KEY_SECRET`，同时保留 Alibaba Cloud SDK 默认凭证链兼容；在服务端 REPL 中更新任一 SOAR 凭证变量都会自动重新初始化客户端
-- 内部日志、SOAR 调用、升级、插件下载、IP 校验和 Shell 引号处理复用 `log0-core` 共享实现，减少 SIREN 本地重复工具代码
-- `plugins update` 会保留插件原有启用/禁用状态，并在配置写入失败时返回明确错误，避免更新 disabled 插件后被短暂启用
-- CLI 命令执行失败时会按错误边界退出；客户端收到中断信号后会主动关闭当前连接并等待处理协程退出，减少退出时的悬挂连接
-- WebUI deploy-batch 请求体上限提升到 8 KiB，可覆盖 20 台目标的真实实例 ID 与公网 IP 输入
+- SOAR 凭证支持独立环境变量，服务端更新凭证后会自动重新初始化客户端
+- `plugins update` 会保留插件启用状态，配置写入失败时返回明确错误
+- CLI 和客户端退出处理更可靠，减少命令失败或中断后的悬挂连接
+- WebUI 批量部署支持更大的目标列表
 
 ### Bugfix
 
-- 修复部分 AIR stream 状态、重复错误提示和 Artifacts 大文件下载错误处理问题
-- 加强插件安装/更新、WebUI 请求处理和客户端协议边界的错误处理
-- 修复 WebUI Shell 与 Agentic IR 在浏览器连接半断开时可能长时间阻塞输出转发的问题；Recon 进度事件拉取失败时会显示错误并停止轮询
-- 修复 Windows 文件 Recon 中最近修改事件日志命令的异常引号，避免 PowerShell 路径解析失败
-- 修复进程分析中启动时间缓存的并发访问问题，并补齐用户删除、用户计数、插件注册等错误处理路径
+- 修复 AIR 状态、重复错误提示和 Artifacts 大文件下载错误处理问题
+- 修复 WebUI Shell 与 Agentic IR 在浏览器断连时输出转发可能阻塞的问题
+- 修复 Recon 进度拉取失败后仍继续轮询的问题
+- 修复 Windows 文件 Recon 最近修改事件日志命令的路径解析问题
+- 修复进程分析启动时间缓存的并发问题，并补齐若干错误处理路径
 
 ---
 

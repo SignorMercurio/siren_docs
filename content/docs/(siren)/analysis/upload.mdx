@@ -1,35 +1,101 @@
 ---
-title: 文件上传
-description: 了解如何使用文件上传功能
-icon: CloudUpload
+title: 文件管理
+description: 通过 WebUI 管理客户端文件与服务端 Artifacts，或使用命令上传取证文件
+icon: FolderTree
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
+import { Card, Cards } from "fumadocs-ui/components/card";
 
-将重要文件保存到集中位置进行证据留存。本地模式上传当前主机文件到 OSS；远程模式从在线客户端拉取文件，并保存到 SIREN 服务端 Artifacts。
+文件管理覆盖两类对象：
 
-**常见使用场景：**
+- **客户端 Files**：浏览在线客户端的本机文件系统，预览、下载或上传文件。
+- **服务端 Artifacts**：管理 SIREN Server 工作目录或 Project 目录中的报告、取证文件和上传文件。
+
+命令行的 `upload` 仍然只负责上传或拉取单个文件；需要浏览、预览、下载、覆盖确认、目录打包或服务端文件整理时，优先使用 WebUI。
+
+常见场景：
 
 - 保存 Web 访问日志、系统日志等重要日志文件
 - 保存恶意样本供后续离线分析
 - 保存配置文件快照，记录攻击者的修改
+- 整理 Recon、AIR、AccessKey 调查生成的 Markdown 报告
 
 <Callout title="前置条件" type="info">
-  本地模式需要[设置 OSS 访问凭证](/credential#设置-oss-访问凭证)。远程模式不需要 OSS 凭证，但目标客户端必须在线。
+  WebUI Files 需要目标客户端在线；Project 视图下只能选择当前 Project 的客户端。本地 `upload` 需要[设置 OSS 访问凭证](/credential#设置-oss-访问凭证)。服务端 REPL 的 `upload` 不需要 OSS 凭证。
 </Callout>
 
-## 上传文件
+## WebUI 文件管理
+
+```text tab="客户端 Files"
+WebUI -> Files -> 选择客户端 -> 打开路径 -> 预览 / 下载 / 上传
+```
+
+```text tab="服务端 Artifacts"
+WebUI -> Artifacts -> 选择文件或目录 -> 预览 / 下载 / 上传 / 新建目录 / 重命名 / 删除
+```
+
+### 客户端 Files
+
+Files 页面读写的是在线客户端的真实文件系统。可以从左侧导航进入后选择客户端，也可以在 Clients 列表中点击目标客户端的 Files 快捷入口。
+
+支持的操作：
+
+- 选择客户端并打开指定路径；Linux/macOS 默认从 `/` 开始，Windows 默认从 `C:\` 开始
+- 展开目录树，搜索文件名，刷新当前目录
+- 预览文本文件；二进制文件会提示不支持预览
+- 下载普通文件或目录；目录会打包为 `tar.gz`
+- 上传单个文件到当前 Target 目录，单文件上限为 100 MiB；目标文件已存在时会要求确认覆盖
+
+<Callout title="远程文件操作" type="warn">
+  Files 页面会直接读取或写入客户端主机文件系统。上传和覆盖前，请确认当前客户端、Project 视图和 Target 目录。
+</Callout>
+
+### 服务端 Artifacts
+
+Artifacts 页面管理的是服务端侧文件。Global 视图对应 `siren_server` 当前工作目录；Project 视图对应当前 Project 的固定取证目录。
+
+支持的操作：
+
+- 预览文本和 Markdown 文件，Markdown 报告会渲染正文并显示目录
+- 下载文件或目录；目录会打包为 `tar.gz`
+- 上传单个文件到当前 Target 目录，单文件上限为 100 MiB；目标文件已存在时会要求确认覆盖
+- 新建目录、重命名、删除文件或目录
+- 从 `.md` 报告直接打开 [Dossier](/dossier) 编辑
+
+<Callout title="删除操作" type="warn">
+  Artifacts 删除会修改服务端真实文件。删除目录会递归删除其中内容，无法从 WebUI 撤销。
+</Callout>
+
+## 命令行上传
 
 ```bash tab="本地模式"
 ./siren upload <file path>
 ```
 
-```bash tab="远程模式"
+```bash tab="服务端 REPL"
 >>> upload <Client ID> <file path>
 ```
 
-本地模式上传完成后，文件存储在 OSS 的 `<objectPath>/<file name>` 路径下（默认 `tmp/siren_upload/<file name>`），可通过[配置文件](/config#客户端配置)中的 `oss.objectPath` 自定义上传路径前缀。
+本地模式会把当前主机上的文件上传到 OSS。上传路径为 `<objectPath>/<file name>`，默认前缀是 `tmp/siren_upload`，可通过[配置文件](/config#客户端配置)中的 `oss.objectPath` 修改。
 
-远程模式完成后，文件保存在服务端工作目录下的 `uploads/client-<Client ID>/<file name>`，可在 WebUI 的 Global Artifacts 页面查看和下载。
+服务端 REPL 会从在线客户端拉取指定文件，保存到服务端工作目录下的 `uploads/client-<Client ID>/<file name>`。完成后可以在 WebUI 的 Global Artifacts 页面查看和下载。
 
-如果需要在浏览器中管理文件，可使用 WebUI 的 [Files](/webui#files) 页面操作客户端文件，使用 [Artifacts](/webui#artifacts) 页面管理服务端结果文档与取证文件。
+命令行上传适合已知完整文件路径、只需要留存单个文件的场景。需要先浏览目录、确认文件内容、下载目录或管理服务端报告时，使用 WebUI 更直接。
+
+## 相关内容
+
+<Cards>
+  <Card title="Web 控制台：Files" href="/webui#files">
+    浏览在线客户端文件系统，预览、下载或上传文件
+  </Card>
+  <Card title="Web 控制台：Artifacts" href="/webui#artifacts">
+    管理服务端工作目录和 Project 目录中的取证文件
+  </Card>
+  <Card title="服务端命令" href="/misc/server">
+    查看服务端 REPL 中的 `upload` 命令用法
+  </Card>
+  <Card title="凭证设置" href="/credential#设置-oss-访问凭证">
+    配置本地 `upload` 所需的 OSS 访问凭证
+  </Card>
+</Cards>

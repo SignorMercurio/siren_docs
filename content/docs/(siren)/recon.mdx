@@ -1,61 +1,62 @@
 ---
 title: 自动化信息收集
-description: 了解如何使用自动化信息收集功能
+description: 运行 Recon 收集主机信息并生成 Markdown 报告
 icon: Info
 ---
 
 import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
-import { Step, Steps } from "fumadocs-ui/components/steps";
 
-<Steps>
-<Step>
+自动化信息收集（Recon）会在目标主机上收集系统、用户、进程、网络、计划任务、文件、Webshell 和应用配置等信息，并生成 Markdown 报告。它适合在接入客户端后先做基线排查，也适合把调查结果保存到服务端 Artifacts 供后续分析。
 
-### 准备凭证
+<Callout title="前置条件" type="info">
+  目标主机需要具备足够权限运行 Recon：Linux 通常需要 root，Windows 需要管理员权限。本地模式会把报告上传到 OSS，需要先[设置 OSS 访问凭证](/credential#设置-oss-访问凭证)；WebUI 和服务端 REPL 不需要 OSS，报告会保存到 SIREN Server 的 Artifacts。
+</Callout>
 
-本地模式 `./siren recon` 会把当前主机生成的报告上传至 OSS，因此需要先[设置 OSS 访问凭证](/credential#设置-oss-访问凭证)。远程模式和 WebUI Recon 不需要 OSS，报告会保存到 SIREN 服务端 Artifacts，并可通过 WebUI 查看。
+## 使用方式
 
-</Step>
-<Step>
+```text tab="WebUI"
+Investigations -> Recon -> 选择客户端 -> Start Recon
+```
 
-### 开始自动化信息收集
+```bash tab="服务端 REPL"
+>>> recon <Client ID>
+```
 
 ```bash tab="本地模式"
 ./siren recon
 ```
 
-```bash tab="远程模式"
->>> recon <Client ID>
-```
+## WebUI 流程
 
-```text tab="WebUI"
-Web 控制台 -> Investigations -> Recon -> 选择客户端 -> Start Recon
-```
+1. 打开 [Web 控制台](/webui#investigations)，进入 **Investigations** 页面。
+2. 在 **Recon** 表单中选择在线客户端。
+3. 点击 **Start Recon**，等待客户端回传阶段进度。
+4. 报告生成后，点击 **Open Report** 打开对应 Markdown 报告；如果报告尚未生成，也可以点击 **Open Artifacts** 进入当前 Artifacts 目录。
 
-信息收集过程中执行的每一条命令默认均有 30s 超时时间（可通过[配置文件](/config#客户端配置)调整）。本地模式完成后，会在当前主机同目录保存 Markdown 文件并上传 OSS；远程模式完成后，客户端会把 Markdown 报告回传给服务端，服务端将其保存为本地 artifact。
+WebUI 会展示服务端从客户端日志中解析出的真实阶段，比如 `Recon.Basic`、`Recon.User`、`Recon.Process`、`Save report to Artifacts`。Project 视图下只能选择当前 Project 的客户端，报告也会写入该 Project 的 Artifacts 目录。
 
-<Callout title="WebUI 进度" type="info">
-  在 WebUI 中运行 Recon 时，页面会展示服务端从客户端日志中解析出的阶段列表，例如 `Recon.Basic`、`Recon.User`、`Recon.Process`、`Save report to Artifacts`。报告生成后可通过 Open Artifacts 直接打开服务端本地保存的 Markdown 文件。
-</Callout>
+## 查看数据
 
-<Callout title="Project 作用域" type="info">
-  Recon 报告会保留客户端生成的原始 Markdown 文件名，通常形如 `SIREN_<host>_<timestamp>.md`。报告写入哪个目录取决于客户端的 Project 归属，见下方"查看数据"。
-</Callout>
+| 使用方式 | 报告保存位置 |
+| --- | --- |
+| WebUI | 保存到服务端 Artifacts；已归属 Project 的客户端写入 Project 目录，未归属客户端写入 Global Artifacts |
+| 服务端 REPL | 与 WebUI 一样保存到服务端 Artifacts，目录由客户端的 Project 归属决定 |
+| 本地模式 | 在当前目录生成 Markdown 文件，并上传到 OSS 的 `<oss.docObjectPath>/<file name>` |
 
-</Step>
-<Step>
+Recon 报告会保留客户端生成的文件名，通常形如 `SIREN_<host>_<timestamp>.md`。服务端保存报告时只接受 Markdown 文件名，并以较严格的文件权限写入。
 
-### 查看数据
+## 执行规则
 
-本地模式输出的 Markdown 可使用任何 Markdown 阅读器/编辑器打开。远程模式和 WebUI 生成的报告会保存在服务端 Artifacts 中，可直接从 WebUI 的 Artifacts 页面打开、预览或下载。Global 视图查看服务端工作目录；Project 视图查看当前 Project 目录。
-
-</Step>
-</Steps>
+- 基础信息每次都会采集，没有单独开关。
+- 其他内置模块通过客户端配置中的 `recon.<module>` 开关启用；未设置为 `true` 的模块不会执行。
+- recon 类型插件也会在 Recon 流程中执行，开关同样是 `recon.<plugin-name>`，结果会追加到同一份报告中。
+- 每条底层命令的默认超时时间为 30 秒，可通过[客户端配置](/config#客户端配置)中的 `recon.commandTimeout` 修改。
 
 ## 信息收集模块
 
-除基础信息外，下列模块均可通过[配置文件](/config#客户端配置)独立开关；基础信息每次运行都会采集，没有开关项。
+下表列出内置模块和对应配置项。模块是否执行以目标客户端实际加载的配置为准。
 
 <Accordions>
   <Accordion title="Linux 平台模块">
@@ -96,13 +97,16 @@ Web 控制台 -> Investigations -> Recon -> 选择客户端 -> Start Recon
 ## 相关内容
 
 <Cards>
-  <Card title="功能特性" href="/features#信息收集">
-    查看 SIREN 的完整功能特性列表
+  <Card title="Web 控制台：Investigations" href="/webui#investigations">
+    在浏览器中下发 Recon、查看阶段进度并打开报告
   </Card>
-  <Card title="Web 控制台" href="/webui#investigations">
-    在浏览器中下发 Recon 并查看阶段进度
+  <Card title="文件管理" href="/analysis/upload">
+    查看服务端 Artifacts 和客户端文件管理能力
   </Card>
-  <Card title="架构设计" href="/overview#架构设计">
-    了解 SIREN 的整体架构设计
+  <Card title="配置文件" href="/config#客户端配置">
+    配置 Recon 模块开关、超时时间和 OSS 上传路径
+  </Card>
+  <Card title="插件系统" href="/plugins">
+    了解 recon 类型插件如何并入信息收集报告
   </Card>
 </Cards>

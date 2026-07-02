@@ -1,6 +1,6 @@
 ---
 title: 进程分析
-description: 了解如何使用进程分析功能
+description: 按 PID、监听端口或进程名查看 Linux 进程详情
 icon: Activity
 ---
 
@@ -9,61 +9,69 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅 Linux 平台支持</Banner>
 
-基于进程 PID、监听端口或进程名称，快速获取进程详细信息，包括：
+进程分析用于在 Linux 客户端或本机 Linux 环境中定位可疑进程。可以按 PID、监听端口或进程名查询，并把进程基础信息、父进程链、网络连接、容器线索和 systemd 服务信息汇总到同一处。
 
-- **进程详情** — PID、用户、CPU/内存占用、命令行、可执行文件路径、工作目录、启动时间
-- **进程树** — 从当前进程到 PID 1 的完整祖先链
-- **容器检测** — 自动识别 Docker / containerd / podman 容器环境
-- **网络连接** — TCP/UDP 连接列表，按状态排序（LISTEN 优先）
-- **服务信息** — 关联的 systemd 服务名称、状态、Unit 文件路径
-- **风险标红** — 自动以红色高亮可疑特征：root 用户、CPU 或内存占用超过 50%、可执行文件已被删除（路径以 ` (deleted)` 结尾）、僵尸进程（标记为 `[zombie]`）
+结果中会高亮常见风险特征，例如 root 用户、高 CPU 或内存占用、已删除可执行文件，以及僵尸进程。
 
-![info](../../../img/info.png)
+## 使用方式
 
-## 查询方式
-
-进程分析支持三种查询方式，可根据已知信息灵活选择。
-
-### WebUI 查询
-
-在 [Web 控制台](/webui#investigations) 的 Investigations 页面中选择 **Process Analysis**，选择 Linux 客户端后按 PID、监听端口或进程名查询。也可以在 Clients 列表中点击目标客户端的 Process 快捷入口，WebUI 会自动选中该客户端并打开进程分析表单。
-
-WebUI 会展示同样的进程详情、进程树、网络连接、容器和服务信息。按进程名匹配到多个结果时，会先列出候选进程，点击候选 PID 可继续查询完整详情。
-
-### 按 PID 查询
-
-```bash tab="本地模式"
-./siren info <PID>
+```text tab="WebUI"
+Investigations -> Process Analysis -> 选择 Linux 客户端 -> 选择 PID / Port / Name -> Analyze
 ```
 
-```bash tab="远程模式"
+```bash tab="服务端 REPL"
 >>> info <Client ID> <PID>
-```
-
-### 按监听端口查询
-
-当你知道目标进程监听的端口号时：
-
-```bash tab="本地模式"
-./siren info -p <Port>
-```
-
-```bash tab="远程模式"
 >>> info <Client ID> -p <Port>
-```
-
-### 按进程名称查询
-
-支持模糊匹配，适合不确定 PID 时使用：
-
-```bash tab="本地模式"
-./siren info -n <Process Name>
-```
-
-```bash tab="远程模式"
 >>> info <Client ID> -n <Process Name>
 ```
 
-<Callout title="提示" type="info">
-  按名称（`-n`）匹配到多个进程时，只列出每个匹配的 PID 与命令行，并提示使用精确 PID 重新查询（`info <PID>`）；按端口（`-p`）查询始终只返回监听该端口的第一个进程。
+```bash tab="本地模式"
+./siren info <PID>
+./siren info -p <Port>
+./siren info -n <Process Name>
+```
+
+## WebUI 流程
+
+1. 打开 [Web 控制台](/webui#investigations)，进入 **Investigations** 页面。
+2. 在 **Process Analysis** 表单中选择 Linux 客户端。
+3. 选择查询类型：**PID**、**Port** 或 **Name**。
+4. 填写对应的 PID、监听端口或进程名，点击 **Analyze**。
+5. 查看进程详情；如果按名称匹配到多个进程，点击候选 PID 继续查询完整详情。
+
+也可以在 [Clients](/webui#clients) 列表中点击目标客户端的 Process 快捷入口。WebUI 会切换到 Investigations 页面，并自动选中该客户端。
+
+非 Linux 客户端不会出现在 Process Analysis 的客户端选择框中，Clients 列表中的 Process 快捷入口也会被禁用。
+
+## 结果内容
+
+- **进程详情**：PID、用户、CPU/内存占用、命令行、可执行文件路径、工作目录和启动时间。
+- **进程树**：从当前进程向上追溯到 PID 1 的父进程链。
+- **网络连接**：当前进程关联的 TCP/UDP 连接，`LISTEN` 状态优先展示。
+- **容器信息**：识别 Docker、containerd 或 podman 容器线索。
+- **服务信息**：关联的 systemd 服务名称、状态、子状态和 Unit 文件路径。
+- **风险提示**：root 用户、CPU 或内存占用超过 50%、可执行文件路径以 ` (deleted)` 结尾、进程状态为僵尸进程时会以醒目样式提示。
+
+## 查询规则
+
+### 按 PID 查询
+
+PID 查询适合已经从告警、Recon 报告、`ps` 或其他工具中拿到精确 PID 的场景。
+
+服务端 REPL 使用 `info <Client ID> <PID>`；本地模式使用 `./siren info <PID>`。
+
+### 按监听端口查询
+
+端口查询适合从外联、监听服务或端口扫描结果反查进程。SIREN 会查找监听该端口的进程，并返回找到的第一个 PID。
+
+服务端 REPL 使用 `info <Client ID> -p <Port>`；本地模式使用 `./siren info -p <Port>`。
+
+### 按进程名称查询
+
+名称查询适合只知道进程名或命令行片段的场景。匹配到单个进程时会直接展示详情；匹配到多个进程时，会先返回候选 PID 和命令行。
+
+服务端 REPL 使用 `info <Client ID> -n <Process Name>`；本地模式使用 `./siren info -n <Process Name>`。
+
+<Callout title="多结果处理" type="info">
+  WebUI 会把名称查询的候选进程显示为可点击列表，点击候选 PID 后会发起一次 PID 查询。服务端 REPL 和本地模式会打印候选列表，需要用精确 PID 重新查询。
 </Callout>

@@ -8,7 +8,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { BookOpenText, FileText, Settings, Upload, WandSparkles } from "lucide-react";
 
-Dossier 是 SIREN 配套的浏览器报告编辑器，用 Dossier Markdown 编写 `report.md`，生成可打印 PDF 和可归档 HTML 的应急响应报告。
+Dossier 是静态浏览器报告编辑器，用 Dossier Markdown 编写 `report.md`，生成可打印 PDF 和可归档 HTML 的应急响应报告。它可以独立离线使用，也可以部署到 SIREN 控制主机并由 WebUI 打开。
 
 <Cards>
   <Card title="部署" icon={<Upload />} href="/dossier/deploy">把 Dossier 静态编辑器部署到 SIREN 控制主机</Card>
@@ -37,13 +37,14 @@ Dossier 有三种常见使用方式：
 | `editor.js` / `editor.css` | 编辑器运行时资源 |
 | `report.md` | 默认报告源文件，也是 WebUI 左侧 Dossier 入口打开的文件 |
 | `assets/` | Dossier 模板内置图片、字体和静态资源 |
+| `assets/pasted/` | 本地离线使用时粘贴图片的默认目录 |
 | `<report>.assets/pasted/` | SIREN WebUI 中粘贴图片后的报告附件目录 |
 
 ## 与 SIREN 的关系
 
 Dossier 是外部静态编辑器，不会打包进 `siren_server` 二进制。SIREN 通过 `webui.dossierDir` 指向一个控制主机上的目录，并在 `/dossier/` 下提供访问。
 
-报告正文和粘贴图片仍通过 SIREN WebUI 的受保护接口保存。反向代理部署时，应把同一域名整体转发到 WebUI 端口，避免 Dossier 页面能打开但报告无法保存。
+报告正文和粘贴图片仍通过 SIREN WebUI 的受保护接口保存。反向代理部署时，应把同一域名整体转发到 WebUI 端口，避免 Dossier 页面能打开但报告无法读取、保存或粘贴图片。
 
 <Callout title="Project 边界" type="info">
   WebUI 左侧 Dossier 入口始终打开 `webui.dossierDir/report.md`。Project 只影响从 Artifacts 打开的 Markdown 报告：报告源文件和粘贴图片会保存在当前 Project 目录内。

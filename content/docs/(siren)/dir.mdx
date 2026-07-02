@@ -4,163 +4,134 @@ description: 了解 SIREN 代码的目录结构
 icon: FolderTree
 ---
 
+本页按当前源码仓库整理常用目录，便于定位入口、配置、运行态数据和主要实现模块。测试文件、平台差异文件和临时产物不逐一展开，查看具体实现时以仓库里的实际文件为准。
+
 <Files>
-  <Folder name="_plugins" desc="插件源代码目录" defaultOpen={false} />
+  <File name="README.md" desc="项目说明与快速入口" />
+  <File name="PRODUCT.md" desc="产品定位与功能说明" />
+  <File name="DESIGN.md" desc="设计说明" />
+  <File name="Makefile" desc="构建、发布和辅助任务入口" />
+  <File name="go.mod" desc="Go module 定义" />
+  <File name="go.sum" desc="Go 依赖锁定文件" />
+  <Folder name="cmd" desc="客户端和服务端二进制入口">
+    <Folder name="client" desc="客户端命令">
+      <File name="client.go" desc="客户端 main 函数" />
+      <Folder name="cli" desc="客户端 CLI 子命令">
+        <File name="root.go" desc="客户端根命令和配置加载" />
+        <File name="client.go" desc="连接服务端的 client 子命令" />
+        <File name="recon.go" desc="本地 Recon 子命令" />
+        <File name="info.go" desc="本地进程分析子命令" />
+        <File name="upload.go" desc="本地上传子命令" />
+        <File name="plugins.go" desc="插件管理子命令" />
+        <File name="clean.go" desc="本地清理子命令" />
+        <File name="upgrade.go" desc="客户端升级子命令" />
+      </Folder>
+    </Folder>
+    <Folder name="server" desc="服务端命令">
+      <File name="server.go" desc="服务端 main 函数" />
+      <Folder name="cli" desc="服务端 CLI 子命令">
+        <File name="root.go" desc="服务端根命令、共享 HTTP 服务和配置加载" />
+        <File name="shell.go" desc="交互式 shell relay 子命令" />
+        <File name="user.go" desc="WebUI 用户管理子命令" />
+        <File name="upgrade.go" desc="服务端升级子命令" />
+      </Folder>
+    </Folder>
+  </Folder>
+  <Folder name="config" desc="客户端和服务端配置模板">
+    <File name="config.yaml" desc="客户端默认配置" />
+    <File name="config_linux.yaml" desc="Linux 客户端配置模板" />
+    <File name="config_windows.yaml" desc="Windows 客户端配置模板" />
+    <File name="config_dist_linux.yaml" desc="Linux 客户端发布配置" />
+    <File name="config_dist_windows.yaml" desc="Windows 客户端发布配置" />
+    <File name="server_config.yaml" desc="服务端配置，包含 WebUI、AIR 和 MCP 设置" />
+  </Folder>
+  <Folder name="internal" desc="项目内部包">
+    <Folder name="auth" desc="WebUI 用户存储和鉴权数据访问" defaultOpen={false} />
+    <Folder name="clean" desc="客户端痕迹清理实现" defaultOpen={false} />
+    <Folder name="client" desc="客户端运行时">
+      <File name="client.go" desc="连接、重连和消息接收循环" />
+      <File name="handler.go" desc="客户端消息处理分发" />
+      <File name="identity.go" desc="稳定 agentId 生成与读取" />
+      <File name="files.go" desc="客户端文件浏览、读取、下载和上传" />
+      <File name="portforward.go" desc="客户端端口转发数据处理" />
+      <File name="shell_unix.go" desc="Unix shell 执行" />
+      <File name="shell_windows.go" desc="Windows shell 执行" />
+    </Folder>
+    <Folder name="info" desc="Linux 进程、网络、容器和服务信息分析" defaultOpen={false} />
+    <Folder name="plugin" desc="插件安装、更新、执行和市场交互">
+      <File name="plugin.go" desc="插件清单、管理器和命令注册" />
+      <File name="manage.go" desc="安装、卸载、更新和启停插件" />
+      <File name="execute.go" desc="插件执行" />
+      <File name="marketplace.go" desc="插件市场下载与清单读取" />
+    </Folder>
+    <Folder name="protocol" desc="客户端与服务端主通道协议">
+      <File name="protocol.go" desc="标准帧、消息类型和读取边界" />
+      <File name="client.go" desc="客户端握手和插件列表编码" />
+      <File name="run.go" desc="远程命令请求和响应编码" />
+      <File name="info.go" desc="进程分析请求和响应编码" />
+      <File name="fs.go" desc="客户端文件操作请求和响应编码" />
+      <File name="portforward.go" desc="端口转发请求和数据编码" />
+      <File name="portforwardmanager.go" desc="端口转发状态管理" />
+      <File name="preview.go" desc="文件预览类型判断" />
+      <File name="tls.go" desc="客户端和服务端 TLS 配置" />
+    </Folder>
+    <Folder name="recon" desc="Linux 和 Windows Recon 模块" defaultOpen={false} />
+    <Folder name="rules" desc="从客户端配置加载 Recon 规则" defaultOpen={false} />
+    <Folder name="server" desc="服务端核心实现">
+      <File name="server.go" desc="TLS 监听、握手和客户端注册" />
+      <File name="client.go" desc="服务端 Client 对象和发送锁" />
+      <File name="handler.go" desc="服务端消息接收和处理" />
+      <File name="commander.go" desc="服务端 REPL 命令分发" />
+      <File name="mcp.go" desc="MCP 工具服务" />
+      <File name="air.go" desc="AIR prompt 构建" />
+      <File name="air_terminal_cmd.go" desc="AIR Provider 命令构建" />
+      <File name="agent_terminal.go" desc="浏览器 Agent 终端运行时" />
+      <File name="agent_session_registry.go" desc="Agent 终端会话注册和回放" />
+      <File name="client_files.go" desc="客户端文件操作请求转发" />
+      <File name="client_notes.go" desc="客户端备注持久化" />
+      <File name="projects.go" desc="Project 持久化、目录约束和客户端归属" />
+      <File name="deploy_batch.go" desc="批量部署" />
+      <File name="portforward.go" desc="服务端端口转发监听和数据分发" />
+      <File name="recon_events.go" desc="Recon 事件解析" />
+      <File name="webui_bridge.go" desc="WebUI 与服务端核心的桥接层" />
+      <Folder name="webui" desc="WebUI 后端路由与前端工程">
+        <File name="webui.go" desc="共享 HTTP 服务入口" />
+        <File name="auth.go" desc="登录、会话和鉴权中间件" />
+        <File name="webui_shell.go" desc="WebSocket shell" />
+        <File name="webui_agent_terminal.go" desc="浏览器 Agent 终端 WebSocket 接口" />
+        <File name="webui_client_files.go" desc="Files 页面接口" />
+        <File name="webui_artifacts.go" desc="Artifacts 页面接口" />
+        <File name="webui_projects.go" desc="Projects 页面接口" />
+        <File name="webui_air_history.go" desc="AIR 历史会话接口" />
+        <File name="webui_dossier.go" desc="Dossier 静态资源与报告入口" />
+        <File name="webui_soar.go" desc="allow、deploy、clean 和 AccessKey 调查接口" />
+        <Folder name="frontend" desc="WebUI React 前端源码与构建产物" defaultOpen={false} />
+      </Folder>
+    </Folder>
+    <Folder name="upgrade" desc="客户端和服务端自升级实现" defaultOpen={false} />
+  </Folder>
+  <Folder name="pkg" desc="项目内复用的辅助包">
+    <Folder name="banner" desc="启动 Banner" defaultOpen={false} />
+    <Folder name="e" desc="错误处理辅助函数" defaultOpen={false} />
+    <Folder name="utils" desc="通用命令执行、OSS 和平台工具" defaultOpen={false} />
+    <Folder name="winpty" desc="Windows PTY 支持与嵌入文件" defaultOpen={false} />
+  </Folder>
+  <Folder name="_plugins" desc="内置或示例插件源码" defaultOpen={false} />
   <Folder name="certs" desc="TLS 证书目录" defaultOpen={false}>
     <File name="cert.pem" />
     <File name="key.pem" />
   </Folder>
-  <Folder name="cmd" desc="CLI 程序目录">
-    <Folder name="client" defaultOpen={false}>
-      <Folder name="cli" desc="客户端 CLI 子命令">
-        <File name="clean.go" />
-        <File name="client.go" />
-        <File name="info.go" />
-        <File name="plugins.go" />
-        <File name="recon.go" />
-        <File name="root.go" desc="客户端 CLI 入口"/>
-        <File name="upgrade.go" />
-        <File name="upload.go" />
-      </Folder>
-      <File name="client.go" desc="客户端主函数" />
-    </Folder>
-    <Folder name="server" defaultOpen={false}>
-      <Folder name="cli" desc="服务端 CLI 子命令">
-        <File name="root.go" desc="服务端 CLI 入口" />
-        <File name="shell.go" />
-        <File name="upgrade.go" />
-        <File name="user.go" desc="WebUI 用户管理子命令（add/list/delete）" />
-      </Folder>
-      <File name="server.go" desc="服务端主函数" />
-    </Folder>
+  <Folder name="dist" desc="发布产物和 version.txt" defaultOpen={false} />
+  <Folder name="docs" desc="开发维护文档，不属于官方文档站" defaultOpen={false}>
+    <File name="refactor-parity.md" />
+    <File name="server-internals.md" />
+    <File name="webui-internals.md" />
   </Folder>
-  <Folder name="config" desc="配置文件目录">
-    <File name="config_linux.yaml" desc="Linux 客户端配置文件" />
-    <File name="config_windows.yaml" desc="Windows 客户端配置文件" />
-    <File name="server_config.yaml" desc="服务端配置文件" />
-    <File name="config_dist_linux.yaml" desc="Linux 客户端发布变体" />
-    <File name="config_dist_windows.yaml" desc="Windows 客户端发布变体" />
-  </Folder>
-  <Folder name="dist" desc="产物目录" defaultOpen={false}>
-    <File name="..." />
-  </Folder>
-  <File name="go.mod" />
-  <File name="go.sum" />
-  <Folder name="internal" desc="内部使用的包目录">
-    <Folder name="auth">
-      <File name="store.go" desc="WebUI 用户存储（SQLite + bcrypt）" />
-    </Folder>
-    <Folder name="clean">
-      <Folder name="embedded">
-        <File name="cleanup.bat" desc="Windows 清理脚本（实现自删除）" />
-      </Folder>
-      <File name="clean_unix.go" desc="Unix 客户端痕迹清理实现" />
-      <File name="clean_windows.go" desc="Windows 客户端痕迹清理实现" />
-      <File name="clean.go" desc="痕迹清理实现" />
-    </Folder>
-    <Folder name="client">
-      <File name="client.go" desc="客户端连接功能与消息接收功能实现" />
-      <File name="handler.go" desc="客户端消息处理功能实现" />
-      <File name="portforward.go" desc="客户端端口转发消息处理功能实现" />
-      <File name="shell_unix.go" desc="Unix 客户端 shell 功能实现" />
-      <File name="shell_windows.go" desc="Windows 客户端 shell 功能实现" />
-    </Folder>
-    <Folder name="info">
-      <File name="container.go" desc="进程容器信息分析功能实现" />
-      <File name="info_unix.go" desc="Unix 平台进程分析功能实现" />
-      <File name="info_unsupported.go" desc="非 Linux 平台进程分析占位实现" />
-      <File name="network.go" desc="进程网络信息分析功能实现" />
-      <File name="process.go" desc="进程信息获取功能实现" />
-      <File name="service.go" desc="进程服务信息分析功能实现" />
-    </Folder>
-    <Folder name="plugin" desc="插件系统实现">
-      <File name="execute.go" desc="插件执行功能实现" />
-      <File name="manage.go" desc="插件安装、卸载与更新功能实现" />
-      <File name="marketplace.go" desc="插件市场交互功能实现" />
-      <File name="plugin.go" desc="插件管理器与清单定义" />
-    </Folder>
-    <Folder name="protocol">
-      <File name="info.go" desc="进程分析请求/响应协议" />
-      <File name="portforward.go" desc="端口转发相关协议实现" />
-      <File name="portforwardmanager.go" desc="端口转发全局状态维护" />
-      <File name="protocol.go" desc="通信协议实现" />
-      <File name="tls.go" desc="TLS 加密实现" />
-    </Folder>
-    <Folder name="recon" desc="各类信息收集模块实现" defaultOpen={false} />
-    <Folder name="rules">
-      <File name="rules_unix.go" desc="从配置文件导入 Linux 信息收集规则" />
-      <File name="rules_windows.go" desc="从配置文件导入 Windows 信息收集规则" />
-    </Folder>
-    <Folder name="server">
-      <Folder name="webui" desc="Web 控制台后端与前端" defaultOpen={false}>
-        <File name="webui.go" desc="共享 HTTP 服务与路由（含 /mcp）" />
-        <File name="auth.go" desc="登录、会话与鉴权中间件" />
-        <File name="webui_shell.go" desc="WebSocket 交互式 Shell" />
-        <File name="webui_agent_terminal.go" desc="浏览器 Agent 终端 WebSocket 接口" />
-        <File name="webui_air_history.go" desc="AIR 历史会话接口" />
-        <File name="webui_artifacts.go" desc="Artifacts 浏览与管理接口" />
-        <File name="webui_projects.go" desc="Projects 管理与客户端归属接口" />
-        <File name="webui_soar.go" desc="allow/deploy/clean/AccessKey 调查接口" />
-        <File name="..." desc="其他 webui_*.go 接口与 frontend/ 前端" />
-      </Folder>
-      <File name="agent_session_registry.go" desc="浏览器 Agent 终端会话注册表（PTY 复用与断连重连回放）" />
-      <File name="agent_terminal.go" desc="Agent 终端运行时与 Provider 配置" />
-      <File name="air.go" desc="Agentic 应急响应 prompt 构建" />
-      <File name="air_terminal_cmd.go" desc="AIR 终端命令构建（MCP 注入、种子 prompt、resume）" />
-      <File name="air_history.go" desc="AIR 历史会话列表与恢复实现" />
-      <File name="info_requests.go" desc="WebUI 进程分析请求转发实现" />
-      <File name="client.go" desc="服务端的 Client 对象相关实现" />
-      <File name="client_files.go" desc="客户端文件浏览与拉取实现" />
-      <File name="client_notes.go" desc="客户端备注管理实现" />
-      <File name="commander.go" desc="服务端命令交互功能实现" />
-      <File name="deploy_batch.go" desc="批量部署实现" />
-      <File name="handler.go" desc="服务端与客户端交互功能实现" />
-      <File name="help.go" desc="服务端帮助信息展示实现" />
-      <File name="mcp.go" desc="MCP 服务功能实现" />
-      <File name="portforward.go" desc="服务端端口转发消息处理功能实现" />
-      <File name="projects.go" desc="Project 持久化、目录约束与客户端归属实现" />
-      <File name="recon_events.go" desc="Recon 阶段事件解析实现" />
-      <File name="server.go" desc="服务端监听功能实现" />
-      <File name="table.go" desc="服务端表格数据展示功能实现" />
-      <File name="webui_bridge.go" desc="WebUI 与服务端核心的桥接层" />
-      <File name="..." desc="artifact_rename_*.go 等平台相关文件" />
-    </Folder>
-    <Folder name="upgrade">
-      <File name="extract_unix.go" desc="Unix 平台解压功能实现" />
-      <File name="extract_windows.go" desc="Windows 平台解压功能实现" />
-      <File name="replace.go" desc="文件替换功能实现" />
-      <File name="upgrade.go" desc="版本升级功能实现" />
-    </Folder>
-  </Folder>
-  <File name="Makefile" />
-  <Folder name="pkg" desc="可供外部使用的包目录">
-    <Folder name="banner" desc="启动 Banner" defaultOpen={false}>
-      <File name="banner.go" />
-    </Folder>
-    <Folder name="e" desc="错误处理" defaultOpen={false}>
-      <File name="error.go" />
-    </Folder>
-    <Folder name="utils" desc="通用工具代码">
-      <File name="oss.go" desc="OSS 上传功能" />
-      <File name="utils_unix.go" desc="其他常用功能（Unix 客户端）" />
-      <File name="utils_windows.go" desc="其他常用功能（Windows 客户端）" />
-      <File name="utils.go" desc="其他常用功能（平台无关）" />
-    </Folder>
-    <Folder name="winpty" desc="WinPTY 支持" defaultOpen={false}>
-      <Folder name="embedded">
-          <File name="README.md" />
-          <File name="winpty-agent.exe" />
-          <File name="winpty.dll" />
-      </Folder>
-      <File name="winpty_unix.go" />
-      <File name="winpty_windows.go" />
-    </Folder>
-  </Folder>
-  <File name="README.md" />
-  <Folder name="scripts" desc="脚本目录">
-    <File name="get_siren.ps1" />
-    <File name="get_siren.sh" />
-    <File name="get_siren_server.sh" />
+  <Folder name="logo" desc="Logo 源文件和导出图片" defaultOpen={false} />
+  <Folder name="scripts" desc="安装、发布和自动化脚本">
+    <File name="get_siren.sh" desc="Linux 客户端安装脚本" />
+    <File name="get_siren.ps1" desc="Windows 客户端安装脚本" />
+    <File name="get_siren_server.sh" desc="服务端安装脚本" />
     <File name="release.go" desc="发布产物上传脚本" />
     <File name="daily-review.sh" desc="每日代码审查脚本" />
   </Folder>

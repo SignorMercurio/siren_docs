@@ -1,6 +1,6 @@
 ---
-title: 远程模式基础
-description: 了解如何使用远程模式下的基础功能
+title: 服务端 REPL
+description: 通过 SIREN Server REPL 管理在线客户端、Shell 和远程命令
 icon: Terminal
 ---
 
@@ -8,17 +8,29 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
-import { ArrowRightLeft, Brain, FolderKanban, Key, Plug } from 'lucide-react';
+import { ArrowRightLeft, Brain, FolderKanban, Key, LayoutDashboard, ListTree, Plug } from 'lucide-react';
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-远程模式下，SIREN 客户端通过 TLS 加密通道连接到服务端。服务端提供统一的命令行界面（REPL）来管理所有已连接的客户端。
+服务端 REPL 是远程模式的命令行入口。启动 `siren_server` 后，终端中的 `>>>` 提示符可用于管理在线客户端、打开交互式 Shell 和执行单条远程命令。
+
+```bash title="控制主机"
+./siren_server -c /path/to/server_config.yaml
+```
+
+```bash title="SIREN Server"
+>>> help
+```
+
+REPL 适合已经登录控制主机、需要在终端里直接操作的场景。需要图形化客户端列表、Project 视图、浏览器 Shell 或文件管理时，使用 [Web 控制台](/webui) 更直接。
 
 ## 客户端管理
 
-每个连接到服务端的客户端都会被分配一个唯一的数字 ID，后续所有操作均通过该 ID 指定目标客户端。
+客户端通过 TLS 加密通道连接服务端。连接成功后，服务端会为当前连接分配一个数字 `Client ID`，后续 REPL 命令都通过这个 ID 指定目标客户端。
 
-列出所有已连接的客户端：
+`Client ID` 只代表当前在线连接，客户端断开并重新连接后可能变化。执行操作前先用 `ls` 确认目标客户端。
+
+### 列出客户端
 
 ```bash title="SIREN Server"
 >>> ls
@@ -39,33 +51,39 @@ import { ArrowRightLeft, Brain, FolderKanban, Key, Plug } from 'lucide-react';
   </Accordion>
 </Accordions>
 
-为客户端添加备注信息，方便在多客户端场景下快速识别；省略备注内容可清空已有备注：
+### 设置备注
+
+为客户端添加备注，便于在多客户端场景下快速识别。省略备注内容时会清空已有备注：
 
 ```bash title="SIREN Server"
 >>> note <Client ID> [Note]
 ```
 
-客户端会保存一个稳定的本机身份标识。服务端短暂下线或升级后，客户端会自动重连；客户端成功连接过一次后，后续短暂断线会更快重连。已设置的备注和 WebUI Project 归属会在重连后恢复。交互式 Shell、端口转发和正在执行的命令属于当前连接上的活动会话，服务端重启后需要重新打开。
+备注按客户端稳定身份保存。服务端短暂下线、升级或客户端重连后，已设置的备注会恢复；WebUI Project 归属也会按稳定身份恢复。
+
+<Callout title="重连后需要重新确认 Client ID" type="info">
+  稳定身份用于恢复备注和 Project 归属，不代表 `Client ID` 固定不变。交互式 Shell、端口转发和正在执行的命令属于当前连接上的活动会话，服务端重启后需要重新打开。
+</Callout>
 
 ## 远程命令执行
 
 ### 交互式 Shell
 
-通过 tmux 启动新窗口，获取一个**全交互式**的远程 Shell：
+`shell` 会在服务端通过 tmux 打开一个新窗口，并把目标客户端的交互式 Shell 接入该窗口。它适合连续排查、编辑文件，或运行 `vim`、`top` 这类需要完整终端交互的程序。
 
 ```bash title="SIREN Server"
 >>> shell <Client ID>
 ```
 
 <Callout title="Shell 特性" type="info">
-  Shell 会话通过独立的 TLS 连接传输，不影响主控制通道。支持 vim、top 等交互式命令、方向键、Tab 补全，使用体验与直接 SSH 登录一致。
+  Shell 会话通过独立的 TLS 中继连接传输，不影响主控制通道。服务端需要安装 `tmux`，客户端也需要能回连服务端临时中继端口。如果不想依赖 tmux，可以使用 [Web 控制台的 Shells 页面](/webui#shells)。
 </Callout>
 
 退出 Shell 的方式与退出普通终端相同（输入 `exit` 或按 `Ctrl+D`），退出后自动返回 SIREN Server REPL。
 
 ### 单条命令执行
 
-运行单条命令并直接返回结果（适合快速查看信息，结果上限 50KB）：
+`run` 用于执行一次性命令，并把输出返回到 REPL。它适合快速查看当前用户、系统版本、进程列表等信息；需要持续交互时使用 `shell`。
 
 ```bash title="SIREN Server"
 >>> run <Client ID> <Command>
@@ -84,13 +102,17 @@ Linux victim 5.15.0-91-generic #101-Ubuntu SMP x86_64 GNU/Linux
   </Accordion>
 </Accordions>
 
-## 参考资料
+单条命令的返回内容有大小限制，超过约 50KB 时会被截断。长输出建议写入文件后用 WebUI Files 下载，或通过 `upload` 保存到 [Artifacts](/analysis/upload) 查看。
 
-- [A beginner's guide to tmux](https://www.redhat.com/en/blog/introduction-tmux-linux)
-
-## 更多远程模式功能
+## 更多功能
 
 <Cards>
+  <Card title="Web 控制台" icon={<LayoutDashboard />} href="/webui">
+    通过浏览器管理客户端、Shell、AIR、文件和 Artifacts
+  </Card>
+  <Card title="服务端命令" icon={<ListTree />} href="/misc/server">
+    查看完整 REPL 命令表和服务端维护操作
+  </Card>
   <Card title="端口转发" icon={<ArrowRightLeft />} href="/portforward">
     将受害主机内网服务转发到服务端
   </Card>

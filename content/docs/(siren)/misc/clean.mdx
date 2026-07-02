@@ -1,34 +1,56 @@
 ---
 title: 痕迹清除
-description: 了解如何使用痕迹清除功能
+description: 在调查完成后清理客户端侧的 SIREN 文件与临时痕迹
 icon: Eraser
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
 
 <Callout title="不可逆操作" type="error">
-  痕迹清除会删除 SIREN 可执行文件及相关文件，此操作不可逆。请确认调查已完成且所有必要数据已保存后再执行。
+  痕迹清除会删除客户端侧的 SIREN 文件并终止客户端进程。执行前请确认调查已完成，必要证据、报告和上传文件已经保存。
 </Callout>
 
-在应急响应调查完成后，从受害主机上清除 SIREN 相关痕迹并终止客户端进程：
+痕迹清除用于在应急响应结束后，从受害主机移除当前 SIREN 客户端。它可以在 [Web 控制台](/webui#clients)、服务端 REPL 或客户端本机执行。
+
+## 执行清理
+
+```text tab="WebUI"
+Clients -> 目标客户端 -> Clean & Terminate -> Clean
+```
+
+```bash tab="服务端 REPL"
+>>> clean <Client ID>
+```
 
 ```bash tab="本地模式"
 ./siren clean
 ```
 
-```bash tab="远程模式"
->>> clean <Client ID>
-```
+WebUI 入口位于 Clients 页面目标客户端行的清理按钮。点击后会弹出 **Clean & Terminate** 确认框；确认后，服务端会向该客户端下发清理指令，客户端完成清理后退出。Project 视图下只能清理当前 Project 内的客户端。
 
-输入 `y` 确认后，将清理以下内容：
+服务端 REPL 与本地模式会要求输入 `y` 确认。确认后，目标客户端会执行清理并退出。
+
+## 清理范围
 
 | 清理项 | 说明 |
 | --- | --- |
 | 环境变量 | 当前进程中的 OSS 与阿里云 AccessKey 环境变量（`OSS_ACCESS_KEY_*`、`ALIBABA_CLOUD_ACCESS_KEY_*`） |
 | 配置文件 | 当前加载的配置文件（如 `config.yaml`） |
-| 可执行文件目录 | SIREN 可执行文件及其所在目录 |
-| 临时文件 | 运行期释放的 WinPTY 临时目录 `%TEMP%\winpty-*`（仅 Windows） |
+| 可执行文件目录 | 当前 SIREN 可执行文件所在目录 |
+| WinPTY 临时目录 | Windows 上运行期释放的 `%TEMP%\winpty-*` 目录 |
 
-<Callout title="清理范围说明" type="info">
-  环境变量清理仅作用于当前运行的 SIREN 进程，不会移除写入 shell 配置或其他位置的持久化凭证，也不清除 `SOAR_ACCESS_KEY_*`。清理完成后客户端进程会主动退出：Linux 下删除可执行文件目录后直接退出；Windows 下可执行文件目录的删除为延迟执行，进程先退出，再由后台脚本完成目录与临时文件的清理。
+<Callout title="清理边界" type="info">
+  环境变量清理只作用于当前运行的 SIREN 进程，不会移除写入 Shell 配置、systemd、cron 或其他启动环境中的持久化凭证，也不会清理 `SOAR_ACCESS_KEY_*`。
 </Callout>
+
+## 平台差异
+
+非 Windows 平台会直接删除当前可执行文件所在目录，然后退出客户端进程。
+
+Windows 无法在进程运行时直接删除自身目录。SIREN 会先写入延迟清理脚本，客户端退出后再删除可执行文件目录和 WinPTY 临时目录。
+
+## 不会清理的内容
+
+- 服务端 Artifacts、报告、项目文件和日志不在客户端清理范围内。
+- 云侧资源、SOAR 配置、放行规则和安全组不会因 `clean` 自动回滚。
+- 写入系统启动项、Shell 配置或其他外部位置的凭证需要按原配置方式单独移除。

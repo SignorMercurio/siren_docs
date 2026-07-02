@@ -26,11 +26,11 @@ webui:
 
 ## 可用性检查
 
-WebUI 会在打开 Dossier 前检查：
+WebUI 会通过 `/api/dossier/status` 检查：
 
 - `webui.dossierDir` 已配置
 - 目录下存在 `index.html`
-- 目录下存在 `report.md`（左侧 Dossier 默认入口所需）
+- 目录下存在 `report.md`（左侧 Dossier 默认入口所需；Artifacts 打开的其他 `.md` 报告只需要 Dossier 运行时可用）
 
 如果 Dossier 未部署、路径配置错误或默认报告缺失，WebUI 会显示错误提示，不影响 Clients、Shells、AIR、Artifacts 等其他功能。
 
@@ -42,6 +42,7 @@ SIREN 中的 Dossier 报告源文件必须以 `.md` 结尾。WebUI 对报告源�
 - 单个报告源文件最大 10 MiB
 - 默认报告通过内部保留路径 `__dossier__/report.md` 映射到 `webui.dossierDir/report.md`
 - Artifacts 中的其他 `.md` 报告位于当前 Artifacts 作用域：Global 视图是 `siren_server` 工作目录，Project 视图是对应 Project 目录
+- 保存前会检查 `/api/auth/check`。登录过期、鉴权接口缺失或反向代理未转发该接口时，Dossier 会阻止保存正文和粘贴图片。
 
 <Callout title="默认报告边界" type="info">
   默认 Dossier 报告可以位于服务端工作目录外，但必须在 `webui.dossierDir` 目录内。即使当前处于 WebUI Project 视图，左侧 Dossier 入口也不会自动改成 Project 目录下的 `report.md`。SIREN 会解析符号链接，阻止默认报告逃逸到 Dossier 目录外。
@@ -68,7 +69,7 @@ report.assets/pasted/
 ![](report.assets/pasted/paste-....png)
 ```
 
-SIREN 只接受图片附件，并限制附件路径留在对应报告的 `.assets/` 目录内。
+SIREN 只接受 PNG、JPG、WebP 和 GIF 图片附件，并限制附件路径留在对应报告的 `.assets/` 目录内。
 
 ## 静态目录保护
 

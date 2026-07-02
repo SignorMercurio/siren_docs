@@ -1,5 +1,5 @@
 {
-  "title": "其他功能",
+  "title": "命令与维护",
   "pages": ["clean", "server"],
   "icon": "Wrench"
 }

@@ -10,23 +10,23 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-SIREN 服务端内置 [模型上下文协议](https://modelcontextprotocol.io/)（MCP）服务，使 AI 助手能够直接与 SIREN 交互，在受害主机上执行命令、获取安全告警详情等。这是 [Agentic 应急响应](/air) 的基础能力。
+SIREN Server 内置 [模型上下文协议](https://modelcontextprotocol.io/)（MCP）服务。支持 MCP 的 AI 客户端可以通过它列出在线 SIREN 客户端、在指定客户端执行排查命令，或通过 SOAR 获取告警详情。[Agentic 应急响应](/air) 也依赖这组工具。
 
-## 配置
+## 启用与访问
 
-MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制，默认启用。它与 [Web 控制台](/webui) 共享同一 HTTP 监听地址和端口（默认 `0.0.0.0:8080`），并通过 `/mcp` 子路径暴露。监听地址和端口分别由 `webui.listen`、`webui.port` 控制。
+MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制，默认启用。它和 [Web 控制台](/webui) 共用 `webui.listen` / `webui.port`，默认监听 `0.0.0.0:8080`，并通过 `/mcp` 暴露。
 
-`mcp.enabled` 与 `webui.enabled` 相互独立：关闭 WebUI 后，只要 `mcp.enabled` 仍为 `true`，MCP 客户端仍可访问 `http://<host>:<port>/mcp`；关闭 MCP 后，WebUI 可以继续独立运行。
+`mcp.enabled` 与 `webui.enabled` 相互独立。关闭 WebUI 后，只要 `mcp.enabled` 仍为 `true`，服务端仍会在共享 HTTP 端口上提供 `/mcp`；关闭 MCP 后，WebUI 可以继续独立运行。
 
 <Callout title="`/mcp` 端点不鉴权" type="warn">
-  MCP 客户端不携带浏览器会话，因此 `/mcp` 不经 WebUI 鉴权中间件——**即使创建了 WebUI 账号也无法保护它**。任何能访问该端口的人都可以通过 `run` 工具在受害主机上执行命令。请务必将 `webui.listen` 限制在可信网络（如 `127.0.0.1` 或内网），或在反向代理加网络 ACL 之后再暴露监听端口。
+  `/mcp` 不使用 WebUI 的 Session 鉴权。WebUI 账号只保护浏览器页面和 API，不能保护 MCP 客户端。任何能访问共享 HTTP 端口的人，都可能通过 `run` 工具在受害主机上执行命令。请把 `webui.listen` 绑定到可信网络，如 `127.0.0.1` 或内网，或在反向代理、VPN、ACL 之后再开放访问。
 </Callout>
 
 <Callout title="从 v1.x 升级" type="warn">
-  v2.0.0 起 `mcpPort` 配置项与 `--mcp-port` 参数已删除，MCP 不再占用独立端口。升级后 MCP 客户端 URL 无需修改（仍是 `http://<host>:<port>/mcp`），只需确认端口对齐 `webui.port`。
+  v2.0.0 起，MCP 不再占用独立端口，`mcpPort` 配置项和 `--mcp-port` 参数已移除。MCP 客户端仍访问 `/mcp` 路径，但端口应改为 `webui.port`。
 </Callout>
 
-将以下配置添加到 MCP 客户端（如 Claude Desktop、Cursor 等）：
+在 MCP 客户端中添加 SIREN Server 的 `/mcp` 地址：
 
 ```json title="mcp.json"
 {
@@ -41,40 +41,35 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 
 | 工具 | 参数 | 描述 |
 | --- | --- | --- |
-| `ls` | 无 | 列出所有已连接的客户端，返回 ID、操作系统、连接地址（host:port）、备注、已安装插件等信息 |
-| `run` | `client_id`, `command` | 在指定客户端上执行命令并返回结果（超时跟随 `recon.commandTimeout` 并保留额外缓冲，50KB 上限），支持对同一客户端并发执行 |
-| `get_alarm_detail` | `uid`, `event_id` | 通过 SOAR 平台获取指定的安全告警详情，返回告警类型、攻击源、受影响资产等 |
+| `ls` | 无 | 列出在线 SIREN 客户端，包含 ID、操作系统、连接地址、备注和已安装插件 |
+| `run` | `client_id`, `command` | 在指定 SIREN 客户端上执行命令并返回结果。执行前会检查命令黑名单，超时时间跟随 `recon.commandTimeout`，输出过长时会被截断 |
+| `get_alarm_detail` | `uid`, `event_id` | 通过 SOAR 获取指定安全告警详情，需要先[配置 SOAR 凭证](/credential#设置-soar-平台访问凭证) |
 
 <Callout title="WebUI Project 作用域" type="info">
-  直接访问 `/mcp` 的外部 MCP 客户端保持全局行为，`ls` 会列出所有已连接客户端。WebUI AIR 在 Project 视图下会为本次会话注入带 Project 上下文的 SIREN MCP：`ls` 只列出当前 Project 客户端，`run` 会拒绝不属于当前 Project 的客户端。
+  外部 MCP 客户端直接访问 `/mcp` 时使用全局视图，`ls` 会列出所有在线 SIREN 客户端。WebUI AIR 在 Project 视图下会自动注入带 Project 作用域的 MCP 地址，`ls` 只返回当前 Project 的客户端，`run` 也会拒绝操作其他 Project 的客户端。
 </Callout>
 
 <Callout title="慢命令超时" type="info">
   如果需要让 MCP / AIR 执行更慢的排查命令，请在服务端和客户端配置中保持 `recon.commandTimeout` 一致或至少让服务端等待时间不短于客户端执行时间。
 </Callout>
 
-<Callout title="提示" type="info">
-  AI 助手可以通过 `ls` 获取客户端列表后，再通过 `run` 在指定客户端上执行任意命令。这使得 AI 能够自主完成信息收集、威胁排查等应急响应任务。
-</Callout>
-
 ## 命令黑名单
 
-`run` 工具在执行命令前会检查命令是否匹配[配置文件](/config#服务端配置)中的 `mcp.cmdBlacklist` 正则表达式列表。匹配到的命令将被拒绝执行，并向 AI 返回错误信息。
+`run` 工具在下发命令前会检查[服务端配置](/config#服务端配置)中的 `mcp.cmdBlacklist`。命中黑名单时，命令不会发给客户端执行，AI 客户端会收到明确的错误信息。
 
-默认黑名单用于阻断破坏性变更，保留 `cat`、`grep`、`journalctl`、`systemctl status`、`iptables -L` 等只读排查命令。默认包含以下类别的危险操作：
+默认黑名单主要阻断破坏性变更，保留常见只读排查命令，例如 `cat`、`grep`、`journalctl`、`systemctl status`、`iptables -L`。默认拦截以下类别：
 
-- **文件删除与磁盘写入**：`rm`、`rmdir`、`find -delete`、`truncate`、`shred`、`wipefs`、`mkfs`、`dd ... of=/dev/...`、向块设备重定向或通过 `tee` / `cp` 写入块设备
-- **进程终止**：`kill`、`killall`、`pkill`
-- **系统关机与运行级别**：`shutdown`、`reboot`、`halt`、`poweroff`、`init 0-6`
-- **服务管理**：`systemctl stop/disable/mask/restart/reload`、`service <name> stop/restart/reload`
-- **防火墙清空**：`iptables` / `ip6tables` 的 `-F`、`-X`、`-Z` 或对应长参数，以及 `nft flush ruleset`
-- **权限与账号变更**：`chmod 000`、`chown`、`passwd`、`chpasswd`、`useradd`、`usermod`、`userdel`、`groupadd`、`groupmod`、`groupdel`
-- **痕迹清除**：`crontab -r`、`history -c`
+- 删除文件、清空文件、格式化或写入块设备
+- 终止进程、关机、重启或切换运行级别
+- 停止、禁用、重启或重载系统服务
+- 清空防火墙规则
+- 修改账号、用户组、密码、文件属主或关键权限
+- 清除计划任务或 Shell 历史
 
-为了减少误报，`run` 会先屏蔽普通引号中的说明文本，例如 `echo "rm -rf /tmp/x"` 不会因为字符串内容被拒绝。若命令通过 `sh`、`bash`、`dash`、`zsh` 或 `ksh -c '...'` 包装执行，引号中的 payload 会被提取出来再次检查，因此 `bash -c 'rm -rf /tmp/x'` 仍会被拒绝。
+为了减少误报，普通引号中的说明文本不会直接触发黑名单，比如 `echo "rm -rf /tmp/x"` 不会被拒绝。通过 `sh -c`、`bash -c` 等方式包装执行时，SIREN 仍会检查实际命令，因此 `bash -c 'rm -rf /tmp/x'` 会被拦截。
 
 <Callout title="自定义" type="info">
-  可根据实际需求在配置文件中添加或移除黑名单规则。规则使用 Go 正则表达式语法。
+  黑名单规则使用 Go 正则表达式语法。遇到误报时，建议只收窄命中的那条规则，不要直接清空整组黑名单；修改 `server_config.yaml` 后需要重启 SIREN Server。
 </Callout>
 
 ## 相关内容

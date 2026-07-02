@@ -1,6 +1,6 @@
 ---
-title: 服务端操作
-description: 了解如何在服务端上使用快捷操作
+title: 服务端命令
+description: 查看 SIREN Server REPL 的常用命令与维护操作
 icon: Server
 ---
 
@@ -9,41 +9,41 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-SIREN Server REPL 提供了完整的命令集，用于管理客户端、下发远程操作，以及在服务端本地执行快捷操作。在 REPL 中输入 `help` 可查看分类帮助，`help <命令>` 查看单个命令的详细用法。
+SIREN Server REPL 用于管理在线客户端、下发远程操作，以及处理少量服务端维护任务。在 REPL 中输入 `help` 查看分类帮助，输入 `help <命令>` 查看单个命令的用法。
 
 ## 命令速查
 
-下表汇总了 REPL 的全部命令，详细用法见对应功能页。
+下表汇总了 REPL 的主要命令。调查流程类命令只保留入口说明，详细步骤见对应功能页。
 
 | 命令 | 用法 | 说明 | 详见 |
 | --- | --- | --- | --- |
-| `ls` | `ls` | 列出所有已连接客户端 | — |
+| `ls` | `ls` | 列出所有已连接客户端 | [远程模式](/remote) |
 | `note` | `note <Client ID> [Note]` | 设置或清空客户端备注 | [远程模式](/remote) |
-| `allow` | `allow <IP>` | 放行受害主机出口 IP 访问 SIREN Server | [凭证设置](/credential) |
+| `allow` | `allow <IP>` | 放行受害主机出口 IP 访问 SIREN Server | [快速开始](/index#手动部署) |
 | `deploy` | `deploy <UID> <Instance ID> [Public IP]` | 通过云助手部署客户端 | [快速开始](/index) |
-| `deploy-batch` | `deploy-batch <UID> <instanceId[,publicIp[,note]]>...` | 批量部署（2–20 台） | [快速开始](/index) |
+| `deploy-batch` | `deploy-batch <UID> <instanceId[,publicIp[,note]]>...` | 批量部署 2-20 台客户端 | [快速开始](/index) |
 | `shell` | `shell <Client ID>` | 启动交互式远程 Shell | [远程模式](/remote#远程命令执行) |
 | `run` | `run <Client ID> <Command>` | 在客户端执行单条命令并返回结果 | [远程模式](/remote#单条命令执行) |
-| `air` | `air <Client ID> <UID> <Alert ID>`／`air <Client ID> <Prompt>` | 启动 Agentic 应急响应 | [Agentic 应急响应](/air) |
+| `air` | `air <Client ID> <UID> <Alert ID>` 或 `air <Client ID> <Prompt>` | 启动 Agentic 应急响应 | [Agentic 应急响应](/air) |
 | `recon` | `recon <Client ID>` | 启动自动化信息收集 | [信息收集](/recon) |
 | `ak` | `ak <UID> <AccessKey ID> [Region]` | 调查 AccessKey 调用历史 | [AccessKey 调查](/ak) |
 | `info` | `info <Client ID> <PID \| -p Port \| -n Name>` | 查看进程详情（仅 Linux） | [进程分析](/analysis/info) |
-| `upload` | `upload <Client ID> <Client file path>` | 将客户端文件保存到服务端 Artifacts | [文件上传](/analysis/upload) |
+| `upload` | `upload <Client ID> <Client file path>` | 将客户端文件保存到服务端 Artifacts | [文件管理](/analysis/upload#命令行上传) |
 | `clean` | `clean <Client ID>` | 清除客户端痕迹并终止客户端 | [痕迹清除](/misc/clean) |
 | `reload` | `reload <Client ID>` | 不重连即重新加载客户端配置 | [本页](#重新加载客户端配置) |
 | `fwd` | `fwd <Client ID> <src_port:target_addr>` | 建立端口转发 | [端口转发](/portforward) |
 | `lsfwd` | `lsfwd` | 列出所有端口转发 | [端口转发](/portforward) |
 | `stopfwd` | `stopfwd <Forward ID>` | 停止指定端口转发 | [端口转发](/portforward) |
-| `plugins` | `plugins <Client ID> [install\|uninstall\|update\|toggle <Name>]` | 列出或管理客户端插件 | [插件系统](/plugins) |
+| `plugins` | `plugins <Client ID> [install\|uninstall\|update\|toggle <Name>]` | 列出或管理客户端插件 | [插件系统](/plugins/list) |
 | `!` | `! <Command>` | 在服务端本地执行 Shell 命令 | [本页](#在服务端执行命令) |
 | `env` | `env <KEY>=<VALUE>` | 设置服务端环境变量 | [本页](#设置环境变量) |
-| `clear` | `clear` | 清屏 | — |
-| `help` | `help [command]` | 查看帮助（可指定命令查看详细用法） | — |
-| `exit` | `exit` | 退出并关闭服务端 | — |
+| `clear` | `clear` | 清屏 | - |
+| `help` | `help [command]` | 查看帮助，可指定命令 | - |
+| `exit` | `exit` | 退出并关闭服务端 | - |
 
 ## 重新加载客户端配置
 
-修改客户端配置文件（如调整[信息收集模块开关](/recon#信息收集模块)或插件状态）后，可用 `reload` 让客户端重新加载配置，无需断开重连。
+修改客户端配置文件后，可用 `reload` 让在线客户端重新读取配置，不需要断开重连。它适合调整[信息收集模块开关](/recon#信息收集模块)、超时参数或插件状态；修改服务端配置仍需重启服务端。
 
 ```bash title="SIREN Server"
 >>> reload 0
@@ -51,7 +51,7 @@ SIREN Server REPL 提供了完整的命令集，用于管理客户端、下发�
 
 ## 在服务端执行命令
 
-使用 `!` 前缀在服务端本地执行 Shell 命令：
+使用 `!` 前缀在 SIREN Server 所在主机执行本地 Shell 命令。该命令不会在客户端执行，适合查看服务端工作目录、证书文件或运行环境。
 
 ```bash title="SIREN Server"
 >>> ! pwd
@@ -64,7 +64,7 @@ total 8
 
 ## 设置环境变量
 
-使用 `env` 命令设置环境变量，常用于配置各类[访问凭证](/credential)：
+使用 `env` 命令设置当前 SIREN Server 进程的环境变量，常用于临时配置[访问凭证](/credential)。变量值里可以包含 `=`。
 
 ```bash title="SIREN Server"
 >>> env SOAR_ACCESS_KEY_ID=<YOUR_ACCESS_KEY_ID>
@@ -72,5 +72,9 @@ total 8
 ```
 
 <Callout title="自动重新初始化" type="info">
-  设置 `SOAR_ACCESS_KEY_ID` / `SOAR_ACCESS_KEY_SECRET` 后会自动重新初始化 SOAR 客户端。兼容的 `ALIBABA_CLOUD_ACCESS_KEY_ID` / `ALIBABA_CLOUD_ACCESS_KEY_SECRET` 也会触发重新初始化，无需重启服务端。
+  设置 `SOAR_ACCESS_KEY_ID` / `SOAR_ACCESS_KEY_SECRET` 后，SIREN 会重置 SOAR 客户端，后续调用会使用新凭证。兼容的 `ALIBABA_CLOUD_ACCESS_KEY_ID` / `ALIBABA_CLOUD_ACCESS_KEY_SECRET` 也会触发同样逻辑。
+</Callout>
+
+<Callout title="进程级配置" type="warn">
+  `env` 只影响当前 SIREN Server 进程。重启服务端后，如需继续使用这些变量，请在 Shell、systemd、cron 或 `.env` 等启动环境中持久化配置。
 </Callout>

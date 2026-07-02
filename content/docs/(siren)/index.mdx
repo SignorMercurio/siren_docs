@@ -5,61 +5,40 @@ icon: Rocket
 ---
 
 import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
+import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
-import { Info, Sparkles, LayoutDashboard } from 'lucide-react';
+import { Info, LayoutDashboard, Settings, Terminal } from 'lucide-react';
 
-本指南介绍如何完成 SIREN 的部署并开始使用。
+本页按最短路径完成 SIREN 启动：先选择运行模式，再部署服务端和客户端，最后开始第一次排查。
 
 ## 模式选择
 
-SIREN 支持两种运行模式，可根据实际网络环境和应急响应场景灵活选择。
+SIREN 支持本地模式和远程模式。多数应急场景建议使用远程模式；只有目标主机网络隔离，或明确要求数据不离开目标主机时，才优先使用本地模式。
 
-### 本地模式
+| 模式 | 适合场景 | 你需要准备 |
+| --- | --- | --- |
+| 本地模式 | 单机、离线、无法连接控制主机，或数据不允许传出 | 登录目标主机并运行 `siren` |
+| 远程模式 | 多主机排查、统一管理客户端，或需要 Web 控制台、Shell、Files、Artifacts、AIR、Project | 一台控制主机，目标主机能够访问控制主机 |
 
-在受害主机上直接运行 SIREN 客户端，所有数据采集、分析和结果输出均在本地完成。
-
-**适用场景：**
-- 受害主机处于隔离网络或无法访问互联网
-- 对数据安全性要求极高，不允许数据传输到外部
-
-**特点：**
-- ✅ 无需额外部署服务端
-- ✅ 完全离线运行，不依赖网络连接
-- ⚠️ 需要直接登录受害主机操作
-- ⚠️ 不支持多主机统一管理
-
-### 远程模式
-
-在受害主机上运行 SIREN 客户端，通过加密通道连接到控制主机上的 SIREN 服务端。客户端负责数据采集，服务端负责指令下发、数据汇聚和结果展示。
-
-**适用场景：**
-- 受害主机可以访问互联网或控制主机
-- 需要同时处理多台受害主机
-
-**特点：**
-- ✅ 支持多主机统一管理和批量操作
-- ✅ 更丰富的功能支持
-- ⚠️ 需要额外部署服务端
-- ⚠️ 依赖网络连接
-
-<Callout title="模式选择建议" type="info">
-  优先推荐**远程模式**，仅在网络隔离或特殊安全要求下选择本地模式。
+<Callout title="选择建议" type="info">
+  如果你不确定该选哪种模式，先使用远程模式。远程模式可以通过 SIREN Server 管理多个客户端，并同时使用服务端 REPL、Web 控制台和 MCP。
 </Callout>
 
 ## 服务端部署（可选）
 
-仅远程模式下需要部署服务端。
+仅远程模式需要部署服务端。本地模式可以跳过本节，直接在目标主机运行 `./siren recon`。
 
 <Callout title="内部预部署环境" type="info">
-  在内部环境已完成 SIREN 控制主机设置，可开箱即用，无需关心凭证与外部工具配置。详见 [内部文档](https://aliyuque.antfin.com/ykozrq/puiz2d/mktg38agsx5bfz9v)。
+  内部环境通常已完成控制主机、SOAR 凭证和外部工具配置。已有可用控制主机时，可以直接从“客户端部署”开始；内部地址见 [内部文档](https://aliyuque.antfin.com/ykozrq/puiz2d/mktg38agsx5bfz9v)。
 </Callout>
 
 <Accordions>
   <Accordion title="服务端部署">
-    准备一台主机作为部署服务端的控制主机，需要满足以下条件：
+    准备一台控制主机，并确认以下条件：
 
-    - 受害主机能够访问控制主机（控制主机有公网 IP，或受害主机与控制主机处于同一内网网段）
-    - 如果需要通过服务端 REPL 使用交互式 Shell 或 `air` 命令，需安装 tmux；只使用 WebUI Shell/AIR 时不依赖 tmux
+    - 目标主机能够访问控制主机的客户端连接端口，默认是 `443`
+    - 操作者能够访问控制主机的 HTTP 端口，默认是 `8080`
+    - 如需在服务端 REPL 中使用交互式 Shell 或 `air` 命令，控制主机需安装 tmux；只使用 Web 控制台的 Shell/AIR 时不需要 tmux
 
     在控制主机上运行：
 
@@ -74,17 +53,17 @@ SIREN 支持两种运行模式，可根据实际网络环境和应急响应场�
     ./siren_server
     ```
 
-    SIREN Server 默认监听 443 端口（客户端 TLS），同时在 8080 端口启动 [Web 控制台](/webui) 与 [MCP 服务](/mcp)。可通过 `-p` 参数或配置文件修改端口。
+    SIREN Server 默认使用 `443` 作为客户端 TLS 连接端口，同时在 `8080` 提供 [Web 控制台](/webui) 和 [MCP 服务](/mcp)。可通过 `-p` 参数或配置文件修改客户端连接端口。
 
-    部署到公网前建议先创建 WebUI 账号，否则 WebUI 会自动禁用鉴权、允许匿名访问：
+    部署到公网或共享网络前，先创建 Web 控制台账号。空用户数据库会禁用 Web 控制台鉴权，适合本地测试，但不适合暴露在共享网络中。
 
     ```bash title="控制主机"
     ./siren_server user add admin
     ```
 
-    如需从 WebUI 直接打开 Dossier 报告编辑器，还需要把 Dossier 编辑器文件和默认报告部署到控制主机。左侧 Dossier 入口会默认编辑 `webui.dossierDir/report.md`，默认目录为 `/opt/siren/dossier`。完整步骤见 [Dossier 部署](/dossier/deploy)，语法、配置和编辑流程见 [Dossier 文档](/dossier)。
-
-    如需按应急响应项目隔离客户端和取证目录，可在 WebUI 中创建 [Projects](/webui#projects)。建议在 `server_config.yaml` 中显式配置 `webui.projectsBaseDir`，例如 `/opt/siren/projects`，新建 Project 时会在该目录下创建固定工作目录。
+    <Callout title="按需配置" type="info">
+      需要在 Web 控制台中编辑报告时，部署 [Dossier](/dossier/deploy)；需要按事件隔离客户端和取证目录时，配置 `webui.projectsBaseDir` 并使用 [Projects](/webui#projects)。这些配置不影响客户端连接和 Recon。
+    </Callout>
 
   </Accordion>
 </Accordions>
@@ -95,51 +74,43 @@ SIREN 支持两种运行模式，可根据实际网络环境和应急响应场�
 ### 内部环境：通过云助手一键部署
 
 <Callout title="前置条件" type="info">
-  受害主机为阿里云 ECS 且云助手状态正常
+  目标主机需要是阿里云 ECS，且云助手状态正常。控制主机还需要配置 [SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)；内部预部署环境通常已完成该配置。
 </Callout>
 
-控制主机[设置 SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)（内部环境已设置）后，在 SIREN Server 运行：
+在 SIREN Server 中运行：
 
 ```bash title="SIREN Server"
 >>> deploy <Alibaba Cloud UID> <ECS Instance ID> [Public IP]
 ```
 
-如果一次需要部署多台 ECS，可使用批量部署命令。每个目标使用 `instanceId`、`instanceId,publicIp` 或 `instanceId,publicIp,note`；只填写备注时可写成 `instanceId,,note`。机器数限制为 2-20 台：
+如需部署多台 ECS，使用批量部署命令。每个目标可以写成 `instanceId`、`instanceId,publicIp` 或 `instanceId,publicIp,note`；只填写备注时使用 `instanceId,,note`。单次支持 2-20 台：
 
 ```bash title="SIREN Server"
 >>> deploy-batch <Alibaba Cloud UID> <instanceId[,publicIp[,note]]>...
 ```
 
-单机和批量部署都会自动化执行以下步骤：
+`deploy` 和 `deploy-batch` 会完成以下动作：
 
-1. 从 SOAR 平台获取受害主机信息（地域、操作系统类型、IP 地址）
-2. 允许受害主机 IP 地址访问 SIREN Server
-3. 将适当的 SIREN 客户端二进制文件部署到受害主机
+1. 从 SOAR 平台读取目标主机的地域、操作系统和出口 IP
+2. 放行目标主机访问 SIREN Server
+3. 安装匹配系统架构的 SIREN 客户端
 4. 返回部署状态和命令输出
 
 <Callout title="出口 IP 获取失败时" type="info">
-  少数情况下 SOAR 无法返回受害主机的公网出口 IP（地域、操作系统类型仍可正常获取）。此时可在第三个参数手动传入出口 IP，SIREN 会跳过自动探测、直接使用该 IP 调用 `AllowVictim`：
+  少数情况下 SOAR 无法返回目标主机的公网出口 IP。此时可在第三个参数手动传入出口 IP，SIREN 会跳过自动探测、直接使用该 IP 放行访问：
 
   ```bash title="SIREN Server"
   >>> deploy user123 i-1234567890abcdef0 203.0.113.10
   ```
 
-  受害主机出口 IP 可以通过 `curl ifconfig.co/ip` 获取。
+  目标主机出口 IP 可以在目标主机上通过 `curl ifconfig.co/ip` 获取。
 </Callout>
 
 <Accordions>
-  <Accordion title="示例">
+  <Accordion title="单机部署示例">
 
     ```bash title="SIREN Server"
     >>> deploy user123 i-1234567890abcdef0
-    [*] Retrieving victim info...
-    [+] Victim info: region=us-east-1, os_type=linux, ip=203.0.113.10
-    [*] Allowing victim to access server...
-    [+] Successfully allowed 203.0.113.10 -> SIREN Server
-    [*] Deploying SIREN...
-    [+] Deployment completed. Command output:
-    SIREN client deployed successfully to /opt/siren
-    [+] New client [0] connected: 203.0.113.10:33724
     ```
 
   </Accordion>
@@ -161,7 +132,7 @@ SIREN 支持两种运行模式，可根据实际网络环境和应急响应场�
 
 ### 手动部署
 
-登录受害主机后，执行：
+登录目标主机后，执行安装脚本：
 
 ```bash tab="Linux"
 (wget -q -O - https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh || curl -s https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh) | sh
@@ -171,30 +142,64 @@ SIREN 支持两种运行模式，可根据实际网络环境和应急响应场�
 powershell -ExecutionPolicy Bypass -Command "iwr -Uri 'https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.ps1' -UseBasicParsing | iex"
 ```
 
-此时如需使用远程模式，需要在防火墙中允许受害主机出口 IP 访问 SIREN Server 监听端口。
+如果使用本地模式，安装后直接运行：
 
-内部环境可以在 SIREN Server 运行以下命令，自动配置安全组规则：
+```bash tab="Linux"
+./siren recon
+```
+
+```powershell tab="Windows"
+.\siren.exe recon
+```
+
+如果使用远程模式，需要先允许目标主机出口 IP 访问 SIREN Server。内部环境可以在 SIREN Server 中运行：
 
 ```bash title="SIREN Server"
 >>> allow <Victim IP>
 ```
 
-受害主机出口 IP 可以通过 `curl ifconfig.co/ip` 获取。随后以客户端模式运行 SIREN：
+目标主机出口 IP 可以通过 `curl ifconfig.co/ip` 获取。随后以客户端模式连接服务端：
 
-```bash title="受害主机"
+```bash tab="Linux"
 ./siren client -s <Server IP> -p <Server Port>
+```
+
+```powershell tab="Windows"
+.\siren.exe client -s <Server IP> -p <Server Port>
+```
+
+## 开始第一次排查
+
+客户端连接后，可以从 Web 控制台、服务端 REPL 或本地命令开始排查。
+
+```text tab="Web 控制台"
+打开 http://<SIREN Server IP>:8080
+进入 Clients，选择客户端
+进入 Investigations，启动 Recon
+```
+
+```bash tab="服务端 REPL"
+>>> ls
+>>> recon <Client ID>
+```
+
+```bash tab="本地模式"
+./siren recon
 ```
 
 ## 下一步
 
 <Cards>
   <Card title="自动化信息收集" href="/recon" icon={<Info />}>
-    部署完成后，运行信息收集开始你的第一次应急排查
+    查看 Recon 的 Web 控制台、服务端 REPL 和本地模式用法
   </Card>
   <Card title="Web 控制台" href="/webui" icon={<LayoutDashboard />}>
-    通过浏览器访问 SIREN 服务端，图形化处理常用远程工作流
+    通过浏览器管理客户端、Shell、Files、Artifacts、AIR 和 Project
   </Card>
-  <Card title="功能特性" href="/features" icon={<Sparkles />}>
-    了解 SIREN 提供的完整功能列表
+  <Card title="服务端 REPL" href="/remote" icon={<Terminal />}>
+    使用命令行管理客户端并执行远程排查命令
+  </Card>
+  <Card title="配置文件" href="/config" icon={<Settings />}>
+    调整端口、Web 控制台、Dossier、Project 和 MCP 配置
   </Card>
 </Cards>

@@ -28,7 +28,7 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 
 ### 粘贴证据图片
 
-在编辑器中粘贴图片时，Dossier 会保存图片并插入 Markdown 引用。通过 SIREN WebUI 打开的报告会把图片放在报告同名的 `.assets/pasted/` 目录下；本地离线打开时通常保存到 `assets/pasted/`。
+在编辑器中粘贴图片时，Dossier 会保存图片并插入 Markdown 引用。通过 SIREN WebUI 打开的报告会把图片放在报告同名的 `.assets/pasted/` 目录下；本地离线打开时会要求选择包含 `index.html` 的项目根目录，并把图片写入 `assets/pasted/`。
 
 </Step>
 <Step>
@@ -42,7 +42,7 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 
 ### 保存与导出
 
-保存 Markdown 源文件后，可以通过浏览器打印导出 PDF，也可以下载可编辑 HTML 快照或当前 Markdown 源文件。
+保存 Markdown 源文件后，可以通过浏览器打印导出 PDF，也可以下载可编辑 HTML 快照或当前 Markdown 源文件。本地首次保存会要求选择 `.md` 写入位置；SIREN WebUI 中保存会通过受保护的报告接口写回服务器。
 
 </Step>
 </Steps>
@@ -64,6 +64,7 @@ Dossier 会把草稿自动保存到浏览器 IndexedDB。自动保存用于防�
 - 默认报告固定为 `webui.dossierDir/report.md`
 - 案件报告可以放在 Global Artifacts 或某个 Project 目录中，从对应视图的 Artifacts 打开
 - 报告附件建议使用同名 `.assets/` 目录，避免多个案件的截图混在一起
+- 本地离线用 `?md=case.md` 打开其他报告时，建议把 `.md` 放在项目根目录，避免粘贴图片的相对路径指向错误目录
 - 历史 HTML 报告可下载后查看，新的应急报告建议继续维护 `.md` 源文件
 
 ## 写作建议

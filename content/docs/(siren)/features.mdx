@@ -1,107 +1,84 @@
 ---
 title: 功能特性
-description: SIREN 的主要功能特性列表
+description: SIREN 的核心能力概览
 icon: Sparkles
 ---
 
 import { Card, Cards } from "fumadocs-ui/components/card";
-import { Info, Users, Terminal, Activity, Network, Clock, Play, Code, FileText, Cpu, Globe, Package, Eraser, CloudUpload, BookOpen, ToggleLeft, Cloud, FileEdit, Radio, Server, Bot, Rocket, Key, Brain, Lock, ArrowRightLeft, Plug, Puzzle, Download, LayoutDashboard, FolderKanban, FolderTree, MousePointerClick } from "lucide-react";
+import { Info, Users, Terminal, Activity, Clock, FileText, Cpu, Package, Eraser, BookOpen, Cloud, FileEdit, Radio, Rocket, Key, Brain, Lock, ArrowRightLeft, Plug, Puzzle, Download, LayoutDashboard, FolderKanban, FolderTree } from "lucide-react";
 
-## 信息收集
+SIREN 的功能可以按应急响应流程理解：接入目标主机，收集证据，远程排查，整理报告，再按需接入 AI、MCP 和插件能力。
 
-自动化采集受害主机上的关键安全信息，支持按模块独立开关。
+## 核心工作流
 
 <Cards>
-    <Card title="基础系统信息" icon={<Info />} href="/recon">主机名、操作系统、CPU、内存、磁盘等</Card>
-    <Card title="用户" icon={<Users />} href="/recon">用户列表、登录历史、sudoers、新增用户记录等</Card>
-    <Card title="SSH" icon={<Terminal />} href="/recon">SSH 配置、authorized_keys、暴力破解与后门检测等</Card>
-    <Card title="进程" icon={<Activity />} href="/recon">进程列表、CPU/内存 Top 20、反弹 shell 与挖矿检测</Card>
-    <Card title="网络" icon={<Network />} href="/recon">网络连接、监听端口、DNS 配置、路由表等</Card>
-    <Card title="计划任务" icon={<Clock />} href="/recon">crontab、cron 日志、Windows 计划任务与启动项等</Card>
-    <Card title="服务与启动项" icon={<Play />} href="/recon">systemd 服务、init 脚本、Windows 服务等</Card>
-    <Card title="环境变量" icon={<Code />} href="/recon">系统环境变量、LD_PRELOAD 等敏感变量检查</Card>
-    <Card title="文件" icon={<FileText />} href="/recon">近期修改文件、大文件、SUID 文件、文件完整性等</Card>
-    <Card title="Rootkit" icon={<Cpu />} href="/recon">内核模块检查、可疑符号与 .ko 模块检测</Card>
-    <Card title="Webshell" icon={<Globe />} href="/recon">Web 目录扫描，基于关键字和正则匹配的 Webshell 检测</Card>
-    <Card title="应用" icon={<Package />} href="/recon">Redis/JDWP/恶意软件包检测、容器、IIS 等</Card>
+    <Card title="本地与远程模式" icon={<Radio />} href="/index#模式选择">本地模式适合离线单机排查；远程模式通过 SIREN Server 管理在线客户端</Card>
+    <Card title="自动化信息收集" icon={<Info />} href="/recon">采集主机关键安全信息，生成结构化 Markdown 报告</Card>
+    <Card title="服务端 REPL" icon={<Terminal />} href="/remote">在控制主机终端管理客户端、执行命令、打开 Shell 和启动 AIR</Card>
+    <Card title="Web 控制台" icon={<LayoutDashboard />} href="/webui">通过浏览器管理 Projects、Clients、Shells、Investigations、Files、Artifacts 和 Dossier</Card>
+    <Card title="Projects 工作区" icon={<FolderKanban />} href="/webui#projects">按应急响应项目隔离客户端、操作目标、AIR 工作目录和取证目录</Card>
+    <Card title="部署与放行" icon={<Rocket />} href="/index#内部环境通过云助手一键部署">通过云助手部署客户端，或使用 `allow` 放行受害主机出口 IP</Card>
 </Cards>
 
-## 报告与取证文件
+## 自动化信息收集
 
-SIREN 将本地报告、服务端 Artifacts 和 Dossier 报告编辑分成不同入口，用于查看采集结果、取证文件和应急报告。
+Recon 会在目标主机上采集常见排查证据。除基础信息外，其他模块可在客户端配置中按需开关。
 
 <Cards>
-    <Card title="本地 Recon 报告" icon={<FileText />} href="/recon#查看数据">本地模式生成结构化 Markdown 文件，可直接阅读，也可按客户端配置上传 OSS</Card>
-    <Card title="服务端 Artifacts" icon={<FolderTree />} href="/webui#artifacts">集中查看远程 Recon 与 AIR 产出的结果文档，以及上传、整理和拉取到服务端的取证文件</Card>
-    <Card title="Project 取证目录" icon={<FolderKanban />} href="/webui#projects">按应急响应项目固定服务端目录，Project 视图下 Artifacts、AIR 和 Recon 都落到对应目录</Card>
-    <Card title="Dossier 报告编辑" icon={<BookOpen />} href="/dossier">面向 Markdown 应急报告编辑和附件保存，可直接打开默认报告或从 Artifacts 打开报告</Card>
+    <Card title="系统与用户" icon={<Users />} href="/recon">系统版本、资源使用、用户列表、权限用户、登录历史和新增用户记录</Card>
+    <Card title="SSH 与登录线索" icon={<Terminal />} href="/recon">SSH 配置、authorized_keys、暴力破解记录和常见后门线索</Card>
+    <Card title="进程与网络" icon={<Activity />} href="/recon">进程列表、资源占用、可疑进程、监听端口、连接、DNS 和路由信息</Card>
+    <Card title="计划任务与服务" icon={<Clock />} href="/recon">cron、Windows 计划任务、启动项、systemd 服务和 Windows 服务</Card>
+    <Card title="文件与 Webshell" icon={<FileText />} href="/recon">历史命令、临时目录、近期变更文件、大文件、SUID 文件和 Web 目录扫描</Card>
+    <Card title="Rootkit 与应用" icon={<Cpu />} href="/recon">内核模块、可疑 .ko、Redis、JDWP、容器、IIS 和恶意 Python 包线索</Card>
 </Cards>
 
-## 文件与进程管理
+## 调查与响应
 
-对客户端文件系统、服务端 Artifacts 和进程信息进行查看、传输和分析。
+远程模式下，SIREN 可以把在线客户端、文件、进程、云上告警和 AI 会话集中到同一个调查现场。
 
 <Cards>
-    <Card title="客户端文件管理" icon={<FolderTree />} href="/webui#files">在线浏览、下载和上传客户端文件系统中的文件与目录</Card>
-    <Card title="服务端 Artifacts 管理" icon={<Server />} href="/webui#artifacts">管理 Global 工作目录或 Project 目录中的报告、取证文件和上传文件，支持预览、下载、上传、新建目录、重命名和删除</Card>
-    <Card title="本地文件上传" icon={<CloudUpload />} href="/analysis/upload">本地文件可上传至 OSS，远程 CLI 上传会拉取客户端文件并保存到服务端 Artifacts</Card>
-    <Card title="进程分析" icon={<Activity />} href="/analysis/info">基于 PID/端口/名称查询进程详情、进程树、容器和服务信息</Card>
+    <Card title="浏览器 Shell" icon={<Terminal />} href="/webui#shells">在 Web 控制台打开多标签交互式终端，切换页面后会话保持运行</Card>
+    <Card title="Agentic 应急响应" icon={<Brain />} href="/air">启动 Claude 或 Codex 辅助排查会话，由操作员观察、追问和确认关键操作</Card>
+    <Card title="AccessKey 调查" icon={<Key />} href="/ak">调用 SOAR 剧本查询泄露 AccessKey 的云上调用历史，生成 Markdown 报告</Card>
+    <Card title="进程分析" icon={<Activity />} href="/analysis/info">按 PID、监听端口或进程名查询 Linux 进程详情、进程树、容器和服务线索</Card>
+    <Card title="端口转发" icon={<ArrowRightLeft />} href="/portforward">把受害主机内网服务转发到控制主机，用于临时访问和验证</Card>
+    <Card title="痕迹清除" icon={<Eraser />} href="/misc/clean">调查结束后清理客户端侧的 SIREN 文件和临时痕迹，并终止客户端进程</Card>
 </Cards>
 
-## 配置文件支持
+## 文件、Artifacts 与报告
 
-通过 YAML 配置文件灵活控制 SIREN 的行为。
+SIREN 把客户端文件系统、服务端取证目录和报告编辑分成不同入口，避免把远端文件操作和报告整理混在一起。
 
 <Cards>
-    <Card title="信息收集项开关" icon={<ToggleLeft />} href="/config#客户端配置">按模块独立控制信息收集项，按需启用或禁用</Card>
-    <Card title="OSS 配置" icon={<Cloud />} href="/config">本地模式的 recon/upload 可配置 OSS Bucket（敏感凭证通过环境变量设置）</Card>
-    <Card title="自定义检测规则" icon={<FileEdit />} href="/config#客户端配置">通过正则表达式定义白名单和黑名单规则，降低噪音</Card>
-    <Card title="通信设置" icon={<Radio />} href="/config">配置客户端-服务端的连接地址、端口和 TLS 证书</Card>
-    <Card title="WebUI 与 MCP 端口" icon={<Server />} href="/config#服务端配置">统一配置 WebUI 与 MCP 共享的监听地址和端口</Card>
-    <Card title="Project 目录基准路径" icon={<FolderKanban />} href="/config#服务端配置">通过 webui.projectsBaseDir 限制 WebUI Project 目录创建位置</Card>
-    <Card title="Agentic 应急响应设置" icon={<Bot />} href="/config#服务端配置">配置 Claude / Codex Provider CLI 路径与 prompt 模板</Card>
+    <Card title="客户端 Files" icon={<FolderTree />} href="/webui#files">浏览、预览、下载和上传在线客户端文件系统中的文件</Card>
+    <Card title="服务端 Artifacts" icon={<FolderTree />} href="/webui#artifacts">管理 Global 工作目录或 Project 目录中的报告、取证文件和上传文件</Card>
+    <Card title="文件管理" icon={<FileText />} href="/analysis/upload">了解 Web 控制台文件管理能力，以及本地模式和服务端 REPL 的 upload 命令</Card>
+    <Card title="Dossier 报告编辑" icon={<BookOpen />} href="/dossier">编辑 Markdown 应急报告、保存粘贴图片，并导出 PDF 或 HTML 报告</Card>
+    <Card title="本地 Recon 报告" icon={<FileText />} href="/recon#查看数据">本地模式在当前目录生成 Markdown 报告，也可按配置上传到 OSS</Card>
+    <Card title="Project 取证目录" icon={<FolderKanban />} href="/webui#projects">Project 视图下的 Recon、AIR、Artifacts 和报告文件会落到对应项目目录</Card>
 </Cards>
 
-## 远程模式专属功能
+## AI、MCP 与插件
 
-远程模式在本地模式的基础上，提供以下专属功能。
+这些能力用于扩展调查入口和自动化方式。MCP 面向 AI 客户端，插件系统面向 SIREN 客户端能力扩展。
 
 <Cards>
-    <Card title="自动化客户端部署" icon={<Rocket />} href="/index#内部环境通过云助手一键部署">通过云助手单机或批量部署 SIREN 客户端到受害主机</Card>
-    <Card title="自动重连与备注恢复" icon={<Radio />} href="/remote">客户端保存稳定身份，服务端重启后自动重连并恢复已设置备注</Card>
-    <Card title="远程 Shell" icon={<Terminal />} href="/remote#远程命令执行">全交互式远程 Shell，支持 vim、top 等交互式命令</Card>
-    <Card title="AccessKey 调查" icon={<Key />} href="/ak">通过 CLI 或 WebUI 调查云上 AccessKey 调用历史，生成 Markdown 报告</Card>
-    <Card title="Agentic 应急响应" icon={<Brain />} href="/air">使用 Claude 或 Codex 自动化执行应急响应，生成完整报告</Card>
-    <Card title="TLS 加密通信" icon={<Lock />} href="/protocol">所有客户端-服务端通信均通过 TLS 加密保护</Card>
-    <Card title="端口转发" icon={<ArrowRightLeft />} href="/portforward">将受害主机内网服务转发到控制主机进行访问</Card>
-    <Card title="MCP 集成" icon={<Plug />} href="/mcp">通过 MCP 协议接入任意 AI 助手</Card>
-    <Card title="痕迹清除" icon={<Eraser />} href="/misc/clean">远程清除受害主机上的 SIREN 痕迹</Card>
+    <Card title="Agentic IR" icon={<Brain />} href="/air">在 Web 控制台或服务端 REPL 中运行 Claude / Codex 辅助排查会话</Card>
+    <Card title="MCP 集成" icon={<Plug />} href="/mcp">让支持 MCP 的 AI 客户端列出 SIREN 客户端、执行命令或获取告警详情</Card>
+    <Card title="插件系统" icon={<Puzzle />} href="/plugins">安装、卸载、更新和启停 `command` 与 `recon` 插件</Card>
+    <Card title="插件列表" icon={<Download />} href="/plugins/list">查看当前可用插件和内置示例插件</Card>
+    <Card title="命令插件" icon={<Terminal />} href="/plugins/command/jdump">通过插件新增独立命令，例如 Java 堆转储</Card>
+    <Card title="信息收集插件" icon={<Package />} href="/plugins/recon/chkrootkit">把外部检查项接入 Recon 报告，例如 chkrootkit</Card>
 </Cards>
 
-## Web 控制台
+## 配置与基础设施
 
-浏览器图形化入口，用于处理常用远程工作流；无需直接登录控制主机操作 tmux 或 REPL。
-
-<Cards>
-    <Card title="Web 控制台" icon={<LayoutDashboard />} href="/webui">统一入口访问客户端管理、Shell、Agentic IR、客户端文件与取证文件浏览等功能</Card>
-    <Card title="Projects 工作区" icon={<FolderKanban />} href="/webui#projects">在 Global 与 Project 视图间切换，隔离客户端列表、操作目标和取证目录</Card>
-    <Card title="账号鉴权" icon={<Lock />} href="/webui#账号鉴权">SQLite + bcrypt 账号登录，通过 CLI 管理用户</Card>
-    <Card title="多标签 Shell" icon={<Terminal />} href="/webui#shells">WebSocket 承载的交互式终端，切换页面会话不中断</Card>
-    <Card title="浏览器内 AIR" icon={<Brain />} href="/webui#agentic-ir">在浏览器内嵌终端里运行 Claude 或 Codex，会话托管在服务端、断连可重连</Card>
-    <Card title="浏览器内调查" icon={<Key />} href="/webui#investigations">执行 AccessKey 调查、Recon 和进程分析，查看真实阶段进度并跳转报告</Card>
-    <Card title="客户端文件浏览" icon={<FolderTree />} href="/webui#files">在线浏览客户端文件系统，支持预览、下载、目录打包和单文件上传</Card>
-    <Card title="取证文件浏览" icon={<FolderTree />} href="/webui#artifacts">服务端 Artifacts 支持 Markdown 预览、Dossier 编辑、新建目录、上传、下载、重命名和删除</Card>
-    <Card title="Dossier 报告编辑" icon={<BookOpen />} href="/dossier">从 WebUI 直接打开 Dossier 编辑器，编辑 Markdown 应急报告和附件</Card>
-    <Card title="SOAR 快捷操作" icon={<MousePointerClick />} href="/webui#clients">allow、单机/批量 deploy、clean 一键调用，运行日志流式展示</Card>
-</Cards>
-
-## 插件系统
-
-通过插件扩展 SIREN 的能力，无需修改核心代码。
+不同部署环境需要的外部依赖不同。只启用基础 Recon 时依赖较少，使用 SOAR、OSS、Dossier、AIR 或 MCP 时再按需配置。
 
 <Cards>
-    <Card title="插件管理" icon={<Puzzle />} href="/plugins#管理插件">安装、卸载、启停插件，支持本地和远程模式</Card>
-    <Card title="插件市场" icon={<Download />} href="/plugins#插件市场">从插件市场一键下载和更新插件</Card>
-    <Card title="内置示例插件" icon={<Package />} href="/plugins#内置示例插件">jdump、chkrootkit 等开箱即用的示例插件</Card>
-    <Card title="插件开发" icon={<Code />} href="/plugins#插件开发">了解如何编写自定义插件清单</Card>
+    <Card title="配置文件" icon={<FileEdit />} href="/config">配置 Recon 模块、OSS、通信端口、Web 控制台、MCP、AIR 和插件市场</Card>
+    <Card title="凭证设置" icon={<Lock />} href="/credential">设置 OSS、SOAR 和 Alibaba Cloud SDK 凭证，避免把密钥写进配置文件</Card>
+    <Card title="关联基础设施" icon={<Cloud />} href="/infra">确认 OSS、SOAR、Dossier、AI CLI、Web 控制台和 MCP 的依赖关系</Card>
+    <Card title="通信协议" icon={<Radio />} href="/protocol">了解客户端和服务端之间的 TLS 主通道、文件传输、Shell、端口转发和插件消息</Card>
 </Cards>

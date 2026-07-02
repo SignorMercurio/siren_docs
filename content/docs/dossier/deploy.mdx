@@ -11,26 +11,35 @@ Dossier 是静态浏览器应用。部署到 SIREN 时，只需要把构建后�
 
 ## SIREN WebUI 部署
 
-默认配置从 `/opt/siren/dossier` 读取 Dossier 编辑器文件，并把 `/opt/siren/dossier/report.md` 作为左侧 Dossier 入口的默认报告。
+示例配置从 `/opt/siren/dossier` 读取 Dossier 编辑器文件，并把 `/opt/siren/dossier/report.md` 作为左侧 Dossier 入口的默认报告。
 
 <Steps>
 <Step>
 
-### 构建 Dossier
+### 使用 Dossier 项目的部署目标
 
 ```bash title="Dossier 项目目录"
 npm install
-npm run build
+make deploy-dry-run
+make deploy
 ```
+
+`make deploy` 会先构建编辑器，再把 `report.md` 同步到 Sleuth 报告模板，并把 Dossier 运行时发布到 `SIREN:/opt/siren/dossier`。只发布运行时可使用 `make deploy-runtime`；需要更改目标时，设置 `DOSSIER_DEPLOY_DIR`、`DOSSIER_DEPLOY_HOST` 或 `DOSSIER_DEPLOY_PATH`。
 
 </Step>
 <Step>
 
-### 复制到控制主机
+### 手工复制
 
-```bash title="控制主机"
+如果不使用 `make deploy`，可在控制主机上手工复制运行时文件：
+
+```bash title="Dossier 项目目录"
+npm install
+npm run build
+
 sudo mkdir -p /opt/siren/dossier
-sudo rsync -av index.html editor.css editor.js report.md assets/ /opt/siren/dossier/
+sudo rsync -av --exclude '.DS_Store' index.html editor.css editor.js report.md /opt/siren/dossier/
+sudo rsync -av --delete --exclude '.DS_Store' --exclude 'assets/pasted/' assets /opt/siren/dossier/
 ```
 
 </Step>
@@ -84,6 +93,6 @@ make dist
 
 ## 反向代理
 
-如果 WebUI 通过 Nginx 或 Caddy 暴露，建议把同一域名完整转发到 SIREN WebUI 端口，包括 `/dossier/`、`/api/reports/*` 和 `/api/dossier/status`。
+如果 WebUI 通过 Nginx 或 Caddy 暴露，建议把同一域名完整转发到 SIREN WebUI 端口，不要只代理 `/dossier/`。
 
-只代理 `/dossier/` 会导致编辑器页面可访问，但保存正文、粘贴图片或读取默认报告失败。`/api/dossier/status` 用于探测 `webui.dossierDir` 是否已正确配置并可用，未一并转发会导致编辑器误判 Dossier 不可用。
+只代理 `/dossier/` 会导致编辑器页面可访问，但读取报告、保存正文或粘贴图片失败。需要单独配置路径时，请同时转发 Dossier 静态路径、报告读写接口、Dossier 状态接口和 WebUI 鉴权检查接口；接口边界见[配置说明](/dossier/config#报告源文件)。

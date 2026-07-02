@@ -6,32 +6,32 @@ icon: BookOpen
 
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { Callout } from "fumadocs-ui/components/callout";
-import { Search, Radio, Brain, Shield, Feather, Zap, Globe, Puzzle, FolderKanban, LayoutDashboard } from 'lucide-react';
+import { Search, Radio, Brain, Shield, Feather, FileText, Puzzle, FolderKanban, LayoutDashboard, BookOpenText } from 'lucide-react';
 
 <Callout title="注意" type="warn">
-  此工具专为合法的应急响应和安全分析目的而设计。所有侦察和系统访问功能均面向有权调查受损系统的授权安全专业人员。
+  SIREN 仅面向合法的应急响应和安全分析场景。运行信息收集、远程 Shell、文件操作、端口转发或痕迹清除前，请确认你有权调查目标系统。
 </Callout>
 
 ## 什么是 SIREN？
 
-SIREN (**S**wift **I**ncident **R**esponse **E**vidence **N**avigator) 是新一代基于 Go 语言的智能化应急响应工具，通过自动化技术简化安全调查流程。它将传统的证据收集与现代 AI 驱动分析和自动化部署能力相结合，使安全专业人员能够在云环境和本地环境中快速响应安全事件。
+SIREN（**S**wift **I**ncident **R**esponse **E**vidence **N**avigator）是面向主机应急响应的工具。它把信息收集、远程操作、文件管理、AI 辅助排查和报告整理放到同一套工作流里，适合在事件处理中快速接入目标主机并留存证据。
 
-该工具支持本地和远程两种操作模式，与 SOAR 平台无缝集成，实现自动化受害主机访问控制和客户端部署。无论是调查单个受损主机还是协调多系统响应，SIREN 都能提供有效应急响应所需的速度和智能。
+SIREN 支持本地模式和远程模式。本地模式直接在目标主机上运行，适合离线单机排查；远程模式由 SIREN Server 管理在线客户端，提供服务端 REPL、Web 控制台、Artifacts、Projects、Agentic IR 和 MCP 服务。需要内部 SOAR 能力时，还可以完成放行、部署、AccessKey 调查和告警详情获取。
 
 ## 设计理念
 
 <Cards>
-  <Card title="零依赖" icon={<Feather />}>
-    Go 静态编译的单一二进制文件，无需 Python、Java 等运行时环境，开箱即用
+  <Card title="单二进制部署" icon={<Feather />}>
+    Go 静态编译客户端，减少目标主机上的运行时依赖
   </Card>
-  <Card title="速度优先" icon={<Zap />}>
-    信息收集全流程可在数十秒内完成，每条命令均有超时控制，避免挂起
+  <Card title="证据优先" icon={<FileText />}>
+    Recon、Files、Artifacts 和 Dossier 都围绕证据收集、留存和报告交付展开
   </Card>
-  <Card title="跨平台" icon={<Globe />}>
-    同时支持 Linux 和 Windows，通过构建标签实现平台隔离，一套代码覆盖主流操作系统
+  <Card title="本地与远程并存" icon={<Radio />}>
+    本地模式适合隔离环境；远程模式适合多客户端统一管理和远程排查
   </Card>
   <Card title="可扩展" icon={<Puzzle />}>
-    插件系统支持自定义命令和信息收集模块，无需修改核心代码即可扩展能力
+    插件系统扩展客户端能力，MCP 让 AI 助手接入 SIREN 工具
   </Card>
 </Cards>
 
@@ -39,22 +39,28 @@ SIREN (**S**wift **I**ncident **R**esponse **E**vidence **N**avigator) 是新一
 
 <Cards>
   <Card title="信息收集" icon={<Search />} href="/recon">
-    自动化采集系统信息、用户、进程、网络、计划任务、服务、文件、Rootkit、Webshell 等关键数据，生成结构化 Markdown 报告
+    采集系统、用户、进程、网络、计划任务、服务、文件、Rootkit 和 Webshell 等信息，生成 Markdown 报告
   </Card>
   <Card title="远程操作" icon={<Radio />} href="/remote">
-    TLS 加密的客户端-服务端通信，支持全交互式 Shell、远程命令执行、端口转发等
-  </Card>
-  <Card title="智能应急" icon={<Brain />} href="/air">
-    AI 驱动的自动化应急响应：MCP 集成、Agentic IR 工作流、自动生成应急响应报告
-  </Card>
-  <Card title="云原生集成" icon={<Shield />} href="/infra">
-    SOAR 平台集成实现一键部署、AccessKey 调查、安全告警详情获取；本地模式可通过 OSS 留存上传文件和报告
+    通过 TLS 连接在线客户端，支持服务端 REPL、远程命令、交互式 Shell 和端口转发
   </Card>
   <Card title="Web 控制台" icon={<LayoutDashboard />} href="/webui">
-    浏览器图形化入口，统一承载客户端管理、交互式 Shell、Agentic IR、取证文件浏览等常用远程工作流
+    在浏览器中管理 Clients、Shells、Investigations、Files、Artifacts、Projects 和 Dossier
+  </Card>
+  <Card title="调查与分析" icon={<Shield />} href="/webui#investigations">
+    执行 AccessKey 调查、客户端 Recon 和 Linux 进程分析，并跳转到 Artifacts 查看结果
+  </Card>
+  <Card title="Agentic IR 与 MCP" icon={<Brain />} href="/air">
+    在 Web 控制台或服务端 REPL 中启动 Claude / Codex 会话，并通过 MCP 使用 SIREN 工具
   </Card>
   <Card title="Projects 工作区" icon={<FolderKanban />} href="/webui#projects">
-    按应急响应项目隔离客户端视图、操作目标、Artifacts 目录和 AIR 工作目录
+    按应急响应项目隔离客户端、操作目标、Artifacts 目录和 AIR 工作目录
+  </Card>
+  <Card title="文件与报告" icon={<BookOpenText />} href="/analysis/upload">
+    管理客户端 Files、服务端 Artifacts 和 Dossier Markdown 应急报告
+  </Card>
+  <Card title="插件系统" icon={<Puzzle />} href="/plugins">
+    安装和管理 command / recon 插件，扩展独立命令或信息收集模块
   </Card>
 </Cards>
 
@@ -62,12 +68,12 @@ SIREN (**S**wift **I**ncident **R**esponse **E**vidence **N**avigator) 是新一
 
 ### 本地模式
 
-在受害主机上直接运行 SIREN 客户端，所有数据采集和分析均在本地完成。
+在目标主机上直接运行 `siren`。Recon 报告生成在本地；如配置 OSS，本地模式的报告和上传文件也可以写入 OSS。此模式不需要 SIREN Server，也不提供 Web 控制台、MCP 或远程 Shell。
 
 ![arch_local](../../img/arch_local.png)
 
 ### 远程模式
 
-客户端通过 TLS 加密通道连接服务端，支持多客户端统一管理、远程 Shell、端口转发、AI 驱动的应急响应等高级功能。
+在控制主机运行 `siren_server`，目标主机运行 `siren client` 并通过 TLS 连接服务端。服务端负责客户端管理、命令下发、Artifacts 保存、Project 目录隔离、Web 控制台和 MCP 服务；Dossier、SOAR、OSS、Claude / Codex CLI 等能力按需接入。
 
 ![arch_remote](../../img/arch_remote.png)

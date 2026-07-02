@@ -6,13 +6,13 @@ icon: BadgeQuestionMark
 
 import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
-## 部署与升级
+## 部署与连接
 
 <Accordions>
 
 <Accordion title="如何升级 SIREN？">
 
-SIREN 客户端与服务端均支持一键版本升级。服务端启动时会自动检查更新并提示。
+客户端和服务端都内置 `upgrade` 子命令。升级时会先检查远端版本，只有发现新版本才下载并替换当前二进制，不会覆盖配置文件。
 
 ```bash tab="客户端"
 ./siren upgrade
@@ -22,35 +22,130 @@ SIREN 客户端与服务端均支持一键版本升级。服务端启动时会�
 ./siren_server upgrade
 ```
 
-添加 `-y` 参数可跳过确认提示，直接升级。
+添加 `-y` 参数可跳过确认提示：
+
+```bash
+./siren_server upgrade -y
+```
+
+服务端启动时也会异步检查更新，但只提示，不会自动升级。
 
 </Accordion>
 
 <Accordion title='启动时报错：Config File "config" Not Found'>
 
-该报错（服务端为 `Config File "server_config" Not Found in ...`）表示 SIREN 在默认查找路径下未能找到配置文件。请确认以下路径之一存在配置文件：
+客户端默认读取 `config.yaml`，服务端默认读取 `server_config.yaml`。出现这个错误时，通常是启动目录不对，或者配置文件没有放在默认查找路径下。
 
-- 当前目录下的 `config.yaml`（客户端）或 `server_config.yaml`（服务端）
+默认查找路径：
+
+- 当前目录下的 `config.yaml` 或 `server_config.yaml`
 - `./config/` 目录下的 `config.yaml` 或 `server_config.yaml`
 
-也可以通过 `-c` 参数指定配置文件路径：
+也可以通过 `-c` 指定配置文件：
 
-```bash
-./siren recon -c /path/to/config.yaml
+```bash tab="客户端"
+./siren client -c /path/to/config.yaml
 ```
 
-详见[配置文件](/config)。
+```bash tab="服务端"
+./siren_server -c /path/to/server_config.yaml
+```
+
+配置项说明见[配置文件](/config)。
 
 </Accordion>
 
 <Accordion title="远程模式下客户端无法连接到服务端？">
 
-请按以下顺序排查：
+先区分两个端口：客户端连接的是服务端 TLS 端口，默认 `443`；WebUI 和 MCP 使用共享 HTTP 端口，默认 `8080`。
 
-1. 确认服务端已启动且正在监听指定端口
-2. 确认客户端所在主机能够访问服务端所在主机的 IP 和端口（防火墙 / 安全组规则）
-3. 确认客户端配置文件中的 `server` 和 `port` 与服务端配置一致
-4. 确认服务端 `certs/` 下的 TLS 证书与私钥存在且路径正确——证书是服务端启动的前置条件（客户端不校验服务端证书）
+按下面顺序排查：
+
+- 服务端是否已启动，`listen` 和 `port` 是否符合预期。
+- 客户端所在主机是否能访问服务端 IP 和 TLS 端口，安全组、防火墙和本机监听地址都要确认。
+- 客户端配置中的 `server` 和 `port` 是否指向服务端 TLS 端口。
+- 服务端 `cert` 和 `key` 指向的证书、私钥是否存在。客户端默认不校验证书链，但服务端启动必须能加载证书和私钥。
+
+</Accordion>
+
+<Accordion title="WebUI 打不开或端口不对？">
+
+WebUI 由服务端的共享 HTTP 服务提供，默认监听 `webui.listen: 0.0.0.0`、`webui.port: 8080`。如果页面打不开，先看服务端配置里的 `webui.enabled`、`webui.listen` 和 `webui.port`，再确认安全组或反向代理是否放通了这个端口。
+
+如果 `webui.enabled: false` 但 `mcp.enabled: true`，服务端仍会在共享 HTTP 端口上提供 `/mcp`，但不会提供 WebUI 页面。
+
+</Accordion>
+
+<Accordion title="WebUI 为什么没有登录页，或登录失败？">
+
+WebUI 认证由用户数据库决定。默认数据库路径是 `data/users.db`，也可以通过 `webui.userDBPath` 覆盖。
+
+如果用户数据库不存在，或数据库里没有用户，服务端会关闭 WebUI 登录校验并在日志中提示。需要启用登录时，在服务端相同配置和工作目录下创建用户：
+
+```bash
+./siren_server user add <username>
+```
+
+如果连续输错密码，当前来源 IP 会被短时间限制登录。等锁定窗口结束后再试，或检查用户名、密码和 `webui.userDBPath` 是否指向同一个数据库。
+
+</Accordion>
+
+<Accordion title="忘记 WebUI 密码怎么办？">
+
+SIREN 目前没有单独的改密命令。请在服务端使用同一份配置和相同工作目录，或先确认 `webui.userDBPath` 指向的数据库，然后删除原用户并重新创建：
+
+```bash
+./siren_server user delete <username>
+./siren_server user add <username>
+```
+
+如果不确定用户名，可以先列出当前用户：
+
+```bash
+./siren_server user list
+```
+
+如果怀疑命令操作的是另一份数据库，优先检查 `webui.userDBPath` 和启动 `siren_server` 时的工作目录。
+
+</Accordion>
+
+</Accordions>
+
+## WebUI 与 AIR
+
+<Accordions>
+
+<Accordion title="WebUI AIR 启动失败怎么办？">
+
+先确认服务端能找到配置中的 Provider CLI：
+
+```yaml
+air:
+  provider: claude
+  providers:
+    claude:
+      cliPath: claude
+      args: []
+    codex:
+      cliPath: codex
+      args: []
+```
+
+`cliPath` 必须在服务端进程的 `PATH` 里可执行，或者写成绝对路径。WebUI 的 Custom、Event 和 Resume 模式会注入 SIREN MCP，因此还要确认 `mcp.enabled` 没有关闭，`webui.port` 在服务端本机可访问。
+
+Claude Code 和 Codex 的模型、权限、沙箱、审批等行为由它们自己的配置决定，SIREN 不会在 AIR 启动时强行覆盖。
+
+</Accordion>
+
+<Accordion title="服务端 REPL 的 shell 命令为什么失败？">
+
+服务端 REPL 中的 `shell <Client ID>` 依赖服务端本机环境和客户端回连能力。请确认：
+
+- 服务端机器已安装 `tmux`。
+- 客户端能访问服务端 `listen` 地址和交互式 Shell 使用的临时端口。
+- `cert` 和 `key` 指向的证书、私钥可用。
+
+WebUI Shell 不依赖 `tmux`，但仍需要客户端能回连服务端临时端口。
 
 </Accordion>
 
@@ -60,75 +155,64 @@ SIREN 客户端与服务端均支持一键版本升级。服务端启动时会�
 
 <Accordions>
 
-<Accordion title="SIREN 与云安全中心 Agent 是否兼容？">
+<Accordion title="SIREN 能和云安全中心 Agent 同时运行吗？">
 
-SIREN 与云安全中心 Agent 兼容性良好，但使用过程中可能会触发告警：
+可以同时运行，但 SIREN 的部分行为可能触发安全中心告警，比如远程 Shell、反弹连接特征、批量执行系统命令或信息收集命令。
 
-1. 使用远程 Shell 功能时，可能触发 `异常的伪终端Shell创建行为` 告警、`反弹Shell` 告警，但不会被拦截。
-2. 使用自动化信息收集功能时，可能触发 `蠕虫病毒命令` 告警，但不会被拦截。
-
-以上告警均为预期行为，可在安全中心中标记为误报。
+是否拦截取决于安全中心策略和租户配置。确认告警来自本次 SIREN 操作后，再按内部流程标记误报或加入白名单。
 
 </Accordion>
 
 <Accordion title="如何在容器环境中使用 SIREN？">
 
-部署在**宿主机**上的 SIREN 可以直接收集容器内恶意文件、进程、网络连接等从宿主机层面可观测的项。
+部署在宿主机上的 SIREN 可以看到宿主机视角下的进程、网络连接、容器线索和宿主机文件系统。下面这些信息如果只存在于容器内部，建议在容器内启动 SIREN 再收集：
 
-以下信息需要通过在**容器内部**启动 SIREN 来收集：
 - 命令执行历史
 - 计划任务
 - 环境变量
-- 容器内的文件系统变更
+- 容器内部文件系统变更
 
 </Accordion>
 
 <Accordion title="远程模式服务端有哪些快捷键？">
 
-SIREN Server 基于 readline 实现，支持标准的 [readline 快捷键](https://github.com/ergochat/readline/blob/master/docs/shortcut.md)，常用快捷键：
+SIREN Server 基于 readline 实现，支持标准的 [readline 快捷键](https://github.com/ergochat/readline/blob/master/docs/shortcut.md)。常用快捷键：
 
-- `Tab` — 命令补全
-- `Ctrl+A` / `Ctrl+E` — 移到行首 / 行尾
-- `Ctrl+W` — 删除前一个单词
-- `Ctrl+U` — 清除当前行
-- `Ctrl+R` — 搜索历史命令
+- `Tab`：命令补全
+- `Ctrl+A` / `Ctrl+E`：移动到行首 / 行尾
+- `Ctrl+W`：删除前一个单词
+- `Ctrl+U`：清除当前行
+- `Ctrl+R`：搜索历史命令
 
 </Accordion>
 
 <Accordion title="信息收集报告中如何减少误报？">
 
-通过[配置文件](/config#客户端配置)中的 `rules` 字段，可以添加白名单和黑名单规则来过滤已知正常项或高亮可疑项。例如：
+通过[配置文件](/config#客户端配置)中的 `rules` 字段添加白名单或黑名单规则。白名单用于过滤已知正常项，黑名单用于高亮可疑项，值支持正则表达式。
 
 ```yaml
 rules:
-  IPWhitelist: 140\.205\.11\.\d+|10\.0\.0\.\d+
-  ProcessWhitelist: sshd|systemd|crond
+  ipwhitelist: 140\.205\.11\.\d+|10\.0\.0\.\d+
+  processwhitelist: sshd|systemd|crond
 ```
 
-规则值支持正则表达式。
+修改规则后，需要让客户端重新加载配置。本地模式重新运行命令即可；远程模式可以在服务端 REPL 中执行 `reload <Client ID>`。
 
 </Accordion>
 
 <Accordion title="如何管理插件？">
 
-SIREN 支持通过命令行管理插件的安装、卸载、更新和启停：
+本地模式和远程模式都支持安装、卸载、更新和启停插件。插件从客户端配置里的 `plugins.marketplace` 下载，安装后保存在客户端工作目录的 `plugins/` 下。
 
-```bash tab="本地模式"
-./siren plugins install <name>
-./siren plugins uninstall <name>
-./siren plugins update <name>
-./siren plugins toggle <name>
-```
+完整命令和示例插件见[插件系统](/plugins)。如果远程模式中看不到插件状态，先在服务端 REPL 执行 `ls`，确认目标客户端在线，并查看输出中的 Plugins 列。
 
-```bash tab="远程模式"
->>> plugins <Client ID> install <name>
->>> plugins <Client ID> uninstall <name>
->>> plugins <Client ID> update <name>
->>> plugins <Client ID> toggle <name>
-```
+</Accordion>
 
-插件从配置文件中指定的 `plugins.marketplace` 地址下载。
-更新插件会保留该插件当前的启用或禁用状态。完整说明见[插件系统](/plugins)。
+<Accordion title="MCP 或 AIR 执行命令时提示被拦截怎么办？">
+
+MCP 的 `run` 工具会先检查服务端配置里的 `mcp.cmdBlacklist`。命中黑名单的命令不会发给客户端执行。
+
+如果确认命令安全，可以调整 `server_config.yaml` 中的 `mcp.cmdBlacklist`，然后重启服务端。不要为了绕过一次误报直接清空黑名单，建议只收窄命中的那条正则。
 
 </Accordion>
 

@@ -67,40 +67,13 @@ plugins:
   `update` 会先卸载再重新安装，并保留插件原有的启用/禁用状态；安装或更新失败时会回滚，不会残留半安装的插件目录。
 </Callout>
 
-## 内置示例插件
+## 插件列表
 
-SIREN 仓库提供了两个示例插件，可作为开发参考：
-
-| 插件 | 类型 | 说明 | 调用方式 |
-| --- | --- | --- | --- |
-| [`chkrootkit`](/plugins/recon/chkrootkit) | `recon` | 运行 chkrootkit 检测 Rootkit | 启用后随 `recon` 自动执行 |
-| [`jdump`](/plugins/command/jdump) | `command` | 获取 Java 进程的堆转储文件 | 本地 `jdump <PID>`；远程 `jdump <Client ID> <PID>` |
-
-查看全部已支持插件见[插件列表](/plugins/list)。
+当前内置示例插件集中维护在[插件列表](/plugins/list)中，包括随 Recon 执行的检查插件和按需调用的命令插件。
 
 ## 插件开发
 
-每个插件目录下需包含一个 `manifest.json` 清单：
-
-```json title="manifest.json"
-{
-  "name": "jdump",
-  "version": "1.0.0",
-  "type": "command",
-  "description": "Dump the Java heap memory",
-  "usage": "jdump <Client ID> <PID>",
-  "clientUsage": "jdump <pid>",
-  "platforms": ["linux_amd64", "linux_arm64"],
-  "entrypoint": "jdump",
-  "setup": "setup.sh"
-}
-```
-
-<Callout title="安全约束" type="warn">
-  `entrypoint` 与 `setup` 必须是纯文件名，不能包含路径分隔符或 `..`。SIREN 在加载与下载前会校验清单，校验不通过的插件会被跳过，以防被篡改的清单触发任意路径写入。
-</Callout>
-
-完整的 `manifest.json` 字段说明、支持平台列表和开发流程见[插件开发指南](/plugins/development)。
+插件通过 `manifest.json` 声明名称、类型、支持平台和入口文件。完整字段说明、平台约束、发布流程和清单安全校验见[插件开发指南](/plugins/development)。
 
 ## 相关内容
 

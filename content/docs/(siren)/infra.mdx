@@ -8,23 +8,36 @@ import { Card, Cards } from "fumadocs-ui/components/card";
 import { Callout } from "fumadocs-ui/components/callout";
 
 <Callout title="核心原则" type="info">
-  SIREN 远程模式的 Recon、文件拉取和 Artifacts 浏览不依赖 OSS 或其他外部基础设施。以下基础设施均为可选，用于增强特定功能体验。
+  远程模式的核心链路只需要控制主机、TLS 配置和网络连通。Recon、文件拉取、Artifacts 与 Projects 都保存在服务端本地目录，不依赖 OSS。OSS、SOAR、插件市场、Dossier 和大模型 CLI 都是按功能启用的可选依赖。
 </Callout>
 
-## 通用基础设施
+## 远程模式必需项
+
+| 项目 | 用途 | 说明 |
+| -------- | -------- | -------- |
+| 控制主机 | 运行 `siren_server`，承载客户端连接、WebUI、MCP、Artifacts、Projects 和调查工作流 | 远程模式必需；Artifacts 与 Projects 默认落在服务端工作目录，Project 基准路径可用 `webui.projectsBaseDir` 调整 |
+| TLS 证书和私钥 | 客户端到服务端的 TLS 控制通道，以及交互式 Shell relay | 通过服务端配置 `cert` / `key` 指定；证书链不需要公网 CA，但服务端启动时必须能加载证书和私钥 |
+| 网络连通 | 客户端连接服务端、浏览器访问 WebUI / MCP、Shell relay 回连 | 客户端连接 TLS 端口（默认 `443`）；WebUI 与 MCP 共用 HTTP 端口（默认 `8080`）；交互式 Shell 会额外使用临时 relay 端口 |
+
+## 可选通用依赖
 
 | 基础设施 | 对应功能 | 必要性 |
 | -------- | -------- | -------- |
-| OSS Bucket 及访问凭证 | 本地模式 [信息收集报告上传](/recon)、[本地文件上传](/analysis/upload) | 仅使用本地模式 OSS 留存时需要 |
-| 控制主机 | 客户端连接、WebUI、MCP、Artifacts、Projects 目录、远程文件与调查工作流 | 远程模式必需 |
-| tmux | 服务端 REPL 中的交互式 Shell 与 `air` 命令 | 仅使用 CLI Shell/AIR 时需要；WebUI Shell/AIR 不依赖 tmux |
-| 插件市场（OSS/HTTP） | [插件](/plugins)的安装与更新（`plugins.marketplace`） | 仅使用插件下载/更新时需要 |
+| OSS Bucket 及访问凭证 | 本地模式 [信息收集报告上传](/recon)、[本地 upload](/analysis/upload#命令行上传) | 仅使用本地模式 OSS 留存时需要；远程模式 Recon 和文件拉取不需要 OSS |
+| 插件市场（OSS/HTTP） | [插件](/plugins)的安装与更新（`plugins.marketplace`） | 仅下载或更新插件时需要；已安装插件保存在客户端工作目录的 `plugins/` 下 |
+| Claude Code / Codex CLI | [AIR](/air) 和 WebUI Agent 终端 | 仅使用对应 Provider 时需要；路径由 `air.providers.<name>.cliPath` 指定，模型、权限、沙箱等由大模型 CLI 自身配置决定 |
+| tmux | 服务端 REPL 中的交互式 `shell` 和 `air` 命令 | 仅通过服务端命令行使用 Shell/AIR 时需要；WebUI Shell 和 WebUI AIR 不依赖 tmux |
+| Dossier 静态目录 | WebUI 左侧 [Dossier](/dossier) 入口和默认 `report.md` | 仅使用 Dossier 编辑器时需要；目录由 `webui.dossierDir` 指定，可位于服务端工作目录外 |
 
 ## 内部环境额外基础设施
 
-| 基础设施 | 对应功能 |
-| -------- | -------- |
-| SOAR 平台及访问凭证 | [云助手一键部署](/index#内部环境通过云助手一键部署)、[自动放行受害主机](/index#手动部署)、[AccessKey 调查](/ak)、[MCP 工具 `get_alarm_detail`](/mcp#可用工具) |
+| 基础设施 | 对应功能 | 必要性 |
+| -------- | -------- | -------- |
+| SOAR 平台及访问凭证 | WebUI / REPL 的 `allow`、`deploy`、`deploy-batch`，[AccessKey 调查](/ak)，以及 [MCP 工具 `get_alarm_detail`](/mcp#可用工具) | 仅使用这些内部能力时需要；优先读取 `SOAR_ACCESS_KEY_ID` / `SOAR_ACCESS_KEY_SECRET`，未设置时回退到 Alibaba Cloud SDK 默认凭证链 |
+
+<Callout title="注意" type="warn">
+  WebUI 鉴权只保护浏览器页面。MCP 客户端直接访问 `/mcp` 时不携带浏览器会话，请把共享 HTTP 端口放在可信网络或反向代理访问控制之后。
+</Callout>
 
 ## 相关内容
 
@@ -34,5 +47,11 @@ import { Callout } from "fumadocs-ui/components/callout";
   </Card>
   <Card title="凭证设置" href="/credential">
     了解如何设置各类访问凭证
+  </Card>
+  <Card title="配置文件" href="/config">
+    查看服务端与客户端配置项
+  </Card>
+  <Card title="Web 控制台" href="/webui">
+    了解 WebUI、MCP、Artifacts 与 Dossier 的关系
   </Card>
 </Cards>
