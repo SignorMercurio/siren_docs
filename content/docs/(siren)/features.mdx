@@ -27,10 +27,10 @@ Recon 会在目标主机上采集常见排查证据。除基础信息外，其�
 <Cards>
     <Card title="系统与用户" icon={<Users />} href="/recon">系统版本、资源使用、用户列表、权限用户、登录历史和新增用户记录</Card>
     <Card title="SSH 与登录线索" icon={<Terminal />} href="/recon">SSH 配置、authorized_keys、暴力破解记录和常见后门线索</Card>
-    <Card title="进程与网络" icon={<Activity />} href="/recon">进程列表、资源占用、可疑进程、监听端口、连接、DNS 和路由信息</Card>
+    <Card title="进程与网络" icon={<Activity />} href="/recon">进程列表、资源占用、非默认进程、监听端口、连接、DNS 和路由信息</Card>
     <Card title="计划任务与服务" icon={<Clock />} href="/recon">cron、Windows 计划任务、启动项、systemd 服务和 Windows 服务</Card>
-    <Card title="文件与 Webshell" icon={<FileText />} href="/recon">历史命令、临时目录、近期变更文件、大文件、SUID 文件和 Web 目录扫描</Card>
-    <Card title="Rootkit 与应用" icon={<Cpu />} href="/recon">内核模块、可疑 .ko、Redis、JDWP、容器、IIS 和恶意 Python 包线索</Card>
+    <Card title="文件" icon={<FileText />} href="/recon">历史命令、临时目录、近期变更文件、大文件、SUID 文件和关键二进制属性</Card>
+    <Card title="Rootkit 与应用" icon={<Cpu />} href="/recon">内核模块、Redis、JDWP、容器和 IIS 线索</Card>
 </Cards>
 
 ## 调查与响应

@@ -10,7 +10,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-SIREN Server 内置 [模型上下文协议](https://modelcontextprotocol.io/)（MCP）服务。支持 MCP 的 AI 客户端可以通过它列出在线 SIREN 客户端、在指定客户端执行排查命令，或通过 SOAR 获取告警详情。[Agentic 应急响应](/air) 也依赖这组工具。
+SIREN Server 内置 [模型上下文协议](https://modelcontextprotocol.io/)（MCP）服务。支持 MCP 的 AI 客户端可以通过它列出在线 SIREN 客户端、在指定客户端执行排查命令、触发一次[信息收集（Recon）](/recon)，或通过 SOAR 获取告警详情。[Agentic 应急响应](/air) 也依赖这组工具。
 
 ## 启用与访问
 
@@ -43,6 +43,7 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 | --- | --- | --- |
 | `ls` | 无 | 列出在线 SIREN 客户端，包含 ID、操作系统、连接地址、备注和已安装插件 |
 | `run` | `client_id`, `command` | 在指定 SIREN 客户端上执行命令并返回结果。执行前会检查命令黑名单，超时时间跟随 `recon.commandTimeout`，输出过长时会被截断 |
+| `recon` | `client_id` | 在指定客户端触发一次 [Recon](/recon) 采集，等待客户端回传并返回报告内容；报告同时保存到服务端 Artifacts。等待时间由服务端配置 `mcp.reconTimeout`（默认 300 秒）控制，同一客户端不允许并发 Recon |
 | `get_alarm_detail` | `uid`, `event_id` | 通过 SOAR 获取指定安全告警详情，需要先[配置 SOAR 凭证](/credential#设置-soar-平台访问凭证) |
 
 <Callout title="WebUI Project 作用域" type="info">

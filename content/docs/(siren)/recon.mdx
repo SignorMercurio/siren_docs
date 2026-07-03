@@ -8,7 +8,7 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 
-自动化信息收集（Recon）会在目标主机上收集系统、用户、进程、网络、计划任务、文件、Webshell 和应用配置等信息，并生成 Markdown 报告。它适合在接入客户端后先做基线排查，也适合把调查结果保存到服务端 Artifacts 供后续分析。
+自动化信息收集（Recon）会在目标主机上收集系统、用户、进程、网络、计划任务、文件和应用配置等信息，并生成 Markdown 报告。Recon 是一次快速、确定性的基线采集：它只做客观采集并用白名单降噪，不再内置矿工、Webshell、Rootkit 符号等黑名单/签名判定——是否可疑交给 [Agentic 应急响应](/air) 结合上下文判断。它适合在接入客户端后先做基线排查，也适合把调查结果保存到服务端 Artifacts 供后续分析。AIR 还可以通过 [`recon` MCP 工具](/mcp#可用工具)按需触发一次采集。
 
 <Callout title="前置条件" type="info">
   目标主机需要具备足够权限运行 Recon：Linux 通常需要 root，Windows 需要管理员权限。本地模式会把报告上传到 OSS，需要先[设置 OSS 访问凭证](/credential#设置-oss-访问凭证)；WebUI 和服务端 REPL 不需要 OSS，报告会保存到 SIREN Server 的 Artifacts。
@@ -66,15 +66,14 @@ Recon 报告会保留客户端生成的文件名，通常形如 `SIREN_<host>_<t
 | 基础信息 | 始终采集 | 当前时间、OS 发行版、主机名、当前用户、IP 地址、CPU 核数、CPU/内存/磁盘使用率、磁盘挂载（/etc/fstab） |
 | 用户 | `recon.user` | 非默认用户、可登录用户、Root 权限用户、sudoers 用户、最近登录记录、`w`/`lastlog` 输出、登录 IP、新增用户记录、`/etc/passwd` 属性 |
 | SSH | `recon.ssh` | SSH 暴力破解记录、`~/.ssh/config` 后门、`authorized_keys`、PAM/inetd/软链接后门、`sshd_config` 与 `sshd` 二进制属性 |
-| 进程 | `recon.process` | CPU/内存占用 Top 20、systemd 启动进程、bash 反弹 shell、常见挖矿程序、其他非默认进程 |
+| 进程 | `recon.process` | CPU/内存占用 Top 20、systemd 启动进程、其他非默认进程 |
 | 网络 | `recon.network` | 监听端口、全 0 开放端口、已建立 TCP 连接、`/etc/hosts`、DNS 服务器、路由表、iptables 规则 |
-| 计划任务 | `recon.cron` | 用户级与系统级 cron 任务、cron 可疑命令、cron 日志 |
-| 服务 | `recon.service` | 运行中服务、非默认服务文件、`/etc/rc.local`、init.d/rc.d 启动项、启动项可疑命令 |
+| 计划任务 | `recon.cron` | 用户级与系统级 cron 任务、cron 日志 |
+| 服务 | `recon.service` | 运行中服务、非默认服务文件、`/etc/rc.local`、init.d/rc.d 启动项 |
 | 环境变量 | `recon.env` | 环境变量、`LD_PRELOAD`/`LD_LIBRARY_PATH` 等敏感变量、进程环境与 `/etc/ld.so.preload`、profile/rc/environment、`profile.d` 非默认脚本、alias |
-| 文件 | `recon.file` | 历史命令及可疑命令、临时目录、SUID 文件、被进程锁定文件、近 1 天变更文件（mtime/ctime）、时间戳篡改、大文件（>200M）、coreutils 与系统软件包完整性、关键二进制属性 |
-| Rootkit | `recon.rootkit` | 非默认内核模块、可疑内核模块（kallsyms）、可疑 `.ko` 模块 |
-| Webshell | `recon.webshell` | Web 目录下 PHP/JSP 可疑文件扫描 |
-| 应用 | `recon.application` | Redis 配置、JDWP 调试进程、Python 2/3 恶意软件包、容器列表 |
+| 文件 | `recon.file` | 历史命令、临时目录、SUID 文件、被进程锁定文件、近 1 天变更文件（mtime/ctime）、大文件（>200M）、coreutils 完整性、关键二进制属性 |
+| Rootkit | `recon.rootkit` | 非默认内核模块（`lsmod`） |
+| 应用 | `recon.application` | Redis 配置、JDWP 调试进程、容器列表 |
 
   </Accordion>
   <Accordion title="Windows 平台模块">
@@ -83,13 +82,12 @@ Recon 报告会保留客户端生成的文件名，通常形如 `SIREN_<host>_<t
 | --- | --- | --- |
 | 基础信息 | 始终采集 | 当前时间、OS 版本、主机名、当前用户、IP 地址、CPU 核数、CPU/内存/磁盘使用率 |
 | 用户 | `recon.user` | 非默认用户、可登录用户、管理员组成员、服务账户、禁用/隐藏账户、远程桌面用户、最近登录记录、当前登录用户、新增用户记录 |
-| 进程 | `recon.process` | CPU/内存占用 Top 20、进程列表、PowerShell 反弹 shell、可疑进程、无文件进程 |
+| 进程 | `recon.process` | CPU/内存占用 Top 20、进程列表、无文件进程 |
 | 网络 | `recon.network` | 监听 TCP 端口、已建立 TCP 连接、hosts 文件、DNS 服务器、网络共享（SMB） |
 | 计划任务 | `recon.schtask` | 计划任务、启动文件夹、系统启动项、注册表启动项（Run/RunOnce）、服务启动项 |
 | 环境变量 | `recon.env` | 环境变量、PATH、PowerShell 配置文件、Windows Defender 排除项 |
-| 文件 | `recon.file` | PowerShell 历史及可疑命令、临时目录、最近访问文件、近 30 天变更的系统目录可执行文件、近 1 天变更的系统日志、启动目录文件、卷影副本 |
-| Webshell | `recon.webshell` | Web 目录下 PHP/JSP/ASP 可疑文件扫描、近 3 天 IIS 日志 |
-| 应用 | `recon.application` | JDWP 调试进程、Python 2/3 恶意软件包、远程桌面配置、IIS 配置、Windows Defender 状态 |
+| 文件 | `recon.file` | PowerShell 历史、临时目录、最近访问文件、近 30 天变更的系统目录可执行文件、近 1 天变更的系统日志、启动目录文件、卷影副本 |
+| 应用 | `recon.application` | JDWP 调试进程、远程桌面配置、IIS 配置、近 3 天 IIS 日志、Windows Defender 状态 |
 
   </Accordion>
 </Accordions>
@@ -108,5 +106,8 @@ Recon 报告会保留客户端生成的文件名，通常形如 `SIREN_<host>_<t
   </Card>
   <Card title="插件系统" href="/plugins">
     了解 recon 类型插件如何并入信息收集报告
+  </Card>
+  <Card title="MCP 集成" href="/mcp#可用工具">
+    让 AIR 通过 `recon` MCP 工具按需触发一次采集
   </Card>
 </Cards>
