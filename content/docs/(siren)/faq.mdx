@@ -133,7 +133,7 @@ air:
 
 `cliPath` 必须在服务端进程的 `PATH` 里可执行，或者写成绝对路径。WebUI 的 Custom、Event 和 Resume 模式会注入 SIREN MCP，因此还要确认 `mcp.enabled` 没有关闭，`webui.port` 在服务端本机可访问。
 
-Claude Code 和 Codex 的模型、权限、沙箱、审批等行为由它们自己的配置决定，SIREN 不会在 AIR 启动时强行覆盖。
+Claude Code 和 Codex 的模型、权限、沙箱、普通 Shell 审批等行为由它们自己的配置决定，SIREN 不会在 AIR 启动时强行覆盖。更多边界见 [Agentic 应急响应](/air#webui-air)。
 
 </Accordion>
 

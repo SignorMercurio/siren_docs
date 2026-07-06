@@ -136,8 +136,8 @@ air:
 
 > WebUI 浏览器终端复用 `air.providers.<name>`。Manual 模式只取 `cliPath` 和 `args`；Custom、Event、Resume 模式会额外注入 SIREN MCP、种子 prompt 或恢复会话 ID。它和浏览器 Shell 一样只受 WebUI 全局鉴权保护。
 
-<Callout title="v2.12.0 AIR 配置更新" type="info">
-  AIR 现在只保留 Provider、prompt、CLI 路径和额外参数。模型、权限、沙箱、审批等行为由 Claude Code / Codex 自身配置决定；旧版 AIR 细分字段和独立的 `agentTerminal.*` 配置块已移除，残留时不会生效。
+<Callout title="AIR 配置边界" type="info">
+  AIR 现在只保留 Provider、prompt、CLI 路径和额外参数。模型、权限、沙箱、普通 Shell 审批等行为由 Claude Code / Codex 自身配置决定；Codex Provider 会把 SIREN 注入的 MCP 工具设置为默认允许。旧版 AIR 细分字段和独立的 `agentTerminal.*` 配置块已移除，残留时不会生效。
 </Callout>
 
 <Callout title="v1.x 升级提示" type="warn">

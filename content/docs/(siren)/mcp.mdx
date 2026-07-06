@@ -47,7 +47,7 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 | `get_alarm_detail` | `uid`, `event_id` | 通过 SOAR 获取指定安全告警详情，需要先[配置 SOAR 凭证](/credential#设置-soar-平台访问凭证) |
 
 <Callout title="WebUI Project 作用域" type="info">
-  外部 MCP 客户端直接访问 `/mcp` 时使用全局视图，`ls` 会列出所有在线 SIREN 客户端。WebUI AIR 在 Project 视图下会自动注入带 Project 作用域的 MCP 地址，`ls` 只返回当前 Project 的客户端，`run` 也会拒绝操作其他 Project 的客户端。
+  外部 MCP 客户端直接访问 `/mcp` 时使用全局视图，`ls` 会列出所有在线 SIREN 客户端。WebUI AIR 在 Project 视图下会自动注入带 Project 作用域的 MCP 地址，`ls` 只返回当前 Project 的客户端，`run` 和 `recon` 也会拒绝操作其他 Project 的客户端。
 </Callout>
 
 <Callout title="慢命令超时" type="info">

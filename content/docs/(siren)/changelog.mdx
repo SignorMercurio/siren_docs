@@ -20,6 +20,11 @@ export const DateTag = ({ children }) => (
 
 - **Recon 收敛为快速、确定性的采集器**：移除矿工、Webshell、Rootkit 符号、可疑命令、时间戳篡改等黑名单/签名判定（含独立的 Webshell 模块与 `recon.webshell` 开关），是否可疑改由 AIR 结合上下文判断，采集更快、噪声更低
 - **Recon 文件模块提速**：将 SUID、近期变更（mtime/ctime）、大文件检查合并为一次全盘遍历（此前为四次），文件模块耗时约降至四分之一
+- Codex AIR 注入的 SIREN MCP 工具默认允许执行，减少重复工具确认
+
+### Bugfix
+
+- 修复 Project 视图下 AIR / MCP 可能错误看到或操作全局客户端的问题
 
 ## v2.12.0 <DateTag>2026-07-01</DateTag>
 
