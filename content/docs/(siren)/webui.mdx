@@ -91,7 +91,7 @@ Web 控制台使用 Session Cookie 鉴权。账号密码存储在 SQLite 数据�
   <Card title="Projects" icon={<FolderKanban />}>按应急响应项目隔离客户端、Artifacts 和调查上下文</Card>
   <Card title="Clients" icon={<Users />}>查看在线客户端，编辑备注，执行 SOAR 放行、部署和清理</Card>
   <Card title="Shells" icon={<Terminal />}>在浏览器中打开多标签交互式终端</Card>
-  <Card title="Agentic IR" icon={<Brain />}>启动 Claude / Codex 辅助排查会话</Card>
+  <Card title="Agentic IR" icon={<Brain />}>启动 Claude / Codex / Qoder 辅助排查会话</Card>
   <Card title="Investigations" icon={<Key />}>执行 AccessKey 调查、Recon 和进程分析</Card>
   <Card title="Files" icon={<Files />}>浏览、预览、下载和上传客户端文件</Card>
   <Card title="Artifacts" icon={<FolderTree />}>管理服务端取证文件和报告</Card>
@@ -138,7 +138,7 @@ Project 视图下，Shell 只能连接当前 Project 的客户端。切换 Proje
 
 ### Agentic IR
 
-Agentic IR 页面在浏览器内嵌终端中运行 Claude Code 或 Codex，用于完成 [Agentic 应急响应](/air)。页面支持选择 Provider、新建会话，也支持恢复当前视图工作目录对应的历史会话。
+Agentic IR 页面在浏览器内嵌终端中运行 Claude Code、Codex 或 Qoder，用于完成 [Agentic 应急响应](/air)。页面支持选择 Provider、新建会话，也支持恢复当前视图工作目录对应的历史会话。
 
 新建会话可选以下入口模式：
 

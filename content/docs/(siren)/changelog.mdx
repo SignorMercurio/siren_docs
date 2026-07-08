@@ -10,17 +10,19 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
-## v2.13.0 <DateTag>2026-07-03</DateTag>
+## v2.13.0 <DateTag>2026-07-08</DateTag>
 
 ### Feature
 
 - **新增 `recon` MCP 工具**：AIR / MCP 客户端可在指定客户端按需触发一次信息收集，等待回传并返回报告内容，报告同时保存到服务端 Artifacts；等待时间由新增配置 `mcp.reconTimeout`（默认 300 秒）控制
+- **WebUI AIR 新增 Qoder Provider**：Agentic IR 页面可选择 QoderCLI 启动 Manual、Custom、Event 或 Resume 会话，并继续使用当前 Project 作用域的 SIREN MCP
 
 ### Improvement
 
 - **Recon 收敛为快速、确定性的采集器**：移除挖矿程序、Webshell、Rootkit 符号、可疑命令、时间戳篡改等黑名单/签名判定（含独立的 Webshell 模块与 `recon.webshell` 开关），是否可疑改由 AIR 结合上下文判断，采集更快、噪声更低
 - **Recon 文件模块提速**：将 SUID、近期变更（mtime/ctime）、大文件检查合并为一次全盘遍历（此前为四次），文件模块耗时约降至四分之一
 - Codex AIR 注入的 SIREN MCP 工具默认允许执行，减少重复工具确认
+- Qoder AIR 可列出并恢复当前工作目录下的 Qoder 历史会话；SIREN 只按会话注入自己的 MCP 配置，不修改用户的 Qoder 全局设置或权限策略
 
 ### Bugfix
 

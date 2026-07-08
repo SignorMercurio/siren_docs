@@ -51,7 +51,7 @@ SIREN 支持本地模式和远程模式。本地模式直接在目标主机上�
     执行 AccessKey 调查、客户端 Recon 和 Linux 进程分析，并跳转到 Artifacts 查看结果
   </Card>
   <Card title="Agentic IR 与 MCP" icon={<Brain />} href="/air">
-    在 Web 控制台或服务端 REPL 中启动 Claude / Codex 会话，并通过 MCP 使用 SIREN 工具
+    在 Web 控制台中启动 Claude / Codex / Qoder 会话，或在服务端 REPL 中启动 Claude 会话，并通过 MCP 使用 SIREN 工具
   </Card>
   <Card title="Projects 工作区" icon={<FolderKanban />} href="/webui#projects">
     按应急响应项目隔离客户端、操作目标、Artifacts 目录和 AIR 工作目录
@@ -74,6 +74,6 @@ SIREN 支持本地模式和远程模式。本地模式直接在目标主机上�
 
 ### 远程模式
 
-在控制主机运行 `siren_server`，目标主机运行 `siren client` 并通过 TLS 连接服务端。服务端负责客户端管理、命令下发、Artifacts 保存、Project 目录隔离、Web 控制台和 MCP 服务；Dossier、SOAR、OSS、Claude / Codex CLI 等能力按需接入。
+在控制主机运行 `siren_server`，目标主机运行 `siren client` 并通过 TLS 连接服务端。服务端负责客户端管理、命令下发、Artifacts 保存、Project 目录隔离、Web 控制台和 MCP 服务；Dossier、SOAR、OSS、Claude / Codex / Qoder CLI 等能力按需接入。
 
 ![arch_remote](../../img/arch_remote.png)

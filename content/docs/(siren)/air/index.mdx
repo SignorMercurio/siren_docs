@@ -1,6 +1,6 @@
 ---
 title: Agentic 应急响应
-description: 在 WebUI 或服务端 REPL 中启动 Claude / Codex 辅助排查会话
+description: 在 WebUI 中启动 Claude / Codex / Qoder，或在服务端 REPL 中启动 Claude 辅助排查会话
 icon: Brain
 ---
 
@@ -11,12 +11,12 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-Agentic 应急响应（AIR）用于把 Claude Code 或 Codex 接入 SIREN 的调查现场。Agent 可以读取告警上下文，通过 SIREN MCP 工具查看在线客户端、执行排查命令，并协助整理应急响应报告。
+Agentic 应急响应（AIR）用于把 Claude Code、Codex 或 Qoder 接入 SIREN 的调查现场。Agent 可以读取告警上下文，通过 SIREN MCP 工具查看在线客户端、执行排查命令，并协助整理应急响应报告。
 
 AIR 是交互式会话。操作员可以在终端中观察 Agent 的执行过程、回答追问、补充指令或停止会话，不应把它当成完全无人值守的自动处置流程。
 
 <Callout title="前置条件" type="info">
-  需要在服务端配置可用的 Claude 或 Codex CLI 路径（`air.providers.<name>.cliPath`）。WebUI 的 Custom、Event 和 Resume 模式还需要启用 [MCP 服务](/mcp#启用与访问)；Event 模式需要[设置 SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)。服务端 REPL 的 `air` 命令需要 tmux。
+  需要在服务端配置可用的 Claude、Codex 或 Qoder CLI 路径（`air.providers.<name>.cliPath`）。WebUI 的 Custom、Event 和 Resume 模式还需要启用 [MCP 服务](/mcp#启用与访问)；Event 模式需要[设置 SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)。服务端 REPL 的 `air` 命令固定使用 Claude，并需要 tmux。
 </Callout>
 
 ## 使用方式
@@ -35,7 +35,7 @@ Agentic IR -> 选择 Provider -> 选择 Manual / Custom / Event / Resume -> Star
 
 ## WebUI AIR
 
-在 [Web 控制台](/webui#agentic-ir) 的 **Agentic IR** 页面中，AIR 以浏览器内嵌终端运行真实的 Claude Code 或 Codex TUI。页面左侧用于启动、恢复和管理会话，右侧显示可交互终端。
+在 [Web 控制台](/webui#agentic-ir) 的 **Agentic IR** 页面中，AIR 以浏览器内嵌终端运行真实的 Claude Code、Codex 或 Qoder TUI。页面左侧用于启动、恢复和管理会话，右侧显示可交互终端。
 
 启动新会话时先选择 Provider，再选择入口模式：
 
@@ -51,7 +51,7 @@ Agentic IR -> 选择 Provider -> 选择 Manual / Custom / Event / Resume -> Star
 </Callout>
 
 <Callout title="配置边界" type="info">
-  WebUI AIR 只使用 `air.providers.<name>.cliPath` 和 `args` 启动对应 CLI，并在 Custom、Event、Resume 模式注入 SIREN MCP、种子 prompt 或恢复会话 ID。模型、权限、沙箱、普通 Shell 审批和操作者已有 MCP 的工具确认规则由 Claude Code / Codex 自身配置决定。Codex Provider 会把 SIREN 注入的 MCP 工具设置为默认允许，避免每次 SIREN 工具调用都弹出确认；如需限制其他可用工具，请在对应 CLI 的用户配置中处理。
+  WebUI AIR 只使用 `air.providers.<name>.cliPath` 和 `args` 启动对应 CLI，并在 Custom、Event、Resume 模式注入 SIREN MCP、种子 prompt 或恢复会话 ID。模型、权限、沙箱、普通 Shell 审批和操作者已有 MCP 的工具确认规则由 Claude Code / Codex / Qoder 自身配置决定。Codex Provider 会把 SIREN 注入的 MCP 工具设置为默认允许，避免每次 SIREN 工具调用都弹出确认；Qoder Provider 不会修改全局 Qoder 设置或强制跳过权限确认。如需限制其他可用工具，请在对应 CLI 的用户配置中处理。
 </Callout>
 
 ## 服务端 REPL
