@@ -97,6 +97,7 @@ mcp:
 air:
   # WebUI AIR 与 Agent 终端的默认 Provider；也可逐会话在页面上选择
   provider: claude                             # claude / codex
+  maxSessions: 10                              # WebUI Agent 终端最大并发会话数；<=0 表示不限制
   prompt: 启动安全应急响应，UID：%s，...        # 告警事件模式的 prompt 模板
   customPromptPrefix: 在 SIREN Client %d 上...  # 自定义 prompt 模式的前缀
   # providers.<name> 用于 WebUI AIR、Manual 裸终端和服务端 REPL air 命令
@@ -127,6 +128,7 @@ air:
 | `mcp.cmdBlacklist` | list | 见 [MCP 集成](/mcp#命令黑名单) | MCP `run` 工具的命令黑名单，值为正则表达式列表 |
 | `mcp.reconTimeout` | int | `300` | [`recon` MCP 工具](/mcp#可用工具)等待客户端回传报告的最长时间（秒） |
 | `air.provider` | string | `claude` | WebUI AIR 与 Agent 终端默认 Provider，可选 `claude` 或 `codex`；页面中也可在每次启动会话时选择。服务端 REPL 的 `air` 命令固定使用 Claude Provider 配置 |
+| `air.maxSessions` | int | `10` | WebUI Agent 终端最大并发会话数；适用于 AIR 和 Manual 会话，设为 `0` 或负数表示不限制 |
 | `air.prompt` | string | 见示例配置 | 告警事件模式下的 prompt 模板，依次填入 `%s` UID、`%s` 安全中心告警 ID、`%d` Client ID（告警 ID 即 `air` 命令的 Security Center Alert ID，详见 [Agentic 应急响应](/air)） |
 | `air.customPromptPrefix` | string | 见示例配置 | 自定义 prompt 模式下的前缀（支持 `%d` Client ID） |
 | `air.providers.claude.cliPath` | string | `claude` | WebUI Claude Provider 和服务端 REPL `air` 命令使用的 Claude Code CLI 路径 |
