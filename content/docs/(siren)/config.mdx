@@ -98,6 +98,7 @@ air:
   # WebUI AIR 与 Agent 终端的默认 Provider；也可逐会话在页面上选择
   provider: claude                             # claude / codex / qoder
   maxSessions: 10                              # WebUI Agent 终端最大并发会话数；<=0 表示不限制
+  replayBufferBytes: 4194304                   # 每个会话用于断线回放的终端输出上限（字节）
   prompt: 启动安全应急响应，UID：%s，...        # 告警事件模式的 prompt 模板
   customPromptPrefix: 在 SIREN Client %d 上...  # 自定义 prompt 模式的前缀
   # providers.<name> 用于 WebUI AIR 和 Manual 裸终端；服务端 REPL air 固定使用 Claude
@@ -107,7 +108,7 @@ air:
       args: []                                 # 额外 Claude CLI 参数
     codex:
       cliPath: codex                           # Codex CLI 路径
-      args: []                                 # 额外 Codex CLI 参数
+      args: [--no-alt-screen]                  # 保留浏览器终端滚动历史
     qoder:
       cliPath: qodercli                        # QoderCLI 路径
       args: []                                 # 额外 QoderCLI 参数
@@ -132,19 +133,20 @@ air:
 | `mcp.reconTimeout` | int | `300` | [`recon` MCP 工具](/mcp#可用工具)等待客户端回传报告的最长时间（秒） |
 | `air.provider` | string | `claude` | WebUI AIR 与 Agent 终端默认 Provider，可选 `claude`、`codex` 或 `qoder`；页面中也可在每次启动会话时选择。服务端 REPL 的 `air` 命令固定使用 Claude Provider 配置 |
 | `air.maxSessions` | int | `10` | WebUI Agent 终端最大并发会话数；适用于 AIR 和 Manual 会话，设为 `0` 或负数表示不限制 |
+| `air.replayBufferBytes` | int | `4194304` | 每个 WebUI Agent 终端会话为断线重连保留的原始输出字节数；设为 `0` 或负数时使用默认的 4 MiB |
 | `air.prompt` | string | 见示例配置 | 告警事件模式下的 prompt 模板，依次填入 `%s` UID、`%s` 安全中心告警 ID、`%d` Client ID（告警 ID 即 `air` 命令的 Security Center Alert ID，详见 [Agentic 应急响应](/air)） |
 | `air.customPromptPrefix` | string | 见示例配置 | 自定义 prompt 模式下的前缀（支持 `%d` Client ID） |
 | `air.providers.claude.cliPath` | string | `claude` | WebUI Claude Provider 和服务端 REPL `air` 命令使用的 Claude Code CLI 路径 |
 | `air.providers.claude.args` | list | `[]` | 传递给 Claude CLI 的额外参数 |
 | `air.providers.codex.cliPath` | string | `codex` | WebUI Codex Provider 使用的 Codex CLI 路径 |
-| `air.providers.codex.args` | list | `[]` | 传递给 Codex CLI 的额外参数 |
+| `air.providers.codex.args` | list | `[--no-alt-screen]` | 传递给 Codex CLI 的额外参数；默认使用 inline TUI 保留浏览器终端滚动历史，自定义时可移除该参数恢复 Codex 的 alternate screen 行为 |
 | `air.providers.qoder.cliPath` | string | `qodercli` | WebUI Qoder Provider 使用的 QoderCLI 路径 |
 | `air.providers.qoder.args` | list | `[]` | 传递给 QoderCLI 的额外参数 |
 
 > WebUI 浏览器终端复用 `air.providers.<name>`。Manual 模式只取 `cliPath` 和 `args`；Custom、Event、Resume 模式会额外注入 SIREN MCP、种子 prompt 或恢复会话 ID。它和浏览器 Shell 一样只受 WebUI 全局鉴权保护。
 
 <Callout title="AIR 配置边界" type="info">
-  AIR 现在只保留 Provider、prompt、CLI 路径和额外参数。模型、权限、沙箱、普通 Shell 审批等行为由 Claude Code / Codex / Qoder 自身配置决定；Codex Provider 会把 SIREN 注入的 MCP 工具设置为默认允许，Qoder Provider 不会修改全局 Qoder 设置或强制跳过权限确认。旧版 AIR 细分字段和独立的 `agentTerminal.*` 配置块已移除，残留时不会生效。
+  AIR 的 Provider 配置只保留 Provider、prompt、CLI 路径和额外参数；会话并发与重连回放容量分别由 `air.maxSessions` 和 `air.replayBufferBytes` 控制。模型、权限、沙箱、普通 Shell 审批等行为由 Claude Code / Codex / Qoder 自身配置决定；Codex Provider 会把 SIREN 注入的 MCP 工具设置为默认允许，Qoder Provider 不会修改全局 Qoder 设置或强制跳过权限确认。旧版 AIR 细分字段和独立的 `agentTerminal.*` 配置块已移除，残留时不会生效。
 </Callout>
 
 <Callout title="v1.x 升级提示" type="warn">

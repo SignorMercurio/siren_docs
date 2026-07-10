@@ -10,6 +10,23 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.13.2 <DateTag>2026-07-10</DateTag>
+
+### Feature
+
+- **Clients 列表增强批量处置**：支持按 ID、系统、地址、备注或 Project 筛选客户端，按主要字段排序，并可多选后批量调整 Project 或清理客户端
+
+### Improvement
+
+- **AIR 可保留更多终端历史**：Codex 默认使用 inline TUI，每个会话的重连回放容量提高到 4 MiB 并支持通过 `air.replayBufferBytes` 调整，浏览器终端滚动历史提高到 20000 行
+- **高风险操作确认更明确**：清理客户端和停止 AIR 会话前需要输入确认短语，降低误操作风险
+- **WebUI 键盘与触屏操作更完整**：AIR / Shell 标签支持标准键盘导航，状态同时使用颜色和形状表达，移动端导航、表格和操作按钮更易用
+- 后台标签页暂停不必要的计时和轮询，Clients 列表在 SOAR 输出更新时减少重复渲染
+
+### Bugfix
+
+- 修复窄屏下 Clients 表格和移动端导航溢出，以及部分文件树颜色、圆角和弹出层样式未跟随主题的问题
+
 ## v2.13.0 <DateTag>2026-07-08</DateTag>
 
 ### Feature

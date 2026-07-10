@@ -120,11 +120,13 @@ Projects 页面支持：
 
 Clients 页面对应服务端 REPL 的 `ls`、`note`、`allow`、`deploy` 和 `clean`。每行展示一个在线客户端，支持：
 
+- 按 ID、系统、地址、备注或 Project 筛选，并按主要字段排序。
+- 多选客户端后批量分配 Project 或执行清理。
 - 编辑备注。备注绑定到客户端稳定身份，客户端重连后会自动恢复。
 - 分配 Project。Global 视图中可以把客户端分配到某个 Project，或移回未归属状态。
 - 打开快捷入口。从客户端行可直接进入 Files 或 Process Analysis。
 - 执行 SOAR 操作，包括 `allow` 放行、单机部署、批量部署。
-- 清理客户端。清理操作会弹出 **Clean & Terminate** 二次确认。
+- 清理客户端。单个或批量清理都会要求输入确认短语后再执行 **Clean & Terminate**。
 
 <Callout title="批量部署规则" type="info">
   批量部署支持同一 UID 下的 2-20 台 ECS。Batch 模式每行输入 `instanceId`、`instanceId,publicIp` 或 `instanceId,publicIp,note`；只填写备注时可写成 `instanceId,,note`。默认并发 3 台，单台失败不会中断其他目标。

@@ -44,7 +44,7 @@ Agentic IR -> 选择 Provider -> 选择 Manual / Custom / Event / Resume -> Star
 - **Event**：选择客户端，输入 Alibaba Cloud UID 和安全中心告警 ID；会话会带上告警标识，Agent 可通过 MCP 获取告警详情。
 - **Resume**：从当前视图工作目录对应的历史会话中选择一条，用原 session ID 继续。
 
-会话托管在 SIREN Server 上。刷新浏览器、切换页面或短暂断连后，可以从 **Running** 列表重新接入并回放此前输出；点击 Stop 才会结束对应会话。
+会话托管在 SIREN Server 上。刷新浏览器、切换页面或短暂断连后，可以从 **Running** 列表重新接入并回放此前输出；点击 Stop 才会结束对应会话。每个会话默认保留最近 4 MiB 原始终端输出用于重连回放，容量可通过 `air.replayBufferBytes` 调整。Codex 默认使用 inline TUI，让浏览器滚动历史更完整。
 
 <Callout title="Project 作用域" type="info">
   在 Project 视图下启动 WebUI AIR 时，Provider 工作目录会切到当前 Project 目录，History 只列出该目录下的历史会话。SIREN 注入的 MCP 地址也带 Project 作用域，工具只能操作当前 Project 的客户端。Global 视图保持全局行为。
