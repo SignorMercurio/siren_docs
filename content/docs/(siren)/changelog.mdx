@@ -10,6 +10,23 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.13.5 <DateTag>2026-07-14</DateTag>
+
+### Feature
+
+- **AIR 会话列表提供更完整的上下文**：Running 显示任务、客户端、Provider、状态和启动时间，History 显示首个任务、最近一条可见对话、分支和更新时间，更容易在恢复前确认会话用途
+
+### Improvement
+
+- Qoder 会话启动和历史恢复兼容更多 CLI 安装方式与历史记录布局
+- AIR 历史搜索可匹配最近一条可见消息，并过滤工具结果和隐藏上下文
+
+### Bugfix
+
+- 修复 Windows 客户端在 PowerShell Constrained Language Mode 下执行命令时反复输出编码设置错误的问题，同时保留外部程序的 UTF-8 输出
+- 修复同一历史会话被并发恢复时可能启动多个 AIR 进程，以及停止旧会话时可能影响新进程的问题
+- 修复 WebUI 部分操作结束后仍显示运行中、确认对话框焦点不完整、排序状态不一致和 Recon 失败后继续轮询的问题
+
 ## v2.13.2 <DateTag>2026-07-10</DateTag>
 
 ### Feature
