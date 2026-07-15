@@ -92,7 +92,7 @@ WebUI 认证由用户数据库决定。默认数据库路径是 `data/users.db`�
 
 <Accordion title="忘记 WebUI 密码怎么办？">
 
-SIREN 目前没有单独的改密命令。请在服务端使用同一份配置和相同工作目录，或先确认 `webui.userDBPath` 指向的数据库，然后删除原用户并重新创建：
+SIREN 目前没有单独的改密命令。请确保服务端使用与原实例相同的配置和工作目录（即确认 `webui.userDBPath` 指向同一个数据库），然后删除原用户并重新创建：
 
 ```bash
 ./siren_server user delete <username>

@@ -11,7 +11,7 @@ import { Card, Cards } from "fumadocs-ui/components/card";
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-当发现泄露的云上 AccessKey 时，可以通过 SIREN 调用 SOAR 剧本查询它的云上调用历史，用于判断影响范围、确认可疑来源，并为止血和复盘提供证据。
+当发现泄露的云上 AccessKey 时，可以通过 SIREN 调用 SOAR 剧本查询该 AccessKey 的云上调用历史，用于判断影响范围、确认可疑来源，并为止血和复盘提供证据。
 
 <Callout title="前置条件" type="info">
   需要在控制主机上[设置 SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)。内部环境通常已预置凭证，可以直接使用。
@@ -36,11 +36,11 @@ Investigations -> AccessKey -> 填写 UID / AccessKey ID / Region -> Run
 3. 点击 **Run**，等待调查完成。
 4. 结果生成后，点击 **Open in Artifacts** 查看完整 Markdown 报告。
 
-WebUI 只展示服务端能确认的运行状态。AccessKey 调查完成后会显示报告入口；失败时直接显示错误信息。
+WebUI 只展示服务端已知的执行结果：调查完成后显示报告入口，失败时显示错误信息。
 
 ## 服务端 REPL
 
-在 SIREN Server REPL 中执行 `ak` 命令。适合已经在控制主机终端里操作，或需要快速把结果文件留在服务端工作目录的场景。
+在 SIREN Server REPL 中执行 `ak` 命令。适合已在控制主机终端操作，或需要将结果文件留在服务端工作目录的场景。
 
 <Accordions>
   <Accordion title="示例输出">

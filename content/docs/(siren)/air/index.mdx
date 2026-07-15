@@ -44,14 +44,18 @@ Agentic IR -> 选择 Provider -> 选择 Manual / Custom / Event / Resume -> Star
 - **Event**：选择客户端，输入 Alibaba Cloud UID 和安全中心告警 ID；会话会带上告警标识，Agent 可通过 MCP 获取告警详情。
 - **Resume**：从当前视图工作目录对应的历史会话中选择一条，用原 session ID 继续。
 
-会话托管在 SIREN Server 上。刷新浏览器、切换页面或短暂断连后，可以从 **Running** 列表重新接入并回放此前输出；点击 Stop 才会结束对应会话。每个会话默认保留最近 4 MiB 原始终端输出用于重连回放，容量可通过 `air.replayBufferBytes` 调整。Codex 默认使用 inline TUI，让浏览器滚动历史更完整。
+会话托管在 SIREN Server 上。刷新浏览器、切换页面或短暂断连后，可以从 **Running** 列表重新接入并回放此前输出；点击 Stop 才会结束对应会话。每个会话默认保留最近 4 MiB 原始终端输出用于重连回放，容量可通过 `air.replayBufferBytes` 调整。Codex 默认使用 inline TUI，以保留更完整的浏览器滚动历史。
 
 <Callout title="Project 作用域" type="info">
   在 Project 视图下启动 WebUI AIR 时，Provider 工作目录会切到当前 Project 目录，History 只列出该目录下的历史会话。SIREN 注入的 MCP 地址也带 Project 作用域，工具只能操作当前 Project 的客户端。Global 视图保持全局行为。
 </Callout>
 
 <Callout title="配置边界" type="info">
-  WebUI AIR 只使用 `air.providers.<name>.cliPath` 和 `args` 启动对应 CLI，并在 Custom、Event、Resume 模式注入 SIREN MCP、种子 prompt 或恢复会话 ID。模型、权限、沙箱、普通 Shell 审批和操作者已有 MCP 的工具确认规则由 Claude Code / Codex / Qoder 自身配置决定。Codex Provider 会把 SIREN 注入的 MCP 工具设置为默认允许，避免每次 SIREN 工具调用都弹出确认；Qoder Provider 不会修改全局 Qoder 设置或强制跳过权限确认。如需限制其他可用工具，请在对应 CLI 的用户配置中处理。
+  - **SIREN 只做**：使用 `air.providers.<name>.cliPath` 和 `args` 启动对应 CLI，并在 Custom、Event、Resume 模式注入 SIREN MCP、种子 prompt 或恢复会话 ID。
+  - **由 CLI 自身决定**：模型、权限、沙箱、普通 Shell 审批和操作者已有 MCP 的工具确认规则。
+  - **Codex**：会把 SIREN 注入的 MCP 工具设置为默认允许，避免每次 SIREN 工具调用都弹出确认。
+  - **Qoder**：不会修改全局 Qoder 设置或强制跳过权限确认。
+  - 如需限制其他可用工具，请在对应 CLI 的用户配置中处理。
 </Callout>
 
 ## 服务端 REPL

@@ -100,7 +100,7 @@ Web 控制台使用 Session Cookie 鉴权。账号密码存储在 SQLite 数据�
 
 ### Projects
 
-Project 是应急响应工作区，用于把客户端、Artifacts 目录和操作目标放到同一个上下文中。每个 Project 创建时会固定一个服务端目录，例如 `/opt/siren/my-project`；之后重命名 Project 只改变显示名，不移动目录。
+Project 是应急响应工作区，用于把客户端、Artifacts 目录和操作目标放到同一个上下文中。每个 Project 创建时会固定一个服务端目录，例如 `/opt/siren/my-project`。
 
 Projects 页面支持：
 
@@ -134,13 +134,13 @@ Clients 页面对应服务端 REPL 的 `ls`、`note`、`allow`、`deploy` 和 `c
 
 ### Shells
 
-Shells 页面提供浏览器内的交互式终端。每个客户端可以打开多个终端标签，切换到 Clients、Agentic IR 或 Artifacts 页面时，已打开的 Shell 会话仍保持运行，回到 Shells 页后可以继续输入。
+Shells 页面提供浏览器内的交互式终端，每个客户端可以打开多个终端标签。切换到其他页面时，已打开的 Shell 会话仍会保持运行；回到 Shells 页后可以继续输入。
 
 Project 视图下，Shell 只能连接当前 Project 的客户端。切换 Project 或切回 Global 时，Web 控制台会关闭不属于新视图的活动 Shell，避免继续操作错误项目中的主机。
 
 ### Agentic IR
 
-Agentic IR 页面在浏览器内嵌终端中运行 Claude Code、Codex 或 Qoder，用于完成 [Agentic 应急响应](/air)。页面支持选择 Provider、新建会话，也支持恢复当前视图工作目录对应的历史会话。
+Agentic IR 页面在浏览器内嵌终端中运行 Claude Code、Codex 或 Qoder，用于完成 [Agentic 应急响应](/air)。页面支持选择 Provider、新建会话，或恢复当前视图工作目录对应的历史会话。
 
 新建会话可选以下入口模式：
 
@@ -160,9 +160,9 @@ Agentic IR 页面在浏览器内嵌终端中运行 Claude Code、Codex 或 Qoder
 
 ### Investigations
 
-Investigations 页面用于承载需要等待结果的调查工具，目前包含 AccessKey 调查、客户端 Recon 和进程分析。
+Investigations 页面汇总需要等待结果的调查工具，目前包含 AccessKey 调查、客户端 Recon 和进程分析。
 
-- **AccessKey**，输入 Alibaba Cloud UID、AccessKey ID 和可选 Region，生成 Markdown 调查报告。Region 留空时默认 `cn-hangzhou`。AccessKey 调查不绑定客户端，报告写入 Global Artifacts。
+- **AccessKey**，输入阿里云 UID、AccessKey ID 和可选 Region，生成 Markdown 调查报告。Region 留空时默认 `cn-hangzhou`。AccessKey 调查不绑定客户端，报告写入 Global Artifacts。
 - **Recon**，选择在线客户端并下发信息收集命令。页面展示服务端从客户端日志中解析出的阶段，例如 `Recon.Basic`、`Recon.User`、`Recon.Process` 和 `Save report to Artifacts`。
 - **Process Analysis**，选择 Linux 客户端后，按 PID、监听端口或进程名查询进程详情。按名称匹配到多个进程时，页面会列出候选项，点击候选 PID 后继续分析。
 - **报告入口**，调查结束后会显示 **Open Artifacts** 按钮。Recon 报告跟随客户端 Project 归属保存；已归属客户端写入 Project 目录，未归属客户端写入 Global Artifacts。
@@ -181,7 +181,7 @@ Files 页面用于浏览在线客户端的本机文件系统。可以从左侧�
 - 打开路径。Linux/macOS 默认从 `/` 打开，Windows 默认从 `C:\` 打开，也可以在 Path 输入框中输入指定路径。
 - 预览文本文件。二进制文件会显示不可预览提示。
 - 下载文件或目录。目录会打包为 `tar.gz`。
-- 上传单个文件到当前目标目录，单文件上限 100 MiB。目标文件已存在时会要求确认覆盖。
+- 点击 **Upload** 选择一个或多个文件，或把多个文件拖到页面任意位置，上传到顶部 **Target** 显示的当前目标目录。文件会按顺序上传，单文件上限 100 MiB；目标文件已存在时会逐个要求覆盖或跳过。拖拽不支持上传目录。
 
 <Callout title="远程文件操作" type="warn">
   Files 页面读写的是客户端主机上的真实文件系统，上传和覆盖操作会直接修改远端文件。执行前请确认目标客户端与上传目录。
@@ -195,7 +195,7 @@ Artifacts 页面管理服务端取证目录。Global 视图使用 `siren_server`
 
 - 预览文本文件。`.md` 和 `.markdown` 会渲染为 Markdown；包含多个标题时会显示目录。
 - 下载文件或目录。目录会打包为 `tar.gz`，并自动排除点号开头的文件和子目录。
-- 上传单个文件到当前目标目录，单文件上限 100 MiB。目标文件已存在时会要求确认覆盖。
+- 点击 **Upload** 选择一个或多个文件，或把多个文件拖到页面任意位置，上传到顶部 **Target** 显示的当前目标目录。文件会按顺序上传，单文件上限 100 MiB；目标文件已存在时会逐个要求覆盖或跳过。拖拽不支持上传目录。
 - 新建目录、重命名和删除文件或目录。删除非空目录会递归删除其中内容。
 - 从 `.md` 报告进入 Dossier 编辑。`.markdown` 可以预览，但不会显示 Dossier 编辑按钮。
 - 保护隐藏路径。`.env`、`.ssh` 等点号开头的文件或目录不会列出，也不允许直接访问。

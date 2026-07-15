@@ -14,7 +14,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 SIREN 客户端与服务端的主通道是 TLS TCP 连接。服务端默认监听客户端连接端口 `443`，TLS 最低版本为 1.2。WebUI 与 MCP 使用独立的 HTTP 服务，默认端口为 `8080`，不使用本页描述的帧协议。
 
-主通道建立后，客户端必须先发送 `MsgClientHello`。服务端用这帧注册客户端、恢复备注与项目归属，并缓存客户端当前插件列表。后续插件发生安装、卸载、更新或启停变化时，客户端再通过 `MsgPluginRegister` 刷新完整插件列表。
+主通道建立后，客户端必须先发送 `MsgClientHello`。服务端通过该帧完成客户端注册、恢复备注与项目归属，并缓存当前插件列表。后续插件发生安装、卸载、更新或启停变化时，客户端再通过 `MsgPluginRegister` 刷新完整插件列表。
 
 交互式 shell 会在主通道之外临时建立一个 TLS relay 连接；端口转发的数据则继续通过主通道上的 `MsgPortForwardData` 分片传输。
 

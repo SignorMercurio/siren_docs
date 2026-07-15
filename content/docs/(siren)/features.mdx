@@ -17,7 +17,7 @@ SIREN 的功能可以按应急响应流程理解：接入目标主机，收集�
     <Card title="服务端 REPL" icon={<Terminal />} href="/remote">在控制主机终端管理客户端、执行命令、打开 Shell 和启动 AIR</Card>
     <Card title="Web 控制台" icon={<LayoutDashboard />} href="/webui">通过浏览器管理 Projects、Clients、Shells、Investigations、Files、Artifacts 和 Dossier</Card>
     <Card title="Projects 工作区" icon={<FolderKanban />} href="/webui#projects">按应急响应项目隔离客户端、操作目标、AIR 工作目录和取证目录</Card>
-    <Card title="部署与放行" icon={<Rocket />} href="/index#内部环境通过云助手一键部署">通过云助手部署客户端，或使用 `allow` 放行受害主机出口 IP</Card>
+    <Card title="部署与放行" icon={<Rocket />} href="/index#内部环境通过云助手一键部署">通过云助手部署客户端，或使用 `allow` 放行目标主机出口 IP</Card>
 </Cards>
 
 ## 自动化信息收集
@@ -42,7 +42,7 @@ Recon 会在目标主机上采集常见排查证据。除基础信息外，其�
     <Card title="Agentic 应急响应" icon={<Brain />} href="/air">启动 Claude、Codex 或 Qoder 辅助排查会话，由操作员观察、追问和确认关键操作</Card>
     <Card title="AccessKey 调查" icon={<Key />} href="/ak">调用 SOAR 剧本查询泄露 AccessKey 的云上调用历史，生成 Markdown 报告</Card>
     <Card title="进程分析" icon={<Activity />} href="/analysis/info">按 PID、监听端口或进程名查询 Linux 进程详情、进程树、容器和服务线索</Card>
-    <Card title="端口转发" icon={<ArrowRightLeft />} href="/portforward">把受害主机内网服务转发到控制主机，用于临时访问和验证</Card>
+    <Card title="端口转发" icon={<ArrowRightLeft />} href="/portforward">把目标主机内网服务转发到控制主机，用于临时访问和验证</Card>
     <Card title="痕迹清除" icon={<Eraser />} href="/misc/clean">调查结束后清理客户端侧的 SIREN 文件和临时痕迹，并终止客户端进程</Card>
 </Cards>
 
@@ -61,7 +61,7 @@ SIREN 把客户端文件系统、服务端取证目录和报告编辑分成不�
 
 ## AI、MCP 与插件
 
-这些能力用于扩展调查入口和自动化方式。MCP 面向 AI 客户端，插件系统面向 SIREN 客户端能力扩展。
+这些能力用于扩展调查入口和自动化方式。MCP 面向 AI 客户端，插件系统用于扩展 SIREN 客户端能力。
 
 <Cards>
     <Card title="Agentic IR" icon={<Brain />} href="/air">在 Web 控制台中运行 Claude / Codex / Qoder 辅助排查会话，或在服务端 REPL 中运行 Claude 会话</Card>

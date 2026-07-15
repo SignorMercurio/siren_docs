@@ -126,7 +126,7 @@ air:
 | `webui.listen` | string | `0.0.0.0` | WebUI 与 MCP 共享的监听地址；只要 `webui.enabled` 或 `mcp.enabled` 有一个启用就会启动监听 |
 | `webui.port` | int | `8080` | WebUI 与 MCP 共享的监听端口，MCP 通过 `/mcp` 子路径暴露 |
 | `webui.userDBPath` | string | `data/users.db` | WebUI 用户 SQLite 数据库路径（相对路径基于启动 CWD） |
-| `webui.dossierDir` | string | -（示例配置为 `/opt/siren/dossier`） | Dossier 编辑器文件目录，可位于服务端工作目录外；左侧 Dossier 入口默认打开该目录下的 `report.md`。默认为空，留空、目录不可用或默认报告不可访问时，WebUI 会提示错误。详见 [Dossier 配置](/dossier/config) |
+| `webui.dossierDir` | string | -（示例配置为 `/opt/siren/dossier`） | Dossier 编辑器文件目录，可位于服务端工作目录外；左侧 Dossier 入口默认打开该目录下的 `report.md`。目录留空、不可用或默认报告不可访问时，WebUI 会提示错误。详见 [Dossier 配置](/dossier/config) |
 | `webui.projectsBaseDir` | string | `""`（服务端当前工作目录） | WebUI Project 目录创建基准路径。创建 Project 时只允许在该目录下创建一个 basename 子目录；Project 重命名不会移动目录，删除 Project 只删除元数据并保留目录文件 |
 | `mcp.enabled` | bool | `true` | 是否启用 [MCP 服务](/mcp)，独立于 `webui.enabled` |
 | `mcp.cmdBlacklist` | list | 见 [MCP 集成](/mcp#命令黑名单) | MCP `run` 工具的命令黑名单，值为正则表达式列表 |

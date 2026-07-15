@@ -9,20 +9,20 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-端口转发会在 SIREN Server 上打开一个 TCP 端口，并把流量转发到指定客户端可访问的目标服务。它常用于访问只在受害主机本机或内网开放的服务。
+端口转发会在 SIREN Server 上打开一个 TCP 端口，并把流量转发到指定客户端可访问的目标服务。它常用于访问只在目标主机本机或内网开放的服务。
 
 常见场景包括：
 
-- 访问受害主机上仅监听 `localhost` 的 Web 管理后台
-- 连接受害主机内网中的数据库
-- 排查受害主机上运行的内网服务
+- 访问目标主机上仅监听 `localhost` 的 Web 管理后台
+- 连接目标主机内网中的数据库
+- 排查目标主机上运行的内网服务
 
 ## 转发方向
 
 ```mermaid
 graph LR
     A[操作者浏览器或客户端] -->|访问 SIREN Server:8080| B[SIREN Server<br/>监听源端口]
-    B -->|SIREN 连接| C[SIREN Client<br/>受害主机]
+    B -->|SIREN 连接| C[SIREN Client<br/>目标主机]
     C -->|TCP 连接| D[目标服务<br/>localhost:8000]
 ```
 
@@ -30,7 +30,7 @@ graph LR
 
 1. 操作者连接 SIREN Server 的源端口。
 2. SIREN Server 通过已连接的客户端转发数据。
-3. SIREN Client 从受害主机侧连接目标地址和端口。
+3. SIREN Client 从目标主机侧连接目标地址和端口。
 
 <Callout title="监听范围" type="warn">
   转发端口开在 SIREN Server 所在主机上。若 Server 暴露在公网或共享网络中，请用安全组、防火墙或只从本机访问的方式限制来源，不要把敏感服务的转发端口暴露给不可信网络。
@@ -49,7 +49,7 @@ graph LR
 
 ## 开始转发
 
-假设受害主机侧目标服务运行在 `localhost:8000`，期望通过控制主机的 `8080` 端口访问：
+假设目标主机侧目标服务运行在 `localhost:8000`，期望通过控制主机的 `8080` 端口访问：
 
 ```bash title="SIREN Server"
 >>> fwd 0 8080:8000
@@ -59,14 +59,14 @@ graph LR
 
 ## 转发到客户端内网
 
-目标地址由客户端侧访问，因此可以填客户端所在内网可达的主机。
+目标地址从客户端一侧发起连接，因此可以填写客户端所在内网中可达的主机。
 
 ```bash title="SIREN Server"
 >>> fwd 0 8080:192.168.1.10:3306
 ```
 
 <Callout title="转发到其他主机" type="info">
-  `targetHost` 是从客户端机器看出去的地址。如果客户端不能连接该主机和端口，端口转发也无法访问目标服务。
+  `targetHost` 是从目标主机看出去的地址。如果客户端不能连接该主机和端口，端口转发也无法访问目标服务。
 </Callout>
 
 ## 查看端口转发
@@ -86,5 +86,5 @@ graph LR
 ## 常见排查
 
 - 源端口无法监听：确认该端口未被其他进程或已有转发占用，并检查是否有权限监听该端口。
-- 访问源端口无响应：确认 SIREN Client 仍在线，目标服务正在监听，且客户端机器能访问目标地址。
+- 访问源端口无响应：确认 SIREN Client 仍在线，目标服务正在监听，且目标主机能访问目标地址。
 - 其他机器无法访问转发端口：确认 SIREN Server 的防火墙、安全组或本机网络策略允许对应来源连接。
