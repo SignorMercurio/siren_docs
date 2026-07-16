@@ -113,7 +113,7 @@ Projects 页面支持：
 客户端最多归属到一个 Project。未归属客户端只在 Global 视图中出现；进入 Project 视图后，Clients、Shells、Agentic IR、Files 和 Investigations 都只允许选择当前 Project 的客户端。
 
 <Callout title="部署归属" type="info">
-  在 Project 视图下通过 Web 控制台单机或批量部署 SIREN 客户端时，服务端会记录本次部署目标的 Allow IP。客户端下一次从该 IP 连接后会自动归属到当前 Project。服务端 REPL 部署不带 Project 上下文，仍保持全局行为。
+  在 Project 视图下通过 Web 控制台单机或批量部署 SIREN 客户端时，唯一匹配到本次 Allow IP 的新客户端会自动归属到当前 Project。批量部署填写的 Note 只会写入尚无备注的客户端，已有备注会保留并显示 warning。服务端 REPL 部署不带 Project 上下文，仍保持全局行为。
 </Callout>
 
 ### Clients
@@ -126,10 +126,17 @@ Clients 页面对应服务端 REPL 的 `ls`、`note`、`allow`、`deploy` 和 `c
 - 分配 Project。Global 视图中可以把客户端分配到某个 Project，或移回未归属状态。
 - 打开快捷入口。从客户端行可直接进入 Files 或 Process Analysis。
 - 执行 SOAR 操作，包括 `allow` 放行、单机部署、批量部署。
+- 查看近期部署任务。页面刷新后仍可恢复当前进度和最近结果，进行中的任务每 2 秒更新一次。
 - 清理客户端。单个或批量清理都会要求输入确认短语后再执行 **Clean & Terminate**。
 
 <Callout title="批量部署规则" type="info">
-  批量部署支持同一 UID 下的 2-20 台 ECS。Batch 模式每行输入 `instanceId`、`instanceId,publicIp` 或 `instanceId,publicIp,note`；只填写备注时可写成 `instanceId,,note`。默认并发 3 台，单台失败不会中断其他目标。
+  点击 **Batch deploy** 会打开独立的批量部署窗口，支持同一 UID 下的 2-20 台 ECS。每行输入 `instanceId`、`instanceId,publicIp` 或 `instanceId,publicIp,note`；只填写备注时可写成 `instanceId,,note`。默认并发 3 台，单台失败不会中断其他目标。提交后窗口会关闭，可在近期部署列表继续查看进度。`success` 表示客户端已经连接，并显示实际 Client ID；playbook 完成后最多等待 90 秒，未连接的目标记为 `timed_out`。
+</Callout>
+
+部署结果分为 `success`、`partial` 和 `failed`。只有所有目标均已连接且没有 warning 时才会清空输入；部分成功、失败或超时会保留原输入，便于核对和修正。近期列表最多显示 20 次部署，可以完全收起；终态记录最长保留 30 分钟。这些记录只存在于当前服务端进程，服务端重启后不会恢复。
+
+<Callout title="需要手工确认客户端" type="warning">
+  多个进行中的部署目标共享同一个出口 IP 时，SIREN 会停止自动关联，不会把本次 Project 或 Note 写入无法确认的客户端。部署会显示 `manual_required`，请在 Clients 列表中核对主机后手工设置；页面不会提供自动重试，以免重复部署。
 </Callout>
 
 ### Shells

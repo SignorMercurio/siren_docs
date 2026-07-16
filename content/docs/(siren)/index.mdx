@@ -94,7 +94,13 @@ SIREN 支持本地模式和远程模式。多数应急场景建议使用远程�
 1. 从 SOAR 平台读取目标主机的地域、操作系统和出口 IP
 2. 放行目标主机访问 SIREN Server
 3. 安装匹配系统架构的 SIREN 客户端
-4. 返回部署状态和命令输出
+4. 最多等待 90 秒，客户端连接成功后返回实际 Client ID
+
+SOAR playbook 执行完成不等于客户端已经上线。只有目标客户端连接到当前 SIREN Server，部署才会显示成功；playbook 失败、等待超时或只能手工确认客户端时，命令会返回明确错误。
+
+<Callout title="共享出口 IP" type="warning">
+  如果多个进行中的部署目标使用同一个出口 IP，SIREN 会继续执行部署，但不会猜测新连接属于哪台主机。请在 Clients 列表中核对客户端后手工设置 Project 和 Note，不要直接重复部署。
+</Callout>
 
 <Callout title="出口 IP 获取失败时" type="info">
   少数情况下 SOAR 无法返回目标主机的公网出口 IP。此时可在第三个参数手动传入出口 IP，SIREN 会跳过自动探测、直接使用该 IP 放行访问：
@@ -111,6 +117,7 @@ SIREN 支持本地模式和远程模式。多数应急场景建议使用远程�
 
     ```bash title="SIREN Server"
     >>> deploy user123 i-1234567890abcdef0
+    [+] Deployment connected as client #12:
     ```
 
   </Accordion>
@@ -121,10 +128,11 @@ SIREN 支持本地模式和远程模式。多数应急场景建议使用远程�
     [*] [1/3 i-a] Starting deployment
     [*] [2/3 i-b] Starting deployment
     [*] [3/3 i-c] Starting deployment
-    [+] [2/3 i-b] Deployment completed
-    [+] [1/3 i-a] Deployment completed
-    [+] [3/3 i-c] Deployment completed
-    [+] Batch deployment completed: 3 succeeded, 0 failed, 3 total
+    [*] Deployment results:
+    1. i-a: connected as client #12
+    2. i-b: connected as client #13
+    3. i-c: connected as client #14
+    [+] Batch deployment completed: 3 connected, 0 failed, 0 timed out, 0 require manual confirmation, 0 warnings, 3 total
     ```
 
   </Accordion>
