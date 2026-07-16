@@ -15,7 +15,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 ## 执行清理
 
 ```text tab="WebUI"
-Clients -> 目标客户端 -> Clean & Terminate -> Clean
+Clients -> 目标客户端 -> Clean & Terminate -> Send cleanup request
 ```
 
 ```bash tab="服务端 REPL"
@@ -26,9 +26,9 @@ Clients -> 目标客户端 -> Clean & Terminate -> Clean
 ./siren clean
 ```
 
-WebUI 入口位于 Clients 页面目标客户端行的清理按钮。点击后会弹出 **Clean & Terminate** 确认框；确认后，服务端会向该客户端下发清理指令，客户端完成清理后退出。Project 视图下只能清理当前 Project 内的客户端。
+WebUI 入口位于 Clients 页面目标客户端行的清理按钮。点击后会弹出 **Clean & Terminate** 确认框；确认后，服务端会向该客户端下发清理指令。Project 视图下只能清理当前 Project 内的客户端。
 
-服务端 REPL 与本地模式会要求输入 `y` 确认。确认后，目标客户端会执行清理并退出。
+服务端 REPL 与本地模式会要求输入 `y` 确认。远程模式下，WebUI 和 REPL 只能确认指令已经发出，不能确认客户端退出后的最终文件删除结果。
 
 ## 清理范围
 
@@ -36,8 +36,11 @@ WebUI 入口位于 Clients 页面目标客户端行的清理按钮。点击后�
 | --- | --- |
 | 环境变量 | 当前进程中的 OSS 与阿里云 AccessKey 环境变量（`OSS_ACCESS_KEY_*`、`ALIBABA_CLOUD_ACCESS_KEY_*`） |
 | 配置文件 | 当前加载的配置文件（如 `config.yaml`） |
-| 可执行文件目录 | 当前 SIREN 可执行文件所在目录 |
-| WinPTY 临时目录 | Windows 上运行期释放的 `%TEMP%\winpty-*` 目录 |
+| 客户端身份 | 当前用户配置目录中的持久化客户端身份文件 |
+| Recon 报告 | 客户端当前工作目录中的 `SIREN_*.md` 本地报告 |
+| 插件 | 当前客户端工作目录中的已安装插件 |
+| 安装文件 | 官方安装器管理的专用安装目录；从共享目录运行时只删除明确属于 SIREN 的文件，不删除相邻文件 |
+| WinPTY 临时目录 | Windows 上由当前 SIREN 进程释放的 WinPTY 临时目录，不影响其他进程的同类目录 |
 
 <Callout title="清理边界" type="info">
   环境变量清理只作用于当前运行的 SIREN 进程，不会移除写入 Shell 配置、systemd、cron 或其他启动环境中的持久化凭证，也不会清理 `SOAR_ACCESS_KEY_*`。
@@ -45,12 +48,13 @@ WebUI 入口位于 Clients 页面目标客户端行的清理按钮。点击后�
 
 ## 平台差异
 
-非 Windows 平台会直接删除当前可执行文件所在目录，然后退出客户端进程。
+非 Windows 平台会同步删除已确认的 SIREN 管理文件，然后退出客户端进程。官方安装器管理的专用目录会整体删除；如果可执行文件位于共享目录，则保留该目录和其他文件。
 
-Windows 无法在进程运行时直接删除自身目录。SIREN 会先写入延迟清理脚本，客户端退出后再删除可执行文件目录和 WinPTY 临时目录。
+Windows 无法在进程运行时直接删除自身文件。SIREN 会创建唯一的临时清理脚本，在客户端退出后重试删除安装文件和当前进程的 WinPTY 临时目录，然后删除脚本自身。因此远程界面显示“请求已发送”不代表延迟删除已经完成。
 
 ## 不会清理的内容
 
 - 服务端 Artifacts、报告、项目文件和日志不在客户端清理范围内。
 - 云侧资源、SOAR 配置、放行规则和安全组不会因 `clean` 自动回滚。
 - 写入系统启动项、Shell 配置或其他外部位置的凭证需要按原配置方式单独移除。
+- 插件安装脚本自行写入 SIREN 管理目录之外的文件无法安全推断，需要按插件说明单独清理。
