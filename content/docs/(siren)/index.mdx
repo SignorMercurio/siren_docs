@@ -9,7 +9,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { Info, LayoutDashboard, Settings, Terminal } from 'lucide-react';
 
-本页按最短路径完成 SIREN 启动：先选择运行模式，再部署服务端和客户端，最后开始第一次排查。
+按本页顺序操作，可以完成 SIREN Server 和客户端安装，并开始第一次排查。
 
 ## 模式选择
 
@@ -17,7 +17,7 @@ SIREN 支持本地模式和远程模式。多数应急场景建议使用远程�
 
 | 模式 | 适合场景 | 你需要准备 |
 | --- | --- | --- |
-| 本地模式 | 单机、离线、无法连接控制主机，或数据不允许传出 | 登录目标主机并运行 `siren` |
+| 本地模式 | 单机、离线、无法连接控制主机，或数据不允许传出 | 登录目标主机并安装 SIREN |
 | 远程模式 | 多主机排查、统一管理客户端，或需要 Web 控制台、Shell、Files、Artifacts、AIR、Project | 一台控制主机，目标主机能够访问控制主机 |
 
 <Callout title="选择建议" type="info">
@@ -26,7 +26,7 @@ SIREN 支持本地模式和远程模式。多数应急场景建议使用远程�
 
 ## 服务端部署（可选）
 
-仅远程模式需要部署服务端。本地模式可以跳过本节，直接在目标主机运行 `./siren recon`。
+仅远程模式需要部署服务端。本地模式可以跳过本节，直接进入“客户端部署”。
 
 <Callout title="内部预部署环境" type="info">
   内部环境通常已完成控制主机、SOAR 凭证和外部工具配置。已有可用控制主机时，可以直接从“客户端部署”开始；内部地址见 [内部文档](https://aliyuque.antfin.com/ykozrq/puiz2d/mktg38agsx5bfz9v)。
@@ -40,26 +40,21 @@ SIREN 支持本地模式和远程模式。多数应急场景建议使用远程�
     - 操作者能够访问控制主机的 HTTP 端口，默认是 `8080`
     - 如需在服务端 REPL 中使用交互式 Shell 或 `air` 命令，控制主机需安装 tmux；只使用 Web 控制台的 Shell/AIR 时不需要 tmux
 
-    在控制主机上运行：
+    使用 root 账号复制并运行下面的命令：
 
     ```bash title="控制主机"
-    (wget -q -O - https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren_server.sh || curl -s https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren_server.sh) | sh
+    curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren_server.sh | sh
     ```
 
-    启动服务端：
+    首次启动前，创建 Web 控制台账号。随后启动服务端，并保持进程运行：
 
     ```bash title="控制主机"
     cd /opt/siren
+    ./siren_server user add admin
     ./siren_server
     ```
 
-    SIREN Server 默认使用 `443` 作为客户端 TLS 连接端口，同时在 `8080` 提供 [Web 控制台](/webui) 和 [MCP 服务](/mcp)。可通过 `-p` 参数或配置文件修改客户端连接端口。
-
-    部署到公网或共享网络前，先创建 Web 控制台账号。空用户数据库会禁用 Web 控制台鉴权，适合本地测试，但不适合暴露在共享网络中。
-
-    ```bash title="控制主机"
-    ./siren_server user add admin
-    ```
+    SIREN Server 默认通过 `443` 接收客户端连接，并在 `8080` 提供 [Web 控制台](/webui) 和 [MCP 服务](/mcp)。如需修改端口，请参考 [配置文件](/config)。
 
     <Callout title="按需配置" type="info">
       需要在 Web 控制台中编辑报告时，部署 [Dossier](/dossier/deploy)；需要按事件隔离客户端和取证目录时，配置 `webui.projectsBaseDir` 并使用 [Projects](/webui#projects)。这些配置不影响客户端连接和 Recon。
@@ -83,20 +78,22 @@ SIREN 支持本地模式和远程模式。多数应急场景建议使用远程�
 >>> deploy <Alibaba Cloud UID> <ECS Instance ID> [Public IP]
 ```
 
-如需部署多台 ECS，使用批量部署命令。每个目标可以写成 `instanceId`、`instanceId,publicIp` 或 `instanceId,publicIp,note`；只填写备注时使用 `instanceId,,note`。单次支持 2-20 台：
+如需部署多台 ECS，使用批量部署命令。单次支持 2-20 台：
 
 ```bash title="SIREN Server"
 >>> deploy-batch <Alibaba Cloud UID> <instanceId[,publicIp[,note]]>...
 ```
 
-`deploy` 和 `deploy-batch` 会完成以下动作：
+目标格式为 `instanceId[,publicIp[,note]]`。只填写备注时，使用 `instanceId,,note`。
+
+部署命令会完成以下操作：
 
 1. 从 SOAR 平台读取目标主机的地域、操作系统和出口 IP
 2. 放行目标主机访问 SIREN Server
 3. 校验并安装匹配系统架构的 SIREN 客户端；已有健康安装会直接复用
 4. 最多等待 30 秒，客户端连接成功后返回实际 Client ID
 
-SOAR playbook 执行完成不等于客户端已经上线。只有目标客户端连接到当前 SIREN Server，部署才会显示成功；安装或启动命令返回非零退出码时会立即显示命令输出，等待超时或只能手工确认客户端时也会返回明确错误。
+看到 `connected as client #<Client ID>` 才表示部署成功。安装失败、启动失败或等待超时都会返回明确错误。
 
 <Callout title="共享出口 IP" type="warning">
   如果多个进行中的部署目标使用同一个出口 IP，SIREN 会继续执行部署，但不会猜测新连接属于哪台主机。请在 Clients 列表中核对客户端后手工设置 Project 和 Note，不要直接重复部署。
@@ -112,73 +109,57 @@ SOAR playbook 执行完成不等于客户端已经上线。只有目标客户端
   目标主机出口 IP 可以在目标主机上通过 `curl ifconfig.co/ip` 获取。
 </Callout>
 
-<Accordions>
-  <Accordion title="单机部署示例">
-
-    ```bash title="SIREN Server"
-    >>> deploy user123 i-1234567890abcdef0
-    [+] Deployment connected as client #12:
-    ```
-
-  </Accordion>
-  <Accordion title="批量部署示例">
-
-    ```bash title="SIREN Server"
-    >>> deploy-batch user123 i-a,,web i-b,203.0.113.10,db i-c
-    [*] [1/3 i-a] Starting deployment
-    [*] [2/3 i-b] Starting deployment
-    [*] [3/3 i-c] Starting deployment
-    [*] Deployment results:
-    1. i-a: connected as client #12
-    2. i-b: connected as client #13
-    3. i-c: connected as client #14
-    [+] Batch deployment completed: 3 connected, 0 failed, 0 timed out, 0 require manual confirmation, 0 warnings, 3 total
-    ```
-
-  </Accordion>
-</Accordions>
-
 ### 手动部署
 
-登录目标主机后，执行安装脚本：
+登录目标主机，复制并运行对应系统的安装命令。Linux 需要 root 权限，Windows 需要以管理员身份打开 PowerShell。手动安装不会自动启动客户端。
 
 ```bash tab="Linux"
-(wget -q -O - https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh || curl -s https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh) | sh
+curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sh
 ```
 
-```bash tab="Windows"
-powershell -ExecutionPolicy Bypass -Command "iwr -Uri 'https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.ps1' -UseBasicParsing | iex"
+```powershell tab="Windows"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "iwr -Uri 'https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.ps1' -UseBasicParsing | iex"
 ```
 
-如果使用本地模式，安装后直接运行：
+#### 本地模式
+
+安装完成后，在目标主机运行一次 Recon：
 
 ```bash tab="Linux"
+cd /opt/siren
 ./siren recon
 ```
 
 ```powershell tab="Windows"
+Set-Location C:\Windows\Temp\siren
 .\siren.exe recon
 ```
 
-如果使用远程模式，需要先允许目标主机出口 IP 访问 SIREN Server。内部环境可以在 SIREN Server 中运行：
+#### 远程模式
+
+先确保 SIREN Server 的客户端连接端口允许目标主机的出口 IP 访问。内部环境可以在 SIREN Server 中运行：
 
 ```bash title="SIREN Server"
 >>> allow <Victim IP>
 ```
 
-目标主机出口 IP 可以通过 `curl ifconfig.co/ip` 获取。随后以客户端模式连接服务端：
+目标主机出口 IP 可以通过 `curl ifconfig.co/ip` 获取。放行后，在目标主机启动客户端：
 
 ```bash tab="Linux"
-./siren client -s <Server IP> -p <Server Port>
+cd /opt/siren
+./siren client -s <SIREN Server IP> -p 443
 ```
 
 ```powershell tab="Windows"
-.\siren.exe client -s <Server IP> -p <Server Port>
+Set-Location C:\Windows\Temp\siren
+.\siren.exe client -s <SIREN Server IP> -p 443
 ```
+
+如果修改过客户端连接端口，请将 `443` 替换为实际端口。保持客户端进程运行，SIREN Server 出现 Client ID 后即可开始排查。
 
 ## 开始第一次排查
 
-客户端连接后，可以从 Web 控制台、服务端 REPL 或本地命令开始排查。
+远程模式下，客户端连接后可以从 Web 控制台或服务端 REPL 开始排查。本地模式的 Recon 结果会直接显示在目标主机终端中。
 
 ```text tab="Web 控制台"
 打开 http://<SIREN Server IP>:8080
@@ -189,10 +170,6 @@ powershell -ExecutionPolicy Bypass -Command "iwr -Uri 'https://oss-siren.oss-cn-
 ```bash tab="服务端 REPL"
 >>> ls
 >>> recon <Client ID>
-```
-
-```bash tab="本地模式"
-./siren recon
 ```
 
 ## 下一步
