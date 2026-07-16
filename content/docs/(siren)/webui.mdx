@@ -130,7 +130,7 @@ Clients 页面对应服务端 REPL 的 `ls`、`note`、`allow`、`deploy` 和 `c
 - 清理客户端。单个或批量清理都会要求输入确认短语后再执行 **Clean & Terminate**。
 
 <Callout title="批量部署规则" type="info">
-  点击 **Batch deploy** 会打开独立的批量部署窗口，支持同一 UID 下的 2-20 台 ECS。每行输入 `instanceId`、`instanceId,publicIp` 或 `instanceId,publicIp,note`；只填写备注时可写成 `instanceId,,note`。默认并发 3 台，单台失败不会中断其他目标。提交后窗口会关闭，可在近期部署列表继续查看进度。`success` 表示客户端已经连接，并显示实际 Client ID；playbook 完成后最多等待 90 秒，未连接的目标记为 `timed_out`。
+  点击 **Batch deploy** 会打开独立的批量部署窗口，支持同一 UID 下的 2-20 台 ECS。每行输入 `instanceId`、`instanceId,publicIp` 或 `instanceId,publicIp,note`；只填写备注时可写成 `instanceId,,note`。默认并发 3 台，单台失败不会中断其他目标。提交后窗口会关闭，可在近期部署列表继续查看进度。`success` 表示客户端已经连接，并显示实际 Client ID；playbook 完成后最多等待 30 秒，未连接的目标记为 `timed_out`。安装或启动命令失败时会立即显示其输出，不再继续等待客户端上线。
 </Callout>
 
 部署结果分为 `success`、`partial` 和 `failed`。只有所有目标均已连接且没有 warning 时才会清空输入；部分成功、失败或超时会保留原输入，便于核对和修正。近期列表最多显示 20 次部署，可以完全收起；终态记录最长保留 30 分钟。这些记录只存在于当前服务端进程，服务端重启后不会恢复。
