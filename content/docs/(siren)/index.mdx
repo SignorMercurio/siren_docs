@@ -66,6 +66,10 @@ SIREN 支持本地模式和远程模式。多数应急场景建议使用远程�
 
 ## 客户端部署
 
+<Callout title="Windows 系统要求" type="info">
+  Windows 客户端最低支持 Windows 7 SP1 或 Windows Server 2008 R2 SP1，并需要 PowerShell 5.1。安装脚本会自动为旧系统选择兼容包，无需手工判断系统版本。
+</Callout>
+
 ### 内部环境：通过云助手一键部署
 
 <Callout title="前置条件" type="info">
@@ -118,7 +122,7 @@ curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sh
 ```
 
 ```powershell tab="Windows"
-iwr -Uri 'https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.ps1' -UseBasicParsing | iex
+if ($PSVersionTable.PSVersion -lt [version]'5.1') { throw 'PowerShell 5.1 or later is required' }; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; iwr -Uri 'https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.ps1' -UseBasicParsing | iex
 ```
 
 #### 本地模式
