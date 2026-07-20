@@ -16,6 +16,10 @@ export const DateTag = ({ children }) => (
 
 - Windows 客户端新增旧系统兼容包，安装脚本会自动支持 Windows 7 SP1 至 Windows 8.1，以及 Windows Server 2008 R2 SP1 至 Windows Server 2012 R2；现代 Windows 继续使用当前工具链构建的客户端
 
+### Bugfix
+
+- 修复 SIREN Server 重启后 Codex 会话可能未出现在 Agentic IR History 中的问题；正常关闭时会给 Provider 最多 5 秒保存历史，服务恢复后页面会自动重新读取可恢复会话
+
 ## v2.14.8 <DateTag>2026-07-17</DateTag>
 
 ### Improvement
