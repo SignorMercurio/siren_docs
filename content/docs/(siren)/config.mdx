@@ -76,6 +76,11 @@ port: 443                                       # 客户端 TLS 服务监听端�
 cert: certs/cert.pem                            # TLS 证书路径
 key: certs/key.pem                              # TLS 密钥路径
 
+logging:
+  level: info                                   # debug / info / warning / error
+  format: text                                  # text / json
+  output: stderr                                # stderr / stdout
+
 webui:                                          # Web 控制台
   enabled: true                                 # 是否启用 WebUI
   listen: 0.0.0.0                               # 共享 HTTP 监听地址
@@ -122,6 +127,9 @@ air:
 | `port` | int | `443` | 客户端 TLS 服务监听端口 |
 | `cert` | string | `certs/cert.pem` | TLS 证书文件路径 |
 | `key` | string | `certs/key.pem` | TLS 私钥文件路径 |
+| `logging.level` | string | `info` | 最低日志级别，可选 `debug`、`info`、`warning` 或 `error`；`success` 与 `info` 使用同一级别 |
+| `logging.format` | string | `text` | 日志格式，可选适合终端阅读的 `text` 或每行一个对象的 `json` |
+| `logging.output` | string | `stderr` | 服务端运行日志输出流，可选 `stderr` 或 `stdout` |
 | `webui.enabled` | bool | `true` | 是否启用 [Web 控制台](/webui)。关闭后若 `mcp.enabled` 仍为 `true`，`/mcp` 会继续在共享端口上提供服务 |
 | `webui.listen` | string | `0.0.0.0` | WebUI 与 MCP 共享的监听地址；只要 `webui.enabled` 或 `mcp.enabled` 有一个启用就会启动监听 |
 | `webui.port` | int | `8080` | WebUI 与 MCP 共享的监听端口，MCP 通过 `/mcp` 子路径暴露 |
@@ -142,6 +150,20 @@ air:
 | `air.providers.codex.args` | list | `[--no-alt-screen]` | 传递给 Codex CLI 的额外参数；默认使用 inline TUI 保留浏览器终端滚动历史，自定义时可移除该参数恢复 Codex 的 alternate screen 行为 |
 | `air.providers.qoder.cliPath` | string | `qodercli` | WebUI Qoder Provider 使用的 QoderCLI 路径 |
 | `air.providers.qoder.args` | list | `[]` | 传递给 QoderCLI 的额外参数 |
+
+### 日志输出
+
+服务端日志默认写入标准错误流，普通命令输出仍可保留在标准输出流。`text` 格式包含完整日期和时间；`json` 格式每行输出一个独立对象，固定包含 `time`、`level` 和 `message`，有上下文时还会包含 `fields`：
+
+```json
+{"time":"2026-07-21T14:30:00.123456+08:00","level":"info","message":"client connected","fields":{"client_id":7,"component":"client","event":"client.connected","project":"global"}}
+```
+
+结构化运行事件使用稳定的 `event` 字段，常见关联字段包括 `request_id`、`client_id`、`session_id` 和 `duration_ms`。成功的常规 MCP 列表调用及工具启动过程属于 `debug` 诊断信息，默认 `info` 级别不会输出；工具完成、失败、超时和其他运行状态仍按相应级别记录。
+
+日志不会记录 HTTP query、请求正文、Cookie、token、prompt、命令正文或凭证。Artifacts、Reports 和远程文件错误也不会写入用户提交的路径或文件名；需要关联 WebUI 故障时，可使用响应头 `X-Request-ID` 对应日志中的 `request_id`。
+
+SIREN 不直接创建日志文件或执行轮转。需要持久化时，应由 systemd、容器运行时或其他进程管理器采集所选输出流并负责保留与轮转。
 
 > WebUI 浏览器终端复用 `air.providers.<name>`。Manual 模式只取 `cliPath` 和 `args`；Custom、Event、Resume 模式会额外注入 SIREN MCP、种子 prompt 或恢复会话 ID。它和浏览器 Shell 一样只受 WebUI 全局鉴权保护。
 

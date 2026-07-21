@@ -10,6 +10,21 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.15.4 <DateTag>2026-07-21</DateTag>
+
+### Feature
+
+- 服务端日志支持按配置选择最低级别、终端文本或逐行 JSON 格式，以及 stdout / stderr 输出目标；默认使用完整时间戳的文本日志并写入 stderr
+
+### Improvement
+
+- Client、AIR、MCP、WebUI 请求和鉴权等运行事件提供稳定的结构化字段与关联 ID；通用请求日志不记录 HTTP query、请求正文、Cookie、token、prompt 或命令正文，Artifacts、Reports 和远程文件错误也不会记录用户提交的路径或文件名
+- 服务运行日志与交互命令输出分流，常规 MCP 启动和列表调用降为 debug；日志文件持久化与轮转继续交由 systemd、容器运行时或其他进程管理器负责
+
+### Bugfix
+
+- 修复 Agentic IR History 可能把 Claude 的斜杠命令或本地命令输出当成用户对话预览的问题
+
 ## v2.15.1 <DateTag>2026-07-20</DateTag>
 
 ### Improvement
