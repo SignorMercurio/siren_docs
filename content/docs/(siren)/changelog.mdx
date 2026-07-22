@@ -10,6 +10,16 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.15.6 <DateTag>2026-07-22</DateTag>
+
+### Improvement
+
+- 登录页视觉更新：卡片与输入框加高、增加用户名/密码图标，副标题更新为 "Swift Incident Response Evidence Navigator"
+- Investigations 页面重构为标签页布局：AccessKey、Recon、Process Analysis 三个工具以标签切换（支持方向键），表单横向排列，结果区提供状态横幅、步骤进度与指标卡片；正在运行的工具会在标签上显示进度圆点
+- 各页面的客户端下拉框统一为「连接状态圆点 + #ID + 备注 · 操作系统」样式，编号与说明分色显示，更易快速定位目标客户端
+- Agentic IR 的 Running 与 History 会话列表改为卡片式：运行中的会话带紫色描边与脉冲圆点，元信息行使用等宽字体与 24 小时制时间；终端标签页显示对应 Provider（Claude / Codex / Qoder）标识
+- Artifacts 页面 Markdown 预览的 Dossier 编辑按钮以紫色强调显示
+
 ## v2.15.4 <DateTag>2026-07-21</DateTag>
 
 ### Feature
