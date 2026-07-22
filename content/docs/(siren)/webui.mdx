@@ -104,7 +104,7 @@ Project 是应急响应工作区，用于把客户端、Artifacts 目录和操�
 
 Projects 页面支持：
 
-- 创建 Project，并可指定目录名。目录名只能是 basename，最终目录必须位于 `webui.projectsBaseDir` 下。
+- 创建 Project，并可指定目录名；未指定时会从 Project 名称中的文字和数字自动生成。目录名只能是 basename，最终目录必须位于 `webui.projectsBaseDir` 下。
 - 复制 Project 目录路径，便于在控制主机上查看或归档。
 - 重命名 Project。重命名只修改显示名，不移动目录。
 - 删除 Project。删除只移除元数据并解除客户端归属，目录和文件会保留。
