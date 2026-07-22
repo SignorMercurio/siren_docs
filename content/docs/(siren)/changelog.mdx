@@ -10,6 +10,17 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.15.8 <DateTag>2026-07-22</DateTag>
+
+### Improvement
+
+- Project 创建时会自动分配并持久化辨识颜色，Projects 列表、侧边栏当前范围和 Clients 归属标记保持一致；已有 Project 会在升级后自动补色
+
+### Bugfix
+
+- 修复 Agentic IR 左侧栏会被 Running 会话整体撑高的问题；桌面端 Running 与 History 列表现在分别滚动，启动表单和 History 搜索框保持可见
+- 修复 Files 页面客户端选择框占据过多顶部空间的问题，为路径输入和上传操作保留更合理的宽度
+
 ## v2.15.7 <DateTag>2026-07-22</DateTag>
 
 ### Bugfix
