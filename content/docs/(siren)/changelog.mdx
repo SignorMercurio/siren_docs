@@ -10,6 +10,16 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.16.0 <DateTag>2026-07-27</DateTag>
+
+### Feature
+
+- WebUI AIR 的 Event 模式支持三种事件目标：安全中心告警 ID、ECS 实例 ID 或云安全中心资产 UUID（均配合 Alibaba Cloud UID）；实例与资产目标会让 Agent 查询关联告警，并可通过 Time range 高级选项限定告警时间范围（最近 3/7/30 天或自定义起止时间，默认不限定）
+
+### Improvement
+
+- AIR 启动表单重新排版：事件目标类型合并进输入行、会话模式改为标签页、表单按功能分组，时间范围选项默认折叠，长 ID 输入不再被截断
+
 ## v2.15.9 <DateTag>2026-07-23</DateTag>
 
 ### Bugfix
