@@ -10,6 +10,13 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.16.3 <DateTag>2026-07-28</DateTag>
+
+### Bugfix
+
+- 修复 CentOS 6 等 Linux 2.6.32–3.1.x 内核主机无法安装客户端的问题；Linux x86_64 安装器会自动选择兼容包，3.2 及以上内核继续使用现代包
+- 安装包二进制验证失败时会保留原始错误信息，便于区分内核、挂载权限等运行环境问题
+
 ## v2.16.0 <DateTag>2026-07-27</DateTag>
 
 ### Feature
