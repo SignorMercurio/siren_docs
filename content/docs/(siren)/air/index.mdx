@@ -109,7 +109,7 @@ SIREN 会在 prompt 前追加 Client ID 上下文，再传给 Claude Provider。
 
 ### 交互式排查
 
-Agent 通过 [MCP 集成](/mcp) 使用 `ls`、`run`、`recon`、`get_alarm_detail` 等工具获取线索。操作员可以在终端中继续追问、确认高风险操作或调整方向。
+Agent 通过 [MCP 集成](/mcp) 使用 `ls`、`run`、`recon` 获取客户端线索。用户明确要求向某台 ECS 部署 SIREN 时，Agent 也可以调用 `deploy` 并等待客户端实际连接；Codex AIR 会自动批准这次工具调用，调查或诊断请求本身不构成部署授权。操作员可以在终端中继续追问或调整方向。
 
 </Step>
 <Step>

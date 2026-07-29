@@ -36,8 +36,7 @@ SIREN 支持本地模式和远程模式。多数应急场景建议使用远程�
   <Accordion title="服务端部署">
     准备一台控制主机，并确认以下条件：
 
-    - 目标主机能够访问控制主机的客户端连接端口，默认是 `443`
-    - 操作者能够访问控制主机的 HTTP 端口，默认是 `8080`
+    - 目标主机和操作者都能够访问控制主机的主 TLS 端口，默认是 `443`
     - 如需在服务端 REPL 中使用交互式 Shell 或 `air` 命令，控制主机需安装 tmux；只使用 Web 控制台的 Shell/AIR 时不需要 tmux
 
     使用 root 账号复制并运行下面的命令：
@@ -54,7 +53,7 @@ SIREN 支持本地模式和远程模式。多数应急场景建议使用远程�
     ./siren_server
     ```
 
-    SIREN Server 默认通过 `443` 接收客户端连接，并在 `8080` 提供 [Web 控制台](/webui) 和 [MCP 服务](/mcp)。如需修改端口，请参考 [配置文件](/config)。
+    SIREN Server 默认在同一个 `443` TLS 端口接收客户端连接，并提供 [Web 控制台](/webui) 和 [MCP 服务](/mcp)。浏览器访问需要证书覆盖服务端域名；使用 WebUI AIR 时，还要将 `webui.publicURL` 设置为该域名的 HTTPS Origin。详见 [配置文件](/config)。
 
     <Callout title="按需配置" type="info">
       需要在 Web 控制台中编辑报告时，部署 [Dossier](/dossier/deploy)；需要按事件隔离客户端和取证目录时，配置 `webui.projectsBaseDir` 并使用 [Projects](/webui#projects)。这些配置不影响客户端连接和 Recon。
@@ -166,7 +165,7 @@ Set-Location C:\Windows\Temp\siren
 远程模式下，客户端连接后可以从 Web 控制台或服务端 REPL 开始排查。本地模式的 Recon 结果会直接显示在目标主机终端中。
 
 ```text tab="Web 控制台"
-打开 http://<SIREN Server IP>:8080
+打开 https://<SIREN Server hostname>
 进入 Clients，选择客户端
 进入 Investigations，启动 Recon
 ```

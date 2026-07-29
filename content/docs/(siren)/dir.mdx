@@ -30,7 +30,7 @@ icon: FolderTree
     <Folder name="server" desc="服务端命令">
       <File name="server.go" desc="服务端 main 函数" />
       <Folder name="cli" desc="服务端 CLI 子命令">
-        <File name="root.go" desc="服务端根命令、共享 HTTP 服务和配置加载" />
+        <File name="root.go" desc="服务端根命令、WebUI/MCP 处理器和配置加载" />
         <File name="shell.go" desc="交互式 shell relay 子命令" />
         <File name="user.go" desc="WebUI 用户管理子命令" />
         <File name="upgrade.go" desc="服务端升级子命令" />
@@ -78,7 +78,8 @@ icon: FolderTree
     <Folder name="recon" desc="Linux 和 Windows Recon 模块" defaultOpen={false} />
     <Folder name="rules" desc="从客户端配置加载 Recon 规则" defaultOpen={false} />
     <Folder name="server" desc="服务端核心实现">
-      <File name="server.go" desc="TLS 监听、握手和客户端注册" />
+      <File name="server.go" desc="共享 TLS 监听、握手和客户端注册" />
+      <File name="shared_tls.go" desc="客户端协议与 HTTPS 的连接分流" />
       <File name="client.go" desc="服务端 Client 对象和发送锁" />
       <File name="handler.go" desc="服务端消息接收和处理" />
       <File name="commander.go" desc="服务端 REPL 命令分发" />
@@ -95,7 +96,7 @@ icon: FolderTree
       <File name="recon_events.go" desc="Recon 事件解析" />
       <File name="webui_bridge.go" desc="WebUI 与服务端核心的桥接层" />
       <Folder name="webui" desc="WebUI 后端路由与前端工程">
-        <File name="webui.go" desc="共享 HTTP 服务入口" />
+        <File name="webui.go" desc="WebUI 与 MCP HTTP 处理器入口" />
         <File name="auth.go" desc="登录、会话和鉴权中间件" />
         <File name="webui_shell.go" desc="WebSocket shell" />
         <File name="webui_agent_terminal.go" desc="浏览器 Agent 终端 WebSocket 接口" />

@@ -57,7 +57,7 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
 <Accordion title="远程模式下客户端无法连接到服务端？">
 
-先区分两个端口：客户端连接的是服务端 TLS 端口，默认 `443`；WebUI 和 MCP 使用共享 HTTP 端口，默认 `8080`。
+客户端、WebUI、WebSocket 和 MCP 现在共用服务端主 TLS 端口，默认是 `443`。
 
 按下面顺序排查：
 
@@ -70,9 +70,9 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
 <Accordion title="WebUI 打不开或端口不对？">
 
-WebUI 由服务端的共享 HTTP 服务提供，默认监听 `webui.listen: 0.0.0.0`、`webui.port: 8080`。如果页面打不开，先看服务端配置里的 `webui.enabled`、`webui.listen` 和 `webui.port`，再确认安全组或反向代理是否放通了这个端口。
+WebUI 由服务端主 TLS 监听器提供，默认使用顶层 `listen: 0.0.0.0`、`port: 443`。如果页面打不开，先检查 `webui.enabled`、`listen`、`port`、`cert` 和 `key`，确认访问使用 `https://` 且证书覆盖该域名，再检查防火墙、安全组或 ACL。
 
-如果 `webui.enabled: false` 但 `mcp.enabled: true`，服务端仍会在共享 HTTP 端口上提供 `/mcp`，但不会提供 WebUI 页面。
+如果 `webui.enabled: false` 但 `mcp.enabled: true`，服务端仍会在共享 TLS 端口上提供 `/mcp`，但不会提供 WebUI 页面。
 
 </Accordion>
 
@@ -134,7 +134,7 @@ air:
       args: []
 ```
 
-`cliPath` 必须在服务端进程的 `PATH` 里可执行，或者写成绝对路径。WebUI 的 Custom、Event 和 Resume 模式会注入 SIREN MCP，因此还要确认 `mcp.enabled` 没有关闭，`webui.port` 在服务端本机可访问。
+`cliPath` 必须在服务端进程的 `PATH` 里可执行，或者写成绝对路径。WebUI 的 Custom、Event 和 Resume 模式会注入 SIREN MCP，因此还要确认 `mcp.enabled` 没有关闭，并将 `webui.publicURL` 设置为证书覆盖的绝对 HTTPS Origin。建议服务端本机把该域名解析到 loopback 或内网地址。
 
 Claude Code、Codex 和 Qoder 的模型、权限、沙箱、普通 Shell 审批等行为由它们自己的配置决定，SIREN 不会在 AIR 启动时强行覆盖。Codex 默认使用 `--no-alt-screen` 保留浏览器终端滚动历史；如果自定义 `args`，可按需保留或移除该参数。更多边界见 [Agentic 应急响应](/air#webui-air)。
 

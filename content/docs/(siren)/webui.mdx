@@ -16,7 +16,7 @@ Web 控制台是 SIREN Server 的浏览器入口。它覆盖日常远程操作�
 
 ## 启动与访问
 
-启用 `webui.enabled` 时，Web 控制台会随 `siren_server` 启动。默认监听 `0.0.0.0:8080`：
+启用 `webui.enabled` 时，Web 控制台会随 `siren_server` 启动，并与远程客户端和 MCP 共用主 TLS 监听端口（默认 `0.0.0.0:443`）：
 
 ```bash title="控制主机"
 ./siren_server
@@ -25,11 +25,11 @@ Web 控制台是 SIREN Server 的浏览器入口。它覆盖日常远程操作�
 启动后访问：
 
 ```
-http://<SIREN Server IP>:8080
+https://<SIREN Server hostname>
 ```
 
 <Callout title="端口统一" type="info">
-  Web 控制台和 [MCP 服务](/mcp) 共用 `webui.listen` / `webui.port`。浏览器访问根路径，MCP 客户端访问 `/mcp`。两者的启停开关相互独立，分别是 `webui.enabled` 和 `mcp.enabled`。
+  Web 控制台、WebSocket、[MCP 服务](/mcp)和远程客户端共用顶层 `listen` / `port`。浏览器访问根路径，MCP 客户端访问 `/mcp`。WebUI 与 MCP 的启停开关仍相互独立，分别是 `webui.enabled` 和 `mcp.enabled`。
 </Callout>
 
 ## 账号鉴权
@@ -237,8 +237,7 @@ Dossier 未部署、路径配置错误或默认 `report.md` 缺失时，Web 控�
 ```yaml title="server_config.yaml"
 webui:
   enabled: true                         # 是否启用 Web 控制台
-  listen: 0.0.0.0                       # 共享 HTTP 监听地址
-  port: 8080                            # 监听端口（与 MCP 共享）
+  publicURL: https://siren.example.com   # WebUI AIR 使用的 HTTPS Origin
   userDBPath: /opt/siren/data/users.db  # 可选：用户数据库绝对路径
   dossierDir: /opt/siren/dossier        # 可选：Dossier 编辑器文件目录
   projectsBaseDir: /opt/siren/projects  # 可选：Project 目录创建基准路径
@@ -247,15 +246,15 @@ mcp:
   enabled: true                         # 是否启用 MCP 服务
 ```
 
-Web 控制台与 MCP 共用监听地址和端口，但启停开关相互独立。完整配置项见 [配置文件](/config#服务端配置)。
+服务端顶层 `listen` / `port` 决定 Web 控制台、MCP 和远程客户端共用的 TLS 监听地址。`webui.publicURL` 只用于 WebUI AIR 注入 MCP 地址；它必须是证书覆盖的 HTTPS Origin，服务端本机宜将该域名解析到 loopback 或内网地址。完整配置项见 [配置文件](/config#服务端配置)。
 
 ## 生产部署建议
 
 <Callout title="公网暴露场景" type="warn">
-  Web 控制台本身使用 HTTP。Session Cookie 虽然是 `HttpOnly` 和 `SameSite=Lax`，但公网明文传输仍有风险。建议：
+  Web 控制台使用服务端主 TLS 端口。部署到公网时：
 
-  - 将 `webui.listen` 改为绑定 `127.0.0.1`（默认 `0.0.0.0`），前置 Nginx / Caddy 做 TLS 终止和反向代理
-  - 或至少通过 iptables / 安全组限制访问 IP
+  - 使用浏览器信任、且覆盖访问域名的证书
+  - 通过防火墙、安全组、VPN 或 ACL 限制主 TLS 端口的访问来源；`/mcp` 不使用 WebUI Session 鉴权
   - 部署前必须创建至少一个用户账号，否则 Web 控制台不会启用鉴权
 </Callout>
 

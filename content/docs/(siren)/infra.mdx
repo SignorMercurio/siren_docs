@@ -16,8 +16,8 @@ import { Callout } from "fumadocs-ui/components/callout";
 | 项目 | 用途 | 说明 |
 | -------- | -------- | -------- |
 | 控制主机 | 运行 `siren_server`，承载客户端连接、WebUI、MCP、Artifacts、Projects 和调查工作流 | 远程模式必需；Artifacts 与 Projects 默认落在服务端工作目录，Project 基准路径可用 `webui.projectsBaseDir` 调整 |
-| TLS 证书和私钥 | 客户端到服务端的 TLS 控制通道，以及交互式 Shell relay | 通过服务端配置 `cert` / `key` 指定；证书链不需要公网 CA，但服务端启动时必须能加载证书和私钥 |
-| 网络连通 | 客户端连接服务端、浏览器访问 WebUI / MCP、Shell relay 回连 | 客户端连接 TLS 端口（默认 `443`）；WebUI 与 MCP 共用 HTTP 端口（默认 `8080`）；交互式 Shell 会额外使用临时 relay 端口 |
+| TLS 证书和私钥 | 客户端控制通道、WebUI / MCP HTTPS，以及交互式 Shell relay | 通过服务端配置 `cert` / `key` 指定；远程客户端不校验证书链，但浏览器访问的域名必须包含在证书中 |
+| 网络连通 | 客户端连接服务端、浏览器访问 WebUI / MCP、Shell relay 回连 | 客户端、WebUI 与 MCP 共用主 TLS 端口（默认 `443`）；交互式 Shell 会额外使用临时 relay 端口 |
 
 ## 可选通用依赖
 
@@ -33,10 +33,10 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 | 基础设施 | 对应功能 | 必要性 |
 | -------- | -------- | -------- |
-| SOAR 平台及访问凭证 | WebUI / REPL 的 `allow`、`deploy`、`deploy-batch`，[AccessKey 调查](/ak)，以及 [MCP 工具 `get_alarm_detail`](/mcp#可用工具) | 仅使用这些内部能力时需要；优先读取 `SOAR_ACCESS_KEY_ID` / `SOAR_ACCESS_KEY_SECRET`，未设置时回退到 Alibaba Cloud SDK 默认凭证链 |
+| SOAR 平台及访问凭证 | WebUI / REPL 的 `allow`、`deploy`、`deploy-batch`，[MCP 的单机 `deploy`](/mcp#可用工具)，以及 [AccessKey 调查](/ak) | 仅使用这些内部能力时需要；优先读取 `SOAR_ACCESS_KEY_ID` / `SOAR_ACCESS_KEY_SECRET`，未设置时回退到 Alibaba Cloud SDK 默认凭证链 |
 
 <Callout title="注意" type="warn">
-  WebUI 鉴权只保护浏览器页面。MCP 客户端直接访问 `/mcp` 时不携带浏览器会话，请将共享 HTTP 端口置于可信网络内，或部署在带访问控制的反向代理之后。
+  WebUI 鉴权只保护浏览器页面。MCP 客户端直接访问 `/mcp` 时不携带浏览器会话，请通过防火墙、安全组、VPN 或 ACL 限制主 TLS 端口的访问来源。
 </Callout>
 
 ## 相关内容

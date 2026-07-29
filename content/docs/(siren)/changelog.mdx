@@ -10,6 +10,22 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.16.4 <DateTag>2026-07-29</DateTag>
+
+### Feature
+
+- 【BREAKING】WebUI、WebSocket、MCP 与远程客户端统一使用服务端主 TLS 监听端口（默认 `443`）；移除 `webui.listen` / `webui.port`，浏览器和 MCP 改用 HTTPS，WebUI AIR 通过 `webui.publicURL` 注入 MCP 地址
+- MCP 新增单机 `deploy` 工具：按 UID 与 ECS Instance ID 触发 SIREN 部署，并等待客户端实际连接后返回 operation ID、状态和 Client ID；Project 视图发起的部署会自动继承当前 Project，Codex AIR 默认自动批准调用
+
+### Improvement
+
+- WebUI 侧边栏新增 Feedback 入口，可直接打开问题反馈页面
+- 移除 MCP 的 `get_alarm_detail` 工具，安全告警列表与详情查询改由独立 SAS 工具承担
+
+### Bugfix
+
+- 多个部署目标共用出口 IP 时，已进入等待连接状态的目标会立即转为需要手工确认，不再等待超时后误报客户端未连接
+
 ## v2.16.3 <DateTag>2026-07-28</DateTag>
 
 ### Bugfix

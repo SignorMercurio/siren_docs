@@ -10,20 +10,20 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-SIREN Server 内置 [模型上下文协议](https://modelcontextprotocol.io/)（MCP）服务。支持 MCP 的 AI 客户端可以通过它列出在线 SIREN 客户端、在指定客户端执行排查命令、触发一次[信息收集（Recon）](/recon)，或通过 SOAR 获取告警详情。[Agentic 应急响应](/air) 也依赖这组工具。
+SIREN Server 内置 [模型上下文协议](https://modelcontextprotocol.io/)（MCP）服务。支持 MCP 的 AI 客户端可以通过它列出在线 SIREN 客户端、在指定客户端执行排查命令、触发一次[信息收集（Recon）](/recon)，或按明确指令在单台 ECS 上部署 SIREN。[Agentic 应急响应](/air) 也依赖这组工具。
 
 ## 启用与访问
 
-MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制，默认启用。它和 [Web 控制台](/webui) 共用 `webui.listen` / `webui.port`，默认监听 `0.0.0.0:8080`，并通过 `/mcp` 暴露。
+MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制，默认启用。它和 [Web 控制台](/webui)、WebSocket、远程客户端共用顶层 `listen` / `port`（默认 TLS `0.0.0.0:443`），并通过 `/mcp` 暴露。
 
-`mcp.enabled` 与 `webui.enabled` 相互独立。关闭 WebUI 后，只要 `mcp.enabled` 仍为 `true`，服务端仍会在共享 HTTP 端口上提供 `/mcp`；关闭 MCP 后，WebUI 可以继续独立运行。
+`mcp.enabled` 与 `webui.enabled` 相互独立。关闭 WebUI 后，只要 `mcp.enabled` 仍为 `true`，服务端仍会在共享 TLS 端口上提供 `/mcp`；关闭 MCP 后，WebUI 可以继续独立运行。
 
 <Callout title="`/mcp` 端点不鉴权" type="warn">
-  `/mcp` 不使用 WebUI 的 Session 鉴权。WebUI 账号只保护浏览器页面和 API，不能保护 MCP 客户端。任何能访问共享 HTTP 端口的人，都可能通过 `run` 工具在受害主机上执行命令。请把 `webui.listen` 绑定到可信网络，如 `127.0.0.1` 或内网，或在反向代理、VPN、ACL 之后再开放访问。
+  `/mcp` 不使用 WebUI 的 Session 鉴权。WebUI 账号只保护浏览器页面和 API，不能保护 MCP 客户端。任何能访问主 TLS 端口的人，都可能通过 `run` 在受害主机上执行命令，或通过 `deploy` 放行目标公网 IP 并安装 SIREN。请使用防火墙、安全组、VPN 或 ACL 限制 `listen` / `port` 的访问来源。
 </Callout>
 
-<Callout title="从 v1.x 升级" type="warn">
-  v2.0.0 起，MCP 不再占用独立端口，`mcpPort` 配置项和 `--mcp-port` 参数已移除。MCP 客户端仍访问 `/mcp` 路径，但端口应改为 `webui.port`。
+<Callout title="端口迁移" type="warn">
+  v2.16.4 起，WebUI 与 MCP 不再占用独立 HTTP 端口，`webui.listen` / `webui.port` 已移除。MCP 客户端仍访问 `/mcp`，但需要改用主 TLS 端口和 HTTPS。
 </Callout>
 
 在 MCP 客户端中添加 SIREN Server 的 `/mcp` 地址：
@@ -32,7 +32,7 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 {
   "siren": {
     "type": "http",
-    "url": "http://<SIREN Server IP>:8080/mcp"
+    "url": "https://siren.example.com/mcp"
   }
 }
 ```
@@ -44,10 +44,14 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 | `ls` | 无 | 列出在线 SIREN 客户端，包含 ID、操作系统、连接地址、备注和已安装插件 |
 | `run` | `client_id`, `command` | 在指定 SIREN 客户端上执行命令并返回结果。执行前会检查命令黑名单，超时时间跟随 `recon.commandTimeout`，输出过长时会被截断 |
 | `recon` | `client_id` | 在指定客户端触发一次 [Recon](/recon) 采集，等待客户端回传并返回报告内容；报告同时保存到服务端 Artifacts。等待时间由服务端配置 `mcp.reconTimeout`（默认 300 秒）控制，同一客户端不允许并发 Recon |
-| `get_alarm_detail` | `uid`, `event_id` | 通过 SOAR 获取指定安全告警详情，需要先[配置 SOAR 凭证](/credential#设置-soar-平台访问凭证) |
+| `deploy` | `uid`, `instance_id`，可选 `public_ip` | 通过 SOAR 在单台阿里云 ECS 上放行网络并安装 SIREN，等待客户端实际连接后返回 operation ID、状态和 Client ID。仅当用户明确要求部署到该实例时调用；同一 UID 与实例已有部署任务运行时会拒绝重复请求 |
 
 <Callout title="WebUI Project 作用域" type="info">
-  外部 MCP 客户端直接访问 `/mcp` 时使用全局视图，`ls` 会列出所有在线 SIREN 客户端。WebUI AIR 在 Project 视图下会自动注入带 Project 作用域的 MCP 地址，`ls` 只返回当前 Project 的客户端，`run` 和 `recon` 也会拒绝操作其他 Project 的客户端。
+  外部 MCP 客户端直接访问 `/mcp` 时使用全局视图，`ls` 会列出所有在线 SIREN 客户端。WebUI AIR 在 Project 视图下会自动注入带 Project 作用域的 MCP 地址，`ls` 只返回当前 Project 的客户端，`run` 和 `recon` 也会拒绝操作其他 Project 的客户端；`deploy` 成功连接的新客户端会自动归入当前 Project。
+</Callout>
+
+<Callout title="AIR 工具批准" type="warn">
+  Codex AIR 默认自动批准 SIREN MCP 工具，包括会产生云端写入的 `deploy`。Agent 只能在用户明确要求部署到确切实例时调用它，不能把调查、诊断或制定计划视为部署授权。Claude 与 Qoder 是否确认工具调用由操作员自己的 Provider 配置决定。
 </Callout>
 
 <Callout title="慢命令超时" type="info">
@@ -83,6 +87,6 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
     与 MCP 共用同一端口的浏览器图形化入口
   </Card>
   <Card title="配置文件" href="/config#服务端配置">
-    配置 MCP 开关与共享监听端口
+    配置 MCP 开关、共享 TLS 监听端口与 WebUI HTTPS Origin
   </Card>
 </Cards>
