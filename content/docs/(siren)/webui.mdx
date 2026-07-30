@@ -113,7 +113,7 @@ Projects 页面支持：
 客户端最多归属到一个 Project。未归属客户端只在 Global 视图中出现；进入 Project 视图后，Clients、Shells、Agentic IR、Files 和 Investigations 都只允许选择当前 Project 的客户端。
 
 <Callout title="部署归属" type="info">
-  在 Project 视图下通过 Web 控制台单机或批量部署 SIREN 客户端时，唯一匹配到本次 Allow IP 的新客户端会自动归属到当前 Project。批量部署填写的 Note 只会写入尚无备注的客户端，已有备注会保留并显示 warning。服务端 REPL 部署不带 Project 上下文，仍保持全局行为。
+  在 Project 视图下通过 Web 控制台单机或批量部署 SIREN 客户端时，唯一匹配到本次 Allow IP 的新客户端会自动归属到当前 Project。无论从 Web 控制台、服务端 REPL 还是 MCP 发起部署，自动关联成功且尚无备注的客户端都会使用 ECS Instance ID 作为备注；批量部署显式填写 Note 时会优先使用该内容。已有备注始终保留，只有显式 Note 与已有备注冲突时才会显示 warning。服务端 REPL 部署不带 Project 上下文，仍保持全局行为。
 </Callout>
 
 ### Clients
