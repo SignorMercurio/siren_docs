@@ -13,7 +13,7 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 
 Agentic 应急响应（AIR）用于把 Claude Code、Codex 或 Qoder 接入 SIREN 的调查现场。Agent 可以读取告警上下文，通过 SIREN MCP 工具查看在线客户端、执行排查命令，并协助整理应急响应报告。
 
-AIR 是交互式会话。操作员可以在终端中观察 Agent 的执行过程、回答追问、补充指令或停止会话，不应把它当成完全无人值守的自动处置流程。
+AIR 是交互式会话。操作员可以在结构化时间线或真实终端中观察执行过程、回答追问、补充指令或停止会话，不应把它当成完全无人值守的自动处置流程。
 
 <Callout title="前置条件" type="info">
   需要在服务端配置可用的 Claude、Codex 或 Qoder CLI 路径（`air.providers.<name>.cliPath`）。WebUI 的 Custom、Event 和 Resume 模式还需要启用 [MCP 服务](/mcp#启用与访问)；Event 模式需要[设置 SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)。服务端 REPL 的 `air` 命令固定使用 Claude，并需要 tmux。
@@ -22,7 +22,7 @@ AIR 是交互式会话。操作员可以在终端中观察 Agent 的执行过程
 ## 使用方式
 
 ```text tab="WebUI"
-Agentic IR -> 选择 Provider -> 选择 Manual / Custom / Event / Resume -> Start
+Agentic IR -> 选择 Provider ->（可选）切换 Terminal 开关 -> 选择 Manual / Custom / Event / Resume -> Start
 ```
 
 ```bash tab="服务端 REPL（告警事件）"
@@ -35,18 +35,27 @@ Agentic IR -> 选择 Provider -> 选择 Manual / Custom / Event / Resume -> Star
 
 ## WebUI AIR
 
-在 [Web 控制台](/webui#agentic-ir) 的 **Agentic IR** 页面中，AIR 以浏览器内嵌终端运行真实的 Claude Code、Codex 或 Qoder TUI。页面左侧用于启动、恢复和管理会话，右侧显示可交互终端。
+在 [Web 控制台](/webui#agentic-ir) 的 **Agentic IR** 页面中，入口模式和呈现方式相互独立。所有新会话默认使用 **GUI**；启动前可通过 Provider 选择器旁的终端开关改为 **Terminal**。
+
+- **GUI**：按轮次组织的调查时间线，Agent 的回复原文与操作记录按发生顺序交错展示。连续操作聚合为可折叠的摘要行（点击展开输入与输出），计划以内联进度块呈现，审批和提问以卡片出现在对应位置。多轮会话时左侧有导航刻度，悬停预览各轮内容、点击跳转；向上翻阅后可一键回到最新。
+- **Terminal**：运行真实的 Claude Code、Codex 或 Qoder TUI，保留 Provider 的斜杠命令、自定义 statusline、ANSI 界面和 PTY 交互，适合作为兼容回退或高级操作入口。
+
+GUI 输入框下方有一条 TUI 风格的状态条，显示当前模型、上下文占用和 Provider 订阅额度（含重置倒计时），并可手动刷新；不支持可编程额度查询时会明确标注，不做估算。GUI 中也可以输入斜杠命令，Provider 上报的命令会自动补全；命令的实际支持范围由 Provider 决定。
 
 需要集中查看长输出时，可点击终端标签栏左侧的箭头收起启动、Running 和 History 区域；再次点击即可恢复，当前浏览器会记住这一选择。
 
 启动新会话时先选择 Provider，再选择入口模式：
 
-- **Manual**：启动不带 SIREN 上下文的裸 CLI 终端，适合临时操作。
+- **Manual**：启动不带客户端、SIREN MCP 或种子 prompt 的空白会话，适合临时通用操作。
 - **Custom**：选择客户端并输入自定义 prompt，SIREN 会追加客户端上下文并注入 SIREN MCP。
 - **Event**：选择客户端，输入 Alibaba Cloud UID，并选择一种事件目标：安全中心告警 ID（Event）、ECS 实例 ID（ECS）或云安全中心资产 UUID（Asset）。告警 ID 直接定位单条告警；实例或资产目标会让 Agent 查询其关联告警，并可展开 **Time range** 高级选项限定告警时间范围（最近 3/7/30 天，或自定义起止时间，默认不限定）。
-- **Resume**：从当前视图工作目录对应的历史会话中选择一条，用原 session ID 继续。
+- **Resume**：从当前视图工作目录对应的历史会话中选择一条。点击历史只会读取本地记录；确认 **Continue session** 后才用原 session ID 继续。
 
-会话托管在 SIREN Server 上。刷新浏览器、切换页面或短暂断连后，可以从 **Running** 列表重新接入并回放此前输出；点击 Stop 会结束对应会话。每个会话默认保留最近 4 MiB 原始终端输出用于重连回放，容量可通过 `air.replayBufferBytes` 调整。Codex 默认使用 inline TUI，以保留更完整的浏览器滚动历史。
+会话托管在 SIREN Server 上。刷新浏览器、切换页面或短暂断连后，可以从 **Running** 列表重新接入并回放此前内容；点击 Stop 会结束对应会话。`air.maxSessions` 同时限制 GUI 与 Terminal 会话，`air.replayBufferBytes` 则分别限制 GUI 结构化事件或 Terminal 原始输出的断线回放容量。同一个 Provider 会话不能同时在两个界面运行，停止后可以换一种界面继续。
+
+报告、证据和文件变更只会显示 Project 范围内的安全相对路径。历史时间线初始为只读，长内容和较早记录按需加载。
+
+额度显示遵循 Provider 当前公开能力：Codex 与 Claude 以 5h / 7d 窗口展示订阅额度和重置倒计时，Claude 的额度在收到用量事件或手动刷新后更新；Qoder Personal 在状态条显示模型与上下文，并提供 Usage 页面入口（其 CLI 暂无可编程额度查询）。上下文占用和订阅额度始终分开展示，过期数据会标记为 stale。
 
 SIREN Server 正常重启时会结束仍在运行的 Provider，并给 Claude、Codex 和 Qoder 最多 5 秒完成各自的历史落盘。服务恢复后，页面会重新读取当前 Provider 和工作目录的 **History**；已经由 Provider 保存的会话可以继续 Resume，不需要刷新整个页面。强制杀进程、主机断电，或 Provider 尚未创建会话记录时只能尽力恢复，不能保证历史一定存在。
 
@@ -55,9 +64,9 @@ SIREN Server 正常重启时会结束仍在运行的 Provider，并给 Claude、
 </Callout>
 
 <Callout title="配置边界" type="info">
-  - **SIREN 只做**：使用 `air.providers.<name>.cliPath` 和 `args` 启动对应 CLI，并在 Custom、Event、Resume 模式注入 SIREN MCP、种子 prompt 或恢复会话 ID。
+  - **SIREN 只做**：使用 `air.providers.<name>.cliPath` 和 `args` 启动对应 CLI，并在 Custom、Event、Resume 模式注入 SIREN MCP、种子 prompt 或恢复会话 ID；GUI 只使用 Provider 公开的机器协议。
   - **由 CLI 自身决定**：模型、权限、沙箱、普通 Shell 审批和操作者已有 MCP 的工具确认规则。
-  - **Codex**：会把 SIREN 注入的 MCP 工具设置为默认允许，避免每次 SIREN 工具调用都弹出确认。
+  - **GUI 审批**：仅在 Provider 返回需要确认时显示“允许一次 / 本会话允许 / 拒绝”；本会话规则只保存在当前会话，不写入用户级永久配置。
   - **Qoder**：不会修改全局 Qoder 设置或强制跳过权限确认。
   - 如需限制其他可用工具，请在对应 CLI 的用户配置中处理。
 </Callout>
@@ -111,7 +120,7 @@ SIREN 会在 prompt 前追加 Client ID 上下文，再传给 Claude Provider。
 
 ### 交互式排查
 
-Agent 通过 [MCP 集成](/mcp) 使用 `ls`、`run`、`recon` 获取客户端线索。用户明确要求向某台 ECS 部署 SIREN 时，Agent 也可以调用 `deploy` 并等待客户端实际连接；Codex AIR 会自动批准这次工具调用，调查或诊断请求本身不构成部署授权。操作员可以在终端中继续追问或调整方向。
+Agent 通过 [MCP 集成](/mcp) 使用 `ls`、`run`、`recon` 获取客户端线索。用户明确要求向某台 ECS 部署 SIREN 时，Agent 也可以调用 `deploy` 并等待客户端实际连接；调查或诊断请求本身不构成部署授权。操作员可以在 GUI 时间线或 Terminal 中继续追问或调整方向。
 
 </Step>
 <Step>

@@ -25,7 +25,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 | -------- | -------- | -------- |
 | OSS Bucket 及访问凭证 | 本地模式 [信息收集报告上传](/recon)、[本地 upload](/analysis/upload#命令行上传) | 仅本地模式使用 OSS 留存报告时需要；远程模式 Recon 和文件拉取不需要 OSS |
 | 插件市场（OSS/HTTP） | [插件](/plugins)的安装与更新（`plugins.marketplace`） | 仅下载或更新插件时需要；已安装插件保存在客户端工作目录的 `plugins/` 下 |
-| Claude Code / Codex / Qoder CLI | [AIR](/air) 和 WebUI Agent 终端 | 仅使用对应 Provider 时需要；路径由 `air.providers.<name>.cliPath` 指定，模型、权限、沙箱等由大模型 CLI 自身配置决定 |
+| Claude Code / Codex / Qoder CLI | [AIR](/air) 的 GUI 与 Terminal | 仅使用对应 Provider 时需要；路径由 `air.providers.<name>.cliPath` 指定，模型、权限、沙箱等由大模型 CLI 自身配置决定 |
 | tmux | 服务端 REPL 中的交互式 `shell` 和 `air` 命令 | 仅通过服务端命令行使用 Shell/AIR 时需要；WebUI Shell 和 WebUI AIR 不依赖 tmux |
 | Dossier 静态目录 | WebUI 左侧 [Dossier](/dossier) 入口和只读默认 `report.md` 模板 | 仅使用 Dossier 编辑器时需要；目录由 `webui.dossierDir` 指定，可位于服务端工作目录外 |
 

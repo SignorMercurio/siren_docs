@@ -147,15 +147,15 @@ Project 视图下，Shell 只能连接当前 Project 的客户端。切换 Proje
 
 ### Agentic IR
 
-Agentic IR 页面在浏览器内嵌终端中运行 Claude Code、Codex 或 Qoder，用于完成 [Agentic 应急响应](/air)。页面支持选择 Provider、新建会话，或恢复当前视图工作目录对应的历史会话。
+Agentic IR 页面通过 Claude Code、Codex 或 Qoder 完成 [Agentic 应急响应](/air)。所有新会话默认使用结构化 GUI 时间线，也可以在启动前选择 Terminal，使用 Provider 的真实 TUI、斜杠命令和自定义 statusline。
 
 新建会话可选以下入口模式：
 
-- **Manual**，不带 SIREN 上下文的裸 CLI 终端，适合临时通用操作。
+- **Manual**，不带客户端、SIREN MCP 或种子 prompt 的空白会话，适合临时通用操作。
 - **Custom**，选择客户端并输入应急响应指令。
 - **Event**，选择客户端并输入阿里云 UID 和云安全中心告警 ID，由服务端拉取告警详情。
 
-也可以切换到 **Resume** 模式，搜索并选择当前视图工作目录对应的历史会话，用原 session ID 在终端中继续该会话。
+也可以切换到 **Resume** 模式，搜索并选择当前视图工作目录对应的历史会话。历史先以只读时间线打开，只有点击 **Continue session** 后才会启动 Provider，并用原 session ID 继续。
 
 左侧的 Running 会显示任务、客户端、Provider、状态和启动时间；History 会显示首个任务、最近一条可见对话、分支和更新时间，便于在恢复前确认会话内容。
 
@@ -163,7 +163,7 @@ Agentic IR 页面在浏览器内嵌终端中运行 Claude Code、Codex 或 Qoder
   Resume 只读取当前视图工作目录对应的 Provider history，不会跨 Project 列出其他目录的历史会话，也不会向浏览器暴露本机 JSONL 文件路径。
 </Callout>
 
-会话托管在服务端。刷新浏览器或切换页面后，可以重新接入并回放此前输出，进程不会因为页面离开而中断。除 Manual 外，会话会使用 SIREN MCP，因此需要启用 [MCP 服务](/mcp#启用与访问)。Project 视图下的工作目录、历史恢复和 MCP 作用域规则见 [Agentic 应急响应](/air#webui-air)。
+GUI 以时间线交错展示 Agent 回复原文与聚合折叠的操作记录，计划、审批和提问出现在对应位置；输入框下方的状态条显示模型、上下文占用和 Provider 额度。Terminal 保留原有 PTY 行为。两种会话都托管在服务端，刷新浏览器或切换页面后可以重新接入并回放，进程不会因为页面离开而中断。除 Manual 外，会话会使用 SIREN MCP，因此需要启用 [MCP 服务](/mcp#启用与访问)。Project 视图下的工作目录、历史恢复和 MCP 作用域规则见 [Agentic 应急响应](/air#webui-air)。
 
 ### Investigations
 

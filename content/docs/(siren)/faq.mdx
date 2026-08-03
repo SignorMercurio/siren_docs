@@ -138,6 +138,8 @@ air:
 
 Claude Code、Codex 和 Qoder 的模型、权限、沙箱、普通 Shell 审批等行为由它们自己的配置决定，SIREN 不会在 AIR 启动时强行覆盖。Codex 默认使用 `--no-alt-screen` 保留浏览器终端滚动历史；如果自定义 `args`，可按需保留或移除该参数。更多边界见 [Agentic 应急响应](/air#webui-air)。
 
+页面会先检查 Provider CLI 是否支持 GUI 所需的公开协议。若 GUI 显示不兼容，可切换到 Terminal 继续使用真实 TUI；运行中的会话不会自动切换界面。Terminal 能运行但 GUI 不可用时，请先升级对应 CLI，再刷新 Agentic IR 页面重新检查。
+
 </Accordion>
 
 <Accordion title="服务端 REPL 的 shell 命令为什么失败？">

@@ -10,6 +10,20 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.17.0 <DateTag>2026-08-03</DateTag>
+
+### Feature
+
+- Agentic IR 默认使用结构化 GUI 时间线：Agent 回复原文与工具调用、命令、文件变更等操作记录按发生顺序交错，连续操作聚合为可展开的摘要行，计划以内联进度块呈现，审批和提问以卡片出现在对应位置
+- 多轮会话左侧提供导航刻度，悬停预览各轮内容、点击跳转，向上翻阅后可一键回到最新；GUI 中可输入斜杠命令，Provider 上报的命令会自动补全
+- Manual、Custom、Event 和 Resume 与 GUI / Terminal 分离；每次新会话默认 GUI，也可在启动前切换到保留真实 TUI、斜杠命令、自定义 statusline 和 PTY 重连的 Terminal
+- 历史会话可先以只读时间线查看，只有点击 Continue session 后才恢复 Provider；停止后可在 GUI 与 Terminal 之间切换，服务端会阻止同一 Provider 会话被并发运行
+- GUI 输入框下方新增 TUI 风格状态条，显示模型、上下文占用和订阅额度（含重置倒计时）：Codex 与 Claude 以 5h / 7d 窗口展示并支持手动刷新，Qoder Personal 显示模型与上下文并提供 Usage 入口
+
+### Improvement
+
+- GUI 不兼容时会在启动前明确禁用并回退到 Terminal，不会在运行中静默切换；GUI 与 Terminal 共用并发上限和有界断线回放容量
+
 ## v2.16.8 <DateTag>2026-07-31</DateTag>
 
 ### Improvement
