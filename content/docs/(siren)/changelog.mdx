@@ -10,6 +10,13 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.17.3 <DateTag>2026-08-04</DateTag>
+
+### Bugfix
+
+- 修复 GUI 图片粘贴能力判断：Claude 与 Codex 会明确启用图片输入，Qoder 则以当前 CLI 实际上报的能力为准；不支持图片的会话会在粘贴时直接提示
+- 修复 GUI 消息发送被服务端校验或 Provider 拒绝时输入内容被清空的问题；文本和已粘贴图片现在会自动恢复到输入框
+
 ## v2.17.2 <DateTag>2026-08-04</DateTag>
 
 ### Feature
