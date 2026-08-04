@@ -10,6 +10,16 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.17.1 <DateTag>2026-08-04</DateTag>
+
+### Bugfix
+
+- 修复 GUI 多轮导航刻度：悬停预览卡片此前被裁剪不可见；跟随底部时点击跳转会被自动滚动拽回原处。现在悬停会加宽刻度并显示预览，点击可平滑滚动到对应轮次
+
+### Improvement
+
+- GUI 输入框不再拦截未上报的斜杠命令：输入内容原样交给 Provider 处理，Provider 上报的命令仍有自动补全
+
 ## v2.17.0 <DateTag>2026-08-03</DateTag>
 
 ### Feature
