@@ -12,6 +12,8 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 SIREN Server 内置 [模型上下文协议](https://modelcontextprotocol.io/)（MCP）服务。支持 MCP 的 AI 客户端可以通过它列出在线 SIREN 客户端、在指定客户端执行排查命令、触发一次[信息收集（Recon）](/recon)，或按明确指令在单台 ECS 上部署 SIREN。[Agentic 应急响应](/air) 也依赖这组工具。
 
+SIREN 支持当前 `2026-07-28` 协议的无会话 Streamable HTTP 交互，同时保留旧版 `initialize` 协商，已有 MCP 客户端可以继续连接。
+
 ## 启用与访问
 
 MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制，默认启用。它和 [Web 控制台](/webui)、WebSocket、远程客户端共用顶层 `listen` / `port`（默认 TLS `0.0.0.0:443`），并通过 `/mcp` 暴露。
