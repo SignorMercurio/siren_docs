@@ -10,6 +10,15 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.17.6 <DateTag>2026-08-06</DateTag>
+
+### Bugfix
+
+- 服务端发行包不再携带发布机的 TLS 证书私钥；首次安装改为在控制主机生成独立自签证书，后续升级会保留现有配置与证书
+- 修复客户端重连时旧端口转发仍可能向新控制连接发送数据的问题；转发连接现在严格随创建它的控制会话结束
+- 修复 WebUI 切换项目后 Investigations 旧请求结果回填到新项目的问题；AccessKey、Recon 和进程分析结果现在只更新发起时的项目视图
+- 统一 AIR GUI 与 Terminal 的断线重试判定：连接稳定后才恢复重试额度；服务端退出时所有 AIR 会话共用一次关闭期限并行收敛
+
 ## v2.17.5 <DateTag>2026-08-05</DateTag>
 
 ### Improvement

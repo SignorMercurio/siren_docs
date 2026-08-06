@@ -37,6 +37,7 @@ SIREN 支持本地模式和远程模式。多数应急场景建议使用远程�
     准备一台控制主机，并确认以下条件：
 
     - 目标主机和操作者都能够访问控制主机的主 TLS 端口，默认是 `443`
+    - 首次安装时控制主机需要提供 `openssl`，用于生成该主机独有的初始自签证书
     - 如需在服务端 REPL 中使用交互式 Shell 或 `air` 命令，控制主机需安装 tmux；只使用 Web 控制台的 Shell/AIR 时不需要 tmux
 
     使用 root 账号复制并运行下面的命令：
@@ -44,6 +45,8 @@ SIREN 支持本地模式和远程模式。多数应急场景建议使用远程�
     ```bash title="控制主机"
     curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren_server.sh | sh
     ```
+
+    服务端安装包不包含 TLS 私钥。首次安装会在控制主机的 `/opt/siren/certs/` 生成仅覆盖 `localhost` 和 `127.0.0.1` 的初始自签证书；再次运行安装器升级时，已有 `server_config.yaml` 和证书均会保留。需要通过公开域名访问 WebUI 时，请在启动前换成覆盖该域名且受浏览器信任的证书，并更新 `server_config.yaml` 中的 `cert` / `key`。
 
     首次启动前，创建 Web 控制台账号。随后启动服务端，并保持进程运行：
 
