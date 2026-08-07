@@ -8,11 +8,11 @@ import { Banner } from 'fumadocs-ui/components/banner';
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { Step, Steps } from "fumadocs-ui/components/steps";
-import { Users, Terminal, Brain, Files, FolderKanban, FolderTree, Lock, Plug, Key, BookOpenText } from 'lucide-react';
+import { Users, Terminal, Brain, Files, FolderKanban, FolderTree, Lock, Plug, Key, BookOpenText, ScrollText } from 'lucide-react';
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-Web 控制台是 SIREN Server 的浏览器入口。它覆盖日常远程操作：Project 工作区、客户端列表、浏览器 Shell、Agentic IR、调查任务、文件管理、Artifacts 和 Dossier。需要在控制主机终端里直接操作时，可以改用 [服务端 REPL](/remote)。
+Web 控制台是 SIREN Server 的浏览器入口。它覆盖日常远程操作：Project 工作区、客户端列表、浏览器 Shell、Agentic IR、调查任务、文件管理、Artifacts、服务端日志和 Dossier。需要在控制主机终端里直接操作时，可以改用 [服务端 REPL](/remote)。
 
 ## 启动与访问
 
@@ -95,6 +95,7 @@ Web 控制台使用 Session Cookie 鉴权。账号密码存储在 SQLite 数据�
   <Card title="Investigations" icon={<Key />}>执行 AccessKey 调查、Recon 和进程分析</Card>
   <Card title="Files" icon={<Files />}>浏览、预览、下载和上传客户端文件</Card>
   <Card title="Artifacts" icon={<FolderTree />}>管理服务端取证文件和报告</Card>
+  <Card title="Logs" icon={<ScrollText />}>查看服务端运行日志，按级别、组件和关键词过滤</Card>
   <Card title="Dossier" icon={<BookOpenText />}>编辑 Markdown 应急报告</Card>
 </Cards>
 
@@ -210,6 +211,29 @@ Artifacts 页面管理服务端取证目录。Global 视图使用 `siren_server`
 
 <Callout title="Artifacts 删除操作" type="warn">
   Artifacts 操作的是服务端真实文件。删除目录会递归删除其中内容，无法从 Web 控制台撤销；执行前请确认当前视图和目标路径。
+</Callout>
+
+### Logs
+
+Logs 页面显示服务端运行日志，内容与启动 `siren_server` 的终端完全一致。远程通过浏览器操作时，不必再登录控制主机翻日志，就能看到客户端接入失败、登录失败、AIR 与 MCP 报错等事件。
+
+页面提供：
+
+- 关键词搜索。匹配日志正文和所有结构化字段值，例如直接搜索客户端 ID、IP 或事件名。
+- 级别过滤。Debug、Info、Warning、Error 可多选；不选表示全部。
+- 组件过滤。下拉选项来自当前缓冲区中实际出现过的组件，例如 `server`、`webui`、`client`、`mcp`。
+- Live / Pause。Live 时约每 3 秒追加新日志，已滚动到底部会自动跟随；向上翻阅时不会被打断。Pause 后停止拉取，恢复 Live 会从暂停位置继续。
+- 复制和下载当前列表内容，便于附到工单或报告中。
+- 点击任意一行展开该条日志的完整结构化内容。
+
+日志按 `logging.level` 过滤后才进入页面，因此页面看到的与终端一致；需要更详细的内容时调整 `logging.level`。
+
+<Callout title="内存缓冲，重启即清空" type="info">
+  日志保留在内存中，条数由 `logging.bufferSize` 控制（默认 5000）。服务重启后历史清空；缓冲区写满后最早的记录会被淘汰，页面会显式提示已丢弃的条数，不会静默截断。需要长期留存请按 [日志输出](/config#日志输出)的说明由 systemd 或容器运行时采集。
+</Callout>
+
+<Callout title="访问范围" type="warn">
+  Logs 页面不区分角色：任何已登录用户都能查看服务端日志，其中包含来访 IP、用户名和客户端地址等信息。日志与 Project 无关，始终显示全局内容。将 `logging.bufferSize` 设为 `0` 可以完全关闭该页面。
 </Callout>
 
 ### Dossier

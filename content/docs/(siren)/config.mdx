@@ -80,6 +80,7 @@ logging:
   level: info                                   # debug / info / warning / error
   format: text                                  # text / json
   output: stderr                                # stderr / stdout
+  bufferSize: 5000                              # Logs 页面保留的日志条数，0 表示关闭
 
 webui:                                          # Web 控制台
   enabled: true                                 # 是否启用 WebUI
@@ -129,6 +130,7 @@ air:
 | `logging.level` | string | `info` | 最低日志级别，可选 `debug`、`info`、`warning` 或 `error`；`success` 与 `info` 使用同一级别 |
 | `logging.format` | string | `text` | 日志格式，可选适合终端阅读的 `text` 或每行一个对象的 `json` |
 | `logging.output` | string | `stderr` | 服务端运行日志输出流，可选 `stderr` 或 `stdout` |
+| `logging.bufferSize` | int | `5000` | [Web 控制台 Logs 页面](/webui#logs)在内存中保留的最近日志条数；服务重启后清空，设为 `0` 或负数则关闭该页面 |
 | `webui.enabled` | bool | `true` | 是否启用 [Web 控制台](/webui)。关闭后若 `mcp.enabled` 仍为 `true`，`/mcp` 会继续在共享端口上提供服务 |
 | `webui.publicURL` | string | `""` | WebUI AIR 注入 MCP 时使用的绝对 HTTPS Origin，不得包含路径、query 或凭证；使用 AIR 时必须设置。建议服务端本机将该域名解析到 loopback 或内网地址，避免绕行公网 |
 | `webui.userDBPath` | string | `data/users.db` | WebUI 用户 SQLite 数据库路径（相对路径基于启动 CWD） |
@@ -162,6 +164,8 @@ air:
 日志不会记录 HTTP query、请求正文、Cookie、token、prompt、命令正文或凭证。Artifacts、Reports 和远程文件错误也不会写入用户提交的路径或文件名；需要关联 WebUI 故障时，可使用响应头 `X-Request-ID` 对应日志中的 `request_id`。
 
 SIREN 不直接创建日志文件或执行轮转。需要持久化时，应由 systemd、容器运行时或其他进程管理器采集所选输出流并负责保留与轮转。
+
+`logging.bufferSize` 额外在内存中保留最近若干条日志，供 [Web 控制台 Logs 页面](/webui#logs)查看。保留的内容与终端输出完全一致，同样受 `logging.level` 约束；缓冲区仅存在于内存中，服务重启后清空，不能替代上述持久化方案。
 
 > WebUI GUI 与 Terminal 都复用 `air.providers.<name>`。Manual 模式只启动空白 Provider 会话；Custom、Event、Resume 模式会额外注入 SIREN MCP、种子 prompt 或恢复会话 ID。两种界面都受 WebUI 全局鉴权保护。
 
