@@ -271,7 +271,7 @@ mcp:
   enabled: true                         # 是否启用 MCP 服务
 ```
 
-服务端顶层 `listen` / `port` 决定 Web 控制台、MCP 和远程客户端共用的 TLS 监听地址。`webui.publicURL` 只用于 WebUI AIR 注入 MCP 地址；它必须是证书覆盖的 HTTPS Origin，服务端本机宜将该域名解析到 loopback 或内网地址。完整配置项见 [配置文件](/config#服务端配置)。
+服务端顶层 `listen` / `port` 决定 Web 控制台、MCP 和远程客户端共用的 TLS 监听地址。`webui.publicURL` 只用于 WebUI AIR 注入 MCP 地址；它必须是证书覆盖的 HTTPS Origin，服务端本机应将该域名解析到本机的非 loopback 内网地址，不能指向 `127.0.0.1` 或 `::1`。完整配置项见 [配置文件](/config#服务端配置)。
 
 ## 生产部署建议
 

@@ -134,7 +134,7 @@ air:
       args: []
 ```
 
-`cliPath` 必须在服务端进程的 `PATH` 里可执行，或者写成绝对路径。WebUI 的 Custom、Event 和 Resume 模式会注入 SIREN MCP，因此还要确认 `mcp.enabled` 没有关闭，并将 `webui.publicURL` 设置为证书覆盖的绝对 HTTPS Origin。建议服务端本机把该域名解析到 loopback 或内网地址。
+`cliPath` 必须在服务端进程的 `PATH` 里可执行，或者写成绝对路径。WebUI 的 Custom、Event 和 Resume 模式会注入 SIREN MCP，因此还要确认 `mcp.enabled` 没有关闭，并将 `webui.publicURL` 设置为证书覆盖的绝对 HTTPS Origin。服务端本机应把该域名解析到本机的非 loopback 内网地址，不能指向 `127.0.0.1` 或 `::1`。
 
 Claude Code、Codex 和 Qoder 的模型、权限、沙箱、普通 Shell 审批等行为由它们自己的配置决定，SIREN 不会在 AIR 启动时强行覆盖。Codex 默认使用 `--no-alt-screen` 保留浏览器终端滚动历史；如果自定义 `args`，可按需保留或移除该参数。更多边界见 [Agentic 应急响应](/air#webui-air)。
 
