@@ -10,6 +10,20 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.19.0 <DateTag>2026-08-13</DateTag>
+
+### Feature
+
+- Web 控制台 Clients 页面新增 **Configure egress**，可为指定 ECS 创建或复用独立的 SIREN 出方向安全组并挂载到实例，同时保留实例已有安全组
+
+### Improvement
+
+- 出方向配置会在执行前展示目标实例和固定规则，执行中显示 SOAR 进度，完成后回显安全组 ID 与地域
+
+### Bugfix
+
+- 修正同机 Agentic IR 访问 MCP 时的地址要求，服务端主机名需解析到非回环私网地址，避免触发 MCP localhost 防护
+
 ## v2.18.0 <DateTag>2026-08-07</DateTag>
 
 ### Feature

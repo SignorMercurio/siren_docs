@@ -89,7 +89,7 @@ Web 控制台使用 Session Cookie 鉴权。账号密码存储在 SQLite 数据�
 
 <Cards>
   <Card title="Projects" icon={<FolderKanban />}>按应急响应项目隔离客户端、Artifacts 和调查上下文</Card>
-  <Card title="Clients" icon={<Users />}>查看在线客户端，编辑备注，执行 SOAR 放行、部署和清理</Card>
+  <Card title="Clients" icon={<Users />}>查看在线客户端，编辑备注，执行 SOAR 放行、出口配置、部署和清理</Card>
   <Card title="Shells" icon={<Terminal />}>在浏览器中打开多标签交互式终端</Card>
   <Card title="Agentic IR" icon={<Brain />}>启动 Claude / Codex / Qoder 辅助排查会话</Card>
   <Card title="Investigations" icon={<Key />}>执行 AccessKey 调查、Recon 和进程分析</Card>
@@ -126,9 +126,13 @@ Clients 页面对应服务端 REPL 的 `ls`、`note`、`allow`、`deploy` 和 `c
 - 编辑备注。备注绑定到客户端稳定身份，客户端重连后会自动恢复。
 - 分配 Project。Global 视图中可以把客户端分配到某个 Project，或移回未归属状态。
 - 打开快捷入口。从客户端行可直接进入 Files 或 Process Analysis。
-- 执行 SOAR 操作，包括 `allow` 放行、单机部署、批量部署。
+- 执行 SOAR 操作，包括 `allow` 放行、配置 SIREN 出方向、单机部署和批量部署。
 - 查看近期部署任务。页面刷新后仍可恢复当前进度和最近结果，进行中的任务每 2 秒更新一次。
 - 清理客户端。单个或批量清理都会要求输入确认短语后再执行 **Clean & Terminate**。
+
+<Callout title="配置 SIREN 出方向" type="info">
+  对出方向默认拒绝的阿里云 ECS，可填写 UID 和 Instance ID 后点击 **Configure egress**。确认窗口会展示目标和以下规则：`47.111.170.208/32` TCP 全端口用于连接 SIREN 服务端，`47.79.65.205/32` TCP 443 用于下载客户端，`100.100.0.0/16` 全流量用于访问阿里云基础服务。执行后会创建或复用独立的 SIREN 安全组并挂载到实例，不会移除已有安全组；页面会显示 SOAR 进度以及最终的安全组 ID 和地域。
+</Callout>
 
 <Callout title="批量部署规则" type="info">
   点击 **Batch deploy** 会打开独立的批量部署窗口，支持同一 UID 下的 2-20 台 ECS。每行输入 `instanceId`、`instanceId,publicIp` 或 `instanceId,publicIp,note`；只填写备注时可写成 `instanceId,,note`。默认并发 3 台，单台失败不会中断其他目标。提交后窗口会关闭，可在近期部署列表继续查看进度。`success` 表示客户端已经连接，并显示实际 Client ID；playbook 完成后最多等待 30 秒，未连接的目标记为 `timed_out`。安装或启动命令失败时会立即显示其输出，不再继续等待客户端上线。
