@@ -10,312 +10,109 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
-## v2.18.1 <DateTag>2026-08-07</DateTag>
-
-### Improvement
-
-- Logs 页面每条日志固定占一行：结构化字段紧随正文，过长的值就地省略，点击整行展开完整内容；级别符号按类型着色，成功与普通信息不再同色，警告和错误整行带底色便于定位
-- AIR GUI 正文行宽放宽到与表格、代码块同宽，提问气泡的右边界与输入框对齐
-- 左侧导航中 Logs 移到 Projects 之后
-
 ## v2.18.0 <DateTag>2026-08-07</DateTag>
 
 ### Feature
 
-- Web 控制台新增 Logs 页面：直接在浏览器查看服务端运行日志，支持按级别和组件过滤、按关键词搜索日志正文与字段值，可实时跟随或暂停，并复制、下载当前内容。日志保留在内存中，条数由 `logging.bufferSize` 控制（默认 5000，设为 `0` 关闭该页面），重启后清空
-- AIR GUI 会话在等待操作员决策时给出明确提示：待处理的审批或提问会标记在标签页、时间线导航和输入框上方，可一键跳转到对应请求；连接重试耗尽后显示断线提示并支持手动重连
-
-## v2.17.6 <DateTag>2026-08-06</DateTag>
-
-### Bugfix
-
-- 服务端发行包不再携带发布机的 TLS 证书私钥；首次安装改为在控制主机生成独立自签证书，后续升级会保留现有配置与证书
-- 修复客户端重连时旧端口转发仍可能向新控制连接发送数据的问题；转发连接现在严格随创建它的控制会话结束
-- 修复 WebUI 切换项目后 Investigations 旧请求结果回填到新项目的问题；AccessKey、Recon 和进程分析结果现在只更新发起时的项目视图
-- 统一 AIR GUI 与 Terminal 的断线重试判定：连接稳定后才恢复重试额度；服务端退出时所有 AIR 会话共用一次关闭期限并行收敛
-
-## v2.17.5 <DateTag>2026-08-05</DateTag>
+- Web 控制台新增 Logs 页面，可按级别、组件和关键词筛选服务日志，并支持实时跟随、暂停、复制和下载
+- AIR GUI 支持粘贴图片，待处理的审批和提问会在标签页、时间线及输入框上方明确提示
 
 ### Improvement
 
-- MCP 服务兼容最新 `2026-07-28` 协议，当前客户端使用无会话的 Streamable HTTP 交互；仍保留旧版初始化协商，并拒绝不安全的跨域浏览器请求
-
-## v2.17.4 <DateTag>2026-08-05</DateTag>
-
-### Feature
-
-- 重构 GUI 提问卡片：问题标题与正文分层显示并保留换行，选项改为带序号和说明的纵向列表；即使 Agent 提供了选项，也可以直接输入自定义答案
+- 提问卡片改为更清晰的纵向布局，支持直接输入自定义答案；时间线导航、表格显示和断线重连提示同步优化
 
 ### Bugfix
 
-- 修复从只读历史记录继续 GUI 会话时原时间线消失的问题；历史内容会保留在当前标签页中，新消息接续显示
-- 改善宽屏下 GUI 时间线的内容宽度和 Markdown 表格可读性；正文保持舒适行长，表格、代码和操作记录可利用更宽空间，过宽表格改为横向滚动而不是挤压列宽
-
-## v2.17.3 <DateTag>2026-08-04</DateTag>
-
-### Bugfix
-
-- 修复 GUI 图片粘贴能力判断：Claude 与 Codex 会明确启用图片输入，Qoder 则以当前 CLI 实际上报的能力为准；不支持图片的会话会在粘贴时直接提示
-- 修复 GUI 消息发送被服务端校验或 Provider 拒绝时输入内容被清空的问题；文本和已粘贴图片现在会自动恢复到输入框
-
-## v2.17.2 <DateTag>2026-08-04</DateTag>
-
-### Feature
-
-- GUI 输入框支持粘贴图片：每条消息最多 4 张、单张不超过 8 MiB（png / jpeg / webp / gif），粘贴后以可移除的缩略图暂存，随消息发送给 Agent，时间线中以图片数量徽标呈现。Claude、Codex、Qoder 均支持，Qoder 以其 CLI 上报的图片能力为准
-
-## v2.17.1 <DateTag>2026-08-04</DateTag>
-
-### Bugfix
-
-- 修复 GUI 多轮导航刻度：悬停预览卡片此前被裁剪不可见；跟随底部时点击跳转会被自动滚动拽回原处。现在悬停会加宽刻度并显示预览，点击可平滑滚动到对应轮次
-
-### Improvement
-
-- GUI 输入框不再拦截未上报的斜杠命令：输入内容原样交给 Provider 处理，Provider 上报的命令仍有自动补全
+- 修复继续历史会话、发送失败和时间线跳转时可能丢失内容或位置的问题
+- 服务端发行包不再携带发布机的 TLS 私钥，首次安装会在控制主机生成独立证书
+- 修复客户端重连后旧端口转发未结束，以及切换 Project 后旧调查结果回填到新页面的问题
 
 ## v2.17.0 <DateTag>2026-08-03</DateTag>
 
-### Feature
+### Breaking Change
 
-- Agentic IR 默认使用结构化 GUI 时间线：Agent 回复原文与工具调用、命令、文件变更等操作记录按发生顺序交错，连续操作聚合为可展开的摘要行，计划以内联进度块呈现，审批和提问以卡片出现在对应位置
-- 多轮会话左侧提供导航刻度，悬停预览各轮内容、点击跳转，向上翻阅后可一键回到最新；GUI 中可输入斜杠命令，Provider 上报的命令会自动补全
-- Manual、Custom、Event 和 Resume 与 GUI / Terminal 分离；每次新会话默认 GUI，也可在启动前切换到保留真实 TUI、斜杠命令、自定义 statusline 和 PTY 重连的 Terminal
-- 历史会话可先以只读时间线查看，只有点击 Continue session 后才恢复 Provider；停止后可在 GUI 与 Terminal 之间切换，服务端会阻止同一 Provider 会话被并发运行
-- GUI 输入框下方新增 TUI 风格状态条，显示模型、上下文占用和订阅额度（含重置倒计时）：Codex 与 Claude 以 5h / 7d 窗口展示并支持手动刷新，Qoder Personal 显示模型与上下文并提供 Usage 入口
-
-### Improvement
-
-- GUI 不兼容时会在启动前明确禁用并回退到 Terminal，不会在运行中静默切换；GUI 与 Terminal 共用并发上限和有界断线回放容量
-
-## v2.16.8 <DateTag>2026-07-31</DateTag>
-
-### Improvement
-
-- Agentic IR 可一键收起左侧的启动、Running 和 History 区域，让 Claude Code、Codex 或 Qoder 终端占满主区域；折叠偏好会保存在当前浏览器
-
-## v2.16.7 <DateTag>2026-07-30</DateTag>
-
-### Bugfix
-
-- WebUI 左侧 Dossier 入口的默认 `report.md` 改为只读模板，保存操作不会再覆盖 `webui.dossierDir/report.md`；需要持久化的报告仍从 Artifacts 打开后编辑
-
-## v2.16.6 <DateTag>2026-07-30</DateTag>
-
-### Improvement
-
-- 部署成功并自动关联客户端后，尚无备注的客户端会自动使用 ECS Instance ID 作为备注；已有备注会继续保留
-- WebUI 内置 Lilex Variable 等宽字体，终端、ID 和时间戳等文本在不同操作系统上保持一致显示
-
-## v2.16.5 <DateTag>2026-07-29</DateTag>
-
-### Bugfix
-
-- 修复从 Files 或 Artifacts 下载中文名称的文件或目录时，浏览器保存的文件名可能显示为乱码的问题
-
-## v2.16.4 <DateTag>2026-07-29</DateTag>
+- WebUI、WebSocket、MCP 和远程客户端统一使用服务端主 TLS 端口，升级后需通过 HTTPS 访问
 
 ### Feature
 
-- 【BREAKING】WebUI、WebSocket、MCP 与远程客户端统一使用服务端主 TLS 监听端口（默认 `443`）；移除 `webui.listen` / `webui.port`，浏览器和 MCP 改用 HTTPS，WebUI AIR 通过 `webui.publicURL` 注入 MCP 地址
-- MCP 新增单机 `deploy` 工具：按 UID 与 ECS Instance ID 触发 SIREN 部署，并等待客户端实际连接后返回 operation ID、状态和 Client ID；Project 视图发起的部署会自动继承当前 Project，Codex AIR 默认自动批准调用
+- Agentic IR 新增结构化 GUI 时间线，按顺序展示回复和操作记录，并支持轮次导航、历史查看与续接、GUI 和 Terminal 切换
+- MCP 新增单机部署能力，可按 UID 和 ECS Instance ID 发起部署，并以客户端实际连接作为完成标准
 
 ### Improvement
 
-- WebUI 侧边栏新增 Feedback 入口，可直接打开问题反馈页面
-- 移除 MCP 的 `get_alarm_detail` 工具，安全告警列表与详情查询改由独立 SAS 工具承担
+- 默认 Dossier 模板改为只读；部署后可自动使用 ECS Instance ID 标记未命名客户端
+- Agentic IR 侧栏可折叠，WebUI 增加 Feedback 入口
 
 ### Bugfix
 
-- 多个部署目标共用出口 IP 时，已进入等待连接状态的目标会立即转为需要手工确认，不再等待超时后误报客户端未连接
-
-## v2.16.3 <DateTag>2026-07-28</DateTag>
-
-### Bugfix
-
-- 修复 CentOS 6 等 Linux 2.6.32–3.1.x 内核主机无法安装客户端的问题；Linux x86_64 安装器会自动选择兼容包，3.2 及以上内核继续使用现代包
-- 安装包二进制验证失败时会保留原始错误信息，便于区分内核、挂载权限等运行环境问题
+- 修复旧版 Linux 内核安装失败、中文文件名下载乱码，以及共享出口 IP 下部署目标识别不准确的问题
 
 ## v2.16.0 <DateTag>2026-07-27</DateTag>
 
 ### Feature
 
-- WebUI AIR 的 Event 模式支持三种事件目标：安全中心告警 ID、ECS 实例 ID 或云安全中心资产 UUID（均配合 Alibaba Cloud UID）；实例与资产目标会让 Agent 查询关联告警，并可通过 Time range 高级选项限定告警时间范围（最近 3/7/30 天或自定义起止时间，默认不限定）
+- AIR Event 模式支持安全告警、ECS 实例和云安全中心资产三类目标，并可限定调查时间范围
+- 服务端日志支持配置级别、文本或 JSON 格式，以及输出位置
 
 ### Improvement
 
-- AIR 启动表单重新排版：事件目标类型合并进输入行、会话模式改为标签页、表单按功能分组，时间范围选项默认折叠，长 ID 输入不再被截断
-
-## v2.15.9 <DateTag>2026-07-23</DateTag>
+- Investigations 改为标签页布局，客户端选择器、AIR 会话列表和 Project 标识更容易辨认
+- 移动端导航和页面布局重新适配，窄屏下可正常使用主要功能
+- 运行日志补充稳定的关联字段，并避免记录请求正文、凭证、命令和用户文件路径
 
 ### Bugfix
 
-- 修复从 Clients 打开 Shell 时立即显示 `Connection error` 并结束会话的问题，远程交互终端现在可正常建立连接
-
-## v2.15.8 <DateTag>2026-07-22</DateTag>
-
-### Improvement
-
-- Project 创建时会自动分配并持久化辨识颜色，Projects 列表、侧边栏当前范围和 Clients 归属标记保持一致；已有 Project 会在升级后自动补色
-
-### Bugfix
-
-- 修复 Agentic IR 左侧栏会被 Running 会话整体撑高的问题；桌面端 Running 与 History 列表现在分别滚动，启动表单和 History 搜索框保持可见
-- 修复 Files 页面客户端选择框占据过多顶部空间的问题，为路径输入和上传操作保留更合理的宽度
-
-## v2.15.7 <DateTag>2026-07-22</DateTag>
-
-### Bugfix
-
-- 修复中文 Project 名称在未指定目录名时生成 `project-2` 等无意义目录的问题；现在会直接使用名称中的文字和数字生成目录名
-
-## v2.15.6 <DateTag>2026-07-22</DateTag>
-
-### Improvement
-
-- 登录页视觉更新：卡片与输入框加高、增加用户名/密码图标，副标题更新为 "Swift Incident Response Evidence Navigator"
-- Investigations 页面重构为标签页布局：AccessKey、Recon、Process Analysis 三个工具以标签切换（支持方向键），表单横向排列，结果区提供状态横幅、步骤进度与指标卡片；正在运行的工具会在标签上显示进度圆点
-- 各页面的客户端下拉框统一为「连接状态圆点 + #ID + 备注 · 操作系统」样式，编号与说明分色显示，更易快速定位目标客户端
-- Agentic IR 的 Running 与 History 会话列表改为卡片式：运行中的会话带紫色描边与脉冲圆点，元信息行使用等宽字体与 24 小时制时间；终端标签页显示对应 Provider（Claude / Codex / Qoder）标识
-- Artifacts 页面 Markdown 预览的 Dossier 编辑按钮以紫色强调显示
-
-## v2.15.4 <DateTag>2026-07-21</DateTag>
-
-### Feature
-
-- 服务端日志支持按配置选择最低级别、终端文本或逐行 JSON 格式，以及 stdout / stderr 输出目标；默认使用完整时间戳的文本日志并写入 stderr
-
-### Improvement
-
-- Client、AIR、MCP、WebUI 请求和鉴权等运行事件提供稳定的结构化字段与关联 ID；通用请求日志不记录 HTTP query、请求正文、Cookie、token、prompt 或命令正文，Artifacts、Reports 和远程文件错误也不会记录用户提交的路径或文件名
-- 服务运行日志与交互命令输出分流，常规 MCP 启动和列表调用降为 debug；日志文件持久化与轮转继续交由 systemd、容器运行时或其他进程管理器负责
-
-### Bugfix
-
-- 修复 Agentic IR History 可能把 Claude 的斜杠命令或本地命令输出当成用户对话预览的问题
-
-## v2.15.1 <DateTag>2026-07-20</DateTag>
-
-### Improvement
-
-- 移动端导航从底部横滑栏改为顶部栏加侧滑抽屉，抽屉复用完整侧边栏，移动端也可切换项目范围（Project scope）
-- WebUI 侧边栏新增「Docs」入口，一键在新标签页打开官方文档；Dossier 与 Docs 均带有外部链接标识
+- 修复 Shell 无法建立连接、中文 Project 名称生成错误，以及服务重启后 Codex 会话未出现在历史记录的问题
 
 ## v2.15.0 <DateTag>2026-07-20</DateTag>
 
+### Feature
+
+- Windows 客户端新增旧系统兼容包，支持 Windows 7 SP1 至 Windows 8.1，以及 Windows Server 2008 R2 SP1 至 2012 R2
+- 单机和批量部署以客户端实际连接为成功标准，可持续查看进行中任务和近期结果
+- Artifacts 支持直接预览 PNG、JPEG、GIF 和 WebP 图片
+
 ### Improvement
 
-- Windows 客户端新增旧系统兼容包，安装脚本会自动支持 Windows 7 SP1 至 Windows 8.1，以及 Windows Server 2008 R2 SP1 至 Windows Server 2012 R2；现代 Windows 继续使用当前工具链构建的客户端
+- 安装和升级会校验安装包，替换失败时恢复旧文件；客户端启动失败时可自动修复一次
+- `clean` 会清理客户端身份、Recon 报告、插件和相关临时文件，同时保留共享目录中的无关文件
 
 ### Bugfix
 
-- 修复 SIREN Server 重启后 Codex 会话可能未出现在 Agentic IR History 中的问题；正常关闭时会给 Provider 最多 5 秒保存历史，服务恢复后页面会自动重新读取可恢复会话
+- 修复重复部署、Project 或备注关联错误、清理残留，以及窄窗口下 AIR 终端内容无法完整查看的问题
 
-## v2.14.8 <DateTag>2026-07-17</DateTag>
-
-### Improvement
-
-- Investigations 页面布局重排：三个工具卡片等高并排于顶部，输出面板全宽显示在下方，窄窗口自动降级为两列或单列
-- Agentic IR 的 Provider 选择器显示 Claude、Codex 和 Qoder 标识，更容易快速确认当前后端
-
-## v2.14.7 <DateTag>2026-07-17</DateTag>
+## v2.14.0 <DateTag>2026-07-16</DateTag>
 
 ### Feature
 
-- **Artifacts 支持常见图片预览**：可直接查看 PNG、JPEG、GIF 和 WebP 图片，并使用适应窗口、100% 和缩放控制核验细节
-
-## v2.14.6 <DateTag>2026-07-17</DateTag>
-
-### Bugfix
-
-- 修复固定宽度的 AIR / Manual 终端在较窄窗口中右侧内容难以访问的问题；终端保留 12px 最小字号，并在内容超宽时提供明确的横向滚动控制
-
-## v2.14.4 <DateTag>2026-07-16</DateTag>
-
-### Feature
-
-- **Deploy 以客户端实际连接为完成标准**：单机和批量部署会等待客户端上线并返回 Client ID，Clients 页面可在刷新后继续查看进行中任务和近期结果
+- Files 和 Artifacts 支持一次拖入多个文件，并可逐个处理重名冲突
+- Clients 列表支持搜索、排序、多选，以及批量调整 Project 或清理客户端
+- AIR 会话列表补充任务、客户端、Provider 和最近消息等信息，恢复前更容易确认会话
 
 ### Improvement
 
-- **批量部署改用独立窗口**：Clients 页面保留紧凑的单机部署表单，批量部署在单独窗口中输入和校验 2-20 个目标，提交后可通过近期部署列表持续查看进度
-- 部署结果区分已连接、执行失败、上线超时、需要手工确认和 warning；近期部署列表可以完全收起，只有全部目标干净成功时才清空输入
-- `clean` 会一并移除客户端身份、本地 Recon 报告、插件和当前进程的 WinPTY 临时文件；共享可执行目录会保留无关文件，WebUI 只确认清理请求已经发出
-- 客户端和服务端安装会校验安装包完整性，并在替换失败时恢复旧文件；客户端部署还会复用健康安装、在启动立即失败时自动修复一次，命令失败会直接显示输出，客户端上线等待缩短为 30 秒
+- WebUI 登录有效期延长至 30 天；清理客户端和停止 AIR 会话前需要输入确认短语
+- AIR 和 Shell 改善键盘、触屏、窄屏及长时间会话的使用体验
 
 ### Bugfix
 
-- 修复同一 ECS 的进行中部署可被重复触发，以及多个目标共享出口 IP 时可能错误套用 Project 或 Note 的问题；无法安全确认客户端时改为提示手工关联
-- 修复 `clean` 可能遗漏安装目录外的客户端文件，以及 Windows 延迟清理脚本可能冲突或误删其他进程 WinPTY 临时目录的问题
-
-## v2.13.8 <DateTag>2026-07-15</DateTag>
-
-### Feature
-
-- **Files 和 Artifacts 支持多文件拖拽上传**：可将多个文件拖到页面，按当前 Target 顺序上传；重名文件可逐个选择覆盖或跳过，拖拽时会显示文件数量和目标路径
-
-## v2.13.7 <DateTag>2026-07-14</DateTag>
-
-### Improvement
-
-- WebUI 登录会话有效期延长至 30 天，减少长期排查过程中重复登录
-- Clients 列表的排序、多选和批量操作状态更清晰，选择客户端时表格位置保持稳定
-
-### Bugfix
-
-- 修复 AIR 终端在窄屏或较矮窗口中行尾、底部输入区域可能被裁切的问题；终端会按可用空间调整本地字号，并保留横向和纵向滚动以查看完整内容
-
-## v2.13.5 <DateTag>2026-07-14</DateTag>
-
-### Feature
-
-- **AIR 会话列表提供更完整的上下文**：Running 显示任务、客户端、Provider、状态和启动时间，History 显示首个任务、最近一条可见对话、分支和更新时间，更容易在恢复前确认会话用途
-
-### Improvement
-
-- Qoder 会话启动和历史恢复兼容更多 CLI 安装方式与历史记录布局
-- AIR 历史搜索可匹配最近一条可见消息，并过滤工具结果和隐藏上下文
-
-### Bugfix
-
-- 修复 Windows 客户端在 PowerShell Constrained Language Mode 下执行命令时反复输出编码设置错误的问题，同时保留外部程序的 UTF-8 输出
-- 修复同一历史会话被并发恢复时可能启动多个 AIR 进程，以及停止旧会话时可能影响新进程的问题
-- 修复 WebUI 部分操作结束后仍显示运行中、确认对话框焦点不完整、排序状态不一致和 Recon 失败后继续轮询的问题
-
-## v2.13.2 <DateTag>2026-07-10</DateTag>
-
-### Feature
-
-- **Clients 列表增强批量处置**：支持按 ID、系统、地址、备注或 Project 筛选客户端，按主要字段排序，并可多选后批量调整 Project 或清理客户端
-
-### Improvement
-
-- **AIR 可保留更多终端历史**：Codex 默认使用 inline TUI，每个会话的重连回放容量提高到 4 MiB 并支持通过 `air.replayBufferBytes` 调整，浏览器终端滚动历史提高到 20000 行
-- **高风险操作确认更明确**：清理客户端和停止 AIR 会话前需要输入确认短语，降低误操作风险
-- **WebUI 键盘与触屏操作更完整**：AIR / Shell 标签支持标准键盘导航，状态同时使用颜色和形状表达，移动端导航、表格和操作按钮更易用
-- 后台标签页暂停不必要的计时和轮询，Clients 列表在 SOAR 输出更新时减少重复渲染
-
-### Bugfix
-
-- 修复窄屏下 Clients 表格和移动端导航溢出，以及部分文件树颜色、圆角和弹出层样式未跟随主题的问题
+- 修复受限 PowerShell 环境的编码报错、历史会话重复恢复，以及部分 WebUI 操作状态未及时结束的问题
 
 ## v2.13.0 <DateTag>2026-07-08</DateTag>
 
 ### Feature
 
-- **新增 `recon` MCP 工具**：AIR / MCP 客户端可在指定客户端按需触发一次信息收集，等待回传并返回报告内容，报告同时保存到服务端 Artifacts；等待时间由新增配置 `mcp.reconTimeout`（默认 300 秒）控制
-- **WebUI AIR 新增 Qoder Provider**：Agentic IR 页面可选择 QoderCLI 启动 Manual、Custom、Event 或 Resume 会话，并继续使用当前 Project 作用域的 SIREN MCP
+- MCP 新增 `recon` 工具，可在指定客户端发起信息收集并将报告保存到 Artifacts
+- Agentic IR 新增 Qoder Provider，支持启动和恢复 Qoder 会话
 
 ### Improvement
 
-- **Recon 收敛为快速、确定性的采集器**：移除挖矿程序、Webshell、Rootkit 符号、可疑命令、时间戳篡改等黑名单/签名判定（含独立的 Webshell 模块与 `recon.webshell` 开关），是否可疑改由 AIR 结合上下文判断，采集更快、噪声更低
-- **Recon 文件模块提速**：将 SUID、近期变更（mtime/ctime）、大文件检查合并为一次全盘遍历（此前为四次），文件模块耗时约降至四分之一
-- Codex AIR 注入的 SIREN MCP 工具默认允许执行，减少重复工具确认
-- Qoder AIR 可列出并恢复当前工作目录下的 Qoder 历史会话；SIREN 只按会话注入自己的 MCP 配置，不修改用户的 Qoder 全局设置或权限策略
+- Recon 移除内置的可疑项判定，专注快速采集，由 AIR 结合上下文分析结果
+- Recon 文件检查合并重复遍历，缩短大规模文件系统的采集时间
 
 ### Bugfix
 
-- 修复 Project 视图下 AIR / MCP 可能错误看到或操作全局客户端的问题
+- 修复 Project 视图下 AIR 或 MCP 可能看到、操作全局客户端的问题
 
 ## v2.12.0 <DateTag>2026-07-01</DateTag>
 
@@ -739,13 +536,6 @@ export const DateTag = ({ children }) => (
 - 客户端支持 Windows 平台，当前仅支持远程 shell 功能
 - 客户端列表显示 OS 信息、端口转发列表显示客户端 ID 信息
 - 本地/远程模式新增子命令 `jdump`：对指定 Java 进程进行堆内存转储
-
----
-
-## v1.4.2 <DateTag>2025-06-03</DateTag>
-
-### Feature
-
 - 端口转发添加并发连接支持、相关代码可维护性优化
 - 网络连接增加超时取消机制
 
