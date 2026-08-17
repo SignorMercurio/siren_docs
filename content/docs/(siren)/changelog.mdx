@@ -10,6 +10,16 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.19.3 <DateTag>2026-08-17</DateTag>
+
+### Improvement
+
+- Agentic IR 会记住当前浏览器选择的 **GUI** 或 **Terminal**，新建会话及刷新页面后保持选择；当前 Provider 不支持时会临时使用可用界面
+
+### Bugfix
+
+- 修复 Claude、Codex 或 Qoder 的提问与审批失效后仍显示为待处理，迟到操作可能重复显示错误的问题
+
 ## v2.19.1 <DateTag>2026-08-13</DateTag>
 
 ### Bugfix

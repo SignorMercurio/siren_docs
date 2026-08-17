@@ -35,7 +35,7 @@ Agentic IR -> 选择 Provider ->（可选）切换 Terminal 开关 -> 选择 Man
 
 ## WebUI AIR
 
-在 [Web 控制台](/webui#agentic-ir) 的 **Agentic IR** 页面中，入口模式和呈现方式相互独立。所有新会话默认使用 **GUI**；启动前可通过 Provider 选择器旁的终端开关改为 **Terminal**。
+在 [Web 控制台](/webui#agentic-ir) 的 **Agentic IR** 页面中，入口模式和呈现方式相互独立。首次使用默认选择 **GUI**；此后页面会记住当前浏览器最后选择的 **GUI** 或 **Terminal**，新建会话及刷新页面后保持选择。当前 Provider 不支持所选界面时，会临时使用可用界面。
 
 - **GUI**：按轮次组织的调查时间线，Agent 的回复原文与操作记录按发生顺序交错展示。连续操作聚合为可折叠的摘要行（点击展开输入与输出），计划以内联进度块呈现，审批和提问以卡片出现在对应位置。多轮会话时左侧有导航刻度，悬停预览各轮内容、点击跳转；向上翻阅后可一键回到最新。
 - **Terminal**：运行真实的 Claude Code、Codex 或 Qoder TUI，保留 Provider 的斜杠命令、自定义 statusline、ANSI 界面和 PTY 交互，适合作为兼容回退或高级操作入口。
