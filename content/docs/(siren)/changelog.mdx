@@ -10,6 +10,18 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.19.6 <DateTag>2026-08-17</DateTag>
+
+### Improvement
+
+- Agentic IR GUI 支持在运行过程中发送补充要求调整后续方向，并保留独立的停止操作
+- Agentic IR GUI 新增统一斜杠命令菜单及 `/status`，Codex 可直接使用上下文压缩、代码审查、模型选择和 MCP 状态查看，Claude 与 Qoder 会补充当前会话公布的命令
+
+### Bugfix
+
+- 修复停止 Claude 或 Qoder 当前工作后 GUI 会话断开、无法继续发送消息的问题
+- 修复方向调整显示为操作记录，以及斜杠命令参数丢失、命令列表无法完整浏览和缺少说明的问题
+
 ## v2.19.3 <DateTag>2026-08-17</DateTag>
 
 ### Improvement

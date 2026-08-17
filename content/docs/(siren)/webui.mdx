@@ -168,7 +168,7 @@ Agentic IR 页面通过 Claude Code、Codex 或 Qoder 完成 [Agentic 应急响�
   Resume 只读取当前视图工作目录对应的 Provider history，不会跨 Project 列出其他目录的历史会话，也不会向浏览器暴露本机 JSONL 文件路径。
 </Callout>
 
-GUI 以时间线交错展示 Agent 回复原文与聚合折叠的操作记录，计划、审批和提问出现在对应位置；输入框下方的状态条显示模型、上下文占用和 Provider 额度。Terminal 保留原有 PTY 行为。两种会话都托管在服务端，刷新浏览器或切换页面后可以重新接入并回放，进程不会因为页面离开而中断。除 Manual 外，会话会使用 SIREN MCP，因此需要启用 [MCP 服务](/mcp#启用与访问)。Project 视图下的工作目录、历史恢复和 MCP 作用域规则见 [Agentic 应急响应](/air#webui-air)。
+GUI 以时间线交错展示 Agent 回复原文与聚合折叠的操作记录，计划、审批和提问出现在对应位置；输入框下方的状态条显示模型、上下文占用和 Provider 额度。Agent 运行时仍可发送补充要求调整后续方向，也可以单独停止当前工作；调整方向不会撤销已经完成的命令、文件修改或远程操作。Terminal 保留原有 PTY 行为。两种会话都托管在服务端，刷新浏览器或切换页面后可以重新接入并回放，进程不会因为页面离开而中断。除 Manual 外，会话会使用 SIREN MCP，因此需要启用 [MCP 服务](/mcp#启用与访问)。Project 视图下的工作目录、历史恢复和 MCP 作用域规则见 [Agentic 应急响应](/air#webui-air)。
 
 ### Investigations
 
