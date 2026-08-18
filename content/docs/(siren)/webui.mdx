@@ -176,7 +176,7 @@ GUI 以时间线交错展示 Agent 回复原文与聚合折叠的操作记录，
 Investigations 页面汇总需要等待结果的调查工具，目前包含 AccessKey 调查、客户端 Recon 和进程分析。
 
 - **AccessKey**，输入阿里云 UID、AccessKey ID 和可选 Region，生成 Markdown 调查报告。Region 留空时默认 `cn-hangzhou`。AccessKey 调查不绑定客户端，报告写入 Global Artifacts。
-- **Recon**，选择在线客户端并下发信息收集命令。页面展示服务端从客户端日志中解析出的阶段，例如 `Recon.Basic`、`Recon.User`、`Recon.Process` 和 `Save report to Artifacts`。
+- **Recon**，选择在线客户端及其实际公布的 Profile 后下发信息收集命令；旧客户端只提供 **Legacy default**。页面显示实际 Profile 和本次 operation 的阶段，例如 `Recon.Basic`、`Recon.User`、`Recon.Process` 和 `Save report to Artifacts`。同一客户端已有 Recon 运行时会直接提示冲突，客户端错误、断连或超时也会结束当前状态，不会一直等待。
 - **Process Analysis**，选择 Linux 客户端后，按 PID、监听端口或进程名查询进程详情。按名称匹配到多个进程时，页面会列出候选项，点击候选 PID 后继续分析。
 - **报告入口**，调查结束后会显示 **Open Artifacts** 按钮。Recon 报告跟随客户端 Project 归属保存；已归属客户端写入 Project 目录，未归属客户端写入 Global Artifacts。
 

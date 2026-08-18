@@ -193,7 +193,7 @@ SIREN Server 基于 readline 实现，支持标准的 [readline 快捷键](https
 
 <Accordion title="信息收集报告中如何减少误报？">
 
-通过[配置文件](/config#客户端配置)中的 `rules` 字段添加白名单或黑名单规则。白名单用于过滤已知正常项，黑名单用于高亮可疑项，值支持正则表达式。
+通过[配置文件](/config#客户端配置)中的 `rules` 字段调整白名单，过滤已知正常项。Recon 不使用黑名单高亮矿工、Webshell 或 Rootkit 特征；可疑性由 AIR 结合采集结果和调查上下文判断。
 
 ```yaml
 rules:

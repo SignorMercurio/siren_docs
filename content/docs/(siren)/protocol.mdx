@@ -14,7 +14,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 SIREN 客户端与服务端的主通道是 TLS TCP 连接。服务端默认监听 `443`，TLS 最低版本为 1.2；同一监听端口也承载 WebUI、WebSocket 和 MCP 的 HTTPS 流量。新版客户端通过 ALPN 标识 SIREN 协议，旧版客户端继续通过首个 `MsgClientHello` 帧识别；HTTP 流量交给 Web 服务处理，不使用本页描述的帧协议。
 
-主通道建立后，客户端必须先发送 `MsgClientHello`。服务端通过该帧完成客户端注册、恢复备注与项目归属，并缓存当前插件列表。后续插件发生安装、卸载、更新或启停变化时，客户端再通过 `MsgPluginRegister` 刷新完整插件列表。
+主通道建立后，客户端必须先发送 `MsgClientHello`。服务端通过该帧完成客户端注册、恢复备注与项目归属，并缓存当前插件列表及 Recon Profile 能力。后续插件发生安装、卸载、更新或启停变化时，客户端通过 `MsgPluginRegister` 刷新完整插件列表；结构化 `reload` 后通过 `MsgClientCapabilities` 刷新 Recon 能力。
 
 交互式 shell 会在主通道之外临时建立一个 TLS relay 连接；端口转发的数据则继续通过主通道上的 `MsgPortForwardData` 分片传输。
 
@@ -46,21 +46,24 @@ type Message struct {
 
 | 类型 | Payload 约定 |
 | --- | --- |
-| `MsgClientHello`、`MsgPluginRegister`、`MsgPluginInvoke`、`MsgPluginManage`、`MsgFSRequest`、`MsgFSResponse` | JSON |
+| `MsgClientHello`、`MsgClientCapabilities`、`MsgPluginRegister`、`MsgPluginInvoke`、`MsgPluginManage`、`MsgFSRequest`、`MsgFSResponse` | JSON |
 | `MsgRun` | 前 4 字节为 big-endian `requestID`，后续为命令或结果 |
 | `MsgInfo` | CLI 场景可发送文本参数；WebUI/MCP 场景使用带 `requestID` 的 JSON |
-| `MsgRecon`、`MsgUpload` | 第一帧为文件名，紧随其后的第二帧必须是 `MsgFile` 文件内容 |
+| `MsgRecon` | 新协议使用带 `version`、`requestId`、`profile` 的 JSON 请求/结果；成功结果后紧跟 `MsgFile`。旧协议仍使用空请求和文件名响应 |
+| `MsgUpload` | 第一帧为文件名，紧随其后的第二帧必须是 `MsgFile` 文件内容 |
 | `MsgPortForward`、`MsgPortForwardData` | 使用固定长度字段承载连接 ID、端口、目标主机和数据分片 |
 | `MsgShell` | `port:cols:rows` 文本，客户端据此连接临时 shell relay |
-| `MsgClean`、`MsgReloadConfig` | 无 payload |
+| `MsgClean` | 无 payload |
+| `MsgReloadConfig` | 可选 JSON；新版服务端请求 reload 后刷新能力，旧版空 payload 仍兼容 |
 
 ## 消息类型
 
 | 消息 | 方向 | 用途 |
 | --- | --- | --- |
-| `MsgClientHello` | Client -> Server | 客户端上线握手，包含稳定 `agentId`、OS 和插件列表 |
+| `MsgClientHello` | Client -> Server | 客户端上线握手，包含稳定 `agentId`、OS、插件列表和可选 Recon Profile 能力 |
+| `MsgClientCapabilities` | Client -> Server | reload 后刷新 Recon 协议版本、默认 Profile 和名称列表 |
 | `MsgPluginRegister` | Client -> Server | 客户端插件列表变化后刷新完整列表 |
-| `MsgRecon` | Server -> Client / Client -> Server | 服务端发起 recon，客户端返回报告文件名 |
+| `MsgRecon` | Server -> Client / Client -> Server | 服务端用 request ID 和 Profile 发起 Recon；客户端返回结构化成功或错误。旧客户端保留文件名响应 |
 | `MsgUpload` | Server -> Client / Client -> Server | 服务端请求客户端上传指定文件，客户端返回文件名 |
 | `MsgFile` | Client -> Server | `recon` 或 `upload` 的文件内容帧 |
 | `MsgRun` | Server -> Client / Client -> Server | 执行远程命令并返回输出 |
@@ -87,7 +90,7 @@ raw 日志单行最大为 `64 KiB`。超过限制或出现无法重新对齐帧�
 ## 错误边界
 
 - 客户端握手帧必须是 `MsgClientHello`，且握手 payload 最大为 `64 KiB`。
-- `MsgRecon` 与 `MsgUpload` 后面必须紧跟 `MsgFile`。如果第二帧类型不匹配，连接会被关闭，避免错误字节流被继续解释为协议帧。
+- 成功的结构化 `MsgRecon` 结果与 `MsgUpload` 文件名后面必须紧跟 `MsgFile`。如果第二帧类型不匹配，连接会被关闭，避免错误字节流被继续解释为协议帧；结构化 Recon 错误不发送文件帧。
 - 超过单帧大小限制、raw 日志行过长或读取到无法识别的服务端消息时，接收方会把连接视为不可恢复。
 - 除 `MsgRun`、`MsgInfo`、`MsgFSResponse`、`MsgPluginResponse`、`MsgPluginRegister` 等明确有响应消息的流程外，管理类消息通常不单独返回 ACK。
 
@@ -101,7 +104,7 @@ sequenceDiagram
     participant C as Client
     participant S as Server
     C->>S: TLS connect
-    C->>S: MsgClientHello {agentId, os, plugins}
+    C->>S: MsgClientHello {agentId, os, plugins, recon capabilities}
     S-->>S: register client and restore metadata
     opt plugins changed later
         C->>S: MsgPluginRegister [full plugin list]
@@ -115,14 +118,21 @@ sequenceDiagram
     autonumber
     participant C as Client
     participant S as Server
-    S->>C: MsgRecon or MsgUpload
-    C-->>C: collect report or read requested file
-    C->>S: MsgRecon or MsgUpload [file name]
-    C->>S: MsgFile [file bytes]
+    S->>C: MsgRecon {requestId, profile} or MsgUpload
+    C-->>C: resolve Profile and collect, or read requested file
+    alt structured Recon success
+        C->>S: MsgRecon {requestId, profile, filename}
+        C->>S: MsgFile [file bytes]
+    else structured Recon error
+        C->>S: MsgRecon {requestId, profile, error}
+    else upload or legacy Recon
+        C->>S: MsgRecon or MsgUpload [file name]
+        C->>S: MsgFile [file bytes]
+    end
     S-->>S: save artifact
 ```
 
-`recon` 会在客户端本地执行内置检查和已启用的 recon 插件，最终把报告作为文件传回服务端。`upload` 使用同样的两帧文件边界，把客户端文件保存到服务端 `uploads/client-<id>/` 下。
+`recon` 会先解析客户端本地 Profile，再按固定顺序执行内置采集和显式引用的 recon 插件。服务端为每个客户端维护单飞 operation；请求 ID 防止迟到响应串入后续操作。新服务端连接旧客户端时只允许 legacy default；新客户端收到旧服务端的空请求时执行自己的默认 Profile 并返回旧式文件帧。`upload` 使用相同的文件边界，把客户端文件保存到服务端 `uploads/client-<id>/` 下。
 
 ### run / info / filesystem
 
@@ -204,4 +214,4 @@ sequenceDiagram
     C-->>C: reload config or clean and exit
 ```
 
-recon 类型插件不走 `MsgPluginInvoke`，而是在 `MsgRecon` 触发的 recon 流程中随内置检查一起执行。
+recon 类型插件不走 `MsgPluginInvoke`，而是在 `MsgRecon` 触发的 Profile 中通过 `plugin:<name>` 显式引用后执行。

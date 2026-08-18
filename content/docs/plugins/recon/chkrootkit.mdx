@@ -12,7 +12,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 | 支持平台 | `linux_amd64`、`linux_arm64` |
 | 依赖 | gcc、make、tar、curl/wget（安装时自动处理） |
 
-使用 [chkrootkit](http://www.chkrootkit.org/) 检测系统中的 Rootkit。作为 recon 插件，安装并启用后会在执行 `recon` 命令时自动运行，检测结果包含在信息收集报告中。
+使用 [chkrootkit](http://www.chkrootkit.org/) 检查系统中的 Rootkit 特征。它是用户显式选择的检测型 recon 插件，不属于 Recon 核心采集能力，也不会自动加入预置 `default` 或 `quick` Profile。
 
 ## 安装
 
@@ -37,22 +37,35 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ## 使用
 
-作为 recon 插件，无需手动调用。执行 `recon` 命令时会自动运行：
+先启用插件，并把 `plugin:chkrootkit` 加入自定义 Profile：
+
+```yaml title="config.yaml"
+recon:
+  defaultProfile: default
+  profiles:
+    default: [user, ssh, process, network, cron, service, env, file, rootkit, application]
+    with-chkrootkit: [user, ssh, process, network, cron, service, env, rootkit, application, "plugin:chkrootkit"]
+
+plugins:
+  chkrootkit: true
+```
+
+然后显式选择该 Profile：
 
 ```bash tab="本地模式"
-./siren recon
+./siren recon --profile with-chkrootkit
 ```
 
 ```bash tab="远程模式"
->>> recon <Client ID>
+>>> recon <Client ID> with-chkrootkit
 ```
 
-如需临时跳过该插件，可先禁用：
+禁用插件后，仍引用它的 Profile 会在采集开始前报错。若要跳过检查，请改用不包含该插件的 `default` 或 `quick` Profile：
 
 ```bash tab="本地模式"
-./siren plugins toggle chkrootkit
+./siren recon --profile quick
 ```
 
 ```bash tab="远程模式"
->>> plugins <Client ID> toggle chkrootkit
+>>> recon <Client ID> quick
 ```

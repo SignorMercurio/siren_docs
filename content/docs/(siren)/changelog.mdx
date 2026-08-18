@@ -10,6 +10,19 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.20.0 <DateTag>2026-08-18</DateTag>
+
+### Feature
+
+- Recon 新增命名 Profile：`default` 保持完整采集，`quick` 只跳过文件模块；本地命令、服务端 REPL、Web 控制台和 MCP 均可选择客户端实际提供的 Profile
+- Recon 插件改为通过 `plugin:<name>` 显式加入 Profile，并统一使用 `plugins.<name>` 启停；安装插件不再自动改变采集集合
+
+### Improvement
+
+- Recon 远程入口统一使用每客户端单飞 operation 和 request ID 关联，断连、结构化错误或超时会立即结束等待，不同客户端仍可并行
+- 客户端上线和 reload 会刷新默认及可用 Profile；旧客户端继续使用 Legacy default，新客户端也兼容旧服务端的空请求与文件回传
+- Recon 明确保持为确定性、白名单降噪的采集器；矿工、Webshell、Rootkit symbol 等检测结论继续由 AIR 结合上下文判断
+
 ## v2.19.7 <DateTag>2026-08-18</DateTag>
 
 ### Improvement

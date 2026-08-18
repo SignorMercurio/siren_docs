@@ -22,7 +22,7 @@ SIREN 的功能可以按应急响应流程理解：接入目标主机，收集�
 
 ## 自动化信息收集
 
-Recon 会在目标主机上采集常见排查证据。除基础信息外，其他模块可在客户端配置中按需开关。
+Recon 会在目标主机上采集常见排查证据。基础信息始终采集，其他模块由命名 Profile 组合；`default` 完整采集，`quick` 只跳过文件模块。Profile 不承载检测规则或结论。
 
 <Cards>
     <Card title="系统与用户" icon={<Users />} href="/recon">系统版本、资源使用、用户列表、权限用户、登录历史和新增用户记录</Card>
@@ -30,7 +30,7 @@ Recon 会在目标主机上采集常见排查证据。除基础信息外，其�
     <Card title="进程与网络" icon={<Activity />} href="/recon">进程列表、资源占用、非默认进程、监听端口、连接、DNS 和路由信息</Card>
     <Card title="计划任务与服务" icon={<Clock />} href="/recon">cron、Windows 计划任务、启动项、systemd 服务和 Windows 服务</Card>
     <Card title="文件" icon={<FileText />} href="/recon">历史命令、临时目录、近期变更文件、大文件、SUID 文件和关键二进制属性</Card>
-    <Card title="Rootkit 与应用" icon={<Cpu />} href="/recon">内核模块、Redis、JDWP、容器和 IIS 线索</Card>
+    <Card title="内核模块与应用" icon={<Cpu />} href="/recon">白名单降噪后的内核模块、Redis、JDWP、容器和 IIS 信息；不做 Rootkit symbol 检测</Card>
 </Cards>
 
 ## 调查与响应
@@ -69,7 +69,7 @@ SIREN 把客户端文件系统、服务端取证目录和报告编辑分成不�
     <Card title="插件系统" icon={<Puzzle />} href="/plugins">安装、卸载、更新和启停 `command` 与 `recon` 插件</Card>
     <Card title="插件列表" icon={<Download />} href="/plugins/list">查看当前可用插件和内置示例插件</Card>
     <Card title="命令插件" icon={<Terminal />} href="/plugins/command/jdump">通过插件新增独立命令，例如 Java 堆转储</Card>
-    <Card title="信息收集插件" icon={<Package />} href="/plugins/recon/chkrootkit">把外部检查项接入 Recon 报告，例如 chkrootkit</Card>
+    <Card title="信息收集插件" icon={<Package />} href="/plugins/recon/chkrootkit">用 `plugin:<name>` 显式加入自定义 Profile；检测型插件不代表 Recon 核心能力</Card>
 </Cards>
 
 ## 配置与基础设施
@@ -77,7 +77,7 @@ SIREN 把客户端文件系统、服务端取证目录和报告编辑分成不�
 不同部署环境需要的外部依赖不同。只启用基础 Recon 时依赖较少，使用 SOAR、OSS、Dossier、AIR 或 MCP 时再按需配置。
 
 <Cards>
-    <Card title="配置文件" icon={<FileEdit />} href="/config">配置 Recon 模块、OSS、通信端口、Web 控制台、MCP、AIR 和插件市场</Card>
+    <Card title="配置文件" icon={<FileEdit />} href="/config">配置 Recon Profile、OSS、通信端口、Web 控制台、MCP、AIR 和插件市场</Card>
     <Card title="凭证设置" icon={<Lock />} href="/credential">设置 OSS、SOAR 和 Alibaba Cloud SDK 凭证，避免把密钥写进配置文件</Card>
     <Card title="关联基础设施" icon={<Cloud />} href="/infra">确认 OSS、SOAR、Dossier、AI CLI、Web 控制台和 MCP 的依赖关系</Card>
     <Card title="通信协议" icon={<Radio />} href="/protocol">了解客户端和服务端之间的 TLS 主通道、文件传输、Shell、端口转发和插件消息</Card>

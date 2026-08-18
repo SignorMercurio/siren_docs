@@ -236,14 +236,18 @@ plugins/
 插件的启用状态存储在配置文件中：
 
 ```yaml title="config.yaml"
-# recon 插件使用 recon.<name> 控制
-recon:
-  chkrootkit: true
-
-# command 插件使用 plugins.<name> 控制
 plugins:
+  chkrootkit: true
   jdump: true
+
+recon:
+  defaultProfile: default
+  profiles:
+    default: [user, process, network]
+    custom: [user, process, network, "plugin:chkrootkit"]
 ```
+
+所有插件统一使用 `plugins.<name>` 控制启停。recon 插件还必须以 `plugin:<name>` 显式写入 Profile；安装插件不会自动修改 Profile。
 
 ### 远程模式交互
 

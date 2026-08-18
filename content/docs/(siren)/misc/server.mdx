@@ -25,7 +25,7 @@ SIREN Server REPL 用于管理在线客户端、下发远程操作，以及处�
 | `shell` | `shell <Client ID>` | 启动交互式远程 Shell | [远程模式](/remote#远程命令执行) |
 | `run` | `run <Client ID> <Command>` | 在客户端执行单条命令并返回结果 | [远程模式](/remote#单条命令执行) |
 | `air` | `air <Client ID> <UID> <Alert ID>` 或 `air <Client ID> <Prompt>` | 启动 Agentic 应急响应 | [Agentic 应急响应](/air) |
-| `recon` | `recon <Client ID>` | 启动自动化信息收集 | [信息收集](/recon) |
+| `recon` | `recon <Client ID> [Profile]` | 启动自动化信息收集；省略时使用客户端默认 Profile | [信息收集](/recon) |
 | `ak` | `ak <UID> <AccessKey ID> [Region]` | 调查 AccessKey 调用历史 | [AccessKey 调查](/ak) |
 | `info` | `info <Client ID> <PID \| -p Port \| -n Name>` | 查看进程详情（仅 Linux） | [进程分析](/analysis/info) |
 | `upload` | `upload <Client ID> <Client file path>` | 将客户端文件保存到服务端 Artifacts | [文件管理](/analysis/upload#命令行上传) |
@@ -43,7 +43,7 @@ SIREN Server REPL 用于管理在线客户端、下发远程操作，以及处�
 
 ## 重新加载客户端配置
 
-修改客户端配置文件后，可用 `reload` 让在线客户端重新读取配置，不需要断开重连。它适合调整[信息收集模块开关](/recon#信息收集模块)、超时参数或插件状态；修改服务端配置仍需重启服务端。
+修改客户端配置文件后，可用 `reload` 让在线客户端重新读取配置并刷新 Recon Profile 能力，不需要断开重连。无效 Profile 配置会被拒绝，并保留上一个有效快照；修改服务端配置仍需重启服务端。
 
 ```bash title="SIREN Server"
 >>> reload 0

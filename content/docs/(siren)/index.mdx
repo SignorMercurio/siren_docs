@@ -133,12 +133,13 @@ iwr -Uri 'https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.ps1' -UseBasi
 
 ```bash tab="Linux"
 cd /opt/siren
-./siren recon
+./siren recon                 # default Profile
+./siren recon --profile quick # 跳过 file 模块
 ```
 
 ```powershell tab="Windows"
 Set-Location C:\Windows\Temp\siren
-.\siren.exe recon
+.\siren.exe recon --profile quick
 ```
 
 #### 远程模式
@@ -175,7 +176,7 @@ Set-Location C:\Windows\Temp\siren
 
 ```bash tab="服务端 REPL"
 >>> ls
->>> recon <Client ID>
+>>> recon <Client ID> [Profile]
 ```
 
 ## 下一步
