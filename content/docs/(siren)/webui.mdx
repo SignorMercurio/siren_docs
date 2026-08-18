@@ -8,7 +8,7 @@ import { Banner } from 'fumadocs-ui/components/banner';
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { Step, Steps } from "fumadocs-ui/components/steps";
-import { Users, Terminal, Brain, Files, FolderKanban, FolderTree, Lock, Plug, Key, BookOpenText, ScrollText } from 'lucide-react';
+import { Users, Terminal, Brain, Files, FolderKanban, FolderTree, Lock, Plug, Key, BookOpenText, ScrollText, Settings } from 'lucide-react';
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
@@ -97,6 +97,7 @@ Web 控制台使用 Session Cookie 鉴权。账号密码存储在 SQLite 数据�
   <Card title="Artifacts" icon={<FolderTree />}>管理服务端取证文件和报告</Card>
   <Card title="Logs" icon={<ScrollText />}>查看服务端运行日志，按级别、组件和关键词过滤</Card>
   <Card title="Dossier" icon={<BookOpenText />}>编辑 Markdown 应急报告</Card>
+  <Card title="Settings" icon={<Settings />}>调整浏览器偏好，查看服务端与 AIR Provider 状态</Card>
 </Cards>
 
 ### Projects
@@ -258,6 +259,18 @@ Dossier 未部署、路径配置错误或默认 `report.md` 缺失时，Web 控�
   - Artifacts 中没有 Dossier 按钮：只有 `.md` 报告支持在 Dossier 中编辑。
   - 旧 HTML 报告无法直接预览：Artifacts 不再内置 HTML 预览，可下载后查看；新的应急报告建议使用 Markdown。
 </Callout>
+
+### Settings
+
+Settings 不在左侧导航里，从左下角的账号入口打开。同一个菜单还提供 Feedback、退出登录和当前版本号。
+
+页面分两部分：
+
+- **Preferences**：偏好只保存在当前浏览器，不跟随账号，也不会同步到其他设备。
+  - 启动时的 Project 范围：沿用上次使用的范围，或每次都从 Global 开始。
+  - Agentic IR 默认界面：沿用上次使用的界面，或固定 GUI / Terminal。固定期间上次使用的记录会被保留，改回"沿用上次使用"时恢复的仍是你真正用过的界面。当前 Provider 不支持所选界面时，仍会临时使用可用的那个。
+  - Clients 列表刷新频率：5 秒到 1 分钟。标签页切到后台时轮询会自动暂停。
+- **Server**：只读信息，包括版本号、鉴权状态与当前用户、Dossier 目录，以及每个 Agentic IR Provider 实际可用的界面。Provider 不可用或只能用其中一种界面时，这里会直接给出原因，不用等到启动会话失败才发现。
 
 ## 配置
 
