@@ -10,6 +10,16 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.20.2 <DateTag>2026-08-18</DateTag>
+
+### Improvement
+
+- Agentic IR 的 Qoder GUI 新增结构化 `/model` 选择，并只展示可确定执行的 `/model` 与 `/status`；Skills、插件、MCP prompts 和 workflows 继续通过 Terminal 使用
+
+### Bugfix
+
+- 修复 Qoder GUI 将未知斜杠命令送入模型队列、长时间等待后才失败的问题；空闲消息和运行中的方向调整现在都会立即提示切换到 Terminal
+
 ## v2.20.1 <DateTag>2026-08-18</DateTag>
 
 ### Improvement
