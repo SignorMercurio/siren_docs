@@ -10,6 +10,20 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.22.0 <DateTag>2026-08-19</DateTag>
+
+### Feature
+
+- Recon 新增显式 opt-in 的 `hunt` Profile，在不改变 `default` / `quick` 的前提下采集应用与服务拓扑、配置与部署材料、凭据和密码策略证据，供 AIR 或其他 Agent 离线分析
+- 新增 `topology`、`config`、`credential` 模块：覆盖常见 Web/应用运行时、中间件、容器与本地 Kubernetes 配置，并记录服务、进程、监听端口、容器、挂载和配置之间的直接可观测关系
+
+### Improvement
+
+- 同一次 Recon 中的进程、socket、服务和容器运行态由多个模块共享，避免为了拓扑和既有报告重复执行系统查询
+- 配置与文本凭据原文只写入权威 Snapshot JSONL，派生 Markdown 仅展示路径、hash、权限、时间和采集状态；每文件、文件数和目录遍历均有独立硬上限
+- Hunt 只采集认证材料和配置事实，不执行在线登录、口令破解、默认口令匹配、secret regex 或不安全配置检测；Windows 受保护的 SAM/SECURITY/LSA 密码材料明确记录为 unavailable
+- 旧布尔配置和无配置 fallback 不会自动启用三个 opt-in 敏感模块；现有 Profile、Snapshot JSONL v1、wire protocol v2、WebUI 和 MCP 接口保持兼容
+
 ## v2.21.1 <DateTag>2026-08-19</DateTag>
 
 ### Feature

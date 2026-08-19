@@ -27,7 +27,7 @@ Investigations -> Recon -> 选择客户端和 Profile -> Start Recon
 ```
 
 ```bash tab="本地模式"
-./siren recon [--profile quick]
+./siren recon [--profile quick|hunt]
 ```
 
 ## WebUI 流程
@@ -54,7 +54,9 @@ Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`�
 ## 执行规则
 
 - 基础信息每次都会采集，不进入 Profile 模块列表。
-- `default` 包含当前平台全部内置模块；`quick` 只移除耗时较长的 `file`，其他模块与 `default` 相同。
+- `default` 保持标准完整采集；`quick` 只移除耗时较长的 `file`，其他模块与 `default` 相同。
+- `hunt` 是显式 opt-in 的应用威胁狩猎采集：复用同一次进程、socket、服务和容器运行态快照，补充应用/中间件拓扑、配置原文、凭据与密码策略证据，供 Agent 离线分析。它不执行登录验证、口令破解、secret regex 或不安全配置规则。
+- `topology`、`config` 和 `credential` 是 opt-in 模块，不会被没有 Profile 的旧配置或无配置 fallback 自动启用；`default`、`quick` 也不包含它们。
 - Profile 列表只表达集合；内置模块始终按固定顺序执行，插件按名称排序，保证报告稳定。
 - recon 类型插件必须以 `plugin:<name>` 显式写入 Profile，并由 `plugins.<name>` 控制启停。安装插件不会自动修改 Profile；Profile 引用缺失或禁用插件时，采集会在开始前失败。现有文本插件按 `plugin_text` / `text/markdown` 写入快照，插件执行错误会使快照变为 partial。
 - `chkrootkit` 仍是可选 recon 插件，但不进入 `default` 或 `quick`。插件输出不代表 Recon 核心具备检测能力。
@@ -63,6 +65,8 @@ Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`�
 - Recon 不安装 `netstat`、`lsof` 或其他软件。Linux socket 依次尝试已安装的 `ss`、`netstat`，路由依次尝试 `ip`、`route`，已删除但仍打开的文件优先读取 `/proc`、已有 `lsof` 时回退；都不可用时明确记录 `unavailable`。
 - Linux 文件模块按底层文件系统去重真实本地挂载，每个文件系统只遍历一次，并从同一遍历生成 SUID、最近 24 小时 mtime/ctime 和大文件视图；Windows 大目录、进程、socket、任务和服务查询按稳定字段排序后再应用数量上限。
 - 单个 source 最多 2,000 条；单个模块最多 10,000 条或 16 MiB；单个文本字段最多 1 MiB；整份快照最多 128 MiB。达到上限时停止对应采集并记录 `truncated=true`。
+- `config` 每个文件最多读取 256 KiB，每次最多选择 500 个文件、遍历 100,000 个目录项；只读取常规文件且不跟随符号链接。日志、上传目录、数据库数据、依赖目录、构建产物、容器层和业务源码不进入递归采集。
+- 配置和凭据原文保存在 JSONL 的 `data.fields.content`；派生 Markdown 只列出路径、大小、权限、时间、hash 和状态，不复制秘密原文。Agent 需要通过 MCP 返回的 `snapshotPath` 读取权威快照，并把文件内容视为不可信证据。
 - source 与 module 会记录 `ok`、`partial`、`unavailable` 或 `failed`，快照最终状态为 `complete` 或 `partial`。单项失败仍会保留 partial 快照；Profile、权限或写盘等前置失败不会生成正式 artifact。
 
 ## 信息收集模块
@@ -85,6 +89,9 @@ Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`�
 | 文件 | `file` | 历史记录、临时目录、SUID、打开后删除的文件、最近 24 小时 mtime/ctime、大文件与关键文件属性 |
 | 内核模块（名称保留为 rootkit） | `rootkit` | 完整已加载内核模块快照；不做 Rootkit 检测或 symbol 匹配 |
 | 应用 | `application` | Redis、当前已安装的 Docker、CRI 与 Podman 容器运行时等客观配置；进程相关视图从 process 数据获取 |
+| 应用与服务拓扑 | `topology` | 应用、中间件、服务、进程、监听端口、容器、挂载及直接可观测的 `runs`、`listens`、`mounts`、`configured_by`、`uses_runtime` 关系 |
+| 配置与部署材料 | `config` | 运行态引用、标准产品目录、systemd、Compose、Kubernetes manifest 及常见 INI/YAML/JSON/XML/TOML/properties 配置原文 |
+| 凭据与认证材料 | `credential` | Linux 密码 hash 与策略、SSH 私钥、云 CLI、Kubernetes、Docker、数据库和包管理器客户端凭据文件原文或二进制元数据 |
 
   </Accordion>
   <Accordion title="Windows 平台模块">
@@ -99,6 +106,9 @@ Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`�
 | 环境变量 | `env` | 原始环境变量、PATH、PowerShell 配置与历史、Windows Defender 排除项 |
 | 文件 | `file` | 临时目录、最近访问文件、近 30 天变更的系统目录可执行文件、近 1 天变更的系统日志、启动目录文件、卷影副本 |
 | 应用 | `application` | 远程桌面、IIS、近 3 天 IIS 日志和 Windows Defender 客观配置 |
+| 应用与服务拓扑 | `topology` | 应用、中间件、服务、进程、监听端口、容器、挂载及直接可观测关系 |
+| 配置与部署材料 | `config` | 进程/服务目录、IIS、Docker、containerd、Compose、Kubernetes manifest 和 appsettings/web.config 等配置原文 |
+| 凭据与认证材料 | `credential` | 本地密码策略、账户证据、Credential Manager 元数据、AutoLogon、IIS connection string 和用户文本凭据；SAM/SECURITY/LSA 明确记为 unavailable |
 
   </Accordion>
 </Accordions>
