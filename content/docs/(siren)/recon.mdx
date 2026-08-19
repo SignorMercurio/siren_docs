@@ -47,7 +47,7 @@ WebUI 会展示本次 operation 的真实 Profile 与采集阶段，比如 `Reco
 | 服务端 REPL | 与 WebUI 一样保存到服务端 Artifacts，目录由客户端的 Project 归属决定 |
 | 本地模式 | 在当前目录生成 JSONL 与 Markdown，并分别上传到 OSS 的 `<oss.docObjectPath>/<file name>` |
 
-同一次采集会生成 `SIREN_<host>_<timestamp>.recon.jsonl` 和同名 `.md`。远程模式只传输 JSONL，服务端校验后生成 Markdown，并将两者保存在同一 Global 或 Project Artifacts 目录。Dossier 只编辑派生 Markdown，不修改权威快照。
+同一次本地采集会生成 `SIREN_<host>_<timestamp>.recon.jsonl` 和同名 `.md`。远程模式只传输 JSONL，服务端校验后生成 Markdown，并在保存名中加入客户端与请求标识，避免同名主机或并发结果相互覆盖；两者位于同一 Global 或 Project Artifacts 目录。Dossier 只编辑派生 Markdown，不修改权威快照。
 
 Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`、`source_result`、`module_end` 和 `snapshot_end`。记录带序号、观测时间、模块、source、类型化 data 和采集范围；结果事件带状态、耗时、数量、字节数、使用工具、错误与截断信息。
 
@@ -59,6 +59,7 @@ Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`�
 - recon 类型插件必须以 `plugin:<name>` 显式写入 Profile，并由 `plugins.<name>` 控制启停。安装插件不会自动修改 Profile；Profile 引用缺失或禁用插件时，采集会在开始前失败。现有文本插件按 `plugin_text` / `text/markdown` 写入快照，插件执行错误会使快照变为 partial。
 - `chkrootkit` 仍是可选 recon 插件，但不进入 `default` 或 `quick`。插件输出不代表 Recon 核心具备检测能力。
 - 每个 source 的底层采集命令都有独立超时，默认 30 秒，可通过[客户端配置](/config#客户端配置)中的 `recon.commandTimeout` 修改。某个 source 超时不会占用后续 source 的预算，未完成状态会关联到实际 source。
+- 整个 Profile 默认有 270 秒客户端采集预算，可通过 `recon.collectionTimeout` 修改。远程 v2 请求还会根据服务端等待时间下发更短预算；预算耗尽会保留已完成的 Basic 和模块结果，并明确列出未执行模块。服务端等待超时时会结束 operation、释放该客户端的单飞占用并请求取消；迟到 artifact 仍可安全保存，但不会关联到新 operation。
 - Recon 不安装 `netstat`、`lsof` 或其他软件。Linux socket 依次尝试已安装的 `ss`、`netstat`，路由依次尝试 `ip`、`route`，已删除但仍打开的文件优先读取 `/proc`、已有 `lsof` 时回退；都不可用时明确记录 `unavailable`。
 - Linux 文件模块按底层文件系统去重真实本地挂载，每个文件系统只遍历一次，并从同一遍历生成 SUID、最近 24 小时 mtime/ctime 和大文件视图；Windows 大目录、进程、socket、任务和服务查询按稳定字段排序后再应用数量上限。
 - 单个 source 最多 2,000 条；单个模块最多 10,000 条或 16 MiB；单个文本字段最多 1 MiB；整份快照最多 128 MiB。达到上限时停止对应采集并记录 `truncated=true`。
@@ -83,7 +84,7 @@ Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`�
 | 环境变量 | `env` | 原始环境变量、进程环境、加载器配置、profile/rc/environment、`profile.d` 和 alias |
 | 文件 | `file` | 历史记录、临时目录、SUID、打开后删除的文件、最近 24 小时 mtime/ctime、大文件与关键文件属性 |
 | 内核模块（名称保留为 rootkit） | `rootkit` | 完整已加载内核模块快照；不做 Rootkit 检测或 symbol 匹配 |
-| 应用 | `application` | Redis、容器等客观配置；进程相关视图从 process 数据获取 |
+| 应用 | `application` | Redis、当前已安装的 Docker、CRI 与 Podman 容器运行时等客观配置；进程相关视图从 process 数据获取 |
 
   </Accordion>
   <Accordion title="Windows 平台模块">

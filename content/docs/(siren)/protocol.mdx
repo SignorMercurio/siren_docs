@@ -49,7 +49,7 @@ type Message struct {
 | `MsgClientHello`、`MsgClientCapabilities`、`MsgPluginRegister`、`MsgPluginInvoke`、`MsgPluginManage`、`MsgFSRequest`、`MsgFSResponse` | JSON |
 | `MsgRun` | 前 4 字节为 big-endian `requestID`，后续为命令或结果 |
 | `MsgInfo` | CLI 场景可发送文本参数；WebUI/MCP 场景使用带 `requestID` 的 JSON |
-| `MsgRecon` | v2 请求增加 `format=snapshot-jsonl-v1`；成功结果包含 Profile、format、`complete|partial` 和 JSONL 文件名，随后紧跟一个 `MsgFile`。v1 继续传 Markdown，旧协议仍使用空请求和文件名响应 |
+| `MsgRecon` | v2 请求包含 `format=snapshot-jsonl-v1`、客户端采集预算，并支持按 request ID 取消；成功结果包含 Profile、format、`complete|partial` 和 JSONL 文件名，随后紧跟一个 `MsgFile`。v1 继续传 Markdown，旧协议仍使用空请求和文件名响应 |
 | `MsgUpload` | 第一帧为文件名，紧随其后的第二帧必须是 `MsgFile` 文件内容 |
 | `MsgPortForward`、`MsgPortForwardData` | 使用固定长度字段承载连接 ID、端口、目标主机和数据分片 |
 | `MsgShell` | `port:cols:rows` 文本，客户端据此连接临时 shell relay |
@@ -95,6 +95,8 @@ type Message struct {
 客户端完成握手后会把日志输出重定向到主连接。服务端读取客户端数据时，如果首字节不在标准消息类型范围内，会把它当作 raw 日志行读取到 `\n`，打印到终端并记录到 WebUI Recon 日志流，然后继续读取下一帧。
 
 raw 日志单行最大为 `64 KiB`。超过限制或出现无法重新对齐帧边界的错误时，服务端会关闭当前连接。
+
+Recon 请求与结果 JSON 控制帧最大为 `64 KiB`；v2 Snapshot 的后续 `MsgFile` 在读取正文前按 `128 MiB` 上限检查并流式保存，v1/legacy Markdown 也会在分配正文前应用相同上限。控制帧与 artifact 使用不同边界，异常长度不会触发大块内存分配。
 
 ## 错误边界
 
@@ -145,7 +147,7 @@ sequenceDiagram
     S-->>S: save artifact
 ```
 
-`recon` 会先解析客户端本地 Profile，再按固定顺序执行内置采集和显式引用的 recon 插件。服务端为每个客户端维护单飞 operation；请求 ID 防止迟到响应串入后续操作。新服务端连接旧客户端时只允许 legacy default；新客户端收到旧服务端的空请求时执行自己的默认 Profile 并返回旧式文件帧。`upload` 使用相同的文件边界，把客户端文件保存到服务端 `uploads/client-<id>/` 下。
+`recon` 会先解析客户端本地 Profile，再按固定顺序执行内置采集和显式引用的 recon 插件。服务端为每个客户端维护单飞 operation；请求 ID 防止迟到响应串入后续操作。服务端等待超时时会立即释放 operation，并向 v2 客户端发送同 request ID 的取消请求；有 request ID 的迟到结果可保存，但不能满足新请求。pre-Profile legacy 文件帧没有 request ID，因此超时会关闭旧会话，由客户端重连后再接受新操作。新服务端连接旧客户端时只允许 legacy default；新客户端收到旧服务端的空请求时执行自己的默认 Profile 并返回旧式文件帧。`upload` 使用相同的文件边界，把客户端文件保存到服务端 `uploads/client-<id>/` 下。
 
 ### run / info / filesystem
 

@@ -23,15 +23,18 @@ export const DateTag = ({ children }) => (
 - 删除客户端 `rules` 与白名单过滤，账户、进程、任务、服务、内核模块、环境变量、配置和历史记录按声明范围原样采集，分析与判断交给 AIR
 - Linux Recon 不再自动安装 `netstat` 或 `lsof`，改用原生能力、已有工具回退和明确的 unavailable 状态
 - Recon 为每个 source 提供独立命令预算；Linux 文件视图按底层文件系统去重并由单次遍历生成，Windows 大目录与进程、socket、任务、服务查询按稳定字段排序后应用结果上限
+- Recon 新增默认 270 秒的 Profile 总采集预算；远程 v2 请求会提前收敛客户端采集并支持按 request ID 取消，服务端超时后立即释放单飞占用
 - v2 Snapshot 在客户端和服务端之间流式传输，服务端在接收正文前执行 128 MiB 上限检查，避免大快照产生多份内存副本
-- WebUI 继续只提供 **Open Report**，partial 快照显示简短警告；MCP 正文继续返回 Markdown，并补充 status、report path 与 snapshot path
+- 服务端会严格校验 Snapshot 的事件顺序、范围和状态后再生成 Markdown，格式无效时立即返回错误
+- WebUI 继续只提供 **Open Report**，partial 快照显示简短警告；MCP 正文继续返回 Markdown，并补充 status、report path 与 snapshot path，正文预览上限为 2 MiB
 
 ### Bugfix
 
 - 分离 Recon 原始观测数据与内部状态标记，历史记录、环境变量、文件名和插件文本中的相似内容不再改变 source 归属或采集状态
 - 修复快照总量边界可能删除 partial artifact、静默省略后续模块或产生未闭合 Markdown 的问题；省略模块和 snapshot-level partial 原因现在会被明确记录
 - 修复 Snapshot 校验、写盘或渲染失败后 operation 继续等待超时，以及迟到 artifact 事件被关联到下一次 Recon 的问题
-- 服务端保存的 v2 artifact 文件名加入客户端和请求标识，避免同名主机并发采集相互覆盖
+- 服务端保存的所有远程 Recon artifact 文件名加入客户端和请求标识，并使用禁止覆盖的原子提交，避免同名主机、旧客户端或重复结果相互覆盖
+- 修复无匹配日志、缺失可选配置或不可用工具被误记为采集失败，以及 Linux 最近文件/大文件有界结果未按真实时间与大小稳定选择的问题
 
 ## v2.20.2 <DateTag>2026-08-18</DateTag>
 

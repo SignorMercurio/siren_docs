@@ -30,6 +30,7 @@ port: 443                                   # 服务端端口
 
 recon:
   commandTimeout: 30                        # Recon 单个 source 命令执行超时时间
+  collectionTimeout: 270                    # 整个 Profile 的客户端采集预算
   defaultProfile: default                   # 省略 --profile 时使用
   profiles:
     default: [user, ssh, process, network, cron, service, env, file, rootkit, application]
@@ -53,6 +54,7 @@ plugins:
 | `server` | string | `127.0.0.1` | 远程模式下连接的服务端地址 |
 | `port` | int | `443` | 远程模式下连接的服务端端口 |
 | `recon.commandTimeout` | int | `30` | Recon 单个 source 命令和客户端远程命令执行的基础超时时间（秒）；MCP / AIR 慢命令建议服务端也设置相同值 |
+| `recon.collectionTimeout` | int | `270` | 客户端完成整个 Recon Profile 的总预算（秒）；远程 v2 请求会取该值与服务端下发预算中的较小值 |
 | `recon.defaultProfile` | string | `default` | 本地命令未传 `--profile` 或远程入口未指定 Profile 时使用的名称 |
 | `recon.profiles.<name>` | list | 见示例 | 命名的模块集合；只选择采集模块，不覆盖超时、资源上限或分析逻辑。`default` 为完整采集，`quick` 只移除 `file` |
 | `oss.region` | string | - | OSS Bucket 所在地域 |
