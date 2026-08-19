@@ -191,20 +191,6 @@ SIREN Server 基于 readline 实现，支持标准的 [readline 快捷键](https
 
 </Accordion>
 
-<Accordion title="信息收集报告中如何减少误报？">
-
-通过[配置文件](/config#客户端配置)中的 `rules` 字段调整白名单，过滤已知正常项。Recon 不使用黑名单高亮矿工、Webshell 或 Rootkit 特征；可疑性由 AIR 结合采集结果和调查上下文判断。
-
-```yaml
-rules:
-  ipwhitelist: 140\.205\.11\.\d+|10\.0\.0\.\d+
-  processwhitelist: sshd|systemd|crond
-```
-
-修改规则后，需要让客户端重新加载配置。本地模式重新运行命令即可；远程模式可以在服务端 REPL 中执行 `reload <Client ID>`。
-
-</Accordion>
-
 <Accordion title="如何管理插件？">
 
 本地模式和远程模式都支持安装、卸载、更新和启停插件。插件从客户端配置里的 `plugins.marketplace` 下载，安装后保存在客户端工作目录的 `plugins/` 下。

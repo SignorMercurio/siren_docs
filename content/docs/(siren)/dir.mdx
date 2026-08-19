@@ -68,6 +68,7 @@ icon: FolderTree
       <File name="protocol.go" desc="标准帧、消息类型和读取边界" />
       <File name="client.go" desc="客户端握手和插件列表编码" />
       <File name="run.go" desc="远程命令请求和响应编码" />
+      <File name="recon.go" desc="Recon v1/v2 能力、请求和结果编码" />
       <File name="info.go" desc="进程分析请求和响应编码" />
       <File name="fs.go" desc="客户端文件操作请求和响应编码" />
       <File name="portforward.go" desc="端口转发请求和数据编码" />
@@ -75,8 +76,7 @@ icon: FolderTree
       <File name="preview.go" desc="文件预览类型判断" />
       <File name="tls.go" desc="客户端和服务端 TLS 配置" />
     </Folder>
-    <Folder name="recon" desc="Linux 和 Windows Recon 模块" defaultOpen={false} />
-    <Folder name="rules" desc="从客户端配置加载 Recon 规则" defaultOpen={false} />
+    <Folder name="recon" desc="Snapshot writer、Markdown renderer、Profile 与平台采集模块" defaultOpen={false} />
     <Folder name="server" desc="服务端核心实现">
       <File name="server.go" desc="共享 TLS 监听、握手和客户端注册" />
       <File name="shared_tls.go" desc="客户端协议与 HTTPS 的连接分流" />

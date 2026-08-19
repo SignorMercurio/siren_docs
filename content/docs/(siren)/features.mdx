@@ -13,7 +13,7 @@ SIREN 的功能可以按应急响应流程理解：接入目标主机，收集�
 
 <Cards>
     <Card title="本地与远程模式" icon={<Radio />} href="/index#模式选择">本地模式适合离线单机排查；远程模式通过 SIREN Server 管理在线客户端</Card>
-    <Card title="自动化信息收集" icon={<Info />} href="/recon">采集主机关键安全信息，生成结构化 Markdown 报告</Card>
+    <Card title="自动化信息收集" icon={<Info />} href="/recon">生成有明确范围和上限的 JSONL 主机快照与派生 Markdown</Card>
     <Card title="服务端 REPL" icon={<Terminal />} href="/remote">在控制主机终端管理客户端、执行命令、打开 Shell 和启动 AIR</Card>
     <Card title="Web 控制台" icon={<LayoutDashboard />} href="/webui">通过浏览器管理 Projects、Clients、Shells、Investigations、Files、Artifacts 和 Dossier</Card>
     <Card title="Projects 工作区" icon={<FolderKanban />} href="/webui#projects">按应急响应项目隔离客户端、操作目标、AIR 工作目录和取证目录</Card>
@@ -22,15 +22,15 @@ SIREN 的功能可以按应急响应流程理解：接入目标主机，收集�
 
 ## 自动化信息收集
 
-Recon 会在目标主机上采集常见排查证据。基础信息始终采集，其他模块由命名 Profile 组合；`default` 完整采集，`quick` 只跳过文件模块。Profile 不承载检测规则或结论。
+Recon 会在目标主机上采集客观状态。基础信息始终采集，其他模块由命名 Profile 组合；`default` 完整采集，`quick` 只跳过文件模块。Profile 不承载分析规则或结论，工具缺失、失败和截断会明确进入快照状态。
 
 <Cards>
     <Card title="系统与用户" icon={<Users />} href="/recon">系统版本、资源使用、用户列表、权限用户、登录历史和新增用户记录</Card>
-    <Card title="SSH 与登录线索" icon={<Terminal />} href="/recon">SSH 配置、authorized_keys、暴力破解记录和常见后门线索</Card>
-    <Card title="进程与网络" icon={<Activity />} href="/recon">进程列表、资源占用、非默认进程、监听端口、连接、DNS 和路由信息</Card>
+    <Card title="SSH 与登录" icon={<Terminal />} href="/recon">SSH 配置、authorized_keys、PAM 元数据、会话和登录记录</Card>
+    <Card title="进程与网络" icon={<Activity />} href="/recon">完整进程与 socket 快照、资源字段、DNS、路由和防火墙配置</Card>
     <Card title="计划任务与服务" icon={<Clock />} href="/recon">cron、Windows 计划任务、启动项、systemd 服务和 Windows 服务</Card>
     <Card title="文件" icon={<FileText />} href="/recon">历史命令、临时目录、近期变更文件、大文件、SUID 文件和关键二进制属性</Card>
-    <Card title="内核模块与应用" icon={<Cpu />} href="/recon">白名单降噪后的内核模块、Redis、JDWP、容器和 IIS 信息；不做 Rootkit symbol 检测</Card>
+    <Card title="内核模块与应用" icon={<Cpu />} href="/recon">完整已加载内核模块、Redis、容器、RDP、IIS 和 Defender 配置</Card>
 </Cards>
 
 ## 调查与响应
@@ -55,7 +55,7 @@ SIREN 把客户端文件系统、服务端取证目录和报告编辑分成不�
     <Card title="服务端 Artifacts" icon={<FolderTree />} href="/webui#artifacts">管理 Global 工作目录或 Project 目录中的报告、取证文件和上传文件</Card>
     <Card title="文件管理" icon={<FileText />} href="/analysis/upload">了解 Web 控制台文件管理能力，以及本地模式和服务端 REPL 的 upload 命令</Card>
     <Card title="Dossier 报告编辑" icon={<BookOpen />} href="/dossier">编辑 Markdown 应急报告、保存粘贴图片，并导出 PDF 或 HTML 报告</Card>
-    <Card title="本地 Recon 报告" icon={<FileText />} href="/recon#查看数据">本地模式在当前目录生成 Markdown 报告，也可按配置上传到 OSS</Card>
+    <Card title="本地 Recon artifacts" icon={<FileText />} href="/recon#查看数据">本地模式生成权威 JSONL 与派生 Markdown，也可按配置上传到 OSS</Card>
     <Card title="Project 取证目录" icon={<FolderKanban />} href="/webui#projects">Project 视图下的 Recon、AIR、Artifacts 和报告文件会落到对应项目目录</Card>
 </Cards>
 

@@ -10,6 +10,29 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.21.1 <DateTag>2026-08-19</DateTag>
+
+### Feature
+
+- Recon 新增 Snapshot JSONL v1：`*.recon.jsonl` 作为权威主机快照，服务端校验后确定性生成同名 Markdown，并在本地、Global Artifacts 和 Project Artifacts 中保留双 artifact
+- Recon wire protocol 升级到 v2，公布 artifact format，并在结果中返回 Profile、`complete|partial` 状态和 snapshot 文件名；v1 Markdown 与 Legacy default 客户端继续兼容
+
+### Improvement
+
+- Recon 改为有明确范围与上限的客观采集：source、module、字段和整份快照均有硬限制，工具缺失、采集失败与截断会记录为 `unavailable`、`failed` 或 `partial`
+- 删除客户端 `rules` 与白名单过滤，账户、进程、任务、服务、内核模块、环境变量、配置和历史记录按声明范围原样采集，分析与判断交给 AIR
+- Linux Recon 不再自动安装 `netstat` 或 `lsof`，改用原生能力、已有工具回退和明确的 unavailable 状态
+- Recon 为每个 source 提供独立命令预算；Linux 文件视图按底层文件系统去重并由单次遍历生成，Windows 大目录与进程、socket、任务、服务查询按稳定字段排序后应用结果上限
+- v2 Snapshot 在客户端和服务端之间流式传输，服务端在接收正文前执行 128 MiB 上限检查，避免大快照产生多份内存副本
+- WebUI 继续只提供 **Open Report**，partial 快照显示简短警告；MCP 正文继续返回 Markdown，并补充 status、report path 与 snapshot path
+
+### Bugfix
+
+- 分离 Recon 原始观测数据与内部状态标记，历史记录、环境变量、文件名和插件文本中的相似内容不再改变 source 归属或采集状态
+- 修复快照总量边界可能删除 partial artifact、静默省略后续模块或产生未闭合 Markdown 的问题；省略模块和 snapshot-level partial 原因现在会被明确记录
+- 修复 Snapshot 校验、写盘或渲染失败后 operation 继续等待超时，以及迟到 artifact 事件被关联到下一次 Recon 的问题
+- 服务端保存的 v2 artifact 文件名加入客户端和请求标识，避免同名主机并发采集相互覆盖
+
 ## v2.20.2 <DateTag>2026-08-18</DateTag>
 
 ### Improvement
@@ -37,7 +60,6 @@ export const DateTag = ({ children }) => (
 
 - Recon 远程入口统一使用每客户端单飞 operation 和 request ID 关联，断连、结构化错误或超时会立即结束等待，不同客户端仍可并行
 - 客户端上线和 reload 会刷新默认及可用 Profile；旧客户端继续使用 Legacy default，新客户端也兼容旧服务端的空请求与文件回传
-- Recon 明确保持为确定性、白名单降噪的采集器；矿工、Webshell、Rootkit symbol 等检测结论继续由 AIR 结合上下文判断
 
 ## v2.19.7 <DateTag>2026-08-18</DateTag>
 

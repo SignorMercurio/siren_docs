@@ -29,7 +29,7 @@ server: 127.0.0.1                           # 服务端地址
 port: 443                                   # 服务端端口
 
 recon:
-  commandTimeout: 30                        # 命令执行超时时间
+  commandTimeout: 30                        # Recon 单个 source 命令执行超时时间
   defaultProfile: default                   # 省略 --profile 时使用
   profiles:
     default: [user, ssh, process, network, cron, service, env, file, rootkit, application]
@@ -39,15 +39,11 @@ oss:
   region: cn-hongkong                       # OSS Bucket Region
   bucketName: ir-transfer-station           # OSS Bucket 名称
   objectPath: tmp/siren_upload              # 本地 upload 文件上传路径
-  docObjectPath: tmp/siren_upload/docs/latest # 本地 recon 文档上传路径前缀
+  docObjectPath: tmp/siren_upload/docs/latest # 本地 Recon artifacts 上传路径前缀
 
 plugins:
   marketplace: https://example.com/plugins  # 插件市场地址
   collector: true                           # 所有类型插件统一开关
-
-rules:                                      # 信息收集规则
-  IPWhitelist: 140\.205\.11\.\d+|8\.147\.237\.0
-  # ...other rules
 ```
 
 ### 配置项说明
@@ -56,24 +52,18 @@ rules:                                      # 信息收集规则
 | --- | --- | --- | --- |
 | `server` | string | `127.0.0.1` | 远程模式下连接的服务端地址 |
 | `port` | int | `443` | 远程模式下连接的服务端端口 |
-| `recon.commandTimeout` | int | `30` | 信息收集和客户端远程命令执行的基础超时时间（秒）；MCP / AIR 慢命令建议服务端也设置相同值 |
+| `recon.commandTimeout` | int | `30` | Recon 单个 source 命令和客户端远程命令执行的基础超时时间（秒）；MCP / AIR 慢命令建议服务端也设置相同值 |
 | `recon.defaultProfile` | string | `default` | 本地命令未传 `--profile` 或远程入口未指定 Profile 时使用的名称 |
-| `recon.profiles.<name>` | list | 见示例 | 命名的模块集合；只选择采集模块，不覆盖规则、超时或检测逻辑。`default` 为完整采集，`quick` 只移除 `file` |
+| `recon.profiles.<name>` | list | 见示例 | 命名的模块集合；只选择采集模块，不覆盖超时、资源上限或分析逻辑。`default` 为完整采集，`quick` 只移除 `file` |
 | `oss.region` | string | - | OSS Bucket 所在地域 |
 | `oss.bucketName` | string | - | OSS Bucket 名称 |
 | `oss.objectPath` | string | `tmp/siren_upload` | 本地 `siren upload` 的 OSS 路径前缀 |
-| `oss.docObjectPath` | string | `tmp/siren_upload/docs/latest` | 本地 `siren recon` 文档上传的 OSS 路径前缀 |
+| `oss.docObjectPath` | string | `tmp/siren_upload/docs/latest` | 本地 `siren recon` 的 JSONL 与 Markdown 上传路径前缀 |
 | `plugins.marketplace` | string | - | 插件市场 URL，用于下载和更新插件 |
 | `plugins.<name>` | bool | - | 启用或禁用插件，command 与 recon 类型统一使用该开关 |
-| `rules` | map | - | 白名单等环境基线规则，值为正则表达式 |
-
-<Callout title="关于 rules" type="info">
-  Recon 只使用相关白名单减少已知正常项带来的噪音，不把 `rules` 当作黑名单或签名检测引擎。矿工、Webshell、Rootkit symbol 等判断由 AIR 结合上下文完成。
-</Callout>
-
 Profile 名必须匹配 `^[a-z][a-z0-9_-]{0,63}$`。每个 Profile 包含 1–64 个不重复模块；未知模块会使配置加载失败。`Basic` 始终执行，不写入列表。recon 插件以 `plugin:<name>` 引用，例如 `custom: [user, process, plugin:collector]`；插件缺失或被 `plugins.<name>` 禁用时，采集开始前会失败。
 
-没有 `recon.profiles` 的旧配置会把已启用的 `recon.<module>` 与旧式 recon 插件合成为唯一的 `default`，并记录迁移提示。新旧结构同时存在时，以 Profile 为准，旧键被忽略。无效的远程 `reload` 会保留上一个有效 Profile 快照。
+没有 `recon.profiles` 的旧配置会把已启用的 `recon.<module>` 与旧式 recon 插件合成为唯一的 `default`，并记录迁移提示。新旧结构同时存在时，以 Profile 为准，旧键被忽略。旧配置中残留的 `rules` 不影响启动，但会记录一次已忽略提示；这些规则不再参与 Recon。无效的远程 `reload` 会保留上一个有效 Profile 快照。
 
 ## 服务端配置
 

@@ -14,7 +14,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 SIREN 客户端与服务端的主通道是 TLS TCP 连接。服务端默认监听 `443`，TLS 最低版本为 1.2；同一监听端口也承载 WebUI、WebSocket 和 MCP 的 HTTPS 流量。新版客户端通过 ALPN 标识 SIREN 协议，旧版客户端继续通过首个 `MsgClientHello` 帧识别；HTTP 流量交给 Web 服务处理，不使用本页描述的帧协议。
 
-主通道建立后，客户端必须先发送 `MsgClientHello`。服务端通过该帧完成客户端注册、恢复备注与项目归属，并缓存当前插件列表及 Recon Profile 能力。后续插件发生安装、卸载、更新或启停变化时，客户端通过 `MsgPluginRegister` 刷新完整插件列表；结构化 `reload` 后通过 `MsgClientCapabilities` 刷新 Recon 能力。
+主通道建立后，客户端必须先发送 `MsgClientHello`。服务端通过该帧完成客户端注册、恢复备注与项目归属，并缓存当前插件列表及 Recon Profile、artifact format 能力。后续插件发生安装、卸载、更新或启停变化时，客户端通过 `MsgPluginRegister` 刷新完整插件列表；结构化 `reload` 后通过 `MsgClientCapabilities` 刷新 Recon 能力。
 
 交互式 shell 会在主通道之外临时建立一个 TLS relay 连接；端口转发的数据则继续通过主通道上的 `MsgPortForwardData` 分片传输。
 
@@ -49,7 +49,7 @@ type Message struct {
 | `MsgClientHello`、`MsgClientCapabilities`、`MsgPluginRegister`、`MsgPluginInvoke`、`MsgPluginManage`、`MsgFSRequest`、`MsgFSResponse` | JSON |
 | `MsgRun` | 前 4 字节为 big-endian `requestID`，后续为命令或结果 |
 | `MsgInfo` | CLI 场景可发送文本参数；WebUI/MCP 场景使用带 `requestID` 的 JSON |
-| `MsgRecon` | 新协议使用带 `version`、`requestId`、`profile` 的 JSON 请求/结果；成功结果后紧跟 `MsgFile`。旧协议仍使用空请求和文件名响应 |
+| `MsgRecon` | v2 请求增加 `format=snapshot-jsonl-v1`；成功结果包含 Profile、format、`complete|partial` 和 JSONL 文件名，随后紧跟一个 `MsgFile`。v1 继续传 Markdown，旧协议仍使用空请求和文件名响应 |
 | `MsgUpload` | 第一帧为文件名，紧随其后的第二帧必须是 `MsgFile` 文件内容 |
 | `MsgPortForward`、`MsgPortForwardData` | 使用固定长度字段承载连接 ID、端口、目标主机和数据分片 |
 | `MsgShell` | `port:cols:rows` 文本，客户端据此连接临时 shell relay |
@@ -61,7 +61,7 @@ type Message struct {
 | 消息 | 方向 | 用途 |
 | --- | --- | --- |
 | `MsgClientHello` | Client -> Server | 客户端上线握手，包含稳定 `agentId`、OS、插件列表和可选 Recon Profile 能力 |
-| `MsgClientCapabilities` | Client -> Server | reload 后刷新 Recon 协议版本、默认 Profile 和名称列表 |
+| `MsgClientCapabilities` | Client -> Server | reload 后刷新 Recon 协议版本、默认 Profile、名称列表和 artifact formats |
 | `MsgPluginRegister` | Client -> Server | 客户端插件列表变化后刷新完整列表 |
 | `MsgRecon` | Server -> Client / Client -> Server | 服务端用 request ID 和 Profile 发起 Recon；客户端返回结构化成功或错误。旧客户端保留文件名响应 |
 | `MsgUpload` | Server -> Client / Client -> Server | 服务端请求客户端上传指定文件，客户端返回文件名 |
@@ -80,6 +80,15 @@ type Message struct {
 | `MsgFSResponse` | Client -> Server | WebUI 文件操作响应 |
 
 `MsgPortForwardStop` 当前仅保留为消息类型定义，现行 `stopfwd` 流程通过服务端取消转发上下文来关闭监听，不向客户端发送停止帧。
+
+### Recon 兼容
+
+| 组合 | 行为 |
+| --- | --- |
+| v2 客户端 + v2 服务端 | 服务端请求 `snapshot-jsonl-v1`，客户端只传 JSONL，服务端生成 Markdown |
+| v1 Profile 客户端 + 新服务端 | 继续按 request ID 传 Markdown |
+| Legacy 客户端 + 新服务端 | 只允许省略 Profile 的 Legacy default，沿用空请求和 Markdown 文件帧 |
+| 新客户端 + 旧服务端 | 收到空请求后执行默认 Profile，只传 Markdown，不发送 JSONL |
 
 ## Raw 日志
 
@@ -118,11 +127,15 @@ sequenceDiagram
     autonumber
     participant C as Client
     participant S as Server
-    S->>C: MsgRecon {requestId, profile} or MsgUpload
+    S->>C: MsgRecon {requestId, profile, format} or MsgUpload
     C-->>C: resolve Profile and collect, or read requested file
-    alt structured Recon success
+    alt Recon v2 success
+        C->>S: MsgRecon {requestId, profile, format, status, filename}
+        C->>S: MsgFile [Snapshot JSONL]
+        S-->>S: validate JSONL and render Markdown
+    else Recon v1 success
         C->>S: MsgRecon {requestId, profile, filename}
-        C->>S: MsgFile [file bytes]
+        C->>S: MsgFile [Markdown]
     else structured Recon error
         C->>S: MsgRecon {requestId, profile, error}
     else upload or legacy Recon

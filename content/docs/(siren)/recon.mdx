@@ -1,6 +1,6 @@
 ---
 title: 自动化信息收集
-description: 运行 Recon 收集主机信息并生成 Markdown 报告
+description: 运行 Recon 生成有明确范围和上限的主机快照
 icon: Info
 ---
 
@@ -8,10 +8,12 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 
-自动化信息收集（Recon）会在目标主机上收集系统、用户、进程、网络、计划任务、文件和应用配置等信息，并生成 Markdown 报告。Recon Profile 是“命名的确定性采集集合”：Profile 只选择模块，不覆盖规则、超时或检测逻辑。Recon 只做客观采集并用白名单降低正常环境噪音；是否可疑交给 [Agentic 应急响应](/air) 结合上下文判断，Recon 本身不做挖矿程序、Webshell、Rootkit 等黑名单或签名判定。
+自动化信息收集（Recon）会在目标主机上生成有明确范围和上限的客观快照。权威数据保存为版本化 `*.recon.jsonl`，供精确查询和跨快照比较；`*.md` 由同一份快照确定性生成，供 WebUI、MCP、AIR、Dossier 和人工阅读。Recon Profile 只选择模块，不覆盖超时、资源上限或分析逻辑。
+
+Recon 不判断主机状态是否正常，也不执行白名单、黑名单、矿工、Webshell、Rootkit symbol 等规则。原始环境变量、凭证、配置和历史记录会按采集范围写入快照；是否存在风险由 [Agentic 应急响应](/air) 或其他分析流程结合上下文判断。
 
 <Callout title="前置条件" type="info">
-  目标主机需要具备足够权限运行 Recon：Linux 通常需要 root，Windows 需要管理员权限。本地模式会把报告上传到 OSS，需要先[设置 OSS 访问凭证](/credential#设置-oss-访问凭证)；WebUI 和服务端 REPL 不需要 OSS，报告会保存到 SIREN Server 的 Artifacts。
+  目标主机需要具备足够权限运行 Recon：Linux 通常需要 root，Windows 需要管理员权限。快照可能包含凭证和其他敏感配置，应只在受控链路和目录中保存。本地模式会把 JSONL 与 Markdown 一起上传到 OSS，需要先[设置 OSS 访问凭证](/credential#设置-oss-访问凭证)；WebUI 和服务端 REPL 不需要 OSS。
 </Callout>
 
 ## 使用方式
@@ -33,28 +35,34 @@ Investigations -> Recon -> 选择客户端和 Profile -> Start Recon
 1. 打开 [Web 控制台](/webui#investigations)，进入 **Investigations** 页面。
 2. 在 **Recon** 表单中选择在线客户端和该客户端实际提供的 Profile。旧客户端只显示 **Legacy default**。
 3. 点击 **Start Recon**，等待客户端回传阶段进度。
-4. 报告生成后，点击 **Open Report** 打开对应 Markdown 报告；如果报告尚未生成，也可以点击 **Open Artifacts** 进入当前 Artifacts 目录。
+4. 报告生成后，点击 **Open Report** 打开派生 Markdown。权威 JSONL 可在 Artifacts 中查看或下载；部分采集完成时页面会显示简短的 partial 提示。
 
 WebUI 会展示本次 operation 的真实 Profile 与采集阶段，比如 `Recon.Basic`、`Recon.User`、`Recon.Process`、`Save report to Artifacts`。同一客户端同时只能运行一个 Recon，不同客户端可并行；冲突、断连、客户端错误和超时都会直接结束当前状态。Project 视图下只能选择当前 Project 的客户端，报告也会写入该 Project 的 Artifacts 目录。
 
 ## 查看数据
 
-| 使用方式 | 报告保存位置 |
+| 使用方式 | 保存位置 |
 | --- | --- |
 | WebUI | 保存到服务端 Artifacts；已归属 Project 的客户端写入 Project 目录，未归属客户端写入 Global Artifacts |
 | 服务端 REPL | 与 WebUI 一样保存到服务端 Artifacts，目录由客户端的 Project 归属决定 |
-| 本地模式 | 在当前目录生成 Markdown 文件，并上传到 OSS 的 `<oss.docObjectPath>/<file name>` |
+| 本地模式 | 在当前目录生成 JSONL 与 Markdown，并分别上传到 OSS 的 `<oss.docObjectPath>/<file name>` |
 
-Recon 报告会保留客户端生成的文件名，通常形如 `SIREN_<host>_<timestamp>.md`。服务端保存报告时只接受 Markdown 文件名，并以较严格的文件权限写入。
+同一次采集会生成 `SIREN_<host>_<timestamp>.recon.jsonl` 和同名 `.md`。远程模式只传输 JSONL，服务端校验后生成 Markdown，并将两者保存在同一 Global 或 Project Artifacts 目录。Dossier 只编辑派生 Markdown，不修改权威快照。
+
+Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`、`source_result`、`module_end` 和 `snapshot_end`。记录带序号、观测时间、模块、source、类型化 data 和采集范围；结果事件带状态、耗时、数量、字节数、使用工具、错误与截断信息。
 
 ## 执行规则
 
 - 基础信息每次都会采集，不进入 Profile 模块列表。
 - `default` 包含当前平台全部内置模块；`quick` 只移除耗时较长的 `file`，其他模块与 `default` 相同。
 - Profile 列表只表达集合；内置模块始终按固定顺序执行，插件按名称排序，保证报告稳定。
-- recon 类型插件必须以 `plugin:<name>` 显式写入 Profile，并由 `plugins.<name>` 控制启停。安装插件不会自动修改 Profile；Profile 引用缺失或禁用插件时，采集会在开始前失败，不生成部分报告。
+- recon 类型插件必须以 `plugin:<name>` 显式写入 Profile，并由 `plugins.<name>` 控制启停。安装插件不会自动修改 Profile；Profile 引用缺失或禁用插件时，采集会在开始前失败。现有文本插件按 `plugin_text` / `text/markdown` 写入快照，插件执行错误会使快照变为 partial。
 - `chkrootkit` 仍是可选 recon 插件，但不进入 `default` 或 `quick`。插件输出不代表 Recon 核心具备检测能力。
-- 每条底层命令的默认超时时间为 30 秒，可通过[客户端配置](/config#客户端配置)中的 `recon.commandTimeout` 修改。
+- 每个 source 的底层采集命令都有独立超时，默认 30 秒，可通过[客户端配置](/config#客户端配置)中的 `recon.commandTimeout` 修改。某个 source 超时不会占用后续 source 的预算，未完成状态会关联到实际 source。
+- Recon 不安装 `netstat`、`lsof` 或其他软件。Linux socket 依次尝试已安装的 `ss`、`netstat`，路由依次尝试 `ip`、`route`，已删除但仍打开的文件优先读取 `/proc`、已有 `lsof` 时回退；都不可用时明确记录 `unavailable`。
+- Linux 文件模块按底层文件系统去重真实本地挂载，每个文件系统只遍历一次，并从同一遍历生成 SUID、最近 24 小时 mtime/ctime 和大文件视图；Windows 大目录、进程、socket、任务和服务查询按稳定字段排序后再应用数量上限。
+- 单个 source 最多 2,000 条；单个模块最多 10,000 条或 16 MiB；单个文本字段最多 1 MiB；整份快照最多 128 MiB。达到上限时停止对应采集并记录 `truncated=true`。
+- source 与 module 会记录 `ok`、`partial`、`unavailable` 或 `failed`，快照最终状态为 `complete` 或 `partial`。单项失败仍会保留 partial 快照；Profile、权限或写盘等前置失败不会生成正式 artifact。
 
 ## 信息收集模块
 
@@ -65,31 +73,31 @@ Recon 报告会保留客户端生成的文件名，通常形如 `SIREN_<host>_<t
 
 | 模块 | Profile 模块 ID | 采集内容 |
 | --- | --- | --- |
-| 基础信息 | 始终采集 | 当前时间、OS 发行版、主机名、当前用户、IP 地址、CPU 核数、CPU/内存/磁盘使用率、磁盘挂载（/etc/fstab） |
-| 用户 | `user` | 非默认用户、可登录用户、Root 权限用户、sudoers 用户、最近登录记录、`w`/`lastlog` 输出、登录 IP、新增用户记录、`/etc/passwd` 属性 |
-| SSH | `ssh` | SSH 暴力破解记录、`~/.ssh/config` 后门、`authorized_keys`、PAM/inetd/软链接后门、`sshd_config` 与 `sshd` 二进制属性 |
-| 进程 | `process` | CPU/内存占用 Top 20、systemd 启动进程、其他非默认进程 |
-| 网络 | `network` | 监听端口、全 0 开放端口、已建立 TCP 连接、`/etc/hosts`、DNS 服务器、路由表、iptables 规则 |
+| 基础信息 | 始终采集 | 当前时间、OS、主机标识、主 IP、完整网络接口、CPU、内存、磁盘与挂载 |
+| 用户 | `user` | 完整账户、组、会话、登录与用户事件、`/etc/passwd` 等账户元数据 |
+| SSH | `ssh` | SSH 配置、公钥、登录记录、PAM 与 inetd 元数据 |
+| 进程 | `process` | 一次完整进程快照；资源视图从同一份数据派生 |
+| 网络 | `network` | 一次完整 socket 快照、`/etc/hosts`、DNS、路由与防火墙配置 |
 | 计划任务 | `cron` | 用户级与系统级 cron 任务、cron 日志 |
-| 服务 | `service` | 运行中服务、非默认服务文件、`/etc/rc.local`、init.d/rc.d 启动项 |
-| 环境变量 | `env` | 环境变量、`LD_PRELOAD`/`LD_LIBRARY_PATH` 等敏感变量、进程环境与 `/etc/ld.so.preload`、profile/rc/environment、`profile.d` 非默认脚本、alias |
-| 文件 | `file` | 历史命令、临时目录、SUID 文件、被进程锁定文件、近 1 天变更文件（mtime/ctime）、大文件（>200M）、coreutils 完整性、关键二进制属性 |
-| 内核模块（名称保留为 rootkit） | `rootkit` | 白名单降噪后的已加载内核模块（`lsmod`）；不做 Rootkit 检测或 symbol 匹配 |
-| 应用 | `application` | Redis 配置、JDWP 调试进程、容器列表 |
+| 服务 | `service` | 全部运行中服务、服务文件、`/etc/rc.local`、init.d/rc.d 启动项 |
+| 环境变量 | `env` | 原始环境变量、进程环境、加载器配置、profile/rc/environment、`profile.d` 和 alias |
+| 文件 | `file` | 历史记录、临时目录、SUID、打开后删除的文件、最近 24 小时 mtime/ctime、大文件与关键文件属性 |
+| 内核模块（名称保留为 rootkit） | `rootkit` | 完整已加载内核模块快照；不做 Rootkit 检测或 symbol 匹配 |
+| 应用 | `application` | Redis、容器等客观配置；进程相关视图从 process 数据获取 |
 
   </Accordion>
   <Accordion title="Windows 平台模块">
 
 | 模块 | Profile 模块 ID | 采集内容 |
 | --- | --- | --- |
-| 基础信息 | 始终采集 | 当前时间、OS 版本、主机名、当前用户、IP 地址、CPU 核数、CPU/内存/磁盘使用率 |
-| 用户 | `user` | 非默认用户、可登录用户、管理员组成员、服务账户、禁用/隐藏账户、远程桌面用户、最近登录记录、当前登录用户、新增用户记录 |
-| 进程 | `process` | CPU/内存占用 Top 20、进程列表、无文件进程 |
-| 网络 | `network` | 监听 TCP 端口、已建立 TCP 连接、hosts 文件、DNS 服务器、网络共享（SMB） |
+| 基础信息 | 始终采集 | 当前时间、OS、主机标识、主 IP、完整网络接口、CPU、内存、磁盘与挂载 |
+| 用户 | `user` | 完整本地账户、本地组与成员、当前会话、登录和用户事件 |
+| 进程 | `process` | 一次完整进程快照，包括父进程、路径、命令行、创建时间和内存字段 |
+| 网络 | `network` | TCP/UDP socket 快照、hosts、DNS 和网络共享 |
 | 计划任务 | `schtask` | 计划任务、启动文件夹、系统启动项、注册表启动项（Run/RunOnce）、服务启动项 |
-| 环境变量 | `env` | 环境变量、PATH、PowerShell 配置文件、Windows Defender 排除项 |
-| 文件 | `file` | PowerShell 历史、临时目录、最近访问文件、近 30 天变更的系统目录可执行文件、近 1 天变更的系统日志、启动目录文件、卷影副本 |
-| 应用 | `application` | JDWP 调试进程、远程桌面配置、IIS 配置、近 3 天 IIS 日志、Windows Defender 状态 |
+| 环境变量 | `env` | 原始环境变量、PATH、PowerShell 配置与历史、Windows Defender 排除项 |
+| 文件 | `file` | 临时目录、最近访问文件、近 30 天变更的系统目录可执行文件、近 1 天变更的系统日志、启动目录文件、卷影副本 |
+| 应用 | `application` | 远程桌面、IIS、近 3 天 IIS 日志和 Windows Defender 客观配置 |
 
   </Accordion>
 </Accordions>

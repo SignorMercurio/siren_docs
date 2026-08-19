@@ -176,9 +176,9 @@ GUI 以时间线交错展示 Agent 回复原文与聚合折叠的操作记录，
 Investigations 页面汇总需要等待结果的调查工具，目前包含 AccessKey 调查、客户端 Recon 和进程分析。
 
 - **AccessKey**，输入阿里云 UID、AccessKey ID 和可选 Region，生成 Markdown 调查报告。Region 留空时默认 `cn-hangzhou`。AccessKey 调查不绑定客户端，报告写入 Global Artifacts。
-- **Recon**，选择在线客户端及其实际公布的 Profile 后下发信息收集命令；旧客户端只提供 **Legacy default**。页面显示实际 Profile 和本次 operation 的阶段，例如 `Recon.Basic`、`Recon.User`、`Recon.Process` 和 `Save report to Artifacts`。同一客户端已有 Recon 运行时会直接提示冲突，客户端错误、断连或超时也会结束当前状态，不会一直等待。
+- **Recon**，选择在线客户端及其实际公布的 Profile 后下发信息收集命令；旧客户端只提供 **Legacy default**。页面显示实际 Profile 和本次 operation 的阶段。partial 快照会显示简短警告；同一客户端已有 Recon 运行时会直接提示冲突，客户端错误、断连或超时也会结束当前状态。
 - **Process Analysis**，选择 Linux 客户端后，按 PID、监听端口或进程名查询进程详情。按名称匹配到多个进程时，页面会列出候选项，点击候选 PID 后继续分析。
-- **报告入口**，调查结束后会显示 **Open Artifacts** 按钮。Recon 报告跟随客户端 Project 归属保存；已归属客户端写入 Project 目录，未归属客户端写入 Global Artifacts。
+- **报告入口**，Recon 完成后只显示 **Open Report**，打开派生 Markdown。权威 JSONL 可在 Artifacts 中查看或下载；两份文件都跟随客户端 Project 归属保存。
 
 <Callout title="进度展示原则" type="info">
   Web 控制台只展示服务端能真实观测到的阶段。AccessKey 调查只显示 playbook 运行状态；Recon 阶段来自客户端实际回传日志；Process Analysis 是一次同步查询，完成后直接展示结果或错误。
@@ -202,7 +202,7 @@ Files 页面用于浏览在线客户端的本机文件系统。可以从左侧�
 
 ### Artifacts
 
-Artifacts 页面管理服务端取证目录。Global 视图使用 `siren_server` 工作目录；Project 视图使用当前 Project 创建时固定的目录。常见场景是查看 Recon、AIR 和 AccessKey 调查生成的 Markdown 报告，或管理从客户端拉取到服务端的取证文件。
+Artifacts 页面管理服务端取证目录。Global 视图使用 `siren_server` 工作目录；Project 视图使用当前 Project 创建时固定的目录。Recon 的权威 `*.recon.jsonl` 与派生 `*.md` 会同时出现；也可以管理 AIR、AccessKey 报告和从客户端拉取的取证文件。
 
 支持的操作：
 
