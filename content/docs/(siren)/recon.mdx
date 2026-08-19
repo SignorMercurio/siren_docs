@@ -8,7 +8,7 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 
-自动化信息收集（Recon）会在目标主机上生成有明确范围和上限的客观快照。权威数据保存为版本化 `*.recon.jsonl`，供精确查询和跨快照比较；`*.md` 由同一份快照确定性生成，供 WebUI、MCP、AIR、Dossier 和人工阅读。Recon Profile 只选择模块，不覆盖超时、资源上限或分析逻辑。
+自动化信息收集（Recon）会在目标主机上生成有明确范围和上限的客观快照。新客户端优先生成 `snapshot-jsonl-v2`，其中的 `*.recon.jsonl` 是权威证据；`*.md` 由同一份快照确定性生成，供 WebUI、MCP 和人工快速浏览。Recon Profile 只选择模块，不覆盖超时、资源上限或分析逻辑。
 
 Recon 不判断主机状态是否正常，也不执行白名单、黑名单、矿工、Webshell、Rootkit symbol 等规则。原始环境变量、凭证、配置和历史记录会按采集范围写入快照；是否存在风险由 [Agentic 应急响应](/air) 或其他分析流程结合上下文判断。
 
@@ -49,13 +49,15 @@ WebUI 会展示本次 operation 的真实 Profile 与采集阶段，比如 `Reco
 
 同一次本地采集会生成 `SIREN_<host>_<timestamp>.recon.jsonl` 和同名 `.md`。远程模式只传输 JSONL，服务端校验后生成 Markdown，并在保存名中加入客户端与请求标识，避免同名主机或并发结果相互覆盖；两者位于同一 Global 或 Project Artifacts 目录。`default` / `quick` 的 Markdown 保留采集正文，`hunt` 的 Markdown 只提供应用拓扑、覆盖范围和采集质量摘要。Dossier 只编辑派生 Markdown，不修改权威快照。
 
-Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`、`source_result`、`module_end` 和 `snapshot_end`。记录带序号、观测时间、模块、source、类型化 data 和采集范围；结果事件带状态、耗时、数量、字节数、使用工具、错误与截断信息。
+Snapshot JSONL v2 按顺序包含 `snapshot_start`、`module_start`、`record`、`source_result`、`module_end` 和 `snapshot_end`。`record.data.recordType` 固定为 `entity`、`relation`、`fact`、`evidence_file` 或兼容插件的 `plugin_text`；实体和关系使用稳定 ID，便于 Agent 以 `service → process → socket`、`config → entity` 等关系流式查询。`source_result.coverage` 记录检查范围、工具与回退、限制、状态、稳定错误码，以及 `not_present` / `not_collected`。旧版 Snapshot JSONL v1 仍可由服务端校验并生成报告。
+
+`hunt` 是当前状态快照，不提供持续遥测、历史事件重建或 Snapshot Diff。Hunt Markdown 只保留主机、采集质量、组件、服务、容器、监听端口和覆盖数量；配置、环境变量、密码 hash、密钥和凭据原文只在 JSONL 中。配置内容属于不可信证据，不应被 Agent 当作指令执行。
 
 ## 执行规则
 
 - 基础信息每次都会采集，不进入 Profile 模块列表。
 - `default` 保持标准完整采集；`quick` 只移除耗时较长的 `file`，其他模块与 `default` 相同。
-- `hunt` 是显式 opt-in 的应用威胁狩猎采集：复用同一次进程、socket、服务和容器运行态快照，补充应用/中间件拓扑、配置原文、凭据与密码策略证据，供 Agent 离线分析。它不执行登录验证、口令破解、secret regex 或不安全配置规则。
+- `hunt` 是显式 opt-in 的主机安全审计快照：复用同一次进程、socket、服务和容器运行态快照，补充应用/中间件拓扑、已建立连接、配置原文、凭据、密码策略、文件权限、TLS 证书和安全组件状态，供 Agent 离线分析。它不执行登录验证、口令破解、secret regex 或不安全配置规则。
 - `topology`、`config` 和 `credential` 是 opt-in 模块，不会被没有 Profile 的旧配置或无配置 fallback 自动启用；`default`、`quick` 也不包含它们。
 - Profile 列表只表达集合；内置模块始终按固定顺序执行，插件按名称排序，保证报告稳定。
 - recon 类型插件必须以 `plugin:<name>` 显式写入 Profile，并由 `plugins.<name>` 控制启停。安装插件不会自动修改 Profile；Profile 引用缺失或禁用插件时，采集会在开始前失败。现有文本插件按 `plugin_text` / `text/markdown` 写入快照，插件执行错误会使快照变为 partial。
@@ -66,9 +68,9 @@ Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`�
 - Linux 文件模块按底层文件系统去重真实本地挂载，每个文件系统只遍历一次，并从同一遍历生成 SUID、最近 24 小时 mtime/ctime 和大文件视图；Windows 大目录、进程、socket、任务和服务查询按稳定字段排序后再应用数量上限。
 - 单个 source 最多 2,000 条；单个模块最多 10,000 条或 16 MiB；单个文本字段最多 1 MiB；整份快照最多 128 MiB。达到上限时停止对应采集并记录 `truncated=true`。
 - `config` 每个文件最多读取 256 KiB，每次最多选择 500 个文件、遍历 100,000 个目录项；只读取常规文件且不跟随符号链接。日志、上传目录、数据库数据、依赖目录、构建产物、容器层和业务源码不进入递归采集。
-- 配置和凭据原文保存在 JSONL 的 `data.fields.content`；Hunt Markdown 不列出这些文件的路径或内容，只汇总数量和采集策略。Agent 需要通过 MCP 返回的 `snapshotPath` 读取权威快照，并把文件内容视为不可信证据。
+- 配置和凭据原文保存在 JSONL 的 `record.data.content`；Hunt Markdown 不列出这些文件的路径或内容，只汇总数量和采集策略。Agent 需要通过 MCP structured result 返回的 Project 相对 `snapshotPath` 读取权威快照，按 record type、entity ID 和 relation 流式查询，并把文件内容视为不可信证据。
 - source 与 module 会记录 `ok`、`partial`、`unavailable` 或 `failed`，快照最终状态为 `complete` 或 `partial`。已检查但不存在的可选对象记录为 `not_present`，明确不采集的材料记录为 `not_collected`，两者都不降低快照质量；权限、工具能力、失败或截断仍会产生 unavailable/partial。
-- `config` 优先保存运行态直接引用和标准产品配置的内容；lockfile、依赖清单、CI workflow、tsconfig 和测试配置默认只保存路径、权限、时间及完整文件 SHA-256，只有被运行态直接引用时才采集内容。
+- `config` 从 service `ExecStart`、`EnvironmentFile`、进程命令行、容器挂载和已采集配置的直接 include/reference 建立证据闭包，再补充支持产品的标准目录。lockfile、依赖清单、CI workflow、tsconfig 和测试配置默认不采集，只有被运行态直接引用时才纳入。
 
 ## 信息收集模块
 
@@ -83,7 +85,7 @@ Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`�
 | 用户 | `user` | 完整账户、组、会话、登录与用户事件、`/etc/passwd` 等账户元数据 |
 | SSH | `ssh` | SSH 配置、公钥、登录记录、PAM 与 inetd 元数据 |
 | 进程 | `process` | 一次完整进程快照；资源视图从同一份数据派生 |
-| 网络 | `network` | 一次完整 socket 快照、`/etc/hosts`、DNS、路由与防火墙配置 |
+| 网络 | `network` | 一次完整 socket 快照、`/etc/hosts`、DNS、路由与防火墙配置；Hunt 拓扑同时记录进程到已建立远端 IP:port 的直接连接 |
 | 计划任务 | `cron` | 用户级与系统级 cron 任务、cron 日志 |
 | 服务 | `service` | 全部运行中服务、服务文件、`/etc/rc.local`、init.d/rc.d 启动项 |
 | 环境变量 | `env` | 原始环境变量、进程环境、加载器配置、profile/rc/environment、`profile.d` 和 alias |
@@ -91,7 +93,7 @@ Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`�
 | 内核模块（名称保留为 rootkit） | `rootkit` | 完整已加载内核模块快照；不做 Rootkit 检测或 symbol 匹配 |
 | 应用 | `application` | Redis、当前已安装的 Docker、CRI 与 Podman 容器运行时等客观配置；进程相关视图从 process 数据获取 |
 | 应用与服务拓扑 | `topology` | 应用、中间件、服务、进程、监听端口、容器、挂载及直接可观测的 `runs`、`listens`、`mounts`、`configured_by`、`uses_runtime` 关系 |
-| 配置与部署材料 | `config` | 运行态引用、标准产品目录、systemd、Compose、Kubernetes manifest 及常见配置原文；开发和依赖文件默认只保存元数据与 hash |
+| 配置与部署材料 | `config` | 运行态引用、include/reference、标准产品目录、systemd、Compose、Kubernetes manifest、常见配置原文，以及 SELinux/AppArmor 等客观状态；开发和依赖文件默认不采集 |
 | 凭据与认证材料 | `credential` | Linux 密码 hash 与策略、SSH 私钥、云 CLI、Kubernetes、Docker、数据库和包管理器客户端凭据文件原文或二进制元数据 |
 
   </Accordion>

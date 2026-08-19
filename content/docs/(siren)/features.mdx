@@ -22,7 +22,7 @@ SIREN 的功能可以按应急响应流程理解：接入目标主机，收集�
 
 ## 自动化信息收集
 
-Recon 会在目标主机上采集客观状态。基础信息始终采集，其他模块由命名 Profile 组合；`default` 标准完整采集，`quick` 只跳过文件模块，显式 opt-in 的 `hunt` 面向应用拓扑、配置和凭据证据。Profile 不承载分析规则或结论，工具缺失、失败和截断会明确进入快照状态。
+Recon 会在目标主机上采集客观状态。基础信息始终采集，其他模块由命名 Profile 组合；`default` 标准完整采集，`quick` 只跳过文件模块，显式 opt-in 的 `hunt` 生成面向 Agent 的当前主机安全审计快照。新客户端优先使用结构化 Snapshot JSONL v2；Profile 不承载分析规则或结论，工具缺失、失败和截断会明确进入快照状态。
 
 <Cards>
     <Card title="系统与用户" icon={<Users />} href="/recon">系统版本、资源使用、用户列表、权限用户、登录历史和新增用户记录</Card>
@@ -31,7 +31,7 @@ Recon 会在目标主机上采集客观状态。基础信息始终采集，其�
     <Card title="计划任务与服务" icon={<Clock />} href="/recon">cron、Windows 计划任务、启动项、systemd 服务和 Windows 服务</Card>
     <Card title="文件" icon={<FileText />} href="/recon">历史命令、临时目录、近期变更文件、大文件、SUID 文件和关键二进制属性</Card>
     <Card title="内核模块与应用" icon={<Cpu />} href="/recon">完整已加载内核模块、Redis、容器、RDP、IIS 和 Defender 配置</Card>
-    <Card title="应用威胁狩猎" icon={<Puzzle />} href="/recon">通过 hunt Profile 生成紧凑拓扑摘要，并将配置、凭据和完整证据保存在 JSONL 中供 Agent 离线分析</Card>
+    <Card title="应用威胁狩猎" icon={<Puzzle />} href="/recon">通过 hunt Profile 关联服务、进程、端口、远端连接、容器、配置和凭据，完整证据保存在 JSONL 中供 Agent 离线分析</Card>
 </Cards>
 
 ## 调查与响应

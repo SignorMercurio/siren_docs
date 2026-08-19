@@ -49,7 +49,7 @@ type Message struct {
 | `MsgClientHello`、`MsgClientCapabilities`、`MsgPluginRegister`、`MsgPluginInvoke`、`MsgPluginManage`、`MsgFSRequest`、`MsgFSResponse` | JSON |
 | `MsgRun` | 前 4 字节为 big-endian `requestID`，后续为命令或结果 |
 | `MsgInfo` | CLI 场景可发送文本参数；WebUI/MCP 场景使用带 `requestID` 的 JSON |
-| `MsgRecon` | v2 请求包含 `format=snapshot-jsonl-v1`、客户端采集预算，并支持按 request ID 取消；成功结果包含 Profile、format、`complete|partial` 和 JSONL 文件名，随后紧跟一个 `MsgFile`。v1 继续传 Markdown，旧协议仍使用空请求和文件名响应 |
+| `MsgRecon` | v2 请求包含协商后的 Snapshot format、客户端采集预算，并支持按 request ID 取消；成功结果包含 Profile、format、`complete|partial` 和 JSONL 文件名，随后紧跟一个 `MsgFile`。Profile v1 继续传 Markdown，旧协议仍使用空请求和文件名响应 |
 | `MsgUpload` | 第一帧为文件名，紧随其后的第二帧必须是 `MsgFile` 文件内容 |
 | `MsgPortForward`、`MsgPortForwardData` | 使用固定长度字段承载连接 ID、端口、目标主机和数据分片 |
 | `MsgShell` | `port:cols:rows` 文本，客户端据此连接临时 shell relay |
@@ -85,7 +85,9 @@ type Message struct {
 
 | 组合 | 行为 |
 | --- | --- |
-| v2 客户端 + v2 服务端 | 服务端请求 `snapshot-jsonl-v1`，客户端只传 JSONL，服务端生成 Markdown |
+| 新客户端 + 新服务端 | 客户端在旧 format 字段中保留 v1 兼容声明，并通过 `preferredFormats` 公布 `[snapshot-jsonl-v2, snapshot-jsonl-v1]`；服务端优先请求 v2，客户端只传 JSONL，服务端校验后生成 Markdown |
+| 新客户端 + 仅理解 v1 format 的 v2 服务端 | 旧服务端忽略 `preferredFormats`，继续请求 `snapshot-jsonl-v1` |
+| 只支持 Snapshot v1 的客户端 + 新服务端 | 服务端根据 capability 回退请求 `snapshot-jsonl-v1` |
 | v1 Profile 客户端 + 新服务端 | 继续按 request ID 传 Markdown |
 | Legacy 客户端 + 新服务端 | 只允许省略 Profile 的 Legacy default，沿用空请求和 Markdown 文件帧 |
 | 新客户端 + 旧服务端 | 收到空请求后执行默认 Profile，只传 Markdown，不发送 JSONL |
@@ -133,8 +135,8 @@ sequenceDiagram
     C-->>C: resolve Profile and collect, or read requested file
     alt Recon v2 success
         C->>S: MsgRecon {requestId, profile, format, status, filename}
-        C->>S: MsgFile [Snapshot JSONL]
-        S-->>S: validate JSONL and render Markdown
+        C->>S: MsgFile [Snapshot JSONL v2 or v1]
+        S-->>S: dispatch validator/renderer by format
     else Recon v1 success
         C->>S: MsgRecon {requestId, profile, filename}
         C->>S: MsgFile [Markdown]

@@ -10,6 +10,20 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.23.0 <DateTag>2026-08-19</DateTag>
+
+### Feature
+
+- Recon 新增首选 `snapshot-jsonl-v2` 权威证据格式，以 `entity`、`relation`、`fact`、`evidence_file` 和 `plugin_text` 固定记录类型表达主机、账户、服务、进程、Socket、容器、配置和凭据；Snapshot JSONL v1 与 Legacy Markdown 继续兼容
+- Hunt 补充进程到已建立远端 IP:port 的直接连接、配置 include/reference 证据闭包、TLS 证书元数据、TLS 私钥凭据标识，以及 SELinux/AppArmor 等客观安全状态，不产生风险评级或检测结论
+
+### Improvement
+
+- Recon capability 通过兼容的 `preferredFormats` 协商 v2；旧服务端继续请求 v1，新服务端也能接收只支持 v1 的客户端
+- v2 source coverage 记录检查范围、排除范围、工具与回退、采集限制、presence、稳定错误码和人类可读错误，Agent 可以区分未发现、未安装、未采集、失败和截断
+- MCP `recon` structured result 增加 `format` 与 `schemaVersion`，并明确 JSONL 是 Project 工作目录中的权威证据；Hunt Markdown 继续只提供不含配置、环境变量和凭据原文的紧凑摘要
+- Hunt 配置发现以运行态参数、服务定义、容器挂载和配置引用为中心，开发依赖、CI workflow、tsconfig 和测试配置默认不再采集
+
 ## v2.22.1 <DateTag>2026-08-19</DateTag>
 
 ### Improvement
