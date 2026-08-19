@@ -10,6 +10,19 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.22.1 <DateTag>2026-08-19</DateTag>
+
+### Improvement
+
+- Hunt Markdown 改为紧凑的拓扑、覆盖范围和采集质量摘要；配置、凭据及其他完整证据仅保存在权威 Snapshot JSONL，避免重复生成庞大报告
+- Hunt 配置采集按运行态引用、产品配置和开发元数据分级；lockfile、CI workflow、tsconfig 等默认只保存元数据和完整文件 hash，被运行态直接引用时才采集内容
+- 应用与服务拓扑补充稳定的实体/关系类型、运行或配置状态及可验证的版本来源，并增强 Linux service 到 process、socket 的关联回退
+
+### Bugfix
+
+- 修复 Redis、容器、可选启动文件和 Windows 受保护凭据等正常不存在或明确不采集的对象被记为 unavailable，导致 Hunt 快照长期显示 partial 的问题
+- 修复 Linux 服务命令返回空结果仍被视为成功，导致服务拓扑缺少直接关系的问题
+
 ## v2.22.0 <DateTag>2026-08-19</DateTag>
 
 ### Feature

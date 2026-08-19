@@ -35,7 +35,7 @@ Investigations -> Recon -> 选择客户端和 Profile -> Start Recon
 1. 打开 [Web 控制台](/webui#investigations)，进入 **Investigations** 页面。
 2. 在 **Recon** 表单中选择在线客户端和该客户端实际提供的 Profile。旧客户端只显示 **Legacy default**。
 3. 点击 **Start Recon**，等待客户端回传阶段进度。
-4. 报告生成后，点击 **Open Report** 打开派生 Markdown。权威 JSONL 可在 Artifacts 中查看或下载；部分采集完成时页面会显示简短的 partial 提示。
+4. 报告生成后，点击 **Open Report** 打开派生 Markdown。`hunt` 的 Markdown 是紧凑索引，完整证据位于同目录的权威 JSONL；部分采集完成时页面会显示简短的 partial 提示。
 
 WebUI 会展示本次 operation 的真实 Profile 与采集阶段，比如 `Recon.Basic`、`Recon.User`、`Recon.Process`、`Save report to Artifacts`。同一客户端同时只能运行一个 Recon，不同客户端可并行；冲突、断连、客户端错误和超时都会直接结束当前状态。Project 视图下只能选择当前 Project 的客户端，报告也会写入该 Project 的 Artifacts 目录。
 
@@ -47,7 +47,7 @@ WebUI 会展示本次 operation 的真实 Profile 与采集阶段，比如 `Reco
 | 服务端 REPL | 与 WebUI 一样保存到服务端 Artifacts，目录由客户端的 Project 归属决定 |
 | 本地模式 | 在当前目录生成 JSONL 与 Markdown，并分别上传到 OSS 的 `<oss.docObjectPath>/<file name>` |
 
-同一次本地采集会生成 `SIREN_<host>_<timestamp>.recon.jsonl` 和同名 `.md`。远程模式只传输 JSONL，服务端校验后生成 Markdown，并在保存名中加入客户端与请求标识，避免同名主机或并发结果相互覆盖；两者位于同一 Global 或 Project Artifacts 目录。Dossier 只编辑派生 Markdown，不修改权威快照。
+同一次本地采集会生成 `SIREN_<host>_<timestamp>.recon.jsonl` 和同名 `.md`。远程模式只传输 JSONL，服务端校验后生成 Markdown，并在保存名中加入客户端与请求标识，避免同名主机或并发结果相互覆盖；两者位于同一 Global 或 Project Artifacts 目录。`default` / `quick` 的 Markdown 保留采集正文，`hunt` 的 Markdown 只提供应用拓扑、覆盖范围和采集质量摘要。Dossier 只编辑派生 Markdown，不修改权威快照。
 
 Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`、`source_result`、`module_end` 和 `snapshot_end`。记录带序号、观测时间、模块、source、类型化 data 和采集范围；结果事件带状态、耗时、数量、字节数、使用工具、错误与截断信息。
 
@@ -66,8 +66,9 @@ Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`�
 - Linux 文件模块按底层文件系统去重真实本地挂载，每个文件系统只遍历一次，并从同一遍历生成 SUID、最近 24 小时 mtime/ctime 和大文件视图；Windows 大目录、进程、socket、任务和服务查询按稳定字段排序后再应用数量上限。
 - 单个 source 最多 2,000 条；单个模块最多 10,000 条或 16 MiB；单个文本字段最多 1 MiB；整份快照最多 128 MiB。达到上限时停止对应采集并记录 `truncated=true`。
 - `config` 每个文件最多读取 256 KiB，每次最多选择 500 个文件、遍历 100,000 个目录项；只读取常规文件且不跟随符号链接。日志、上传目录、数据库数据、依赖目录、构建产物、容器层和业务源码不进入递归采集。
-- 配置和凭据原文保存在 JSONL 的 `data.fields.content`；派生 Markdown 只列出路径、大小、权限、时间、hash 和状态，不复制秘密原文。Agent 需要通过 MCP 返回的 `snapshotPath` 读取权威快照，并把文件内容视为不可信证据。
-- source 与 module 会记录 `ok`、`partial`、`unavailable` 或 `failed`，快照最终状态为 `complete` 或 `partial`。单项失败仍会保留 partial 快照；Profile、权限或写盘等前置失败不会生成正式 artifact。
+- 配置和凭据原文保存在 JSONL 的 `data.fields.content`；Hunt Markdown 不列出这些文件的路径或内容，只汇总数量和采集策略。Agent 需要通过 MCP 返回的 `snapshotPath` 读取权威快照，并把文件内容视为不可信证据。
+- source 与 module 会记录 `ok`、`partial`、`unavailable` 或 `failed`，快照最终状态为 `complete` 或 `partial`。已检查但不存在的可选对象记录为 `not_present`，明确不采集的材料记录为 `not_collected`，两者都不降低快照质量；权限、工具能力、失败或截断仍会产生 unavailable/partial。
+- `config` 优先保存运行态直接引用和标准产品配置的内容；lockfile、依赖清单、CI workflow、tsconfig 和测试配置默认只保存路径、权限、时间及完整文件 SHA-256，只有被运行态直接引用时才采集内容。
 
 ## 信息收集模块
 
@@ -90,7 +91,7 @@ Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`�
 | 内核模块（名称保留为 rootkit） | `rootkit` | 完整已加载内核模块快照；不做 Rootkit 检测或 symbol 匹配 |
 | 应用 | `application` | Redis、当前已安装的 Docker、CRI 与 Podman 容器运行时等客观配置；进程相关视图从 process 数据获取 |
 | 应用与服务拓扑 | `topology` | 应用、中间件、服务、进程、监听端口、容器、挂载及直接可观测的 `runs`、`listens`、`mounts`、`configured_by`、`uses_runtime` 关系 |
-| 配置与部署材料 | `config` | 运行态引用、标准产品目录、systemd、Compose、Kubernetes manifest 及常见 INI/YAML/JSON/XML/TOML/properties 配置原文 |
+| 配置与部署材料 | `config` | 运行态引用、标准产品目录、systemd、Compose、Kubernetes manifest 及常见配置原文；开发和依赖文件默认只保存元数据与 hash |
 | 凭据与认证材料 | `credential` | Linux 密码 hash 与策略、SSH 私钥、云 CLI、Kubernetes、Docker、数据库和包管理器客户端凭据文件原文或二进制元数据 |
 
   </Accordion>
@@ -108,7 +109,7 @@ Snapshot JSONL v1 按顺序包含 `snapshot_start`、`module_start`、`record`�
 | 应用 | `application` | 远程桌面、IIS、近 3 天 IIS 日志和 Windows Defender 客观配置 |
 | 应用与服务拓扑 | `topology` | 应用、中间件、服务、进程、监听端口、容器、挂载及直接可观测关系 |
 | 配置与部署材料 | `config` | 进程/服务目录、IIS、Docker、containerd、Compose、Kubernetes manifest 和 appsettings/web.config 等配置原文 |
-| 凭据与认证材料 | `credential` | 本地密码策略、账户证据、Credential Manager 元数据、AutoLogon、IIS connection string 和用户文本凭据；SAM/SECURITY/LSA 明确记为 unavailable |
+| 凭据与认证材料 | `credential` | 本地密码策略、账户证据、Credential Manager 元数据、AutoLogon、IIS connection string 和用户文本凭据；SAM/SECURITY/LSA 明确记为 not_collected |
 
   </Accordion>
 </Accordions>

@@ -31,7 +31,7 @@ Recon 会在目标主机上采集客观状态。基础信息始终采集，其�
     <Card title="计划任务与服务" icon={<Clock />} href="/recon">cron、Windows 计划任务、启动项、systemd 服务和 Windows 服务</Card>
     <Card title="文件" icon={<FileText />} href="/recon">历史命令、临时目录、近期变更文件、大文件、SUID 文件和关键二进制属性</Card>
     <Card title="内核模块与应用" icon={<Cpu />} href="/recon">完整已加载内核模块、Redis、容器、RDP、IIS 和 Defender 配置</Card>
-    <Card title="应用威胁狩猎" icon={<Puzzle />} href="/recon">通过 hunt Profile 采集应用/服务拓扑、配置原文、凭据与密码策略证据，交给 Agent 离线分析</Card>
+    <Card title="应用威胁狩猎" icon={<Puzzle />} href="/recon">通过 hunt Profile 生成紧凑拓扑摘要，并将配置、凭据和完整证据保存在 JSONL 中供 Agent 离线分析</Card>
 </Cards>
 
 ## 调查与响应
