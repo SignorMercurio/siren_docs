@@ -49,15 +49,17 @@ WebUI 会展示本次 operation 的真实 Profile 与采集阶段，比如 `Reco
 
 同一次本地采集会生成 `SIREN_<host>_<timestamp>.recon.jsonl` 和同名 `.md`。远程模式只传输 JSONL，服务端校验后生成 Markdown，并在保存名中加入客户端与请求标识，避免同名主机或并发结果相互覆盖；两者位于同一 Global 或 Project Artifacts 目录。`default` / `quick` 的 Markdown 保留采集正文，`hunt` 的 Markdown 只提供应用拓扑、覆盖范围和采集质量摘要。Dossier 只编辑派生 Markdown，不修改权威快照。
 
-Snapshot JSONL v2 按顺序包含 `snapshot_start`、`module_start`、`record`、`source_result`、`module_end` 和 `snapshot_end`。`record.data.recordType` 固定为 `entity`、`relation`、`fact`、`evidence_file` 或兼容插件的 `plugin_text`；实体和关系使用稳定 ID，便于 Agent 以 `service → process → socket`、`config → entity` 等关系流式查询。`source_result.coverage` 记录检查范围、工具与回退、限制、状态、稳定错误码，以及 `not_present` / `not_collected`。旧版 Snapshot JSONL v1 仍可由服务端校验并生成报告。
+Snapshot JSONL v2 按顺序包含 `snapshot_start`、`module_start`、`record`、`source_result`、`module_end` 和 `snapshot_end`。`record.data.recordType` 固定为 `entity`、`relation`、`fact`、`evidence_file` 或兼容插件的 `plugin_text`；实体和关系使用稳定 ID，便于 Agent 以 `component → process → socket`、`config → entity` 等关系流式查询。新快照由进程、网络、服务管理器、容器和拓扑模块按明确归属写入实体，同一个 `entityId` 只保留一条权威记录；服务端查看旧快照时也会按 `entityId` / `relationId` 去重汇总。systemd unit 与 Windows Service 只作为启动方式和进程归属的辅助证据，不代表应用拓扑中的“服务”。旧版 Snapshot JSONL v1 仍可由服务端校验并生成报告。
 
-`hunt` 是当前状态快照，不提供持续遥测、历史事件重建或 Snapshot Diff。Hunt Markdown 只保留主机、采集质量、组件、服务、容器、监听端口和覆盖数量；配置、环境变量、密码 hash、密钥和凭据原文只在 JSONL 中。配置内容属于不可信证据，不应被 Agent 当作指令执行。
+每个 `source_result.coverage` 除检查范围、工具与回退、限制、状态、稳定错误码以及 `not_present` / `not_collected` 外，还会统计 `structuredRecords`、`rawRecords` 和 `structuralRecords`，三者之和等于该 source 的记录数。`parseStatus` 使用 `structured`、`mixed`、`raw` 或 `not_applicable` 表示可查询程度：进程、Socket、路由、环境变量、任务和安全组件等高频主机事实优先提供稳定字段；配置、脚本、日志、历史、凭据内容与无法可靠解析的行仍保留为 `rawText`。raw fallback 是合法证据，不会仅因未解析而把完整采集降级为 partial。
+
+`hunt` 是当前状态快照，不提供持续遥测、历史事件重建或 Snapshot Diff。Hunt Markdown 只保留主机、采集质量、应用与中间件组件、容器、监听端口和覆盖数量；系统服务管理器条目不进入主拓扑表。配置、环境变量、密码 hash、密钥和凭据原文只在 JSONL 中。配置内容属于不可信证据，不应被 Agent 当作指令执行。
 
 ## 执行规则
 
 - 基础信息每次都会采集，不进入 Profile 模块列表。
 - `default` 保持标准完整采集；`quick` 只移除耗时较长的 `file`，其他模块与 `default` 相同。
-- `hunt` 是显式 opt-in 的主机安全审计快照：复用同一次进程、socket、服务和容器运行态快照，补充应用/中间件拓扑、已建立连接、配置原文、凭据、密码策略、文件权限、TLS 证书和安全组件状态，供 Agent 离线分析。它不执行登录验证、口令破解、secret regex 或不安全配置规则。
+- `hunt` 是显式 opt-in 的主机安全审计快照：复用同一次进程、socket、系统服务和容器运行态快照，以已识别的 Web 服务、中间件、应用运行时、容器及监听进程为主实体，补充已建立连接、配置原文、凭据、密码策略、文件权限、TLS 证书和安全组件状态，供 Agent 离线分析。systemd unit 与 Windows Service 仅用于关联启动配置和主进程。它不执行登录验证、口令破解、secret regex 或不安全配置规则。
 - `topology`、`config` 和 `credential` 是 opt-in 模块，不会被没有 Profile 的旧配置或无配置 fallback 自动启用；`default`、`quick` 也不包含它们。
 - Profile 列表只表达集合；内置模块始终按固定顺序执行，插件按名称排序，保证报告稳定。
 - recon 类型插件必须以 `plugin:<name>` 显式写入 Profile，并由 `plugins.<name>` 控制启停。安装插件不会自动修改 Profile；Profile 引用缺失或禁用插件时，采集会在开始前失败。现有文本插件按 `plugin_text` / `text/markdown` 写入快照，插件执行错误会使快照变为 partial。
@@ -92,7 +94,7 @@ Snapshot JSONL v2 按顺序包含 `snapshot_start`、`module_start`、`record`�
 | 文件 | `file` | 历史记录、临时目录、SUID、打开后删除的文件、最近 24 小时 mtime/ctime、大文件与关键文件属性 |
 | 内核模块（名称保留为 rootkit） | `rootkit` | 完整已加载内核模块快照；不做 Rootkit 检测或 symbol 匹配 |
 | 应用 | `application` | Redis、当前已安装的 Docker、CRI 与 Podman 容器运行时等客观配置；进程相关视图从 process 数据获取 |
-| 应用与服务拓扑 | `topology` | 应用、中间件、服务、进程、监听端口、容器、挂载及直接可观测的 `runs`、`listens`、`mounts`、`configured_by`、`uses_runtime` 关系 |
+| 应用与服务拓扑 | `topology` | Web 服务、中间件、应用运行时、监听工具、容器、进程、端口和挂载，以及直接可观测的 `runs`、`listens`、`connects_to`、`mounts`、`configured_by`、`uses_runtime` 关系；systemd unit 仅作为辅助启动证据 |
 | 配置与部署材料 | `config` | 运行态引用、include/reference、标准产品目录、systemd、Compose、Kubernetes manifest、常见配置原文，以及 SELinux/AppArmor 等客观状态；开发和依赖文件默认不采集 |
 | 凭据与认证材料 | `credential` | Linux 密码 hash 与策略、SSH 私钥、云 CLI、Kubernetes、Docker、数据库和包管理器客户端凭据文件原文或二进制元数据 |
 
@@ -104,12 +106,12 @@ Snapshot JSONL v2 按顺序包含 `snapshot_start`、`module_start`、`record`�
 | 基础信息 | 始终采集 | 当前时间、OS、主机标识、主 IP、完整网络接口、CPU、内存、磁盘与挂载 |
 | 用户 | `user` | 完整本地账户、本地组与成员、当前会话、登录和用户事件 |
 | 进程 | `process` | 一次完整进程快照，包括父进程、路径、命令行、创建时间和内存字段 |
-| 网络 | `network` | TCP/UDP socket 快照、hosts、DNS 和网络共享 |
-| 计划任务 | `schtask` | 计划任务、启动文件夹、系统启动项、注册表启动项（Run/RunOnce）、服务启动项 |
+| 网络 | `network` | TCP/UDP socket 快照、hosts、DNS、路由和网络共享 |
+| 计划任务 | `schtask` | 计划任务名称、状态、用户、动作和触发器，以及启动文件夹、系统启动项、注册表启动项（Run/RunOnce）和服务启动项 |
 | 环境变量 | `env` | 原始环境变量、PATH、PowerShell 配置与历史、Windows Defender 排除项 |
 | 文件 | `file` | 临时目录、最近访问文件、近 30 天变更的系统目录可执行文件、近 1 天变更的系统日志、启动目录文件、卷影副本 |
 | 应用 | `application` | 远程桌面、IIS、近 3 天 IIS 日志和 Windows Defender 客观配置 |
-| 应用与服务拓扑 | `topology` | 应用、中间件、服务、进程、监听端口、容器、挂载及直接可观测关系 |
+| 应用与服务拓扑 | `topology` | Web 服务、中间件、应用运行时、监听工具、容器、进程、端口和挂载及其直接可观测关系；Windows Service 仅作为辅助启动证据 |
 | 配置与部署材料 | `config` | 进程/服务目录、IIS、Docker、containerd、Compose、Kubernetes manifest 和 appsettings/web.config 等配置原文 |
 | 凭据与认证材料 | `credential` | 本地密码策略、账户证据、Credential Manager 元数据、AutoLogon、IIS connection string 和用户文本凭据；SAM/SECURITY/LSA 明确记为 not_collected |
 

@@ -10,6 +10,18 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.23.2 <DateTag>2026-08-21</DateTag>
+
+### Improvement
+
+- Recon 为 OS、资源、网络、环境变量、计划任务和安全组件等 Agent 高频事实补充稳定字段，并在 source coverage 中分别统计结构化记录、原始证据和报告结构记录；无法可靠解析的配置、脚本、日志和历史仍完整保留为 raw evidence，不会因此误报 partial
+- Windows Hunt 增加类型化路由与计划任务证据，旧版系统可通过 WMI 和 Task Scheduler COM 回退获取任务状态、运行用户、动作和触发器
+
+### Bugfix
+
+- 修复 Process 等运行态实体同时被所属模块和 Topology 重复写入，导致 Hunt Snapshot 与 Markdown 实体数量翻倍的问题；新快照按实体归属只写一条，历史重复快照也按稳定 ID 去重汇总
+- 修复应用拓扑把 systemd unit 或 Windows Service 当作主要应用服务的问题；主拓扑现在聚焦 Web 服务、中间件、应用运行时、容器和对外监听进程，系统服务只保留为辅助启动关系
+
 ## v2.23.1 <DateTag>2026-08-20</DateTag>
 
 ### Improvement
