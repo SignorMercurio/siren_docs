@@ -12,10 +12,15 @@ export const DateTag = ({ children }) => (
 
 ## v2.23.2 <DateTag>2026-08-21</DateTag>
 
+### Feature
+
+- Hunt 默认加入 opt-in `activity` 模块，在不引入持续 Recorder 的前提下采集当前运行应用与容器直接关联的近期本地日志尾部；候选限定最近 24 小时、最多 16 个文件、每文件 256 KiB、总计 4 MiB，正文只保存在权威 JSONL，Markdown 仅显示覆盖摘要
+
 ### Improvement
 
 - Recon 为 OS、资源、网络、环境变量、计划任务和安全组件等 Agent 高频事实补充稳定字段，并在 source coverage 中分别统计结构化记录、原始证据和报告结构记录；无法可靠解析的配置、脚本、日志和历史仍完整保留为 raw evidence，不会因此误报 partial
 - Windows Hunt 增加类型化路由与计划任务证据，旧版系统可通过 WMI 和 Task Scheduler COM 回退获取任务状态、运行用户、动作和触发器
+- Hunt 使用同一瞬时快照中的稳定实体 ID 串联父子进程，并让每条已建立连接引用实际 Socket、本地地址、远端地址、协议和状态；同一进程到同一远端的多个 Socket 分别保留
 
 ### Bugfix
 

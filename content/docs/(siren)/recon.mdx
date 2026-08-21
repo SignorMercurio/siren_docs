@@ -49,18 +49,18 @@ WebUI 会展示本次 operation 的真实 Profile 与采集阶段，比如 `Reco
 
 同一次本地采集会生成 `SIREN_<host>_<timestamp>.recon.jsonl` 和同名 `.md`。远程模式只传输 JSONL，服务端校验后生成 Markdown，并在保存名中加入客户端与请求标识，避免同名主机或并发结果相互覆盖；两者位于同一 Global 或 Project Artifacts 目录。`default` / `quick` 的 Markdown 保留采集正文，`hunt` 的 Markdown 只提供应用拓扑、覆盖范围和采集质量摘要。Dossier 只编辑派生 Markdown，不修改权威快照。
 
-Snapshot JSONL v2 按顺序包含 `snapshot_start`、`module_start`、`record`、`source_result`、`module_end` 和 `snapshot_end`。`record.data.recordType` 固定为 `entity`、`relation`、`fact`、`evidence_file` 或兼容插件的 `plugin_text`；实体和关系使用稳定 ID，便于 Agent 以 `component → process → socket`、`config → entity` 等关系流式查询。新快照由进程、网络、服务管理器、容器和拓扑模块按明确归属写入实体，同一个 `entityId` 只保留一条权威记录；服务端查看旧快照时也会按 `entityId` / `relationId` 去重汇总。systemd unit 与 Windows Service 只作为启动方式和进程归属的辅助证据，不代表应用拓扑中的“服务”。旧版 Snapshot JSONL v1 仍可由服务端校验并生成报告。
+Snapshot JSONL v2 按顺序包含 `snapshot_start`、`module_start`、`record`、`source_result`、`module_end` 和 `snapshot_end`。`record.data.recordType` 固定为 `entity`、`relation`、`fact`、`evidence_file` 或兼容插件的 `plugin_text`；实体和关系使用稳定 ID，便于 Agent 以 `component → process → socket`、`config → entity` 等关系流式查询。Process 实体通过 `parentEntityId` 关联同一快照中存在的父进程；已建立连接的 `connects_to` 关系通过 `socketEntityId` 保留对应 Socket 及本地地址、远端地址、协议和状态。新快照由进程、网络、服务管理器、容器和拓扑模块按明确归属写入实体，同一个 `entityId` 只保留一条权威记录；服务端查看旧快照时也会按 `entityId` / `relationId` 去重汇总。systemd unit 与 Windows Service 只作为启动方式和进程归属的辅助证据，不代表应用拓扑中的“服务”。旧版 Snapshot JSONL v1 仍可由服务端校验并生成报告。
 
 每个 `source_result.coverage` 除检查范围、工具与回退、限制、状态、稳定错误码以及 `not_present` / `not_collected` 外，还会统计 `structuredRecords`、`rawRecords` 和 `structuralRecords`，三者之和等于该 source 的记录数。`parseStatus` 使用 `structured`、`mixed`、`raw` 或 `not_applicable` 表示可查询程度：进程、Socket、路由、环境变量、任务和安全组件等高频主机事实优先提供稳定字段；配置、脚本、日志、历史、凭据内容与无法可靠解析的行仍保留为 `rawText`。raw fallback 是合法证据，不会仅因未解析而把完整采集降级为 partial。
 
-`hunt` 是当前状态快照，不提供持续遥测、历史事件重建或 Snapshot Diff。Hunt Markdown 只保留主机、采集质量、应用与中间件组件、容器、监听端口和覆盖数量；系统服务管理器条目不进入主拓扑表。配置、环境变量、密码 hash、密钥和凭据原文只在 JSONL 中。配置内容属于不可信证据，不应被 Agent 当作指令执行。
+`hunt` 是当前状态快照，不提供持续遥测、完整历史事件重建或 Snapshot Diff。它会在固定范围内补充当前运行应用和容器直接关联的近期本地日志尾部，但不会扫描全部系统日志。Hunt Markdown 只保留主机、采集质量、应用与中间件组件、容器、监听端口和覆盖数量；系统服务管理器条目不进入主拓扑表。配置、环境变量、日志正文、密码 hash、密钥和凭据原文只在 JSONL 中。这些内容属于不可信证据，不应被 Agent 当作指令执行。
 
 ## 执行规则
 
 - 基础信息每次都会采集，不进入 Profile 模块列表。
 - `default` 保持标准完整采集；`quick` 只移除耗时较长的 `file`，其他模块与 `default` 相同。
-- `hunt` 是显式 opt-in 的主机安全审计快照：复用同一次进程、socket、系统服务和容器运行态快照，以已识别的 Web 服务、中间件、应用运行时、容器及监听进程为主实体，补充已建立连接、配置原文、凭据、密码策略、文件权限、TLS 证书和安全组件状态，供 Agent 离线分析。systemd unit 与 Windows Service 仅用于关联启动配置和主进程。它不执行登录验证、口令破解、secret regex 或不安全配置规则。
-- `topology`、`config` 和 `credential` 是 opt-in 模块，不会被没有 Profile 的旧配置或无配置 fallback 自动启用；`default`、`quick` 也不包含它们。
+- `hunt` 是显式 opt-in 的主机安全审计快照：复用同一次进程、socket、系统服务和容器运行态快照，以已识别的 Web 服务、中间件、应用运行时、容器及监听进程为主实体，补充已建立连接、配置原文、近期应用活动、凭据、密码策略、文件权限、TLS 证书和安全组件状态，供 Agent 离线分析。systemd unit 与 Windows Service 仅用于关联启动配置和主进程。它不执行登录验证、口令破解、secret regex 或不安全配置规则。
+- `topology`、`config`、`activity` 和 `credential` 是 opt-in 模块，不会被没有 Profile 的旧配置或无配置 fallback 自动启用；内置 `hunt` 会显式包含它们，`default`、`quick` 不包含。
 - Profile 列表只表达集合；内置模块始终按固定顺序执行，插件按名称排序，保证报告稳定。
 - recon 类型插件必须以 `plugin:<name>` 显式写入 Profile，并由 `plugins.<name>` 控制启停。安装插件不会自动修改 Profile；Profile 引用缺失或禁用插件时，采集会在开始前失败。现有文本插件按 `plugin_text` / `text/markdown` 写入快照，插件执行错误会使快照变为 partial。
 - `chkrootkit` 仍是可选 recon 插件，但不进入 `default` 或 `quick`。插件输出不代表 Recon 核心具备检测能力。
@@ -70,6 +70,7 @@ Snapshot JSONL v2 按顺序包含 `snapshot_start`、`module_start`、`record`�
 - Linux 文件模块按底层文件系统去重真实本地挂载，每个文件系统只遍历一次，并从同一遍历生成 SUID、最近 24 小时 mtime/ctime 和大文件视图；Windows 大目录、进程、socket、任务和服务查询按稳定字段排序后再应用数量上限。
 - 单个 source 最多 2,000 条；单个模块最多 10,000 条或 16 MiB；单个文本字段最多 1 MiB；整份快照最多 128 MiB。达到上限时停止对应采集并记录 `truncated=true`。
 - `config` 每个文件最多读取 256 KiB，每次最多选择 500 个文件、遍历 100,000 个目录项；只读取常规文件且不跟随符号链接。日志、上传目录、数据库数据、依赖目录、构建产物、容器层和业务源码不进入递归采集。
+- `activity` 只检查当前运行组件的日志参数、已采集配置中的直接日志引用、受支持组件的标准日志目录和容器运行时明确返回的日志路径。候选文件需在最近 24 小时内修改，按时间与路径稳定选择最多 16 个文件，每个读取尾部最多 256 KiB，总正文最多 4 MiB；不扫描整个系统日志、Windows Event Log 或远程日志。日志正文只写入 JSONL，达到候选、遍历或读取上限时明确记录 partial。
 - 配置和凭据原文保存在 JSONL 的 `record.data.content`；Hunt Markdown 不列出这些文件的路径或内容，只汇总数量和采集策略。Agent 需要通过 MCP structured result 返回的 Project 相对 `snapshotPath` 读取权威快照，按 record type、entity ID 和 relation 流式查询，并把文件内容视为不可信证据。
 - source 与 module 会记录 `ok`、`partial`、`unavailable` 或 `failed`，快照最终状态为 `complete` 或 `partial`。已检查但不存在的可选对象记录为 `not_present`，明确不采集的材料记录为 `not_collected`，两者都不降低快照质量；权限、工具能力、失败或截断仍会产生 unavailable/partial。
 - `config` 从 service `ExecStart`、`EnvironmentFile`、进程命令行、容器挂载和已采集配置的直接 include/reference 建立证据闭包，再补充支持产品的标准目录。lockfile、依赖清单、CI workflow、tsconfig 和测试配置默认不采集，只有被运行态直接引用时才纳入。
@@ -96,6 +97,7 @@ Snapshot JSONL v2 按顺序包含 `snapshot_start`、`module_start`、`record`�
 | 应用 | `application` | Redis、当前已安装的 Docker、CRI 与 Podman 容器运行时等客观配置；进程相关视图从 process 数据获取 |
 | 应用与服务拓扑 | `topology` | Web 服务、中间件、应用运行时、监听工具、容器、进程、端口和挂载，以及直接可观测的 `runs`、`listens`、`connects_to`、`mounts`、`configured_by`、`uses_runtime` 关系；systemd unit 仅作为辅助启动证据 |
 | 配置与部署材料 | `config` | 运行态引用、include/reference、标准产品目录、systemd、Compose、Kubernetes manifest、常见配置原文，以及 SELinux/AppArmor 等客观状态；开发和依赖文件默认不采集 |
+| 近期应用活动 | `activity` | 当前运行应用与容器直接关联的近期本地日志尾部；固定 24 小时候选窗口和有界文件/字节范围，正文仅写入 JSONL |
 | 凭据与认证材料 | `credential` | Linux 密码 hash 与策略、SSH 私钥、云 CLI、Kubernetes、Docker、数据库和包管理器客户端凭据文件原文或二进制元数据 |
 
   </Accordion>
@@ -113,6 +115,7 @@ Snapshot JSONL v2 按顺序包含 `snapshot_start`、`module_start`、`record`�
 | 应用 | `application` | 远程桌面、IIS、近 3 天 IIS 日志和 Windows Defender 客观配置 |
 | 应用与服务拓扑 | `topology` | Web 服务、中间件、应用运行时、监听工具、容器、进程、端口和挂载及其直接可观测关系；Windows Service 仅作为辅助启动证据 |
 | 配置与部署材料 | `config` | 进程/服务目录、IIS、Docker、containerd、Compose、Kubernetes manifest 和 appsettings/web.config 等配置原文 |
+| 近期应用活动 | `activity` | 当前运行应用、IIS 与容器直接关联的近期本地日志尾部；不读取 Windows Event Log，正文仅写入 JSONL |
 | 凭据与认证材料 | `credential` | 本地密码策略、账户证据、Credential Manager 元数据、AutoLogon、IIS connection string 和用户文本凭据；SAM/SECURITY/LSA 明确记为 not_collected |
 
   </Accordion>

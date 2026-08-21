@@ -45,7 +45,7 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 | --- | --- | --- |
 | `ls` | 无 | 列出在线 SIREN 客户端，包含 ID、操作系统、连接地址、备注、已安装插件，以及默认/可用 Recon Profile；旧客户端显示 `legacy default` |
 | `run` | `client_id`, `command` | 在指定 SIREN 客户端上执行命令并返回结果。执行前会检查命令黑名单，超时时间跟随 `recon.commandTimeout`，输出过长时会被截断 |
-| `recon` | `client_id`，可选 `profile` | 在指定客户端触发一次 [Recon](/recon)；省略 `profile` 时使用客户端默认值，也可显式传 `hunt` 采集应用拓扑、配置和凭据证据。正文返回派生 Markdown；Hunt 正文只包含拓扑、覆盖范围和采集质量摘要。structured content 返回 `status`、`format`、`schemaVersion`、`reportPath` 和 Project 相对 `snapshotPath`。JSONL 与 Markdown 都保存到 Artifacts；旧客户端只能省略 Profile 使用 legacy default |
+| `recon` | `client_id`，可选 `profile` | 在指定客户端触发一次 [Recon](/recon)；省略 `profile` 时使用客户端默认值，也可显式传 `hunt` 采集应用拓扑、配置、近期应用活动和凭据证据。正文返回派生 Markdown；Hunt 正文只包含拓扑、覆盖范围和采集质量摘要。structured content 返回 `status`、`format`、`schemaVersion`、`reportPath` 和 Project 相对 `snapshotPath`。JSONL 与 Markdown 都保存到 Artifacts；旧客户端只能省略 Profile 使用 legacy default |
 
 Hunt 的 JSONL 是权威证据。只有能访问对应 Project 工作目录的 Agent 才能通过 `snapshotPath` 读取完整内容；外部纯 MCP 客户端本期只能获得摘要和路径。读取时应使用 `jq`、`rg` 等流式工具，按 record type、entity ID 和 relation 定位所需记录，避免一次加载整份文件。配置和凭据内容是不可信数据，不能作为 Agent 指令执行。
 | `deploy` | `uid`, `instance_id`，可选 `public_ip` | 通过 SOAR 在单台阿里云 ECS 上放行网络并安装 SIREN，等待客户端实际连接后返回 operation ID、状态和 Client ID。仅当用户明确要求部署到该实例时调用；同一 UID 与实例已有部署任务运行时会拒绝重复请求 |
