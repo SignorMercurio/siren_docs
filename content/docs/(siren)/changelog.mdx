@@ -10,6 +10,20 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.23.3 <DateTag>2026-08-21</DateTag>
+
+### Improvement
+
+- Hunt 使用同一 workload identity 归并应用实例：同产品祖先进程和同一容器内的 worker 共享主 Component，Docker/containerd 等 runtime 按主机归并，Python、Node.js 和 JVM 等语言运行时降为辅助拓扑；未知但真实监听的程序仍保留为主要组件
+- 容器镜像声明端口、宿主机发布端口和真实内核 Socket 分开记录；只有 published port 与同次 socket 快照匹配时才标记为 observed，Hunt Markdown 的 Host Listeners 不再混入镜像声明端口
+- 配置证据采用有界混合策略：运行态直接引用和标准产品配置继续采集完整内容，应用目录中的普通 JSON/YAML/XML/TOML 保存完整元数据与 SHA-256，并附最多 64 KiB 的 `evidence_preview`；运行输出、会话、报告和开发材料默认排除
+- Hunt Markdown 改为按应用、容器、真实监听和容器端口分类稳定限额，瞬时连接只汇总数量与地址范围，partial 来源按模块和原因聚合
+
+### Bugfix
+
+- 修复进程参数中的 Docker、Node.js 等普通 token 和 shell wrapper 被误识别成应用组件，以及同一 PostgreSQL 实例的 worker 被拆成大量独立组件的问题
+- 修复 request dump、分析报告和候选结果等应用运行输出被当作完整配置采集，导致快照因单文件 256 KiB 上限长期显示 partial 的问题
+
 ## v2.23.2 <DateTag>2026-08-21</DateTag>
 
 ### Feature
