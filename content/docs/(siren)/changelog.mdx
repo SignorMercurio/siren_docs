@@ -10,6 +10,17 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.24.0 <DateTag>2026-08-25</DateTag>
+
+### Feature
+
+- MCP `run` 默认在结果超过 8 KiB 时返回可恢复的首尾预览和 `audit_id`，Agent 可通过新增的 `read_run_result` 按范围读取原文，或用 `search_run_result` 做有界字面搜索，无需重新执行受害主机命令
+- 客户端返回的 50 KiB 内权威结果继续完整写入 `mcp.run.finished` 审计日志；最近结果同时在服务端按 Project 隔离保存 60 分钟，并受 512 条、32 MiB 和服务重启清空等边界约束
+
+### Improvement
+
+- 新增 `mcp.runOutputMode` 配置和单次 `run.output_mode` 参数；默认 `auto` 减少长工具结果占用，设为 `full` 可恢复原有的一次性完整返回行为
+
 ## v2.23.4 <DateTag>2026-08-25</DateTag>
 
 ### Improvement

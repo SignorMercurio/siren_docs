@@ -233,7 +233,7 @@ Logs 页面显示服务端运行日志，内容与启动 `siren_server` 的终�
 
 日志按 `logging.level` 过滤后才进入页面，因此页面看到的与终端一致；需要更详细的内容时调整 `logging.level`。
 
-MCP `run` 会写入共享 `audit_id` 的 `mcp.run.requested` 和 `mcp.run.finished` 记录。选择 `mcp` 组件后，可以直接搜索完整命令、返回给 Agent 的有界结果、客户端 ID、outcome 或 `audit_id`；策略拦截、目标拒绝、发送失败、取消、超时和远端执行失败也会留下完成记录。
+MCP `run` 会写入共享 `audit_id` 的 `mcp.run.requested` 和 `mcp.run.finished` 记录。选择 `mcp` 组件后，可以直接搜索完整命令、客户端返回的 50 KiB 内权威结果、客户端 ID、outcome 或 `audit_id`；Agent 收到长结果预览不会改变日志中的权威结果。策略拦截、目标拒绝、发送失败、取消、超时和远端执行失败也会留下完成记录。
 
 <Callout title="内存缓冲，重启即清空" type="info">
   日志保留在内存中，条数由 `logging.bufferSize` 控制（默认 5000）。服务重启后历史清空；缓冲区写满后最早的记录会被淘汰，页面会显式提示已丢弃的条数，不会静默截断。需要长期留存请按 [日志输出](/config#日志输出)的说明由 systemd 或容器运行时采集。
@@ -289,6 +289,7 @@ webui:
 
 mcp:
   enabled: true                         # 是否启用 MCP 服务
+  runOutputMode: auto                  # run 长结果默认返回可恢复首尾预览
 ```
 
 服务端顶层 `listen` / `port` 决定 Web 控制台、MCP 和远程客户端共用的 TLS 监听地址。`webui.publicURL` 只用于 WebUI AIR 注入 MCP 地址；它必须是证书覆盖的 HTTPS Origin，服务端本机应将该域名解析到本机的非 loopback 内网地址，不能指向 `127.0.0.1` 或 `::1`。完整配置项见 [配置文件](/config#服务端配置)。

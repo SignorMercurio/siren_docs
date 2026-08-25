@@ -94,6 +94,7 @@ recon:
 
 mcp:
   enabled: true                                 # 是否启用 MCP 服务
+  runOutputMode: auto                          # run 长结果默认返回 auto 预览；full 返回完整有界结果
   cmdBlacklist:                                 # MCP run 命令黑名单（正则表达式）
     - '(?:^|[;|&\n]\s*)(?:sudo\s+)?rm(?:\s|$)'
     - '(?:^|[;|&\n]\s*)(?:sudo\s+)?find(?:\s|$)[^;|&\n]*\s-delete(?:\s|$)'
@@ -141,6 +142,7 @@ air:
 | `webui.projectsBaseDir` | string | `""`（服务端当前工作目录） | WebUI Project 目录创建基准路径。创建 Project 时只允许在该目录下创建一个 basename 子目录；Project 重命名不会移动目录，删除 Project 只删除元数据并保留目录文件 |
 | `recon.responseTimeout` | int | `300` | REPL、WebUI 和 MCP 等远程 Recon 入口等待客户端结果的最长时间（秒）；旧 `mcp.reconTimeout` 仍作为兼容回退 |
 | `mcp.enabled` | bool | `true` | 是否启用 [MCP 服务](/mcp)，独立于 `webui.enabled` |
+| `mcp.runOutputMode` | string | `auto` | MCP `run` 默认输出模式：`auto` 对超过 8 KiB 的结果返回可恢复首尾预览，`full` 返回客户端 50 KiB 上限内的完整结果；单次调用可用 `output_mode` 覆盖 |
 | `mcp.cmdBlacklist` | list | 见 [MCP 集成](/mcp#命令黑名单) | MCP `run` 工具的命令黑名单，值为正则表达式列表 |
 | `air.provider` | string | `codex` | WebUI AIR 默认 Provider，可选 `codex`、`claude` 或 `qoder`；页面中也可在每次启动会话时选择。服务端 REPL 的 `air` 命令固定使用 Claude Provider 配置 |
 | `air.maxSessions` | int | `10` | WebUI GUI 与 Terminal 合计最大并发会话数；适用于 Manual、Custom、Event 和 Resume，设为 `0` 或负数表示不限制 |
