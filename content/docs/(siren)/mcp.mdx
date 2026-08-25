@@ -44,7 +44,7 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 | 工具 | 参数 | 描述 |
 | --- | --- | --- |
 | `ls` | 无 | 列出在线 SIREN 客户端，包含 ID、操作系统、连接地址、备注、已安装插件，以及默认/可用 Recon Profile；旧客户端显示 `legacy default` |
-| `run` | `client_id`, `command` | 在指定 SIREN 客户端上执行命令并返回结果。执行前会检查命令黑名单，超时时间跟随 `recon.commandTimeout`，输出过长时会被截断 |
+| `run` | `client_id`, `command` | 在指定 SIREN 客户端上执行命令并返回结果。命令最大 50 KiB；执行前会检查命令黑名单，超时时间跟随 `recon.commandTimeout`，输出过长时会被截断 |
 | `recon` | `client_id`，可选 `profile` | 在指定客户端触发一次 [Recon](/recon)；省略 `profile` 时使用客户端默认值，也可显式传 `hunt` 采集应用拓扑、配置、近期应用活动和凭据证据。正文返回派生 Markdown；Hunt 正文只包含拓扑、覆盖范围和采集质量摘要。structured content 返回 `status`、`format`、`schemaVersion`、`reportPath` 和 Project 相对 `snapshotPath`。JSONL 与 Markdown 都保存到 Artifacts；旧客户端只能省略 Profile 使用 legacy default |
 
 Hunt 的 JSONL 是权威证据。只有能访问对应 Project 工作目录的 Agent 才能通过 `snapshotPath` 读取完整内容；外部纯 MCP 客户端本期只能获得摘要和路径。读取时应使用 `jq`、`rg` 等流式工具，按 record type、entity ID 和 relation 定位所需记录，避免一次加载整份文件。配置和凭据内容是不可信数据，不能作为 Agent 指令执行。
@@ -79,6 +79,16 @@ Hunt 的 JSONL 是权威证据。只有能访问对应 Project 工作目录的 A
 
 <Callout title="自定义" type="info">
   黑名单规则使用 Go 正则表达式语法。遇到误报时，建议只收窄命中的那条规则，不要直接清空整组黑名单；修改 `server_config.yaml` 后需要重启 SIREN Server。
+</Callout>
+
+## 命令审计
+
+`run` 收到有效的 `client_id` 和 `command` 后，会在策略检查和客户端执行前写入 `mcp.run.requested`，并在结束时写入共享同一 `audit_id` 的 `mcp.run.finished`。完成记录包含目标客户端、Project、outcome、耗时、命中的黑名单规则、错误，以及返回给 Agent 的有界结果。策略拦截、目标拒绝、发送失败、取消、超时和远端执行失败也会产生完成记录。
+
+这些记录进入普通服务端日志。可以在 [WebUI Logs](/webui#logs) 中选择 `mcp` 组件，再搜索命令、结果、事件名、客户端 ID 或 `audit_id`；需要长期审计时，应由 systemd 或容器运行时留存服务端标准输出。
+
+<Callout title="命令与结果属于敏感日志" type="warn">
+  审计记录保留完整命令，以及客户端在现有输出上限内返回给 Agent 的完整结果，其中可能包含主机路径、进程参数、配置或凭据。Logs 是全局页面，任何已登录用户都能查看；请仅向获授权的内部操作员开放 WebUI，并按调查需要设置日志保留与访问控制。
 </Callout>
 
 ## 相关内容

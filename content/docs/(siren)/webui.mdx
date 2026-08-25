@@ -233,12 +233,14 @@ Logs 页面显示服务端运行日志，内容与启动 `siren_server` 的终�
 
 日志按 `logging.level` 过滤后才进入页面，因此页面看到的与终端一致；需要更详细的内容时调整 `logging.level`。
 
+MCP `run` 会写入共享 `audit_id` 的 `mcp.run.requested` 和 `mcp.run.finished` 记录。选择 `mcp` 组件后，可以直接搜索完整命令、返回给 Agent 的有界结果、客户端 ID、outcome 或 `audit_id`；策略拦截、目标拒绝、发送失败、取消、超时和远端执行失败也会留下完成记录。
+
 <Callout title="内存缓冲，重启即清空" type="info">
   日志保留在内存中，条数由 `logging.bufferSize` 控制（默认 5000）。服务重启后历史清空；缓冲区写满后最早的记录会被淘汰，页面会显式提示已丢弃的条数，不会静默截断。需要长期留存请按 [日志输出](/config#日志输出)的说明由 systemd 或容器运行时采集。
 </Callout>
 
 <Callout title="访问范围" type="warn">
-  Logs 页面不区分角色：任何已登录用户都能查看服务端日志，其中包含来访 IP、用户名和客户端地址等信息。日志与 Project 无关，始终显示全局内容。将 `logging.bufferSize` 设为 `0` 可以完全关闭该页面。
+  Logs 页面不区分角色：任何已登录用户都能查看服务端日志，其中包含来访 IP、用户名、客户端地址，以及 MCP `run` 的完整命令和有界返回结果等敏感信息。日志与 Project 无关，始终显示全局内容。大量远程命令输出也会增加内存占用；可按操作量调低 `logging.bufferSize`，设为 `0` 则完全关闭该页面。
 </Callout>
 
 ### Dossier
