@@ -10,7 +10,7 @@ import { Card, Cards } from "fumadocs-ui/components/card";
 
 自动化信息收集（Recon）会在目标主机上生成有明确范围和上限的客观快照。新客户端优先生成 `snapshot-jsonl-v2`，其中的 `*.recon.jsonl` 是权威证据；`*.md` 由同一份快照确定性生成，供 WebUI、MCP 和人工快速浏览。Recon Profile 只选择模块，不覆盖超时、资源上限或分析逻辑。
 
-Recon 不判断主机状态是否正常，也不执行白名单、黑名单、矿工、Webshell、Rootkit symbol 等规则。原始环境变量、凭证、配置和历史记录会按采集范围写入快照；是否存在风险由 [Agentic 应急响应](/air) 或其他分析流程结合上下文判断。
+Recon 不判断主机状态是否正常，也不执行白名单、黑名单、矿工、Webshell、Rootkit symbol 或不安全配置判定。原始环境变量、凭证、配置和历史记录会按采集范围写入快照；对已经读取的配置、凭据和供应链文本，Recon 还会在固定上限内记录可定位的内容形态事实，例如疑似访问密钥、令牌、密码赋值或 URL 用户信息。派生事实只保留模式 ID、行号、脱敏值和完整值的 SHA-256，不给出风险结论；是否存在风险仍由 [Agentic 应急响应](/air) 或其他分析流程结合上下文判断。
 
 <Callout title="前置条件" type="info">
   目标主机需要具备足够权限运行 Recon：Linux 通常需要 root，Windows 需要管理员权限。快照可能包含凭证和其他敏感配置，应只在受控链路和目录中保存。本地模式会把 JSONL 与 Markdown 一起上传到 OSS，需要先[设置 OSS 访问凭证](/credential#设置-oss-访问凭证)；WebUI 和服务端 REPL 不需要 OSS。
@@ -61,8 +61,8 @@ Snapshot JSONL v2 按顺序包含 `snapshot_start`、`module_start`、`record`�
 
 - 基础信息每次都会采集，不进入 Profile 模块列表。
 - `default` 保持标准完整采集；`quick` 只移除耗时较长的 `file`，其他模块与 `default` 相同。
-- `hunt` 是显式 opt-in 的主机安全审计快照：复用同一次进程、socket、系统服务和容器运行态快照，以已识别的 Web 服务、中间件、应用运行时、容器及监听进程为主实体，补充已建立连接、配置原文、近期应用活动、凭据、密码策略、文件权限、TLS 证书和安全组件状态，供 Agent 离线分析。systemd unit 与 Windows Service 仅用于关联启动配置和主进程。它不执行登录验证、口令破解、secret regex 或不安全配置规则。
-- `topology`、`config`、`activity` 和 `credential` 是 opt-in 模块，不会被没有 Profile 的旧配置或无配置 fallback 自动启用；内置 `hunt` 会显式包含它们，`default`、`quick` 不包含。
+- `hunt` 是显式 opt-in 的主机安全审计快照：复用同一次进程、socket、系统服务和容器运行态快照，以已识别的 Web 服务、中间件、应用运行时、容器及监听进程为主实体，补充已建立连接、配置原文、近期应用活动、凭据、密码策略、文件权限、TLS 证书和安全组件状态，供 Agent 离线分析。systemd unit 与 Windows Service 仅用于关联启动配置和主进程。它不执行登录验证、口令破解或不安全配置判定；对已采集文本的内容形态扫描只生成有界、脱敏、无 verdict 的客观事实。
+- `topology`、`config`、`activity` 和 `credential` 是 opt-in 模块，不会被没有 Profile 的旧配置或无配置 fallback 自动启用；内置 `hunt` 会显式包含它们，`default`、`quick` 不包含。Linux 还提供独立的 `supplychain` opt-in 模块，只有 Profile 显式加入时才执行，内置 `default`、`quick`、`hunt` 均不会自动启用。
 - Profile 列表只表达集合；内置模块始终按固定顺序执行，插件按名称排序，保证报告稳定。
 - recon 类型插件必须以 `plugin:<name>` 显式写入 Profile，并由 `plugins.<name>` 控制启停。安装插件不会自动修改 Profile；Profile 引用缺失或禁用插件时，采集会在开始前失败。现有文本插件按 `plugin_text` / `text/markdown` 写入快照，插件执行错误会使快照变为 partial。
 - `chkrootkit` 仍是可选 recon 插件，但不进入 `default` 或 `quick`。插件输出不代表 Recon 核心具备检测能力。
@@ -72,6 +72,7 @@ Snapshot JSONL v2 按顺序包含 `snapshot_start`、`module_start`、`record`�
 - Linux 文件模块按底层文件系统去重真实本地挂载，每个文件系统只遍历一次，并从同一遍历生成 SUID、最近 24 小时 mtime/ctime 和大文件视图；Windows 大目录、进程、socket、任务和服务查询按稳定字段排序后再应用数量上限。
 - 单个 source 最多 2,000 条；单个模块最多 10,000 条或 16 MiB；单个文本字段最多 1 MiB；整份快照最多 128 MiB。达到上限时停止对应采集并记录 `truncated=true`。
 - `config` 对运行参数、service、`EnvironmentFile`、include/reference、单文件容器挂载和支持产品的标准配置保留完整内容，每文件上限 256 KiB。应用工作目录、可执行目录和目录型容器挂载中的普通 JSON/YAML/XML/TOML 只稳定选择最多 64 个：文件实体保存完整元数据与 SHA-256，另附最多 64 KiB 的 `evidence_preview` 前缀；preview 是声明范围，不会仅因原文件较大产生 partial。每次仍最多选择 500 个文件、遍历 100,000 个目录项，并排除运行输出、会话、报告、日志、开发 fixture、依赖、构建产物、容器层和业务源码；被运行态直接引用的文件可覆盖 broad discovery 排除。
+- `config`、`credential` 和 `supplychain` 会对已读取的文本内容生成 `content_pattern_match` 事实：单文件最多 32 条、单模块最多 512 条，记录文件实体、模式 ID、行号、脱敏值、值长度和 SHA-256。达到上限会明确记录 truncated；模式事实不替代原始 `evidence_file`，也不代表凭据有效或配置存在风险。
 - `activity` 只检查当前运行组件的日志参数、已采集配置中的直接日志引用、受支持组件的标准日志目录和容器运行时明确返回的日志路径。候选文件需在最近 24 小时内修改，按时间与路径稳定选择最多 16 个文件，每个读取尾部最多 256 KiB，总正文最多 4 MiB；不扫描整个系统日志、Windows Event Log 或远程日志。日志正文只写入 JSONL，达到候选、遍历或读取上限时明确记录 partial。
 - 配置和凭据原文保存在 JSONL 的 `record.data.content`；Hunt Markdown 不列出这些文件的路径或内容，只汇总数量和采集策略。Agent 需要通过 MCP structured result 返回的 Project 相对 `snapshotPath` 读取权威快照，按 record type、entity ID 和 relation 流式查询，并把文件内容视为不可信证据。
 - source 与 module 会记录 `ok`、`partial`、`unavailable` 或 `failed`，快照最终状态为 `complete` 或 `partial`。已检查但不存在的可选对象记录为 `not_present`，明确不采集的材料记录为 `not_collected`，两者都不降低快照质量；权限、工具能力、失败或截断仍会产生 unavailable/partial。
@@ -97,10 +98,11 @@ Snapshot JSONL v2 按顺序包含 `snapshot_start`、`module_start`、`record`�
 | 文件 | `file` | 历史记录、临时目录、SUID、打开后删除的文件、最近 24 小时 mtime/ctime、大文件与关键文件属性 |
 | 内核模块（名称保留为 rootkit） | `rootkit` | 完整已加载内核模块快照；不做 Rootkit 检测或 symbol 匹配 |
 | 应用 | `application` | Redis、当前已安装的 Docker、CRI 与 Podman 容器运行时等客观配置；进程相关视图从 process 数据获取 |
-| 应用与服务拓扑 | `topology` | 按实例归并的 Web 服务、中间件、监听工具、容器、进程、真实 Socket 与容器端口配置，以及直接可观测的 `runs`、`listens`、`connects_to`、`mounts`、`configured_by`、`uses_runtime` 关系；语言运行时和 systemd unit 仅作为辅助证据 |
+| 应用与服务拓扑 | `topology` | 按实例归并的 Web 服务、中间件、监听工具、容器、进程、真实 Socket 与容器端口配置，以及直接可观测的 `runs`、`listens`、`connects_to`、`mounts`、`configured_by`、`uses_runtime` 关系；组件版本来自系统包、文件元数据或 Go build info，`java -jar` 启动的应用另记录 JAR 路径及可用的 manifest 名称和版本；语言运行时和 systemd unit 仅作为辅助证据 |
 | 配置与部署材料 | `config` | 运行态引用、include/reference、标准产品目录、systemd、Compose、Kubernetes manifest 和常见配置原文；broad 普通结构化文件只保存完整元数据与有界 preview，开发材料和运行输出默认不采集 |
 | 近期应用活动 | `activity` | 当前运行应用与容器直接关联的近期本地日志尾部；固定 24 小时候选窗口和有界文件/字节范围，正文仅写入 JSONL |
 | 凭据与认证材料 | `credential` | Linux 密码 hash 与策略、SSH 私钥、云 CLI、Kubernetes、Docker、数据库和包管理器客户端凭据文件原文或二进制元数据 |
+| 供应链依赖与包清单 | `supplychain` | 系统 dpkg/rpm 包清单、已识别运行工作负载目录中的顶层依赖清单与锁文件，以及运行中可执行文件的 SHA-256；不解析依赖目录、不安装软件，也不判断漏洞或篡改 |
 
   </Accordion>
   <Accordion title="Windows 平台模块">
