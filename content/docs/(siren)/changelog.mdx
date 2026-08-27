@@ -10,6 +10,24 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.25.0 <DateTag>2026-08-27</DateTag>
+
+### Feature
+
+- Linux 与 Windows 的 `hunt` Profile 默认加入跨平台 `supplychain` 模块，记录当前运行应用、中间件、真实监听程序和运行中容器载荷对应的可执行文件摘要、版本来源、依赖清单及容器镜像引用；不再生成全系统软件包清单或散列全部主机进程
+
+### Improvement
+
+- 运行载荷可执行文件使用流式 SHA-256，并同时执行 128 文件、64 MiB 单文件和 512 MiB 总读取边界；读取失败、采集期间变化、文件过大或总预算耗尽会以独立 coverage 原因呈现，不输出可能不一致的摘要
+- `supplychain`、`config` 与 `credential` 复用同一路径的 canonical evidence，后续模块仍可补充内容、关系和凭据分类；完整文件摘要另受 8 MiB 单文件与 64 MiB Snapshot 总读取边界约束
+- Hunt Markdown 使用实际 selected、processed、collected、failed 和 reused 数量汇总供应链覆盖；运行态 producer 的部分结果、失败和容器 runtime 未安装会保留各自语义，不再被空结果掩盖
+
+### Bugfix
+
+- 修复 Linux 大小写不同的证据路径被错误合并、preview 先发现后无法升级为直接引用内容，以及首次内容定位写入受模块上限拒绝后无法由后续模块补写的问题
+- 修复已停止容器、命名 volume 和无关语言运行时进入运行载荷证据，以及带空格的依赖参数和 digest-only 镜像引用解析不准确的问题
+- 修复配置 include/reference 闭包、JAR 元数据和证据文件读取缺少完整硬边界或稳定文件校验，可能造成漏项、越界读取或不一致摘要的问题
+
 ## v2.24.0 <DateTag>2026-08-25</DateTag>
 
 ### Feature

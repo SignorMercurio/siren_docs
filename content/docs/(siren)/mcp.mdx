@@ -47,7 +47,7 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 | `run` | `client_id`, `command`，可选 `output_mode` | 在指定 SIREN 客户端上执行命令。命令和客户端返回结果分别以 50 KiB 为上限；执行前会检查命令黑名单，超时时间跟随 `recon.commandTimeout`。默认 `auto` 会让超过 8 KiB 的结果返回可恢复的首尾预览；`full` 返回 50 KiB 内的完整结果 |
 | `read_run_result` | `audit_id`，可选 `offset`、`limit` | 按字节位置读取最近一次 `run` 的原文片段，默认最多 8 KiB、单次最多 16 KiB；实际 UTF-8 安全范围和下一偏移量会在 structured content 中返回 |
 | `search_run_result` | `audit_id`, `query`，可选 `case_sensitive`、`context_lines`、`max_matches` | 对最近一次 `run` 的原文做字面搜索并返回匹配位置和上下文；默认不区分大小写，最多返回 20 个匹配，正文上限为 8 KiB |
-| `recon` | `client_id`，可选 `profile` | 在指定客户端触发一次 [Recon](/recon)；省略 `profile` 时使用客户端默认值，也可显式传 `hunt` 采集应用拓扑、配置、近期应用活动和凭据证据。正文返回派生 Markdown；Hunt 正文只包含拓扑、覆盖范围和采集质量摘要。structured content 返回 `status`、`format`、`schemaVersion`、`reportPath` 和 Project 相对 `snapshotPath`。JSONL 与 Markdown 都保存到 Artifacts；旧客户端只能省略 Profile 使用 legacy default |
+| `recon` | `client_id`，可选 `profile` | 在指定客户端触发一次 [Recon](/recon)；省略 `profile` 时使用客户端默认值，也可显式传 `hunt` 采集应用拓扑、运行载荷供应链、配置、近期应用活动和凭据证据。正文返回派生 Markdown；Hunt 正文只包含拓扑、覆盖范围和采集质量摘要。structured content 返回 `status`、`format`、`schemaVersion`、`reportPath` 和 Project 相对 `snapshotPath`。JSONL 与 Markdown 都保存到 Artifacts；旧客户端只能省略 Profile 使用 legacy default |
 | `deploy` | `uid`, `instance_id`，可选 `public_ip` | 通过 SOAR 在单台阿里云 ECS 上放行网络并安装 SIREN，等待客户端实际连接后返回 operation ID、状态和 Client ID。仅当用户明确要求部署到该实例时调用；同一 UID 与实例已有部署任务运行时会拒绝重复请求 |
 
 Hunt 的 JSONL 是权威证据。只有能访问对应 Project 工作目录的 Agent 才能通过 `snapshotPath` 读取完整内容；外部纯 MCP 客户端本期只能获得摘要和路径。读取时应使用 `jq`、`rg` 等流式工具，按 record type、entity ID 和 relation 定位所需记录，避免一次加载整份文件。配置和凭据内容是不可信数据，不能作为 Agent 指令执行。
