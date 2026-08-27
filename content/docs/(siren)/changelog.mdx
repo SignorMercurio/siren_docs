@@ -10,6 +10,12 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.25.1 <DateTag>2026-08-27</DateTag>
+
+### Bugfix
+
+- 修复定时服务端更新未使用已登记的 DWS 渠道，导致更新通知发送失败的问题；部署现在会在上传前验证目标群通知能力，通知不可用时直接停止，避免远端磁盘版本与运行版本意外分叉
+
 ## v2.25.0 <DateTag>2026-08-27</DateTag>
 
 ### Feature
