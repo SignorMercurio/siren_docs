@@ -91,7 +91,7 @@ Web 控制台使用 Session Cookie 鉴权。账号密码存储在 SQLite 数据�
   <Card title="Projects" icon={<FolderKanban />}>按应急响应项目隔离客户端、Artifacts 和调查上下文</Card>
   <Card title="Clients" icon={<Users />}>查看在线客户端，编辑备注，执行 SOAR 放行、出口配置、部署和清理</Card>
   <Card title="Shells" icon={<Terminal />}>在浏览器中打开多标签交互式终端</Card>
-  <Card title="Agentic IR" icon={<Brain />}>启动 Claude / Codex / Qoder 辅助排查会话</Card>
+  <Card title="Agentic IR" icon={<Brain />}>启动 Claude / Codex / Qoder / Pi 辅助排查会话</Card>
   <Card title="Investigations" icon={<Key />}>执行 AccessKey 调查、Recon 和进程分析</Card>
   <Card title="Files" icon={<Files />}>浏览、预览、下载和上传客户端文件</Card>
   <Card title="Artifacts" icon={<FolderTree />}>管理服务端取证文件和报告</Card>
@@ -153,11 +153,11 @@ Project 视图下，Shell 只能连接当前 Project 的客户端。切换 Proje
 
 ### Agentic IR
 
-Agentic IR 页面通过 Claude Code、Codex 或 Qoder 完成 [Agentic 应急响应](/air)。所有新会话默认使用结构化 GUI 时间线，也可以在启动前选择 Terminal，使用 Provider 的真实 TUI、斜杠命令和自定义 statusline。
+Agentic IR 页面通过 Claude Code、Codex、Qoder 或 Pi 完成 [Agentic 应急响应](/air)。所有新会话默认使用结构化 GUI 时间线，也可以在启动前选择 Terminal，使用 Provider 的真实 TUI、斜杠命令和自定义 statusline。
 
 新建会话可选以下入口模式：
 
-- **Manual**，不带客户端、SIREN MCP 或种子 prompt 的空白会话，适合临时通用操作。
+- **Manual**，不带客户端或种子 prompt 的空白会话，适合临时通用操作；仍会注入当前范围的 SIREN MCP。
 - **Custom**，选择客户端并输入应急响应指令。
 - **Event**，选择客户端并输入阿里云 UID 和云安全中心告警 ID，由服务端拉取告警详情。
 
@@ -169,7 +169,7 @@ Agentic IR 页面通过 Claude Code、Codex 或 Qoder 完成 [Agentic 应急响�
   Resume 只读取当前视图工作目录对应的 Provider history，不会跨 Project 列出其他目录的历史会话，也不会向浏览器暴露本机 JSONL 文件路径。
 </Callout>
 
-GUI 以时间线交错展示 Agent 回复原文与聚合折叠的操作记录，计划、审批和提问出现在对应位置；输入框下方的状态条显示模型、上下文占用和 Provider 额度。时间线支持 Cmd/Ctrl+F 检索与过滤，并可从状态条把当前会话导出为 Markdown。Agent 运行时仍可发送补充要求调整后续方向，也可以单独停止当前工作；调整方向不会撤销已经完成的命令、文件修改或远程操作。Terminal 保留原有 PTY 行为。两种会话都托管在服务端，刷新浏览器或切换页面后可以重新接入并回放，进程不会因为页面离开而中断。除 Manual 外，会话会使用 SIREN MCP，因此需要启用 [MCP 服务](/mcp#启用与访问)。Project 视图下的工作目录、历史恢复和 MCP 作用域规则见 [Agentic 应急响应](/air#webui-air)。
+GUI 以时间线交错展示 Agent 回复原文与聚合折叠的操作记录，计划、审批和提问出现在对应位置；输入框下方的状态条显示模型、上下文占用和 Provider 额度。时间线支持 Cmd/Ctrl+F 检索与过滤，并可从状态条把当前会话导出为 Markdown。Agent 运行时仍可发送补充要求调整后续方向，也可以单独停止当前工作；调整方向不会撤销已经完成的命令、文件修改或远程操作。Terminal 保留原有 PTY 行为。两种会话都托管在服务端，刷新浏览器或切换页面后可以重新接入并回放，进程不会因为页面离开而中断。所有入口都会使用 SIREN MCP，因此需要启用 [MCP 服务](/mcp#启用与访问)。Project 视图使用项目级 MCP，Global 视图使用全局 MCP；工作目录、历史恢复和 MCP 作用域规则见 [Agentic 应急响应](/air#webui-air)。
 
 ### Investigations
 
@@ -270,7 +270,7 @@ Settings 不在左侧导航里，从左下角的账号入口打开。同一个�
 
 - **Preferences**：偏好只保存在当前浏览器，不跟随账号，也不会同步到其他设备。
   - 启动时的 Project 范围：沿用上次使用的范围，或每次都从 Global 开始。
-  - Agentic IR 默认 Provider：沿用上次使用的 Provider，或固定 Codex / Claude / Qoder。固定期间仍可为单次会话临时切换；所选 Provider 不可用时会自动使用可用的 Provider。
+  - Agentic IR 默认 Provider：沿用上次使用的 Provider，或固定 Codex / Claude / Qoder / Pi。固定期间仍可为单次会话临时切换；所选 Provider 不可用时会自动使用可用的 Provider。
   - Agentic IR 默认界面：沿用上次使用的界面，或固定 GUI / Terminal。固定期间上次使用的记录会被保留，改回"沿用上次使用"时恢复的仍是你真正用过的界面。当前 Provider 不支持所选界面时，仍会临时使用可用的那个。
   - Clients 列表刷新频率：5 秒到 1 分钟。标签页切到后台时轮询会自动暂停。
 - **Server**：只读信息，包括版本号、鉴权状态与当前用户、Dossier 目录，以及每个 Agentic IR Provider 实际可用的界面。Provider 不可用或只能用其中一种界面时，这里会直接给出原因，不用等到启动会话失败才发现。

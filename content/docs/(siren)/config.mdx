@@ -64,7 +64,7 @@ plugins:
 | `oss.docObjectPath` | string | `tmp/siren_upload/docs/latest` | 本地 `siren recon` 的 JSONL 与 Markdown 上传路径前缀 |
 | `plugins.marketplace` | string | - | 插件市场 URL，用于下载和更新插件 |
 | `plugins.<name>` | bool | - | 启用或禁用插件，command 与 recon 类型统一使用该开关 |
-Profile 名必须匹配 `^[a-z][a-z0-9_-]{0,63}$`。每个 Profile 包含 1–64 个不重复模块；未知模块会使配置加载失败。`Basic` 始终执行，不写入列表。recon 插件以 `plugin:<name>` 引用，例如 `custom: [user, process, plugin:collector]`；插件缺失或被 `plugins.<name>` 禁用时，采集开始前会失败。
+Profile 名必须匹配 `^[a-z][a-z0-9_-]{0,63}$`。每个 Profile 包含 1 到 64 个不重复模块；未知模块会使配置加载失败。`Basic` 始终执行，不写入列表。recon 插件以 `plugin:<name>` 引用，例如 `custom: [user, process, plugin:collector]`；插件缺失或被 `plugins.<name>` 禁用时，采集开始前会失败。
 
 没有 `recon.profiles` 的旧配置会把已启用的传统 `recon.<module>` 与旧式 recon 插件合成为唯一的 `default`，并记录迁移提示。`topology`、`supplychain`、`config`、`activity` 和 `credential` 属于 opt-in 采集，不会被旧配置或无配置 fallback 自动启用；Linux 与 Windows 的内置 `hunt` 会显式包含这些模块。Linux 的 `rootkit` 仍保留在 `default`、`quick` 和用户自定义 Profile 中，但不进入 `hunt`。新旧结构同时存在时，以 Profile 为准，旧键被忽略。旧配置中残留的 `rules` 不影响启动，但会记录一次已忽略提示；这些规则不再参与 Recon。无效的远程 `reload` 会保留上一个有效 Profile 快照。
 
@@ -105,7 +105,7 @@ mcp:
 
 air:
   # WebUI AIR 的默认 Provider；也可逐会话在页面上选择
-  provider: codex                              # codex / claude / qoder
+  provider: codex                              # codex / claude / qoder / pi
   maxSessions: 10                              # GUI 与 Terminal 合计最大并发数；<=0 表示不限制
   replayBufferBytes: 4194304                   # 每个会话的断线回放上限（字节）
   prompt: 启动安全应急响应，UID：%s，...        # 告警事件模式的 prompt 模板
@@ -121,6 +121,12 @@ air:
     qoder:
       cliPath: qodercli                        # QoderCLI 路径
       args: []                                 # 额外 QoderCLI 参数
+    pi:
+      cliPath: pi                              # 全局 Pi CLI 路径
+      args: []                                 # 额外 Pi CLI 参数
+      agentDir: /root/.pi/agent                # 全局 Pi 配置与插件目录
+      contextModeDir: /root/.pi/context-mode   # 长上下文存储目录
+      memoryDir: /root/.pi/agent/memory        # 长期记忆目录
 ```
 
 ### 配置项说明
@@ -144,7 +150,7 @@ air:
 | `mcp.enabled` | bool | `true` | 是否启用 [MCP 服务](/mcp)，独立于 `webui.enabled` |
 | `mcp.runOutputMode` | string | `auto` | MCP `run` 默认输出模式：`auto` 对超过 8 KiB 的结果返回可恢复首尾预览，`full` 返回客户端 50 KiB 上限内的完整结果；单次调用可用 `output_mode` 覆盖 |
 | `mcp.cmdBlacklist` | list | 见 [MCP 集成](/mcp#命令黑名单) | MCP `run` 工具的命令黑名单，值为正则表达式列表 |
-| `air.provider` | string | `codex` | WebUI AIR 默认 Provider，可选 `codex`、`claude` 或 `qoder`；页面中也可在每次启动会话时选择。服务端 REPL 的 `air` 命令固定使用 Claude Provider 配置 |
+| `air.provider` | string | `codex` | WebUI AIR 默认 Provider，可选 `codex`、`claude`、`qoder` 或 `pi`；页面中也可在每次启动会话时选择。服务端 REPL 的 `air` 命令固定使用 Claude Provider 配置 |
 | `air.maxSessions` | int | `10` | WebUI GUI 与 Terminal 合计最大并发会话数；适用于 Manual、Custom、Event 和 Resume，设为 `0` 或负数表示不限制 |
 | `air.replayBufferBytes` | int | `4194304` | 每个会话用于断线重连的回放预算；Terminal 按原始输出字节、GUI 按序列化事件字节计算，设为 `0` 或负数时使用默认的 4 MiB |
 | `air.prompt` | string | 见示例配置 | 告警事件模式下的 prompt 模板，依次填入 `%s` UID、`%s` 安全中心告警 ID、`%d` Client ID（告警 ID 即 `air` 命令的 Security Center Alert ID，详见 [Agentic 应急响应](/air)） |
@@ -155,6 +161,11 @@ air:
 | `air.providers.codex.args` | list | `[--no-alt-screen]` | 传递给 Codex CLI 的额外参数；默认使用 inline TUI 保留浏览器终端滚动历史，自定义时可移除该参数恢复 Codex 的 alternate screen 行为 |
 | `air.providers.qoder.cliPath` | string | `qodercli` | WebUI Qoder Provider 使用的 QoderCLI 路径 |
 | `air.providers.qoder.args` | list | `[]` | 传递给 QoderCLI 的额外参数 |
+| `air.providers.pi.cliPath` | string | `pi` | WebUI Pi Provider 使用的全局 Pi CLI 路径 |
+| `air.providers.pi.args` | list | `[]` | 传递给 Pi CLI 的额外参数；SIREN 会覆盖冲突的 model、thinking、mode 和 session 参数 |
+| `air.providers.pi.agentDir` | string | `/root/.pi/agent` | Pi 的全局配置、插件、认证与 Skills 目录 |
+| `air.providers.pi.contextModeDir` | string | `/root/.pi/context-mode` | Pi 长上下文卸载与恢复目录 |
+| `air.providers.pi.memoryDir` | string | `/root/.pi/agent/memory` | Pi 跨会话长期记忆目录 |
 
 ### 日志输出
 
@@ -172,10 +183,10 @@ SIREN 不直接创建日志文件或执行轮转。需要持久化时，应由 s
 
 `logging.bufferSize` 额外在内存中保留最近若干条日志，供 [Web 控制台 Logs 页面](/webui#logs)查看。保留的内容与终端输出完全一致，同样受 `logging.level` 约束；缓冲区仅存在于内存中，服务重启后清空，不能替代上述持久化方案。
 
-> WebUI GUI 与 Terminal 都复用 `air.providers.<name>`。Manual 模式只启动空白 Provider 会话；Custom、Event、Resume 模式会额外注入 SIREN MCP、种子 prompt 或恢复会话 ID。两种界面都受 WebUI 全局鉴权保护。
+> WebUI GUI 与 Terminal 都复用 `air.providers.<name>`。所有入口都会注入当前范围的 SIREN MCP：Project 使用 `/mcp/project/<id>`，Global 使用 `/mcp`。Manual 只启动空白 Provider 会话；Custom、Event、Resume 再按需加入种子 prompt 或恢复会话 ID。两种界面都受 WebUI 全局鉴权保护。
 
 <Callout title="AIR 配置边界" type="info">
-  AIR 的 Provider 配置只保留 Provider、prompt、CLI 路径和额外参数；会话并发与重连回放容量分别由 `air.maxSessions` 和 `air.replayBufferBytes` 控制。模型、权限、沙箱、普通 Shell 审批等行为由 Claude Code / Codex / Qoder 自身配置决定；GUI 仅展示 Provider 主动返回的审批，不写入用户级永久规则。Qoder Provider 不会修改全局 Qoder 设置或强制跳过权限确认。旧版 AIR 细分字段和独立的 `agentTerminal.*` 配置块已移除，残留时不会生效。
+  AIR 的 Provider 配置只保留 Provider、prompt、CLI 路径和额外参数；会话并发与重连回放容量分别由 `air.maxSessions` 和 `air.replayBufferBytes` 控制。Claude Code、Codex 和 Qoder 的模型、权限、沙箱、普通 Shell 审批等行为由各自配置决定；GUI 仅展示 Provider 主动返回的审批，不写入用户级永久规则。Pi 复用全局 Pi 配置并固定使用 Qwen Aegis，文件、Shell、MCP 和子 agent 操作不产生权限审批。旧版 AIR 细分字段和独立的 `agentTerminal.*` 配置块已移除，残留时不会生效。
 </Callout>
 
 <Callout title="v1.x 升级提示" type="warn">

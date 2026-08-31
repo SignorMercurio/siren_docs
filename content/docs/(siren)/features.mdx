@@ -40,7 +40,7 @@ Recon 会在目标主机上采集客观状态。基础信息始终采集，其�
 
 <Cards>
     <Card title="浏览器 Shell" icon={<Terminal />} href="/webui#shells">在 Web 控制台打开多标签交互式终端，切换页面后会话保持运行</Card>
-    <Card title="Agentic 应急响应" icon={<Brain />} href="/air">启动 Claude、Codex 或 Qoder 辅助排查会话，由操作员观察、追问和确认关键操作</Card>
+    <Card title="Agentic 应急响应" icon={<Brain />} href="/air">启动 Claude、Codex、Qoder 或 Pi 辅助排查会话，由操作员观察、追问并控制调查过程</Card>
     <Card title="AccessKey 调查" icon={<Key />} href="/ak">调用 SOAR 剧本查询泄露 AccessKey 的云上调用历史，生成 Markdown 报告</Card>
     <Card title="进程分析" icon={<Activity />} href="/analysis/info">按 PID、监听端口或进程名查询 Linux 进程详情、进程树、容器和服务线索</Card>
     <Card title="端口转发" icon={<ArrowRightLeft />} href="/portforward">把目标主机内网服务转发到控制主机，用于临时访问和验证</Card>
@@ -65,7 +65,7 @@ SIREN 把客户端文件系统、服务端取证目录和报告编辑分成不�
 这些能力用于扩展调查入口和自动化方式。MCP 面向 AI 客户端，插件系统用于扩展 SIREN 客户端能力。
 
 <Cards>
-    <Card title="Agentic IR" icon={<Brain />} href="/air">在 Web 控制台中运行 Claude / Codex / Qoder 辅助排查会话，或在服务端 REPL 中运行 Claude 会话</Card>
+    <Card title="Agentic IR" icon={<Brain />} href="/air">在 Web 控制台中运行 Claude / Codex / Qoder / Pi 辅助排查会话，或在服务端 REPL 中运行 Claude 会话</Card>
     <Card title="MCP 集成" icon={<Plug />} href="/mcp">让支持 MCP 的 AI 客户端列出 SIREN 客户端、执行命令或获取告警详情</Card>
     <Card title="插件系统" icon={<Puzzle />} href="/plugins">安装、卸载、更新和启停 `command` 与 `recon` 插件</Card>
     <Card title="插件列表" icon={<Download />} href="/plugins/list">查看当前可用插件和内置示例插件</Card>
