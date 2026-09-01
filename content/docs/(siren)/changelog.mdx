@@ -12,6 +12,10 @@ export const DateTag = ({ children }) => (
 
 ## v2.26.3 <DateTag>2026-09-01</DateTag>
 
+### Improvement
+
+- Agentic IR 的 GUI 与 Terminal 合计最大并发会话数默认从 10 提升到 20；仍可通过 `air.maxSessions` 调整，设为 `0` 或负数表示不限制
+
 ### Bugfix
 
 - 修复多台 ECS 共享同一出口 IP 时，批量部署完成后无法自动归属当前 Project 或写入对应备注的问题；SIREN 现在通过客户端稳定身份精确关联每个部署目标，缺少身份、身份冲突或来源 IP 不一致时仍会安全进入 `manual_required`，不会回退为按 IP 猜测

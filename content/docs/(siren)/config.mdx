@@ -106,7 +106,7 @@ mcp:
 air:
   # WebUI AIR 的默认 Provider；也可逐会话在页面上选择
   provider: codex                              # codex / claude / qoder / pi
-  maxSessions: 10                              # GUI 与 Terminal 合计最大并发数；<=0 表示不限制
+  maxSessions: 20                              # GUI 与 Terminal 合计最大并发数；<=0 表示不限制
   replayBufferBytes: 4194304                   # 每个会话的断线回放上限（字节）
   prompt: 启动安全应急响应，UID：%s，...        # 告警事件模式的 prompt 模板
   customPromptPrefix: 在 SIREN Client %d 上...  # 自定义 prompt 模式的前缀
@@ -151,7 +151,7 @@ air:
 | `mcp.runOutputMode` | string | `auto` | MCP `run` 默认输出模式：`auto` 对超过 8 KiB 的结果返回可恢复首尾预览，`full` 返回客户端 50 KiB 上限内的完整结果；单次调用可用 `output_mode` 覆盖 |
 | `mcp.cmdBlacklist` | list | 见 [MCP 集成](/mcp#命令黑名单) | MCP `run` 工具的命令黑名单，值为正则表达式列表 |
 | `air.provider` | string | `codex` | WebUI AIR 默认 Provider，可选 `codex`、`claude`、`qoder` 或 `pi`；页面中也可在每次启动会话时选择。服务端 REPL 的 `air` 命令固定使用 Claude Provider 配置 |
-| `air.maxSessions` | int | `10` | WebUI GUI 与 Terminal 合计最大并发会话数；适用于 Manual、Custom、Event 和 Resume，设为 `0` 或负数表示不限制 |
+| `air.maxSessions` | int | `20` | WebUI GUI 与 Terminal 合计最大并发会话数；适用于 Manual、Custom、Event 和 Resume，设为 `0` 或负数表示不限制 |
 | `air.replayBufferBytes` | int | `4194304` | 每个会话用于断线重连的回放预算；Terminal 按原始输出字节、GUI 按序列化事件字节计算，设为 `0` 或负数时使用默认的 4 MiB |
 | `air.prompt` | string | 见示例配置 | 告警事件模式下的 prompt 模板，依次填入 `%s` UID、`%s` 安全中心告警 ID、`%d` Client ID（告警 ID 即 `air` 命令的 Security Center Alert ID，详见 [Agentic 应急响应](/air)） |
 | `air.customPromptPrefix` | string | 见示例配置 | 自定义 prompt 模式下的前缀（支持 `%d` Client ID） |
