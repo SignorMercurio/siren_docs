@@ -101,8 +101,8 @@ SIREN 支持本地模式和远程模式。多数应急场景建议使用远程�
 
 看到 `connected as client #<Client ID>` 才表示部署成功。安装失败、启动失败或等待超时都会返回明确错误。
 
-<Callout title="共享出口 IP" type="warning">
-  如果多个进行中的部署目标使用同一个出口 IP，SIREN 会继续执行部署，但不会猜测新连接属于哪台主机。请在 Clients 列表中核对客户端后手工设置 Project 和 Note，不要直接重复部署。
+<Callout title="共享出口 IP" type="info">
+  多个部署目标共享同一个出口 IP 时，SIREN 会使用安装后返回的客户端稳定身份精确关联每台主机，不会按 IP 猜测。稳定身份缺失、冲突或来源 IP 不一致时，目标会进入 `manual_required`；请在 Clients 列表中核对后手工设置 Project 和 Note，不要直接重复部署。
 </Callout>
 
 <Callout title="出口 IP 获取失败时" type="info">
