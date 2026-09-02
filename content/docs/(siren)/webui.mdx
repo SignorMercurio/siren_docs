@@ -127,6 +127,7 @@ Clients 页面对应服务端 REPL 的 `ls`、`note`、`allow`、`deploy` 和 `c
 - 编辑备注。备注绑定到客户端稳定身份，客户端重连后会自动恢复。
 - 分配 Project。Global 视图中可以把客户端分配到某个 Project，或移回未归属状态。
 - 打开快捷入口。从客户端行可直接进入 Files 或 Process Analysis。
+- 没有在线客户端时，页面会显示三步引导：部署客户端、等待连接、从客户端行开始排查。
 - 执行 SOAR 操作，包括 `allow` 放行、配置 SIREN 出方向、单机部署和批量部署。
 - 查看近期部署任务。页面刷新后仍可恢复当前进度和最近结果，进行中的任务每 2 秒更新一次。
 - 清理客户端。单个或批量清理都会要求输入确认短语后再执行 **Clean & Terminate**。
@@ -163,7 +164,7 @@ Agentic IR 页面通过 Claude Code、Codex、Qoder 或 Pi 完成 [Agentic 应�
 
 也可以切换到 **Resume** 模式，搜索并选择当前视图工作目录对应的历史会话。历史先以只读时间线打开，只有点击 **Continue session** 后才会启动 Provider，并用原 session ID 继续。
 
-左侧的 Running 会显示任务、客户端、Provider、状态和启动时间；History 会显示首个任务、最近一条可见对话、分支和更新时间，便于在恢复前确认会话内容。
+左侧的 Running 会显示任务、客户端、Provider、状态和启动时间；History 默认收起在侧栏底部，展开后显示首个任务、最近一条可见对话、分支和更新时间，便于在恢复前确认会话内容。
 
 <Callout title="恢复范围" type="info">
   Resume 只读取当前视图工作目录对应的 Provider history，不会跨 Project 列出其他目录的历史会话，也不会向浏览器暴露本机 JSONL 文件路径。

@@ -10,6 +10,19 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.27.0 <DateTag>2026-09-02</DateTag>
+
+### Feature
+
+- Agentic IR 的 GUI 与 Terminal 输入框支持直接粘贴图片（PNG、JPEG、WebP、GIF，单张最多 8 MiB，一次最多 4 张），由 SIREN 转交给 Provider；Claude 与 Codex 支持图片，Qoder 以其 CLI 上报的能力为准，Pi 当前使用的模型不接受图片
+
+### Improvement
+
+- Agentic IR 启动面板：Provider 图标与 GUI/Terminal 开关悬停时显示名称或不可用原因；Manual / Custom / Event 下方显示一行模式说明；输入框、文本框和下拉框统一高度、圆角、悬停与聚焦样式
+- Agentic IR 侧栏每次加载默认展开，从 Clients 行内进入时也会自动展开；History 默认收起在侧栏底部，点击标题展开；收起侧栏的箭头固定在分隔线上，窄屏布局同样可用
+- Investigations 的 AccessKey、Recon 和 Process Analysis 面板顶部各增加一行用途说明
+- Clients 页面没有在线客户端时显示三步引导：部署客户端、等待连接、从客户端行开始排查
+
 ## v2.26.5 <DateTag>2026-09-02</DateTag>
 
 ### Improvement
