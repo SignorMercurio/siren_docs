@@ -71,7 +71,7 @@ GUI 输入框支持直接粘贴图片（如告警截图、拓扑图），每条�
 - **Event**：选择客户端，输入 Alibaba Cloud UID，并选择一种事件目标：安全中心告警 ID（Event）、ECS 实例 ID（ECS）或云安全中心资产 UUID（Asset）。告警 ID 直接定位单条告警；实例或资产目标会让 Agent 查询其关联告警，并可展开 **Time range** 高级选项限定告警时间范围（最近 3/7/30 天，或自定义起止时间，默认不限定）。
 - **Resume**：从当前视图工作目录对应的历史会话中选择一条。点击历史只会读取本地记录；确认 **Continue session** 后才用原 session ID 继续。
 
-会话托管在 SIREN Server 上。刷新浏览器、切换页面或短暂断连后，可以从 **Running** 列表重新接入并回放此前内容；点击 Stop 会结束对应会话。`air.maxSessions` 同时限制 GUI 与 Terminal 会话，`air.replayBufferBytes` 则分别限制 GUI 结构化事件或 Terminal 原始输出的断线回放容量。长会话重新接入时，如果更早的内容已超出回放缓冲，GUI 时间线顶部会显示已丢弃多少条更早事件的横幅，并提供 **Open full transcript** 按钮打开该会话的完整历史（只读时间线）。同一个 Provider 会话不能同时在两个界面运行，停止后可以换一种界面继续。
+会话托管在 SIREN Server 上。刷新浏览器、切换页面或短暂断连后，可以从 **Running** 列表重新接入并回放此前内容；点击 Stop 会结束对应会话。会话结束后（Agent 进程退出、被 Stop、或服务端重启后会话已不存在），面板顶部会显示 “Session ended” 与原因；Terminal 自动重连次数用尽时显示 **Reconnect** 按钮。`air.maxSessions` 同时限制 GUI 与 Terminal 会话，`air.replayBufferBytes` 则分别限制 GUI 结构化事件或 Terminal 原始输出的断线回放容量。长会话重新接入时，如果更早的内容已超出回放缓冲，GUI 时间线顶部会显示已丢弃多少条更早事件的横幅，并提供 **Open full transcript** 按钮打开该会话的完整历史（只读时间线）。同一个 Provider 会话不能同时在两个界面运行，停止后可以换一种界面继续。
 
 报告、证据和文件变更只会显示 Project 范围内的安全相对路径。历史时间线初始为只读，长内容和较早记录按需加载。
 

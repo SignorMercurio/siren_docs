@@ -10,6 +10,25 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.26.5 <DateTag>2026-09-02</DateTag>
+
+### Improvement
+
+- Agentic IR 会话结束时（Agent 进程退出、被 Stop、服务端重启后会话已不存在），GUI 与 Terminal 面板顶部都会显示 “Session ended” 及原因；Terminal 自动重连次数用尽后显示 **Reconnect** 按钮，不再静默停在最后一帧
+- Running 列表刷新失败时在列表上方提示可能过期，Stop 失败也会给出原因，不再只是行短暂消失又回来
+- Terminal 会话在 macOS 上选中文字时 Ctrl+C 仍发送中断信号，复制请使用 Cmd+C；共享会话不再响应终端程序写剪贴板的 OSC 52 序列；重连不再抢走输入框焦点；关闭标签页后焦点落到相邻标签
+
+### Bugfix
+
+- 修复 GUI 会话在 Provider 退出或被 Stop 后仍显示 “Agent is working”、输入框停留在调整方向模式的问题
+- 修复 Claude 空闲时刷新额度会让界面短暂进入运行态、此时发送的请求被拒绝的问题
+- 修复 Pi 上下文压缩事件不在时间线显示的问题，现与 Codex 一致以通知形式出现
+- 修复历史时间线中失败的工具调用不带失败标记、Failed 过滤为空的问题
+- 修复 Qoder 进程异常退出后审批卡片一直挂起的问题
+- 修复 Agent 进程崩溃时最后一段输出可能未到达 Terminal 面板与回放缓冲的问题
+- 修复全屏类 TUI 输出下 Terminal 回放缓冲被过度裁剪、重新接入几乎看不到历史的问题
+- 修复某个 Provider 的 GUI 探测卡住时会阻塞其他 Provider 与 Terminal 会话启动的问题
+
 ## v2.26.3 <DateTag>2026-09-01</DateTag>
 
 ### Improvement
