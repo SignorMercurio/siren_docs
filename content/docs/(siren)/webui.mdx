@@ -169,7 +169,7 @@ Agentic IR 页面通过 Claude Code、Codex、Qoder 或 Pi 完成 [Agentic 应�
   Resume 只读取当前视图工作目录对应的 Provider history，不会跨 Project 列出其他目录的历史会话，也不会向浏览器暴露本机 JSONL 文件路径。
 </Callout>
 
-GUI 以时间线交错展示 Agent 回复原文与聚合折叠的操作记录，计划、审批和提问出现在对应位置；输入框下方的状态条显示模型、上下文占用和 Provider 额度。时间线支持 Cmd/Ctrl+F 检索与过滤，并可从状态条把当前会话导出为 Markdown。Agent 运行时仍可发送补充要求调整后续方向，也可以单独停止当前工作；调整方向不会撤销已经完成的命令、文件修改或远程操作。Terminal 保留原有 PTY 行为。两种会话都托管在服务端，刷新浏览器或切换页面后可以重新接入并回放，进程不会因为页面离开而中断。所有入口都会使用 SIREN MCP，因此需要启用 [MCP 服务](/mcp#启用与访问)。Project 视图使用项目级 MCP，Global 视图使用全局 MCP；工作目录、历史恢复和 MCP 作用域规则见 [Agentic 应急响应](/air#webui-air)。
+GUI 以时间线交错展示 Agent 回复原文与聚合折叠的操作记录，计划、审批和提问出现在对应位置；输入框下方的状态条显示模型、上下文占用和 Provider 额度。时间线支持 Cmd/Ctrl+F 检索与过滤，并可从状态条把当前会话导出为 Markdown。Agent 运行时仍可发送补充要求调整后续方向，也可以单独停止当前工作；调整方向不会撤销已经完成的命令、文件修改或远程操作。GUI 与 Terminal 都支持直接粘贴 PNG、JPEG、WebP 和 GIF 图片，单张最多 8 MiB、一次最多 4 张；SIREN 负责把图片转交给 Provider，具体模型能否识别由 Provider 和模型决定。Terminal 保留原有 PTY 行为。两种会话都托管在服务端，刷新浏览器或切换页面后可以重新接入并回放，进程不会因为页面离开而中断。所有入口都会使用 SIREN MCP，因此需要启用 [MCP 服务](/mcp#启用与访问)。Project 视图使用项目级 MCP，Global 视图使用全局 MCP；工作目录、历史恢复和 MCP 作用域规则见 [Agentic 应急响应](/air#webui-air)。
 
 ### Investigations
 
