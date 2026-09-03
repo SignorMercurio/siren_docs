@@ -113,7 +113,7 @@ export const DateTag = ({ children }) => (
 
 ### Improvement
 
-- Recon 改为有明确范围与上限的客观采集，工具缺失或截断如实记录为 `unavailable` / `partial`
+- Recon 改为有界采集，每个 source、module 和整份快照均有硬限制，工具缺失或截断记录为 `unavailable` / `partial`
 - Recon 新增 270 秒 Profile 总采集预算
 
 ## v2.20.0 <DateTag>2026-08-18</DateTag>
@@ -155,7 +155,7 @@ export const DateTag = ({ children }) => (
 ### Bugfix
 
 - 修复继续历史会话、发送失败和时间线跳转时可能丢失内容或位置的问题
-- 服务端发行包不再携带发布机的 TLS 私钥，首次安装生成独立证书
+- 修复服务端发行包携带发布机 TLS 私钥的问题，首次安装改为在控制主机生成独立证书
 
 ## v2.17.0 <DateTag>2026-08-03</DateTag>
 
@@ -359,9 +359,8 @@ export const DateTag = ({ children }) => (
 
 ### Improvement
 
-- Files 与 Artifacts 复用一致的文件浏览交互：树形目录、刷新、文件预览、下载按钮、可拖拽目录宽度等行为保持统一
-- 客户端文件操作改为结构化请求/响应协议，目录读取、文件过大、二进制预览等状态会以明确错误或提示返回 WebUI
-- SOAR 操作日志与运行按钮组件复用到多个 WebUI 页面，Clients、Investigations 等页面的等待态和结果展示更一致
+- Files 与 Artifacts 共用一致的文件浏览交互：树形目录、刷新、文件预览、下载、可拖拽目录宽度
+- 目录读取失败、文件过大、二进制预览等情况会返回明确的错误或提示
 
 ### Bugfix
 
@@ -380,7 +379,7 @@ export const DateTag = ({ children }) => (
 
 ### Improvement
 
-- WebUI 调查流程的等待态改为真实可观测状态：AK 调查只展示 SOAR playbook 运行中，Recon 展示客户端实际回传阶段，避免虚构进度
+- WebUI 调查流程的等待态改为真实可观测状态：AK 调查展示 SOAR playbook 运行中，Recon 展示客户端实际回传阶段
 - Recon 报告在服务端本地保留一份，并继续按配置上传 OSS，便于远程部署时通过 Artifacts 页面直接打开
 - Investigation 结果面板增加空状态说明、字段占位提示和更清晰的打开 Artifacts 入口
 
@@ -395,9 +394,9 @@ export const DateTag = ({ children }) => (
 
 ### Feature
 
-- **Artifacts 页面支持整目录打包下载**：文件树每个目录行悬停显示下载图标，点击以 tar.gz 流式下载（使用 `gzip.BestSpeed`，针对应急响应证据目录中常见的二进制文件优化吞吐）。dotfile 与 dotdir 自动排除，与浏览逻辑保持一致
+- **Artifacts 页面支持整目录打包下载**：文件树每个目录行悬停显示下载图标，点击以 tar.gz 流式下载；dotfile 与 dotdir 自动排除
 - **Artifacts 页面原生预览 HTML 报告**：针对 Agentic IR 等场景生成的 HTML 报告，可直接在浏览器中查看，并支持同目录下的 CSS、JS、字体、图片等相对资源
-- 目录下载按钮可键盘导航，默认低调显示，行悬停或按钮聚焦时高亮
+- 目录下载按钮支持键盘导航
 
 ### Bugfix
 
@@ -419,8 +418,11 @@ export const DateTag = ({ children }) => (
     - Shell 页面支持多标签 WebSocket 终端，切换页面时会话不中断
     - Agentic IR 页面内嵌 Claude Code CLI，基于 PTY 在浏览器里完成全程自动响应
     - Artifacts 文件浏览器支持 Markdown 渲染、文件下载，文件树宽度可拖拽调整并持久化
-- 【BREAKING】MCP 服务合并到 WebUI 端口（默认 `:8080`），移除 `mcpPort` 配置和 `--mcp-port` 参数。MCP 客户端 URL 需指向 `http://<host>:8080/mcp`。
 - 服务端、客户端启动时打印 banner 显示版本信息
+
+### Breaking Change
+
+- MCP 服务合并到 WebUI 端口（默认 `:8080`），移除 `mcpPort` 配置和 `--mcp-port` 参数。MCP 客户端 URL 需指向 `http://<host>:8080/mcp`
 
 ### Bugfix
 
@@ -434,7 +436,7 @@ export const DateTag = ({ children }) => (
 
 ### Feature
 
-- `deploy` 命令支持跳过公网 IP 查询、同时提升了受害主机出口 IP 获取稳定性
+- `deploy` 命令支持跳过公网 IP 查询，提升受害主机出口 IP 获取稳定性
 
 ### Bugfix
 
@@ -488,7 +490,6 @@ export const DateTag = ({ children }) => (
 - 规避云安全中心"异常的伪终端 Shell 创建行为"等告警
 - 信息收集报告默认上传至 OSS 的 `latest` 目录
 - OSS 上传进度条显示优化
-- 表格显示、日志输出相关代码重构
 
 ### Bugfix
 
@@ -578,8 +579,6 @@ export const DateTag = ({ children }) => (
 
 - 子命令 `run` 添加 Windows 支持
 - 子命令 `recon` 执行命令时新增超时机制，默认 30s 超时
-- Unix/Windows 相关实现代码分离
-- 说明文档与 README 完善
 
 ---
 
@@ -618,9 +617,7 @@ export const DateTag = ({ children }) => (
     - `forward`：开始本地端口转发
     - `stopforward`：停止本地端口转发
     - `lsforward`：查看本地端口转发列表
-- 子命令 `recon` 生成的文档现在以 `SIREN_` 开头，子命令 `clean` 在清理文档时逻辑一致
-- 代码结构优化
-- 通信协议中 Raw 消息定义调整，避免消息模式切换问题
+- 子命令 `recon` 生成的文档以 `SIREN_` 开头，`clean` 在清理时逻辑一致
 
 ### Bugfix
 
@@ -659,9 +656,8 @@ export const DateTag = ({ children }) => (
 ### Feature
 
 - 远程模式-服务端：优化 `ls` 命令展示方式
-- 实现了全新的通信协议，提高传输效率、避免特殊字符混淆问题
-- 支持服务端断连时，主动关闭客户端
-- 代码可读性与性能优化
+- 通信协议升级，提高传输效率、避免特殊字符混淆
+- 支持服务端断连时主动关闭客户端
 
 ---
 
@@ -674,9 +670,7 @@ export const DateTag = ({ children }) => (
 
 ### Bugfix
 
-- 修复多处使用 `log.Fatal` 导致 `defer` 失效的问题
-- 错误处理逻辑全部重构
-- 修复键入 Ctrl+D 导致 stdin 关闭但程序未退出的问题
+- 修复键入 Ctrl+D 导致程序未退出的问题
 - 修复输入 `exit` 后服务端阻塞的问题
 - 修复并发场景下信道冲突、协议冲突的问题
 
@@ -692,7 +686,7 @@ export const DateTag = ({ children }) => (
 
 ### Bugfix
 
-- 修复了 AI 分析异步流式输出效果与同步方式相同的问题
+- 修复 AI 分析流式输出未生效的问题
 
 ---
 
