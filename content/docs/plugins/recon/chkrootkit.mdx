@@ -44,7 +44,7 @@ recon:
   defaultProfile: default
   profiles:
     default: [user, ssh, process, network, cron, service, env, file, rootkit, application]
-    with-chkrootkit: [user, ssh, process, network, cron, service, env, rootkit, application, "plugin:chkrootkit"]
+    with-chkrootkit: [user, ssh, process, network, cron, service, env, file, rootkit, application, "plugin:chkrootkit"]
 
 plugins:
   chkrootkit: true

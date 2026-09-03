@@ -26,7 +26,7 @@ Clients -> 目标客户端 -> Clean & Terminate -> Send cleanup request
 ./siren clean
 ```
 
-WebUI 入口位于 Clients 页面目标客户端行的清理按钮。点击后会弹出 **Clean & Terminate** 确认框；确认后，服务端会向该客户端下发清理指令。Project 视图下只能清理当前 Project 内的客户端。
+WebUI 入口位于 Clients 页面目标客户端行的清理按钮，也支持多选客户端后批量清理。单个或批量清理都会要求输入确认短语后再执行 **Clean & Terminate**；确认后，服务端向客户端下发清理指令。Project 视图下只能清理当前 Project 内的客户端。
 
 服务端 REPL 与本地模式会要求输入 `y` 确认。远程模式下，WebUI 和 REPL 只能确认指令已经发出，不能确认客户端退出后的最终文件删除结果。
 

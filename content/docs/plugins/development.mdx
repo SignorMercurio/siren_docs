@@ -8,11 +8,9 @@ import { Callout } from "fumadocs-ui/components/callout";
 import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Step, Steps } from "fumadocs-ui/components/steps";
 
-本指南面向希望为 SIREN 开发自定义插件的开发者。
+SIREN 插件是独立的可执行文件，通过标准输入/输出与 SIREN 交互。插件可以使用任意编程语言开发，只要最终产物是目标平台的可执行二进制文件即可。
 
 ## 基本概念
-
-SIREN 插件是独立的可执行文件，通过标准输入/输出与 SIREN 交互。插件可以使用任意编程语言开发，只要最终产物是目标平台的可执行二进制文件即可。
 
 每个插件包含以下内容：
 
@@ -48,7 +46,7 @@ SIREN 插件是独立的可执行文件，通过标准输入/输出与 SIREN 交
 | `version` | string | 是 | 语义化版本号 |
 | `type` | string | 是 | 插件类型：`recon`（信息收集）或 `command`（命令） |
 | `description` | string | 是 | 插件功能描述 |
-| `usage` | string | 否 | 远程模式下的使用说明（展示在服务端帮助信息中） |
+| `usage` | string | 否 | 远程模式下的使用说明（展示在服务端帮助信息中）。`<Client ID>` 是占位符，实际运行时由服务端自动填入 |
 | `clientUsage` | string | 否 | 本地模式下的使用说明，与 `usage` 类似但用于客户端 CLI（command 插件使用） |
 | `platforms` | []string | 是 | 支持的平台列表，格式为 `{os}_{arch}` |
 | `entrypoint` | string | 是 | 可执行文件名（不能包含路径分隔符） |

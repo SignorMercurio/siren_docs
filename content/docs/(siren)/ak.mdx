@@ -46,9 +46,9 @@ WebUI 只展示服务端已知的执行结果：调查完成后显示报告入�
   <Accordion title="示例输出">
 
 ```bash title="SIREN Server"
->>> ak 1601097845544644 AKIA1234567890123456
+>>> ak 1601097845544644 LTAI1234567890123456
 [*] Investigating AccessKey...
-[+] Investigation completed. Report saved to: AK_1601097845544644_AKIA1234567890123456_2024-01-15_14:30:25.md
+[+] Investigation completed. Report saved to: AK_1601097845544644_LTAI1234567890123456_2026-01-15_14:30:25.md
 ```
 
   </Accordion>
@@ -56,7 +56,7 @@ WebUI 只展示服务端已知的执行结果：调查完成后显示报告入�
 
 ## 输出位置
 
-调查结果会保存为 Markdown 文件，文件名形如 `AK_<UID>_<AccessKey ID>_<时间>.md`。报告包含 SOAR 返回的调用历史，常见信息包括调用时间、操作类型和来源 IP，具体字段以 SOAR 返回结果为准。
+调查结果会保存为 Markdown 文件，文件名形如 `AK_<UID>_<AccessKey ID>_<时间>.md`。报告包含 SOAR 返回的调用历史，常见字段包括调用时间、操作类型和来源 IP，具体以 SOAR 返回结果为准。
 
 AccessKey 调查不绑定在线客户端，也不跟随 Project 视图切换。报告始终写入 Global Artifacts，也就是 `siren_server` 当前工作目录。即使在 Project 视图中从 WebUI 发起调查，**Open in Artifacts** 也会打开 Global Artifacts 中的报告。
 

@@ -12,7 +12,7 @@ import { Users, Terminal, Brain, Files, FolderKanban, FolderTree, Lock, Plug, Ke
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-Web 控制台是 SIREN Server 的浏览器入口。它覆盖日常远程操作：Project 工作区、客户端列表、浏览器 Shell、Agentic IR、调查任务、文件管理、Artifacts、服务端日志和 Dossier。需要在控制主机终端里直接操作时，可以改用 [服务端 REPL](/remote)。
+Web 控制台是 SIREN Server 的浏览器入口。它覆盖日常远程操作：Project 工作区、客户端列表、浏览器 Shell、Agentic IR、调查任务、文件管理、Artifacts、服务端日志、Dossier 和全局设置。需要在控制主机终端里直接操作时，可以改用 [服务端 REPL](/remote)。
 
 ## 启动与访问
 
@@ -160,7 +160,7 @@ Agentic IR 页面通过 Claude Code、Codex、Qoder 或 Pi 完成 [Agentic 应�
 
 - **Manual**，不带客户端或种子 prompt 的空白会话，适合临时通用操作；仍会注入当前范围的 SIREN MCP。
 - **Custom**，选择客户端并输入应急响应指令。
-- **Event**，选择客户端并输入阿里云 UID 和云安全中心告警 ID，由服务端拉取告警详情。
+- **Event**，选择客户端并输入阿里云 UID，再选择事件目标：告警 ID（Event）、ECS 实例 ID（ECS）或资产 UUID（Asset）。实例或资产目标可展开 **Time range** 限定告警时间范围。
 
 也可以切换到 **Resume** 模式，搜索并选择当前视图工作目录对应的历史会话。历史先以只读时间线打开，只有点击 **Continue session** 后才会启动 Provider，并用原 session ID 继续。
 

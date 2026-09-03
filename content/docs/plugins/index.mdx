@@ -44,7 +44,7 @@ import { Card, Cards } from "fumadocs-ui/components/card";
 
 远程模式下，每个客户端已安装的插件也会显示在 `ls` 命令输出的 Plugins 列中。
 
-安装 recon 插件不会自动修改任何 Profile。Profile 引用了缺失或禁用的插件时，Recon 会在采集开始前失败，不生成部分报告。
+安装 recon 插件不会自动修改任何 Profile。Profile 引用了缺失或禁用的插件时，Recon 会在启动校验阶段失败，不开始采集。这与运行时的插件执行错误不同——后者会生成 partial 快照。
 
 `command` 类型插件安装并启用后，可以直接作为命令调用：
 
