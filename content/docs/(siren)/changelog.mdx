@@ -14,321 +14,135 @@ export const DateTag = ({ children }) => (
 
 ### Feature
 
-- Agentic IR 的 GUI 与 Terminal 输入框支持直接粘贴图片（PNG、JPEG、WebP、GIF，单张最多 8 MiB，一次最多 4 张），由 SIREN 转交给 Provider；Claude 与 Codex 支持图片，Qoder 以其 CLI 上报的能力为准，Pi 当前使用的模型不接受图片
+- **AIR 图片粘贴**：GUI 和 Terminal 输入框支持直接粘贴图片（PNG、JPEG、WebP、GIF），由 SIREN 转交给 Provider 处理
 
 ### Improvement
 
-- Agentic IR 启动面板：Provider 图标与 GUI/Terminal 开关悬停时显示名称或不可用原因；Manual / Custom / Event 下方显示一行模式说明；输入框、文本框和下拉框统一高度、圆角、悬停与聚焦样式
-- Agentic IR 侧栏每次加载默认展开，从 Clients 行内进入时也会自动展开；History 默认收起在侧栏底部，点击标题展开；收起侧栏的箭头固定在分隔线上，窄屏布局同样可用
-- Investigations 的 AccessKey、Recon 和 Process Analysis 面板顶部各增加一行用途说明
-- Clients 页面没有在线客户端时显示三步引导：部署客户端、等待连接、从客户端行开始排查
+- AIR 启动面板优化：Provider 图标悬停显示名称，模式入口增加说明文字，输入控件样式统一
+- Investigations 的 AccessKey、Recon 和 Process Analysis 面板增加用途说明
+- Clients 页面没有在线客户端时显示三步引导
 
-## v2.26.5 <DateTag>2026-09-02</DateTag>
-
-### Improvement
-
-- Agentic IR 会话结束时（Agent 进程退出、被 Stop、服务端重启后会话已不存在），GUI 与 Terminal 面板顶部都会显示 “Session ended” 及原因；Terminal 自动重连次数用尽后显示 **Reconnect** 按钮，不再静默停在最后一帧
-- Running 列表刷新失败时在列表上方提示可能过期，Stop 失败也会给出原因，不再只是行短暂消失又回来
-- Terminal 会话在 macOS 上选中文字时 Ctrl+C 仍发送中断信号，复制请使用 Cmd+C；共享会话不再响应终端程序写剪贴板的 OSC 52 序列；重连不再抢走输入框焦点；关闭标签页后焦点落到相邻标签
-
-### Bugfix
-
-- 修复 GUI 会话在 Provider 退出或被 Stop 后仍显示 “Agent is working”、输入框停留在调整方向模式的问题
-- 修复 Claude 空闲时刷新额度会让界面短暂进入运行态、此时发送的请求被拒绝的问题
-- 修复 Pi 上下文压缩事件不在时间线显示的问题，现与 Codex 一致以通知形式出现
-- 修复历史时间线中失败的工具调用不带失败标记、Failed 过滤为空的问题
-- 修复 Qoder 进程异常退出后审批卡片一直挂起的问题
-- 修复 Agent 进程崩溃时最后一段输出可能未到达 Terminal 面板与回放缓冲的问题
-- 修复全屏类 TUI 输出下 Terminal 回放缓冲被过度裁剪、重新接入几乎看不到历史的问题
-- 修复某个 Provider 的 GUI 探测卡住时会阻塞其他 Provider 与 Terminal 会话启动的问题
-
-## v2.26.3 <DateTag>2026-09-01</DateTag>
-
-### Improvement
-
-- Agentic IR 的 GUI 与 Terminal 合计最大并发会话数默认从 10 提升到 20；仍可通过 `air.maxSessions` 调整，设为 `0` 或负数表示不限制
-
-### Bugfix
-
-- 修复多台 ECS 共享同一出口 IP 时，批量部署完成后无法自动归属当前 Project 或写入对应备注的问题；SIREN 现在通过客户端稳定身份精确关联每个部署目标，缺少身份、身份冲突或来源 IP 不一致时仍会安全进入 `manual_required`，不会回退为按 IP 猜测
-
-## v2.26.1 <DateTag>2026-08-31</DateTag>
+## v2.26.0 <DateTag>2026-08-31</DateTag>
 
 ### Feature
 
-- Agentic IR 新增独立 Pi Provider，GUI 与 Terminal 均可使用 Qwen Aegis、SIREN MCP、Skills、subagents、memory、Web 查询、提问和长上下文管理；Pi 的文件、Shell、MCP 与子 agent 操作直接执行，不显示权限审批
+- **AIR 新增 Pi Provider**：支持 Qwen Aegis、SIREN MCP、Skills、子 Agent、记忆、Web 查询和长上下文管理
 
 ### Improvement
 
-- Agentic IR 的 Codex、Claude、Qoder、Pi 入口改为纯图标，在窄窗口下仍可完整显示，并保留 tooltip、键盘操作和无障碍名称
-- 四个 Provider 的所有 GUI 与 Terminal 入口统一注入当前范围的 SIREN MCP：Project 会话使用项目级 MCP，Global 会话使用全局 MCP
-- Pi 新会话改由 Pi 原生生成会话 ID，启动时不再显示“找不到 Project Session”的警告；SIREN 仍会阻止运行中的同一会话被重复恢复
-
-## v2.25.3 <DateTag>2026-08-28</DateTag>
-
-### Feature
-
-- Agentic IR 时间线新增 Cmd/Ctrl+F 搜索条，关键词检索可叠加仅看失败、命令、文件、请求（审批与提问）过滤 chip，chip 之间取并集并与关键词同时生效；命中处高亮，可按 n/m 计数器逐条跳转
-- Agentic IR 状态条新增导出按钮，可将当前会话时间线导出为 Markdown 文件，包含各轮次、命令与输出摘录及审批、提问的决策记录，超长输出带截断标记
-
-### Improvement
-
-- 审批与提问解决后保留决定、时间与具体内容的记录（提问含所选答案），记录来自服务端事件流，刷新页面或跨浏览器重新接入后依然保留；有待处理审批或提问时，浏览器标签页标题显示 “● Approval” 或 “● Question” 前缀（审批优先），后台会话标签页同样生效
-- 长会话断线重连时，若更早内容已超出 `air.replayBufferBytes` 回放缓冲，时间线顶部会提示已丢弃的更早事件数量，并可一键打开该会话完整历史（只读时间线）
-- 命令输出等等宽输出块支持换行与不换行切换（不换行时块内横向滚动，保留列对齐），超过 30 行的输出标注总行数；Provider 通知带时间戳，附带数据的通知可展开详情，warning 与 error 级通知以醒目颜色区分
-- 长会话高频输出下时间线渲染更流畅
-
-## v2.25.2 <DateTag>2026-08-28</DateTag>
-
-### Improvement
-
-- 精简服务端运行时、MCP/WebUI 组合与批量部署路径，移除不再使用的兼容入口和重复状态；现有命令、接口与部署流程保持不变
-
-## v2.25.1 <DateTag>2026-08-27</DateTag>
-
-### Improvement
-
-- Agentic IR 时间线按调查轮次组织用户请求、计划、命令、工具、文件修改、审批和提问记录，补充统一时间戳、执行耗时、可展开输入/输出及复制操作，历史会话也能保留已处理请求的上下文
-- Agentic IR 状态栏补充 Provider、模型、上下文与配额信息；等待审批或回答时同步更新浏览器标题，并改进冷启动、启动失败、断线重连、自动跟随和轮次跳转状态
+- 会话结束时 GUI 与 Terminal 顶部显示 "Session ended" 及原因；Terminal 断线后提供 Reconnect 按钮
+- GUI 与 Terminal 最大并发会话数默认从 10 提升到 20（可通过 `air.maxSessions` 调整）
+- 四个 Provider 统一注入当前范围的 SIREN MCP
+- Provider 入口改为纯图标，窄窗口下仍可完整显示
 
 ### Bugfix
 
-- 修复 Claude 与 Qoder 的中途方向调整在重新提交后显示成新的用户问题，以及 Qoder 会话级批准在已处理记录中丢失具体选项标签的问题
-- 修复定时服务端更新未使用已登记的 DWS 渠道，导致更新通知发送失败的问题；部署现在会在上传前验证目标群通知能力，通知不可用时直接停止，避免远端磁盘版本与运行版本意外分叉
+- 修复 GUI 会话在 Provider 退出后仍显示运行态、Qoder 审批卡片挂起的问题
+- 修复终端回放缓冲被过度裁剪、Agent 崩溃时末段输出可能丢失的问题
+- 修复多台 ECS 共享出口 IP 时部署归属失败的问题
 
 ## v2.25.0 <DateTag>2026-08-27</DateTag>
 
 ### Feature
 
-- Linux 与 Windows 的 `hunt` Profile 默认加入跨平台 `supplychain` 模块，记录当前运行应用、中间件、真实监听程序和运行中容器载荷对应的可执行文件摘要、版本来源、依赖清单及容器镜像引用；不再生成全系统软件包清单或散列全部主机进程
+- **AIR 时间线搜索**：新增 Cmd/Ctrl+F 搜索，可叠加失败、命令、文件等过滤条件，逐条高亮跳转
+- **AIR 时间线导出**：支持将当前会话时间线导出为 Markdown
+- Hunt Profile 新增 `supplychain` 模块，记录运行中应用和容器的可执行文件摘要与依赖清单
 
 ### Improvement
 
-- 运行载荷可执行文件使用流式 SHA-256，并同时执行 128 文件、64 MiB 单文件和 512 MiB 总读取边界；读取失败、采集期间变化、文件过大或总预算耗尽会以独立 coverage 原因呈现，不输出可能不一致的摘要
-- `supplychain`、`config` 与 `credential` 复用同一路径的 canonical evidence，后续模块仍可补充内容、关系和凭据分类；完整文件摘要另受 8 MiB 单文件与 64 MiB Snapshot 总读取边界约束
-- Hunt Markdown 使用实际 selected、processed、collected、failed 和 reused 数量汇总供应链覆盖；运行态 producer 的部分结果、失败和容器 runtime 未安装会保留各自语义，不再被空结果掩盖
-
-### Bugfix
-
-- 修复 Linux 大小写不同的证据路径被错误合并、preview 先发现后无法升级为直接引用内容，以及首次内容定位写入受模块上限拒绝后无法由后续模块补写的问题
-- 修复已停止容器、命名 volume 和无关语言运行时进入运行载荷证据，以及带空格的依赖参数和 digest-only 镜像引用解析不准确的问题
-- 修复配置 include/reference 闭包、JAR 元数据和证据文件读取缺少完整硬边界或稳定文件校验，可能造成漏项、越界读取或不一致摘要的问题
+- AIR 时间线按调查轮次组织，统一时间戳和执行耗时，支持展开输入/输出和复制
+- 状态栏显示 Provider、模型、上下文与配额信息
+- 审批与提问解决后保留决策记录，刷新页面不丢失；有待处理事项时浏览器标签页标题显示提示
+- 断线重连时提示已丢弃的早期事件数量，可一键打开完整历史
+- 命令输出块支持换行与不换行切换，超过 30 行的输出标注总行数
 
 ## v2.24.0 <DateTag>2026-08-25</DateTag>
 
 ### Feature
 
-- MCP `run` 默认在结果超过 8 KiB 时返回可恢复的首尾预览和 `audit_id`，Agent 可通过新增的 `read_run_result` 按范围读取原文，或用 `search_run_result` 做有界字面搜索，无需重新执行受害主机命令
-- 客户端返回的 50 KiB 内权威结果继续完整写入 `mcp.run.finished` 审计日志；最近结果同时在服务端按 Project 隔离保存 60 分钟，并受 512 条、32 MiB 和服务重启清空等边界约束
+- **MCP `run` 大结果分页读取**：结果超过 8 KiB 时返回首尾预览，Agent 可通过 `read_run_result` 按范围读取原文或搜索，无需重新执行命令
+- **MCP `run` 审计日志**：新增结构化审计日志，可在 Logs 页面按命令、客户端或执行结果查询
 
 ### Improvement
 
-- 新增 `mcp.runOutputMode` 配置和单次 `run.output_mode` 参数；默认 `auto` 减少长工具结果占用，设为 `full` 可恢复原有的一次性完整返回行为
-
-## v2.23.4 <DateTag>2026-08-25</DateTag>
-
-### Improvement
-
-- MCP `run` 新增可关联的结构化审计日志：完整命令和返回给 Agent 的有界结果会写入服务端日志，策略拦截、目标拒绝、发送失败、取消、超时和远端执行失败也会留下完成记录；可在 WebUI Logs 页面按命令、结果、审计 ID、客户端或 outcome 直接查询
-
-## v2.23.3 <DateTag>2026-08-21</DateTag>
-
-### Improvement
-
-- Hunt 使用同一 workload identity 归并应用实例：同产品祖先进程和同一容器内的 worker 共享主 Component，Docker/containerd 等 runtime 按主机归并，Python、Node.js 和 JVM 等语言运行时降为辅助拓扑；未知但真实监听的程序仍保留为主要组件
-- 容器镜像声明端口、宿主机发布端口和真实内核 Socket 分开记录；只有 published port 与同次 socket 快照匹配时才标记为 observed，Hunt Markdown 的 Host Listeners 不再混入镜像声明端口
-- 配置证据采用有界混合策略：运行态直接引用和标准产品配置继续采集完整内容，应用目录中的普通 JSON/YAML/XML/TOML 保存完整元数据与 SHA-256，并附最多 64 KiB 的 `evidence_preview`；运行输出、会话、报告和开发材料默认排除
-- Hunt Markdown 改为按应用、容器、真实监听和容器端口分类稳定限额，瞬时连接只汇总数量与地址范围，partial 来源按模块和原因聚合
-
-### Bugfix
-
-- 修复进程参数中的 Docker、Node.js 等普通 token 和 shell wrapper 被误识别成应用组件，以及同一 PostgreSQL 实例的 worker 被拆成大量独立组件的问题
-- 修复 request dump、分析报告和候选结果等应用运行输出被当作完整配置采集，导致快照因单文件 256 KiB 上限长期显示 partial 的问题
-
-## v2.23.2 <DateTag>2026-08-21</DateTag>
-
-### Feature
-
-- Hunt 默认加入 opt-in `activity` 模块，在不引入持续 Recorder 的前提下采集当前运行应用与容器直接关联的近期本地日志尾部；候选限定最近 24 小时、最多 16 个文件、每文件 256 KiB、总计 4 MiB，正文只保存在权威 JSONL，Markdown 仅显示覆盖摘要
-
-### Improvement
-
-- Recon 为 OS、资源、网络、环境变量、计划任务和安全组件等 Agent 高频事实补充稳定字段，并在 source coverage 中分别统计结构化记录、原始证据和报告结构记录；无法可靠解析的配置、脚本、日志和历史仍完整保留为 raw evidence，不会因此误报 partial
-- Windows Hunt 增加类型化路由与计划任务证据，旧版系统可通过 WMI 和 Task Scheduler COM 回退获取任务状态、运行用户、动作和触发器
-- Hunt 使用同一瞬时快照中的稳定实体 ID 串联父子进程，并让每条已建立连接引用实际 Socket、本地地址、远端地址、协议和状态；同一进程到同一远端的多个 Socket 分别保留
-
-### Bugfix
-
-- 修复 Process 等运行态实体同时被所属模块和 Topology 重复写入，导致 Hunt Snapshot 与 Markdown 实体数量翻倍的问题；新快照按实体归属只写一条，历史重复快照也按稳定 ID 去重汇总
-- 修复应用拓扑把 systemd unit 或 Windows Service 当作主要应用服务的问题；主拓扑现在聚焦 Web 服务、中间件、应用运行时、容器和对外监听进程，系统服务只保留为辅助启动关系
-
-## v2.23.1 <DateTag>2026-08-20</DateTag>
-
-### Improvement
-
-- WebUI Settings 新增 Agentic IR 默认 Provider 偏好，可沿用当前浏览器上次选择或固定 Codex、Claude、Qoder；Provider 列表与服务端默认值统一为 Codex 优先
+- 新增 `mcp.runOutputMode` 配置，默认 `auto` 按大小自动切换，`full` 恢复完整返回
 
 ## v2.23.0 <DateTag>2026-08-19</DateTag>
 
 ### Feature
 
-- Recon 新增首选 `snapshot-jsonl-v2` 权威证据格式，以 `entity`、`relation`、`fact`、`evidence_file` 和 `plugin_text` 固定记录类型表达主机、账户、服务、进程、Socket、容器、配置和凭据；Snapshot JSONL v1 与 Legacy Markdown 继续兼容
-- Hunt 补充进程到已建立远端 IP:port 的直接连接、配置 include/reference 证据闭包、TLS 证书元数据、TLS 私钥凭据标识，以及 SELinux/AppArmor 等客观安全状态，不产生风险评级或检测结论
+- **Recon Snapshot JSONL v2**：新增权威证据格式，以固定记录类型表达主机、账户、服务、进程、容器等实体及其关系
+- **Hunt `activity` 模块**：采集运行中应用关联的近期本地日志
 
 ### Improvement
 
-- Recon capability 通过兼容的 `preferredFormats` 协商 v2；旧服务端继续请求 v1，新服务端也能接收只支持 v1 的客户端
-- v2 source coverage 记录检查范围、排除范围、工具与回退、采集限制、presence、稳定错误码和人类可读错误，Agent 可以区分未发现、未安装、未采集、失败和截断
-- MCP `recon` structured result 增加 `format` 与 `schemaVersion`，并明确 JSONL 是 Project 工作目录中的权威证据；Hunt Markdown 继续只提供不含配置、环境变量和凭据原文的紧凑摘要
-- Hunt 配置发现以运行态参数、服务定义、容器挂载和配置引用为中心，开发依赖、CI workflow、tsconfig 和测试配置默认不再采集
-
-## v2.22.1 <DateTag>2026-08-19</DateTag>
-
-### Improvement
-
-- Hunt Markdown 改为紧凑的拓扑、覆盖范围和采集质量摘要；配置、凭据及其他完整证据仅保存在权威 Snapshot JSONL，避免重复生成庞大报告
-- Hunt 配置采集按运行态引用、产品配置和开发元数据分级；lockfile、CI workflow、tsconfig 等默认只保存元数据和完整文件 hash，被运行态直接引用时才采集内容
-- 应用与服务拓扑补充稳定的实体/关系类型、运行或配置状态及可验证的版本来源，并增强 Linux service 到 process、socket 的关联回退
-
-### Bugfix
-
-- 修复 Redis、容器、可选启动文件和 Windows 受保护凭据等正常不存在或明确不采集的对象被记为 unavailable，导致 Hunt 快照长期显示 partial 的问题
-- 修复 Linux 服务命令返回空结果仍被视为成功，导致服务拓扑缺少直接关系的问题
+- Hunt 按 workload identity 归并应用实例，容器镜像端口、宿主机发布端口和真实 Socket 分开记录
+- Hunt Markdown 改为紧凑的拓扑与覆盖摘要，完整证据仅保存在 Snapshot JSONL
+- WebUI Settings 新增 AIR 默认 Provider 偏好
 
 ## v2.22.0 <DateTag>2026-08-19</DateTag>
 
 ### Feature
 
-- Recon 新增显式 opt-in 的 `hunt` Profile，在不改变 `default` / `quick` 的前提下采集应用与服务拓扑、配置与部署材料、凭据和密码策略证据，供 AIR 或其他 Agent 离线分析
-- 新增 `topology`、`config`、`credential` 模块：覆盖常见 Web/应用运行时、中间件、容器与本地 Kubernetes 配置，并记录服务、进程、监听端口、容器、挂载和配置之间的直接可观测关系
+- **Recon 新增 `hunt` Profile**：采集应用与服务拓扑、配置与部署材料、凭据和密码策略
+- **Recon 新增 `topology`、`config`、`credential` 模块**：覆盖 Web/应用运行时、中间件和容器配置
 
 ### Improvement
 
-- 同一次 Recon 中的进程、socket、服务和容器运行态由多个模块共享，避免为了拓扑和既有报告重复执行系统查询
-- 配置与文本凭据原文只写入权威 Snapshot JSONL，派生 Markdown 仅展示路径、hash、权限、时间和采集状态；每文件、文件数和目录遍历均有独立硬上限
-- Hunt 只采集认证材料和配置事实，不执行在线登录、口令破解、默认口令匹配、secret regex 或不安全配置检测；Windows 受保护的 SAM/SECURITY/LSA 密码材料明确记录为 unavailable
-- 旧布尔配置和无配置 fallback 不会自动启用三个 opt-in 敏感模块；现有 Profile、Snapshot JSONL v1、wire protocol v2、WebUI 和 MCP 接口保持兼容
+- 配置与凭据原文只写入 Snapshot JSONL，Markdown 仅显示路径、权限和采集状态
 
-## v2.21.1 <DateTag>2026-08-19</DateTag>
+## v2.21.0 <DateTag>2026-08-19</DateTag>
 
 ### Feature
 
-- Recon 新增 Snapshot JSONL v1：`*.recon.jsonl` 作为权威主机快照，服务端校验后确定性生成同名 Markdown，并在本地、Global Artifacts 和 Project Artifacts 中保留双 artifact
-- Recon wire protocol 升级到 v2，公布 artifact format，并在结果中返回 Profile、`complete|partial` 状态和 snapshot 文件名；v1 Markdown 与 Legacy default 客户端继续兼容
+- **Recon Snapshot JSONL v1**：新增权威格式（`.recon.jsonl`），服务端校验后确定性生成 Markdown
 
 ### Improvement
 
-- Recon 改为有明确范围与上限的客观采集：source、module、字段和整份快照均有硬限制，工具缺失、采集失败与截断会记录为 `unavailable`、`failed` 或 `partial`
-- 删除客户端 `rules` 与白名单过滤，账户、进程、任务、服务、内核模块、环境变量、配置和历史记录按声明范围原样采集，分析与判断交给 AIR
-- Linux Recon 不再自动安装 `netstat` 或 `lsof`，改用原生能力、已有工具回退和明确的 unavailable 状态
-- Recon 为每个 source 提供独立命令预算；Linux 文件视图按底层文件系统去重并由单次遍历生成，Windows 大目录与进程、socket、任务、服务查询按稳定字段排序后应用结果上限
-- Recon 新增默认 270 秒的 Profile 总采集预算；远程 v2 请求会提前收敛客户端采集并支持按 request ID 取消，服务端超时后立即释放单飞占用
-- v2 Snapshot 在客户端和服务端之间流式传输，服务端在接收正文前执行 128 MiB 上限检查，避免大快照产生多份内存副本
-- 服务端会严格校验 Snapshot 的事件顺序、范围和状态后再生成 Markdown，格式无效时立即返回错误
-- WebUI 继续只提供 **Open Report**，partial 快照显示简短警告；MCP 正文继续返回 Markdown，并补充 status、report path 与 snapshot path，正文预览上限为 2 MiB
-
-### Bugfix
-
-- 分离 Recon 原始观测数据与内部状态标记，历史记录、环境变量、文件名和插件文本中的相似内容不再改变 source 归属或采集状态
-- 修复快照总量边界可能删除 partial artifact、静默省略后续模块或产生未闭合 Markdown 的问题；省略模块和 snapshot-level partial 原因现在会被明确记录
-- 修复 Snapshot 校验、写盘或渲染失败后 operation 继续等待超时，以及迟到 artifact 事件被关联到下一次 Recon 的问题
-- 服务端保存的所有远程 Recon artifact 文件名加入客户端和请求标识，并使用禁止覆盖的原子提交，避免同名主机、旧客户端或重复结果相互覆盖
-- 修复无匹配日志、缺失可选配置或不可用工具被误记为采集失败，以及 Linux 最近文件/大文件有界结果未按真实时间与大小稳定选择的问题
-
-## v2.20.2 <DateTag>2026-08-18</DateTag>
-
-### Improvement
-
-- Agentic IR 的 Qoder GUI 新增结构化 `/model` 选择，并只展示可确定执行的 `/model` 与 `/status`；Skills、插件、MCP prompts 和 workflows 继续通过 Terminal 使用
-
-### Bugfix
-
-- 修复 Qoder GUI 将未知斜杠命令送入模型队列、长时间等待后才失败的问题；空闲消息和运行中的方向调整现在都会立即提示切换到 Terminal
-
-## v2.20.1 <DateTag>2026-08-18</DateTag>
-
-### Improvement
-
-- 精简 Web 控制台 Investigations 和 Clients 页面中的重复说明，保留默认值、校验、进度与错误恢复等操作相关提示
+- Recon 改为有明确范围与上限的客观采集，工具缺失或截断如实记录为 `unavailable` / `partial`
+- Recon 新增 270 秒 Profile 总采集预算
 
 ## v2.20.0 <DateTag>2026-08-18</DateTag>
 
 ### Feature
 
-- Recon 新增命名 Profile：`default` 保持完整采集，`quick` 只跳过文件模块；本地命令、服务端 REPL、Web 控制台和 MCP 均可选择客户端实际提供的 Profile
-- Recon 插件改为通过 `plugin:<name>` 显式加入 Profile，并统一使用 `plugins.<name>` 启停；安装插件不再自动改变采集集合
+- **Recon 支持命名 Profile**：`default` Profile 完整采集，`quick` Profile 跳过文件模块
 
 ### Improvement
 
-- Recon 远程入口统一使用每客户端单飞 operation 和 request ID 关联，断连、结构化错误或超时会立即结束等待，不同客户端仍可并行
-- 客户端上线和 reload 会刷新默认及可用 Profile；旧客户端继续使用 Legacy default，新客户端也兼容旧服务端的空请求与文件回传
-
-## v2.19.7 <DateTag>2026-08-18</DateTag>
-
-### Improvement
-
-- Web 控制台左下角改为账号入口，显示当前登录用户，并集中收纳设置、反馈、版本号和退出登录
-- 新增 Settings 页面：可选择启动时的 Project 范围、Agentic IR 默认界面和 Clients 列表刷新频率，偏好仅保存在当前浏览器
-- Settings 页面新增服务端信息，可直接查看版本、鉴权状态、Dossier 目录，以及每个 Agentic IR Provider 实际可用的界面和不可用原因
-
-## v2.19.6 <DateTag>2026-08-17</DateTag>
-
-### Improvement
-
-- Agentic IR GUI 支持在运行过程中发送补充要求调整后续方向，并保留独立的停止操作
-- Agentic IR GUI 新增统一斜杠命令菜单及 `/status`，Codex 可直接使用上下文压缩、代码审查、模型选择和 MCP 状态查看，Claude 与 Qoder 会补充当前会话公布的命令
-
-### Bugfix
-
-- 修复停止 Claude 或 Qoder 当前工作后 GUI 会话断开、无法继续发送消息的问题
-- 修复方向调整显示为操作记录，以及斜杠命令参数丢失、命令列表无法完整浏览和缺少说明的问题
-
-## v2.19.3 <DateTag>2026-08-17</DateTag>
-
-### Improvement
-
-- Agentic IR 会记住当前浏览器选择的 **GUI** 或 **Terminal**，新建会话及刷新页面后保持选择；当前 Provider 不支持时会临时使用可用界面
-
-### Bugfix
-
-- 修复 Claude、Codex 或 Qoder 的提问与审批失效后仍显示为待处理，迟到操作可能重复显示错误的问题
-
-## v2.19.1 <DateTag>2026-08-13</DateTag>
-
-### Bugfix
-
-- 修复 **Configure egress** 无法触发已发布 SOAR 剧本的问题
+- Qoder GUI 新增 `/model` 选择
 
 ## v2.19.0 <DateTag>2026-08-13</DateTag>
 
 ### Feature
 
-- Web 控制台 Clients 页面新增 **Configure egress**，可为指定 ECS 创建或复用独立的 SIREN 出方向安全组并挂载到实例，同时保留实例已有安全组
+- **Configure egress 功能**：Clients 页面可为指定 ECS 创建或复用独立的 SIREN 出方向安全组
+- **Settings 页面**：可选择启动 Project、AIR 默认界面和刷新频率
 
 ### Improvement
 
-- 出方向配置会在执行前展示目标实例和固定规则，执行中显示 SOAR 进度，完成后回显安全组 ID 与地域
-
-### Bugfix
-
-- 修正同机 Agentic IR 访问 MCP 时的地址要求，服务端主机名需解析到非回环私网地址，避免触发 MCP localhost 防护
+- Web 控制台左下角改为账号入口，集中收纳设置、反馈、版本号和退出登录
+- Settings 显示服务端版本、鉴权状态和各 AIR Provider 可用状态
+- AIR GUI 支持运行中发送补充要求调整后续方向
+- AIR GUI 新增斜杠命令菜单及 `/status`
+- AIR 记住当前浏览器选择的 GUI 或 Terminal，新建会话及刷新后保持
 
 ## v2.18.0 <DateTag>2026-08-07</DateTag>
 
 ### Feature
 
-- Web 控制台新增 Logs 页面，可按级别、组件和关键词筛选服务日志，并支持实时跟随、暂停、复制和下载
-- AIR GUI 支持粘贴图片，待处理的审批和提问会在标签页、时间线及输入框上方明确提示
+- **Logs 页面**：Web 控制台新增 Logs 页面，可按级别、组件和关键词筛选服务日志，支持实时跟随和下载
+- AIR GUI 支持粘贴图片
 
 ### Improvement
 
-- 提问卡片改为更清晰的纵向布局，支持直接输入自定义答案；时间线导航、表格显示和断线重连提示同步优化
+- AIR 待处理的审批和提问会在标签页、时间线及输入框上方明确提示
 
 ### Bugfix
 
 - 修复继续历史会话、发送失败和时间线跳转时可能丢失内容或位置的问题
-- 服务端发行包不再携带发布机的 TLS 私钥，首次安装会在控制主机生成独立证书
-- 修复客户端重连后旧端口转发未结束，以及切换 Project 后旧调查结果回填到新页面的问题
+- 服务端发行包不再携带发布机的 TLS 私钥，首次安装生成独立证书
 
 ## v2.17.0 <DateTag>2026-08-03</DateTag>
 
@@ -338,158 +152,97 @@ export const DateTag = ({ children }) => (
 
 ### Feature
 
-- Agentic IR 新增结构化 GUI 时间线，按顺序展示回复和操作记录，并支持轮次导航、历史查看与续接、GUI 和 Terminal 切换
-- MCP 新增单机部署能力，可按 UID 和 ECS Instance ID 发起部署，并以客户端实际连接作为完成标准
+- **AIR 结构化 GUI 时间线**：按顺序展示回复和操作记录，支持轮次导航、历史查看与续接、GUI 和 Terminal 切换
+- **MCP 新增 `deploy` 工具**：可按 UID 和 ECS Instance ID 发起部署，以客户端实际连接作为完成标准
 
 ### Improvement
 
-- 默认 Dossier 模板改为只读；部署后可自动使用 ECS Instance ID 标记未命名客户端
-- Agentic IR 侧栏可折叠，WebUI 增加 Feedback 入口
-
-### Bugfix
-
-- 修复旧版 Linux 内核安装失败、中文文件名下载乱码，以及共享出口 IP 下部署目标识别不准确的问题
+- AIR 侧栏可折叠
+- 默认 Dossier 模板改为只读
 
 ## v2.16.0 <DateTag>2026-07-27</DateTag>
 
 ### Feature
 
-- AIR Event 模式支持安全告警、ECS 实例和云安全中心资产三类目标，并可限定调查时间范围
-- 服务端日志支持配置级别、文本或 JSON 格式，以及输出位置
+- **AIR Event 模式扩展**：支持安全告警、ECS 实例和云安全中心资产三类目标，并可限定调查时间范围
+- 服务端日志支持配置级别、格式和输出位置
 
 ### Improvement
 
-- Investigations 改为标签页布局，客户端选择器、AIR 会话列表和 Project 标识更容易辨认
-- 移动端导航和页面布局重新适配，窄屏下可正常使用主要功能
-- 运行日志补充稳定的关联字段，并避免记录请求正文、凭证、命令和用户文件路径
-
-### Bugfix
-
-- 修复 Shell 无法建立连接、中文 Project 名称生成错误，以及服务重启后 Codex 会话未出现在历史记录的问题
+- Investigations 改为标签页布局，客户端选择器和 AIR 会话列表更易辨认
+- 移动端导航和页面布局适配
 
 ## v2.15.0 <DateTag>2026-07-20</DateTag>
 
 ### Feature
 
-- Windows 客户端新增旧系统兼容包，支持 Windows 7 SP1 至 Windows 8.1，以及 Windows Server 2008 R2 SP1 至 2012 R2
-- 单机和批量部署以客户端实际连接为成功标准，可持续查看进行中任务和近期结果
+- **Windows 旧系统兼容包**：支持 Windows 7 SP1 至 Windows 8.1 / Server 2008 R2 SP1 至 2012 R2
 - Artifacts 支持直接预览 PNG、JPEG、GIF 和 WebP 图片
 
 ### Improvement
 
-- 安装和升级会校验安装包，替换失败时恢复旧文件；客户端启动失败时可自动修复一次
-- `clean` 会清理客户端身份、Recon 报告、插件和相关临时文件，同时保留共享目录中的无关文件
-
-### Bugfix
-
-- 修复重复部署、Project 或备注关联错误、清理残留，以及窄窗口下 AIR 终端内容无法完整查看的问题
+- 单机和批量部署以客户端实际连接为成功标准，可查看进行中任务和近期结果
+- 安装和升级会校验安装包，替换失败时恢复旧文件
 
 ## v2.14.0 <DateTag>2026-07-16</DateTag>
 
 ### Feature
 
-- Files 和 Artifacts 支持一次拖入多个文件，并可逐个处理重名冲突
-- Clients 列表支持搜索、排序、多选，以及批量调整 Project 或清理客户端
-- AIR 会话列表补充任务、客户端、Provider 和最近消息等信息，恢复前更容易确认会话
+- **多文件上传**：Files 和 Artifacts 支持一次拖入多个文件，可逐个处理重名冲突
+- **Clients 批量操作**：列表支持搜索、排序、多选，以及批量调整 Project 或清理客户端
 
 ### Improvement
 
-- WebUI 登录有效期延长至 30 天；清理客户端和停止 AIR 会话前需要输入确认短语
-- AIR 和 Shell 改善键盘、触屏、窄屏及长时间会话的使用体验
-
-### Bugfix
-
-- 修复受限 PowerShell 环境的编码报错、历史会话重复恢复，以及部分 WebUI 操作状态未及时结束的问题
+- AIR 会话列表补充 Provider 和最近消息等信息，恢复前更容易确认会话
+- WebUI 登录有效期延长至 30 天
 
 ## v2.13.0 <DateTag>2026-07-08</DateTag>
 
 ### Feature
 
-- MCP 新增 `recon` 工具，可在指定客户端发起信息收集并将报告保存到 Artifacts
-- Agentic IR 新增 Qoder Provider，支持启动和恢复 Qoder 会话
+- **MCP 新增 `recon` 工具**：可在指定客户端发起信息收集并将报告保存到 Artifacts
+- AIR 新增 Qoder Provider
 
 ### Improvement
 
-- Recon 移除内置的可疑项判定，专注快速采集，由 AIR 结合上下文分析结果
-- Recon 文件检查合并重复遍历，缩短大规模文件系统的采集时间
-
-### Bugfix
-
-- 修复 Project 视图下 AIR 或 MCP 可能看到、操作全局客户端的问题
+- Recon 移除内置可疑项判定，专注快速采集，由 AIR 结合上下文分析结果
 
 ## v2.12.0 <DateTag>2026-07-01</DateTag>
 
 ### Feature
 
-- **Agentic IR 改为浏览器内嵌终端**：可直接在 WebUI 中操作 Claude Code / Codex，回答提问并查看完整终端输出
-- **AIR 会话由服务端托管**：刷新页面、切换页面或短暂断连后，可重新接入并回放此前输出
-- **Agentic IR 入口整合为四种模式**：支持 Manual、Custom、Event 和 Resume，并可在 Claude / Codex 间选择 Provider
+- **AIR 浏览器内嵌终端**：可直接在 WebUI 中操作 Claude Code / Codex，回答提问并查看完整终端输出
+- **AIR 会话服务端托管**：刷新页面、切换页面或短暂断连后，可重新接入并回放此前输出
+- **AIR 模式整合**：入口整合为四种模式（Manual / Custom / Event / Resume）
 
 ### Improvement
 
-- AIR 默认沿用操作者自己的 Claude Code / Codex 配置，不再替用户固定模型、权限或沙箱策略
-- AIR Provider 配置更简洁，只保留 CLI 路径和额外参数等必要项
-- Running / History 列表以原始 prompt 展示会话，恢复历史会话后会回到 Running
-- Agentic IR 表单和 Client 选择器统一为深色界面样式
-
-### Bugfix
-
-- 修复切换到尚未创建目录的 Project 时，Agentic IR 历史列表报错的问题
-- 修复停止已结束 AIR 会话时可能返回错误的问题
+- AIR 默认沿用操作者自己的 Claude Code / Codex 配置，不再替用户固定模型或权限
 
 ## v2.11.0 <DateTag>2026-06-29</DateTag>
 
 ### Feature
 
-- **WebUI 新增 Projects 工作区**：可按项目隔离客户端、AIR 会话和服务端取证目录
-- **客户端支持 Project 归属管理**：可在 Clients 页面分配或移出 Project，客户端重连后继续保持归属
-- **Project 视图下部署自动归属**：在 Project 中发起 WebUI 部署后，新连接的目标会自动归入当前 Project
-- **Agentic IR 支持 Claude / Codex 选择**：新建或恢复 AIR 会话时可选择 Provider
-- **Artifacts 支持新建目录**：可在当前取证目录中创建子目录
-- **批量部署支持目标备注**：可在批量部署时为目标预置备注
-
-### Improvement
-
-- Artifacts、AIR、Recon 和 Dossier 均支持 Project 作用域，项目内报告、会话和粘贴资源会留在对应目录
-- 新增 `webui.projectsBaseDir` 和 `--webui-projects-base-dir`，用于设置 Project 目录基准路径
-- AIR 状态展示更清晰，便于判断会话是否仍在运行
-- WebUI 进程分析详情面板更易读，并只在 Linux 客户端上开放入口
-- 服务端 REPL 的 `note` 命令支持清空客户端备注
+- **Projects 工作区**：可按项目隔离客户端、AIR 会话和取证目录，Artifacts、AIR、Recon 和 Dossier 均支持 Project 作用域
+- **客户端 Project 归属**：可在 Clients 页面分配或移出 Project，客户端重连后继续保持归属
+- AIR 支持 Claude / Codex Provider 选择
+- Artifacts 支持新建目录
+- 批量部署支持目标备注
 
 ### Bugfix
 
-- 修复 MCP 慢命令被提前判定超时的问题，并加强高风险命令防护
-- 修复 MCP 黑名单对普通说明文本的误报
-- 修复客户端 Files 中目录 symlink 无法按目录展开和下载的问题
-- 修复 WebUI 进程分析错误状态不准确的问题
-- 修复 Recon 报告文件名校验和 Project 落盘边界问题
-- 修复移动端 Files 与 Artifacts 标签重复的问题
-- 修复部分 artifact 文件名和二进制预览的兼容性问题
-
----
+- 修复 MCP 慢命令被提前判定超时的问题
 
 ## v2.10.0 <DateTag>2026-06-02</DateTag>
 
 ### Feature
 
-- **WebUI Investigations 新增进程分析**：可按 PID、监听端口或进程名查询 Linux 客户端进程详情
-- Clients 列表新增进程分析入口，可从指定客户端直接发起查询
-- **Agentic IR 支持恢复 Claude 历史会话**：可在 Resume 模式中继续已有 Claude Code 会话
+- **Investigations 进程分析**：可按 PID、监听端口或进程名查询 Linux 客户端进程详情
+- **AIR 恢复历史会话**：可在 Resume 模式中继续已有的 AIR 会话
 
 ### Improvement
 
-- SOAR 凭证支持独立环境变量，服务端更新凭证后会自动重新初始化客户端
-- `plugins update` 会保留插件启用状态，配置写入失败时返回明确错误
-- CLI 和客户端退出处理更可靠，减少命令失败或中断后的悬挂连接
 - WebUI 批量部署支持更大的目标列表
-
-### Bugfix
-
-- 修复 AIR 状态、重复错误提示和 Artifacts 大文件下载错误处理问题
-- 修复 WebUI Shell 与 Agentic IR 在浏览器断连时输出转发可能阻塞的问题
-- 修复 Recon 进度拉取失败后仍继续轮询的问题
-- 修复 Windows 文件 Recon 最近修改事件日志命令的路径解析问题
-- 修复进程分析启动时间缓存的并发问题，并补齐若干错误处理路径
 
 ---
 
