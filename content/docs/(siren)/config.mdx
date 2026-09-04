@@ -79,7 +79,7 @@ key: certs/key.pem                              # TLS 密钥路径
 logging:
   level: info                                   # debug / info / warning / error
   format: text                                  # text / json
-  output: stderr                                # stderr / stdout
+  output: stderr                                # stderr / stdout / none
   bufferSize: 5000                              # Logs 页面保留的日志条数，0 表示关闭
 
 webui:                                          # Web 控制台
@@ -139,7 +139,7 @@ air:
 | `key` | string | `certs/key.pem` | TLS 私钥文件路径 |
 | `logging.level` | string | `info` | 最低日志级别，可选 `debug`、`info`、`warning` 或 `error`；`success` 与 `info` 使用同一级别 |
 | `logging.format` | string | `text` | 日志格式，可选适合终端阅读的 `text` 或每行一个对象的 `json` |
-| `logging.output` | string | `stderr` | 服务端运行日志输出流，可选 `stderr` 或 `stdout` |
+| `logging.output` | string | `stderr` | 服务端运行日志输出流，可选 `stderr`、`stdout` 或 `none`（不输出到终端，仅保留 Logs 页面缓冲） |
 | `logging.bufferSize` | int | `5000` | [Web 控制台 Logs 页面](/webui#logs)在内存中保留的最近日志条数；服务重启后清空，设为 `0` 或负数则关闭该页面 |
 | `webui.enabled` | bool | `true` | 是否启用 [Web 控制台](/webui)。关闭后若 `mcp.enabled` 仍为 `true`，`/mcp` 会继续在共享端口上提供服务 |
 | `webui.publicURL` | string | `""` | WebUI AIR 注入 MCP 时使用的绝对 HTTPS Origin，不得包含路径、query 或凭证；使用 AIR 时必须设置。服务端本机应将该域名解析到本机的非 loopback 内网地址，不能指向 `127.0.0.1` 或 `::1` |
@@ -181,7 +181,7 @@ air:
 
 SIREN 不直接创建日志文件或执行轮转。需要持久化时，应由 systemd、容器运行时或其他进程管理器采集所选输出流并负责保留与轮转。
 
-`logging.bufferSize` 额外在内存中保留最近若干条日志，供 [Web 控制台 Logs 页面](/webui#logs)查看。保留的内容与终端输出完全一致，同样受 `logging.level` 约束；缓冲区仅存在于内存中，服务重启后清空，不能替代上述持久化方案。
+`logging.bufferSize` 额外在内存中保留最近若干条日志，供 [Web 控制台 Logs 页面](/webui#logs)查看。保留的内容同样受 `logging.level` 约束，`logging.output` 设为 `none` 时也照常保留；缓冲区仅存在于内存中，服务重启后清空，不能替代上述持久化方案。
 
 > WebUI GUI 与 Terminal 都复用 `air.providers.<name>`。所有入口都会注入当前范围的 SIREN MCP：Project 使用 `/mcp/project/<id>`，Global 使用 `/mcp`。Manual 只启动空白 Provider 会话；Custom、Event、Resume 再按需加入种子 prompt 或恢复会话 ID。两种界面都受 WebUI 全局鉴权保护。
 

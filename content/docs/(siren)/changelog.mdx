@@ -10,6 +10,16 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.27.2 <DateTag>2026-09-04</DateTag>
+
+### Improvement
+
+- `logging.output` 新增 `none`：不向终端输出日志，Logs 页面缓冲照常保留
+
+### Bugfix
+
+- 修复 AIR Terminal 模式下 Claude Code 鼠标拖选复制失效的问题：终端在本地操作后短时间内接受程序的剪贴板写入，其余时间仍会拦截，避免 Agent 输出覆盖观看者剪贴板
+
 ## v2.27.1 <DateTag>2026-09-03</DateTag>
 
 ### Improvement
