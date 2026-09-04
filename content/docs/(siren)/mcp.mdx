@@ -56,6 +56,8 @@ Hunt 的 JSONL 是权威证据。只有能访问对应 Project 工作目录的 A
 
 `run` 的 structured content 会返回 `audit_id`、执行 outcome、原始/返回字节数、已展示和省略的字节范围，以及结果过期时间。`auto` 对不超过 8 KiB 的结果保持原文不变；更大的结果保留首尾各约 4 KiB，并明确标出省略范围。预览、读取和搜索返回的远端内容都标记为不可信证据，但不会清洗 ANSI、控制字符、重复行或疑似指令。
 
+`run`、`read_run_result`、`search_run_result`、`recon` 和 `deploy` 的 structured content 还包含必填的 `text` 字段，与工具返回的文本内容完全一致，供只读取结构化结果的 MCP 客户端使用。字节数和范围仍描述原始证据，不计算这份兼容性镜像。
+
 `read_run_result` 和 `search_run_result` 只读取服务端已经收到的结果，不会再次在受害主机上执行命令。可检索记录由当前 SIREN Server 进程保存在内存中，创建 60 分钟后过期；读取不会续期。超过 512 条或 32 MiB 时会从最早记录开始淘汰，服务重启也会清空。这里保存的是客户端现有 50 KiB 上限内的权威结果，不能恢复客户端在上游已经截断的内容。
 
 <Callout title="WebUI Project 作用域" type="info">
