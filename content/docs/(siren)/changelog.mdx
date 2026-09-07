@@ -10,6 +10,20 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.27.6 <DateTag>2026-09-07</DateTag>
+
+### New Features
+
+- MCP `run` 在新版 Linux、macOS 和 Windows 客户端上支持合计 16 MiB 的双流输出，可分流回读、搜索，并明确报告捕获完整性与取消状态
+- WebUI 客户端列表使用系统图标显示 Linux、Windows 和 macOS，未知系统保留原文
+- 侧栏突出显示 Agentic IR 入口
+
+### Bugfix
+
+- 修复 Unix 复合进程查询可能匹配到 SIREN 自身命令包装器的问题
+- 修复命令结束但输出尚未读完时误报捕获完整，以及并发文件传输时命令完成回复丢失的问题
+- 文件传输按块限时，长文件不再受五秒整体发送期限限制
+
 ## v2.27.4 <DateTag>2026-09-04</DateTag>
 
 ### Bugfix

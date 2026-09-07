@@ -44,9 +44,9 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 | 工具 | 参数 | 描述 |
 | --- | --- | --- |
 | `ls` | 无 | 列出在线 SIREN 客户端，包含 ID、操作系统、连接地址、备注、已安装插件，以及默认/可用 Recon Profile；旧客户端显示 `legacy default` |
-| `run` | `client_id`, `command`，可选 `output_mode` | 在指定 SIREN 客户端上执行命令。命令和客户端返回结果分别以 50 KiB 为上限；执行前会检查命令黑名单，超时时间跟随 `recon.commandTimeout`。默认 `auto` 会让超过 8 KiB 的结果返回可恢复的首尾预览；`full` 返回 50 KiB 内的完整结果 |
-| `read_run_result` | `audit_id`，可选 `offset`、`limit` | 按字节位置读取最近一次 `run` 的原文片段，默认最多 8 KiB、单次最多 16 KiB；实际 UTF-8 安全范围和下一偏移量会在 structured content 中返回 |
-| `search_run_result` | `audit_id`, `query`，可选 `case_sensitive`、`context_lines`、`max_matches` | 对最近一次 `run` 的原文做字面搜索并返回匹配位置和上下文；默认不区分大小写，最多返回 20 个匹配，正文上限为 8 KiB |
+| `run` | `client_id`, `command`，可选 `output_mode` | 在指定 SIREN 客户端上执行命令。命令上限为 50 KiB；支持流式执行的新客户端最多保留合计 16 MiB 的标准输出和错误输出。执行前检查命令黑名单，超时时间跟随 `recon.commandTimeout`；`auto` 对超过 8 KiB 的结果显示首尾预览，`full` 直接显示 50 KiB 内的结果，超出时仍显示预览 |
+| `read_run_result` | `audit_id`，可选 `stream`、`offset`、`limit` | 按字节位置读取最近一次 `run` 的原文片段，默认最多 8 KiB、单次最多 16 KiB；实际 UTF-8 安全范围和下一偏移量会在 structured content 中返回 |
+| `search_run_result` | `audit_id`, `query`，可选 `stream`、`case_sensitive`、`context_lines`、`max_matches` | 对最近一次 `run` 的原文做字面搜索并返回匹配位置和上下文；默认不区分大小写，最多返回 20 个匹配，正文上限为 8 KiB |
 | `recon` | `client_id`，可选 `profile` | 在指定客户端触发一次 [Recon](/recon)；省略 `profile` 时使用客户端默认值，也可显式传 `hunt` 采集应用拓扑、运行载荷供应链、配置、近期应用活动和凭据证据。正文返回派生 Markdown；Hunt 正文只包含拓扑、覆盖范围和采集质量摘要。structured content 返回 `status`、`format`、`schemaVersion`、`reportPath` 和 Project 相对 `snapshotPath`。JSONL 与 Markdown 都保存到 Artifacts；旧客户端只能省略 Profile 使用 legacy default |
 | `deploy` | `uid`, `instance_id`，可选 `public_ip` | 通过 SOAR 在单台阿里云 ECS 上放行网络并安装 SIREN，等待客户端实际连接后返回 operation ID、状态和 Client ID。仅当用户明确要求部署到该实例时调用；同一 UID 与实例已有部署任务运行时会拒绝重复请求 |
 
@@ -56,9 +56,15 @@ Hunt 的 JSONL 是权威证据。只有能访问对应 Project 工作目录的 A
 
 `run` 的 structured content 会返回 `audit_id`、执行 outcome、原始/返回字节数、已展示和省略的字节范围，以及结果过期时间。`auto` 对不超过 8 KiB 的结果保持原文不变；更大的结果保留首尾各约 4 KiB，并明确标出省略范围。预览、读取和搜索返回的远端内容都标记为不可信证据，但不会清洗 ANSI、控制字符、重复行或疑似指令。
 
+服务端与 Linux、macOS 或 Windows 客户端升级到 v2.27.6 后，可分别保留标准输出与错误输出。读取和搜索的 `stream` 默认为合并的 `text`，也可选择 `stdout`、`stderr`、`raw_stdout` 或 `raw_stderr`；读取原始流时，精确字节放在 Base64 编码的 `content_base64` 中。可解析的 PowerShell CLIXML 会提供可读错误视图，原始错误流仍保留。
+
+`preview_complete` 表示展示是否省略内容，`capture_complete` 表示输出是否完整捕获，顶层 `complete` 只有在两者均确认完整时才为真；分页的 `complete` 仅表示到达已保留数据末尾。真实退出码与 PowerShell ErrorRecord 分开报告，非零退出也可能完整捕获。旧客户端的捕获完整性与取消确认保持未知，并提示升级；没有收到取消确认时，不能据此断言远端命令已经终止。
+
+同一客户端同时只接受一个一次性命令，MCP 和 REPL 共用此限制，冲突时立即返回 busy。并发文件传输可能延迟完成回复；回复超过 30 秒仍无法交付会关闭连接，正在进行的传输也会中断，已收到的结果仍可按捕获状态回读。
+
 `run`、`read_run_result`、`search_run_result`、`recon` 和 `deploy` 的 structured content 还包含必填的 `text` 字段，与工具返回的文本内容完全一致，供只读取结构化结果的 MCP 客户端使用。字节数和范围仍描述原始证据，不计算这份兼容性镜像。
 
-`read_run_result` 和 `search_run_result` 只读取服务端已经收到的结果，不会再次在受害主机上执行命令。可检索记录由当前 SIREN Server 进程保存在内存中，创建 60 分钟后过期；读取不会续期。超过 512 条或 32 MiB 时会从最早记录开始淘汰，服务重启也会清空。这里保存的是客户端现有 50 KiB 上限内的权威结果，不能恢复客户端在上游已经截断的内容。
+`read_run_result` 和 `search_run_result` 只读取服务端已经收到的结果，不会再次在受害主机上执行命令。可检索记录由当前 SIREN Server 进程保存在内存中，创建 60 分钟后过期；读取不会续期。超过 512 条或 32 MiB 时会从最早记录开始淘汰，服务重启也会清空。正在执行的结果也计入容量限制；超过单次输出上限或容量不足时，返回已收到的内容并标记捕获不完整。旧客户端仍受约 50 KiB 上限限制，已在客户端截断的内容无法恢复。
 
 <Callout title="WebUI Project 作用域" type="info">
   外部 MCP 客户端直接访问 `/mcp` 时使用全局视图，`ls` 会列出所有在线 SIREN 客户端。WebUI AIR 在 Project 视图下会自动注入带 Project 作用域的 MCP 地址，`ls` 只返回当前 Project 的客户端，`run` 和 `recon` 也会拒绝操作其他 Project 的客户端；`read_run_result` 和 `search_run_result` 只能读取同一作用域创建的结果，Global 与 Project 结果不能互读；`deploy` 成功连接的新客户端会自动归入当前 Project。
@@ -93,12 +99,12 @@ Hunt 的 JSONL 是权威证据。只有能访问对应 Project 工作目录的 A
 
 ## 命令审计
 
-`run` 收到有效的 `client_id` 和 `command` 后，会在策略检查和客户端执行前写入 `mcp.run.requested`，并在结束时写入共享同一 `audit_id` 的 `mcp.run.finished`。完成记录包含目标客户端、Project、outcome、耗时、命中的黑名单规则、错误，以及客户端返回的 50 KiB 内权威结果；Agent 使用 `auto` 时收到预览不会改变这份审计结果。策略拦截、目标拒绝、发送失败、取消、超时和远端执行失败也会产生完成记录。
+`run` 收到有效的 `client_id` 和 `command` 后，会在策略检查和客户端执行前写入 `mcp.run.requested`，并在结束时写入共享同一 `audit_id` 的 `mcp.run.finished`。完成记录包含目标客户端、Project、outcome、耗时、命中的黑名单规则、错误，以及捕获字节数、完整性和结果过期时间；新客户端的完整输出通过结果读取工具获取，不重复写入日志，旧客户端仍记录其返回范围内的结果。策略拦截、目标拒绝、发送失败、取消、超时和远端执行失败也会产生完成记录。
 
 这些记录进入普通服务端日志。可以在 [WebUI Logs](/webui#logs) 中选择 `mcp` 组件，再搜索命令、结果、事件名、客户端 ID 或 `audit_id`；需要长期审计时，应由 systemd 或容器运行时留存服务端标准输出。
 
 <Callout title="命令与结果属于敏感日志" type="warn">
-  审计记录保留完整命令，以及客户端在现有输出上限内返回的完整结果，其中可能包含主机路径、进程参数、配置或凭据。Logs 是全局页面，任何已登录用户都能查看；请仅向获授权的内部操作员开放 WebUI，并按调查需要设置日志保留与访问控制。
+  审计记录保留完整命令、错误说明，以及旧客户端返回的结果，其中可能包含主机路径、进程参数、配置或凭据。Logs 是全局页面，任何已登录用户都能查看；请仅向获授权的内部操作员开放 WebUI，并按调查需要设置日志保留与访问控制。
 </Callout>
 
 ## 相关内容
