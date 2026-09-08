@@ -10,6 +10,14 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.28.0 <DateTag>2026-09-08</DateTag>
+
+### New Features
+
+- WebUI 每个页面都有独立的 URL 地址（如 `#/investigations/recon`、`#/artifacts/<路径>?project=<id>`），刷新、浏览器前进后退和分享链接都能回到同一位置；Investigations 记住当前工具、Agentic IR 记住当前会话、Artifacts 记住选中文件和 Project 范围，浏览器标签页标题随页面变化
+- 左侧导航按用途分组：Respond（Clients、Agentic IR）、Tools（Shells、Files、Investigations）、Evidence（Artifacts、Dossier）和 System（Logs）
+- Project 范围切换改为自绘菜单，并提供 **Manage projects** 入口进入 Projects 页面；Docs 入口移到左下角账号菜单
+
 ## v2.27.7 <DateTag>2026-09-08</DateTag>
 
 ### Bugfix

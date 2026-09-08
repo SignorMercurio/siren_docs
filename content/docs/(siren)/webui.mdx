@@ -87,6 +87,8 @@ Web 控制台使用 Session Cookie 鉴权。账号密码存储在 SQLite 数据�
 
 ## 功能页面
 
+左侧导航按用途分为四组：**Respond**（Clients、Agentic IR）、**Tools**（Shells、Files、Investigations）、**Evidence**（Artifacts、Dossier）和 **System**（Logs）。每个页面都有自己的 URL，例如 `#/investigations/recon` 或 `#/artifacts/<路径>?project=<id>`；刷新、浏览器前进后退和分享链接都会回到同一页面、同一工具标签、同一 AIR 会话或同一选中文件，浏览器标签页标题也随页面变化。
+
 <Cards>
   <Card title="Projects" icon={<FolderKanban />}>按应急响应项目隔离客户端、Artifacts 和调查上下文</Card>
   <Card title="Clients" icon={<Users />}>查看在线客户端，编辑备注，执行 SOAR 放行、出口配置、部署和清理</Card>
@@ -103,6 +105,8 @@ Web 控制台使用 Session Cookie 鉴权。账号密码存储在 SQLite 数据�
 ### Projects
 
 Project 是应急响应工作区，用于把客户端、Artifacts 目录和操作目标放到同一个上下文中。每个 Project 创建时会固定一个服务端目录，例如 `/opt/siren/my-project`。
+
+Projects 页面不在左侧导航里：点击侧边栏顶部的 **Project scope**，在弹出的范围菜单中选择 **Manage projects** 进入。同一个菜单用于在 Global 视图和各 Project 视图之间切换。
 
 Projects 页面支持：
 
@@ -265,7 +269,7 @@ Dossier 未部署、路径配置错误或默认 `report.md` 缺失时，Web 控�
 
 ### Settings
 
-Settings 不在左侧导航里，从左下角的账号入口打开。同一个菜单还提供 Feedback、退出登录和当前版本号。
+Settings 不在左侧导航里，从左下角的账号入口打开。同一个菜单还提供 Docs、Feedback、退出登录和当前版本号。
 
 页面分两部分：
 
