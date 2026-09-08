@@ -66,7 +66,7 @@ plugins:
 | `plugins.<name>` | bool | - | 启用或禁用插件，command 与 recon 类型统一使用该开关 |
 Profile 名必须匹配 `^[a-z][a-z0-9_-]{0,63}$`。每个 Profile 包含 1 到 64 个不重复模块；未知模块会使配置加载失败。`Basic` 始终执行，不写入列表。recon 插件以 `plugin:<name>` 引用，例如 `custom: [user, process, plugin:collector]`；插件缺失或被 `plugins.<name>` 禁用时，采集开始前会失败。
 
-没有 `recon.profiles` 的旧配置会把已启用的传统 `recon.<module>` 与旧式 recon 插件合成为唯一的 `default`，并记录迁移提示。`topology`、`supplychain`、`config`、`activity` 和 `credential` 属于 opt-in 采集，不会被旧配置或无配置 fallback 自动启用；Linux 与 Windows 的内置 `hunt` 会显式包含这些模块。Linux 的 `rootkit` 仍保留在 `default`、`quick` 和用户自定义 Profile 中，但不进入 `hunt`。新旧结构同时存在时，以 Profile 为准，旧键被忽略。旧配置中残留的 `rules` 不影响启动，但会记录一次已忽略提示；这些规则不再参与 Recon。无效的远程 `reload` 会保留上一个有效 Profile 快照。
+没有 `recon.profiles` 的旧配置会把已启用的传统 `recon.<module>` 与旧式 recon 插件合成为唯一的 `default`，并记录迁移提示。`topology`、`supplychain`、`config`、`activity` 和 `credential` 属于 opt-in 采集，不会被旧配置或无配置 fallback 自动启用；Linux 与 Windows 的内置 `hunt` 会显式包含这些模块。Linux 的 `rootkit` 仍保留在 `default`、`quick` 和用户自定义 Profile 中，但不进入 `hunt`。新旧结构同时存在时，以 Profile 为准，旧键被忽略。旧配置中残留的 `rules` 不影响启动，但会记录一次已忽略提示；这些规则不再参与 Recon。无效的远程 `reload` 会保留当前配置与上一个有效 Profile 快照。客户端配置正在被 Recon 或其他操作使用时，重载会提示稍后重试。
 
 ## 服务端配置
 
