@@ -305,7 +305,7 @@ mcp:
   Web 控制台使用服务端主 TLS 端口。部署到公网时：
 
   - 使用浏览器信任、且覆盖访问域名的证书
-  - 通过防火墙、安全组、VPN 或 ACL 限制主 TLS 端口的访问来源；`/mcp` 不使用 WebUI Session 鉴权
+  - 通过防火墙、安全组、VPN 或 ACL 限制主 TLS 端口的访问来源；`/mcp` 使用独立 Bearer 凭证，不使用 WebUI Session 鉴权
   - 部署前必须创建至少一个用户账号，否则 Web 控制台不会启用鉴权
 </Callout>
 

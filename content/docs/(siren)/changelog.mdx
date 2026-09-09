@@ -10,6 +10,13 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.29.0 <DateTag>2026-09-09</DateTag>
+
+### New Features
+
+- MCP 统一使用 Bearer 认证，Raven 钉钉群自动绑定独立 Project；跨项目访问、结果回读和部署抢占会被拒绝。升级需配置两种服务端凭证并迁移运维客户端 Header，旧主机保留原归属，由管理员手工分配
+- AIR 的 Claude、Codex、Qoder、Pi GUI 与 Terminal 自动使用当前范围的会话凭证，结束后失效，保持原有工具审批设置
+
 ## v2.28.0 <DateTag>2026-09-08</DateTag>
 
 ### New Features

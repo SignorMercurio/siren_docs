@@ -20,8 +20,8 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 
 `mcp.enabled` 与 `webui.enabled` 相互独立。关闭 WebUI 后，只要 `mcp.enabled` 仍为 `true`，服务端仍会在共享 TLS 端口上提供 `/mcp`；关闭 MCP 后，WebUI 可以继续独立运行。
 
-<Callout title="`/mcp` 端点不鉴权" type="warn">
-  `/mcp` 不使用 WebUI 的 Session 鉴权。WebUI 账号只保护浏览器页面和 API，不能保护 MCP 客户端。任何能访问主 TLS 端口的人，都可能通过 `run` 在受害主机上执行命令，或通过 `deploy` 放行目标公网 IP 并安装 SIREN。请使用防火墙、安全组、VPN 或 ACL 限制 `listen` / `port` 的访问来源。
+<Callout title="MCP 需要独立的 Bearer 凭证" type="warn">
+  所有 MCP 请求均须携带 `Authorization: Bearer <token>`，WebUI Session 不能代替它。启用 MCP 前，必须为服务端配置非空且不同的环境变量 `SIREN_MCP_ADMIN_TOKEN`（运维访问）和 `SIREN_MCP_RAVEN_TOKEN`（Raven 群凭证申请）。缺少配置会拒绝启动；关闭 WebUI 不会取消 MCP 认证。请使用受保护的服务环境文件保存凭证，不要写入项目文件、URL 或聊天消息。
 </Callout>
 
 <Callout title="端口迁移" type="warn">
@@ -34,7 +34,8 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 {
   "siren": {
     "type": "http",
-    "url": "https://siren.example.com/mcp"
+    "url": "https://siren.example.com/mcp",
+    "headers": { "Authorization": "Bearer <SIREN_MCP_ADMIN_TOKEN>" }
   }
 }
 ```
@@ -67,7 +68,7 @@ Hunt 的 JSONL 是权威证据。只有能访问对应 Project 工作目录的 A
 `read_run_result` 和 `search_run_result` 只读取服务端已经收到的结果，不会再次在受害主机上执行命令。可检索记录由当前 SIREN Server 进程保存在内存中，创建 60 分钟后过期；读取不会续期。超过 512 条或 32 MiB 时会从最早记录开始淘汰，服务重启也会清空。正在执行的结果也计入容量限制；超过单次输出上限或容量不足时，返回已收到的内容并标记捕获不完整。旧客户端仍受约 50 KiB 上限限制，已在客户端截断的内容无法恢复。
 
 <Callout title="WebUI Project 作用域" type="info">
-  外部 MCP 客户端直接访问 `/mcp` 时使用全局视图，`ls` 会列出所有在线 SIREN 客户端。WebUI AIR 在 Project 视图下会自动注入带 Project 作用域的 MCP 地址，`ls` 只返回当前 Project 的客户端，`run` 和 `recon` 也会拒绝操作其他 Project 的客户端；`read_run_result` 和 `search_run_result` 只能读取同一作用域创建的结果，Global 与 Project 结果不能互读；`deploy` 成功连接的新客户端会自动归入当前 Project。
+  运维客户端使用管理凭证访问 `/mcp` 时使用全局视图，`ls` 会列出所有在线 SIREN 客户端。WebUI AIR 在 Project 视图下会自动注入带 Project 作用域的 MCP 地址，`ls` 只返回当前 Project 的客户端，`run` 和 `recon` 也会拒绝操作其他 Project 的客户端；`read_run_result` 和 `search_run_result` 只能读取同一作用域创建的结果，Global 与 Project 结果不能互读；`deploy` 成功连接的新客户端会归入当前 Project；其他 Project 的客户端不会被部署操作自动迁移，归属冲突要求人工处理。
 </Callout>
 
 <Callout title="AIR 工具批准" type="warn">
@@ -120,3 +121,13 @@ Hunt 的 JSONL 是权威证据。只有能访问对应 Project 工作目录的 A
     配置 MCP 开关、共享 TLS 监听端口与 WebUI HTTPS Origin
   </Card>
 </Cards>
+
+## Raven 群项目与迁移
+
+Raven 的钉钉直接回复和主动回复按原始 `openConversationId` 使用独立 Project。首次使用会创建项目，同群跨机器人仍对应同一个项目，同名不同群不会合并。Project 名优先采用唯一客户全称，其次群名；名称只用于显示，不决定权限。占位名称取得可靠名称后可补齐一次，管理员改名不会被自动覆盖。群绑定项目不能普通删除，本版不提供解绑或合并。
+
+Raven 配置 `RAVEN_SIREN_MCP_TOKEN`，其值须与服务端 `SIREN_MCP_RAVEN_TOKEN` 相同。服务凭证只能申请一小时有效的项目访问凭证，不能直接执行 MCP 工具。项目凭证访问全局或其他项目会被拒绝；服务端重启后，已签发凭证失效。Raven 会在后续调用前更新凭证，不自动重放可能已执行的操作。MAS 和 Responses 不提供 SIREN 工具。
+
+部署前还会检查钉钉群的云账号 UID 白名单；映射不可用或 UID 不属于该群时，不提交部署。群绑定、项目访问权限与云账号权限是独立检查。该方案隔离 MCP 资源访问，不提供独立进程、资源配额或网络隔离；Raven 服务端与 SIREN 管理员仍属于信任边界。
+
+升级时先为现有运维客户端配置认证 Header，再在维护窗口依次更新 SIREN 和 Raven；切换期间允许请求失败，不开放匿名兼容入口。用两个测试群验证各自列表、受控主机的无副作用命令与结果回读，再验证跨项目拒绝。旧项目、主机和产物保持原状，由管理员确认后手工分配。需要回退时先停止 Raven 的 SIREN 调用，保留 SIREN 认证和项目数据。

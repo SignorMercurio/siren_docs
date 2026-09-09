@@ -16,7 +16,7 @@ Agentic 应急响应（AIR）用于把 Claude Code、Codex、Qoder 或 Pi 接入
 AIR 是交互式会话。操作员可以在结构化时间线或真实终端中观察执行过程、回答追问、补充指令或停止会话，不应把它当成完全无人值守的自动处置流程。
 
 <Callout title="前置条件" type="info">
-  需要在服务端配置可用的 Claude、Codex、Qoder 或 Pi CLI 路径（`air.providers.<name>.cliPath`），并启用 [MCP 服务](/mcp#启用与访问)。Event 模式需要[设置 SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)。服务端 REPL 的 `air` 命令固定使用 Claude，并需要 tmux。
+  需要在服务端配置可用的 Claude、Codex、Qoder 或 Pi CLI 路径（`air.providers.<name>.cliPath`），并启用、配置独立凭证的 [MCP 服务](/mcp#启用与访问)。Event 模式需要[设置 SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)。服务端 REPL 的 `air` 命令固定使用 Claude，并需要 tmux。
 </Callout>
 
 ## 使用方式
@@ -171,3 +171,7 @@ Agent 可以把调查结论整理成 Markdown 报告。WebUI Project 视图下�
     查看 Agentic 应急响应生成的报告示例
   </Card>
 </Cards>
+
+### MCP 会话凭证
+
+Claude、Codex、Qoder、Pi 的 GUI 与 Terminal 会自动获得当前范围的 MCP 凭证：Project 会话只能访问本项目，全局会话使用全局范围。凭证随会话结束失效，服务端重启后也失效，不会因为调查超过一小时而中途到期。长期管理凭证不会注入 Provider 会话，工具审批行为保持原有配置。服务端 REPL 的 Claude 仍使用操作员自己的 MCP 配置，升级时需同步添加认证 Header。

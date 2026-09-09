@@ -192,3 +192,7 @@ SIREN 不直接创建日志文件或执行轮转。需要持久化时，应由 s
 <Callout title="v1.x 升级提示" type="warn">
   v2.0.0 合并了 MCP 与 WebUI 端口，顶层 `mcpPort` 字段与 `--mcp-port` 参数已移除。升级后的配置示例如上，`mcpPort` 如有残留不会报错但会被忽略。
 </Callout>
+
+### MCP 认证环境变量
+
+启用 `mcp.enabled` 前，必须通过受保护的服务环境配置 `SIREN_MCP_ADMIN_TOKEN` 和 `SIREN_MCP_RAVEN_TOKEN`，两者须非空且不同，不能写入 YAML 或项目文件。前者供运维客户端使用，后者仅用于 Raven 申请群项目凭证。未配置时服务端拒绝启动，不降级为匿名访问。AIR 自动注入当前会话凭证；外部客户端的 Header 和迁移步骤见 [MCP 集成](/mcp#启用与访问)。
