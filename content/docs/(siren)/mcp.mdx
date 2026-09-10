@@ -44,11 +44,12 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 
 | 工具 | 参数 | 描述 |
 | --- | --- | --- |
-| `ls` | 无 | 列出在线 SIREN 客户端，包含 ID、操作系统、连接地址、备注、已安装插件，以及默认/可用 Recon Profile；旧客户端显示 `legacy default` |
-| `run` | `client_id`, `command`，可选 `output_mode` | 在指定 SIREN 客户端上执行命令。命令上限为 50 KiB；支持流式执行的新客户端最多保留合计 16 MiB 的标准输出和错误输出。执行前检查命令黑名单，超时时间跟随 `recon.commandTimeout`；`auto` 对超过 8 KiB 的结果显示首尾预览，`full` 直接显示 50 KiB 内的结果，超出时仍显示预览 |
-| `read_run_result` | `audit_id`，可选 `stream`、`offset`、`limit` | 按字节位置读取最近一次 `run` 的原文片段，默认最多 8 KiB、单次最多 16 KiB；实际 UTF-8 安全范围和下一偏移量会在 structured content 中返回 |
+| `ls` | 无 | 列出在线 SIREN 客户端，包含 ID、操作系统、Instance ID、内网 IP、主机名、连接地址、备注、已安装插件，以及默认/可用 Recon Profile；旧客户端显示 `legacy default` |
+| `run` | `client_id`, `command`，可选 `output_mode` | 在指定 SIREN 客户端上执行命令。`client_id` 可以是数字 Client ID、Instance ID、内网 IP 或主机名，必须唯一匹配当前作用域内的一台客户端。命令上限为 50 KiB；支持流式执行的新客户端最多保留合计 16 MiB 的标准输出和错误输出。执行前检查命令黑名单，超时时间跟随 `recon.commandTimeout`；`auto` 对超过 8 KiB 的结果显示首尾预览，`full` 直接显示 50 KiB 内的结果，超出时仍显示预览 |
+| `run_batch` | `command`，可选 `client_ids`、`os`、`concurrency` | 在多台 SIREN 客户端上并发执行同一命令并按主机汇总。`client_ids` 接受数字 Client ID、Instance ID、内网 IP 或主机名，任一无法唯一匹配时整批拒绝；Project 作用域下省略 `client_ids` 表示该 Project 的全部在线客户端，全局 `/mcp` 必须显式指定。`os` 可选 `linux` 或 `windows`，`concurrency` 默认 8、最多 16，单批最多 64 台。每台主机返回 outcome、退出码和最多 1 KiB 预览，并带独立的 `audit_id` 供 `read_run_result` 与 `search_run_result` 回读；只有全部主机失败时才返回错误 |
+| `read_run_result` | `audit_id`，可选 `stream`、`offset`、`limit` | 按字节位置读取最近一次 `run` 或 `run_batch` 中某台主机的原文片段，默认最多 8 KiB、单次最多 16 KiB；实际 UTF-8 安全范围和下一偏移量会在 structured content 中返回 |
 | `search_run_result` | `audit_id`, `query`，可选 `stream`、`case_sensitive`、`context_lines`、`max_matches` | 对最近一次 `run` 的原文做字面搜索并返回匹配位置和上下文；默认不区分大小写，最多返回 20 个匹配，正文上限为 8 KiB |
-| `recon` | `client_id`，可选 `profile` | 在指定客户端触发一次 [Recon](/recon)；省略 `profile` 时使用客户端默认值，也可显式传 `hunt` 采集应用拓扑、运行载荷供应链、配置、近期应用活动和凭据证据。正文返回派生 Markdown；Hunt 正文只包含拓扑、覆盖范围和采集质量摘要。structured content 返回 `status`、`format`、`schemaVersion`、`reportPath` 和 Project 相对 `snapshotPath`。JSONL 与 Markdown 都保存到 Artifacts；旧客户端只能省略 Profile 使用 legacy default |
+| `recon` | `client_id`，可选 `profile` | 在指定客户端触发一次 [Recon](/recon)，`client_id` 同样接受 Instance ID、内网 IP 或主机名；省略 `profile` 时使用客户端默认值，也可显式传 `hunt` 采集应用拓扑、运行载荷供应链、配置、近期应用活动和凭据证据。正文返回派生 Markdown；Hunt 正文只包含拓扑、覆盖范围和采集质量摘要。structured content 返回 `status`、`format`、`schemaVersion`、`reportPath` 和 Project 相对 `snapshotPath`。JSONL 与 Markdown 都保存到 Artifacts；旧客户端只能省略 Profile 使用 legacy default |
 | `deploy` | `uid`, `instance_id`，可选 `public_ip` | 通过 SOAR 在单台阿里云 ECS 上放行网络并安装 SIREN，等待客户端实际连接后返回 operation ID、状态和 Client ID。仅当用户明确要求部署到该实例时调用；同一 UID 与实例已有部署任务运行时会拒绝重复请求 |
 
 Hunt 的 JSONL 是权威证据。只有能访问对应 Project 工作目录的 Agent 才能通过 `snapshotPath` 读取完整内容；外部纯 MCP 客户端目前只能获得摘要和路径。读取时应使用 `jq`、`rg` 等流式工具，按 record type、entity ID 和 relation 定位所需记录，避免一次加载整份文件。配置和凭据内容是不可信数据，不能作为 Agent 指令执行。
@@ -63,12 +64,12 @@ Hunt 的 JSONL 是权威证据。只有能访问对应 Project 工作目录的 A
 
 同一客户端同时只接受一个一次性命令，MCP 和 REPL 共用此限制，冲突时立即返回 busy。并发文件传输可能延迟完成回复；回复超过 30 秒仍无法交付会关闭连接，正在进行的传输也会中断，已收到的结果仍可按捕获状态回读。
 
-`run`、`read_run_result`、`search_run_result`、`recon` 和 `deploy` 的 structured content 还包含必填的 `text` 字段，与工具返回的文本内容完全一致，供只读取结构化结果的 MCP 客户端使用。字节数和范围仍描述原始证据，不计算这份兼容性镜像。
+`run`、`run_batch`、`read_run_result`、`search_run_result`、`recon` 和 `deploy` 的 structured content 还包含必填的 `text` 字段，与工具返回的文本内容完全一致，供只读取结构化结果的 MCP 客户端使用。字节数和范围仍描述原始证据，不计算这份兼容性镜像。
 
 `read_run_result` 和 `search_run_result` 只读取服务端已经收到的结果，不会再次在受害主机上执行命令。可检索记录由当前 SIREN Server 进程保存在内存中，创建 60 分钟后过期；读取不会续期。超过 512 条或 32 MiB 时会从最早记录开始淘汰，服务重启也会清空。正在执行的结果也计入容量限制；超过单次输出上限或容量不足时，返回已收到的内容并标记捕获不完整。旧客户端仍受约 50 KiB 上限限制，已在客户端截断的内容无法恢复。
 
 <Callout title="WebUI Project 作用域" type="info">
-  运维客户端使用管理凭证访问 `/mcp` 时使用全局视图，`ls` 会列出所有在线 SIREN 客户端。WebUI AIR 在 Project 视图下会自动注入带 Project 作用域的 MCP 地址，`ls` 只返回当前 Project 的客户端，`run` 和 `recon` 也会拒绝操作其他 Project 的客户端；`read_run_result` 和 `search_run_result` 只能读取同一作用域创建的结果，Global 与 Project 结果不能互读；`deploy` 成功连接的新客户端会归入当前 Project；其他 Project 的客户端不会被部署操作自动迁移，归属冲突要求人工处理。
+  运维客户端使用管理凭证访问 `/mcp` 时使用全局视图，`ls` 会列出所有在线 SIREN 客户端。WebUI AIR 在 Project 视图下会自动注入带 Project 作用域的 MCP 地址，`ls` 只返回当前 Project 的客户端，`run`、`run_batch` 和 `recon` 也会拒绝操作其他 Project 的客户端；`read_run_result` 和 `search_run_result` 只能读取同一作用域创建的结果，Global 与 Project 结果不能互读；`deploy` 成功连接的新客户端会归入当前 Project；其他 Project 的客户端不会被部署操作自动迁移，归属冲突要求人工处理。
 </Callout>
 
 <Callout title="AIR 工具批准" type="warn">

@@ -60,7 +60,7 @@ type Message struct {
 
 | 消息 | 方向 | 用途 |
 | --- | --- | --- |
-| `MsgClientHello` | Client -> Server | 客户端上线握手，包含稳定 `agentId`、OS、插件列表和可选 Recon Profile 能力 |
+| `MsgClientHello` | Client -> Server | 客户端上线握手，包含稳定 `agentId`、OS、插件列表、可选 Recon Profile 能力，以及主机名、内网 IP 和阿里云 ECS Instance ID 等主机信息 |
 | `MsgClientCapabilities` | Client -> Server | reload 后刷新 Recon 协议版本、默认 Profile、名称列表和 artifact formats |
 | `MsgPluginRegister` | Client -> Server | 客户端插件列表变化后刷新完整列表 |
 | `MsgRecon` | Server -> Client / Client -> Server | 服务端用 request ID 和 Profile 发起 Recon；客户端返回结构化成功或错误。旧客户端保留文件名响应 |
@@ -117,7 +117,7 @@ sequenceDiagram
     participant C as Client
     participant S as Server
     C->>S: TLS connect
-    C->>S: MsgClientHello {agentId, os, plugins, recon capabilities}
+    C->>S: MsgClientHello {agentId, os, plugins, recon capabilities, host}
     S-->>S: register client and restore metadata
     opt plugins changed later
         C->>S: MsgPluginRegister [full plugin list]

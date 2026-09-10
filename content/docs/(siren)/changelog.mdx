@@ -10,6 +10,20 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.30.0 <DateTag>2026-09-10</DateTag>
+
+### New Features
+
+- `Client ID` 按客户端稳定身份持久保存，客户端重连和服务端重启后保持不变，也不会分配给其他主机
+- 客户端上线时上报主机名、内网 IP 和阿里云 ECS Instance ID；REPL 与 MCP 的 `ls` 显示这些字段，Clients 页面新增 Instance ID 和 Private IP 列，主机名、连接地址和完整 IP 列表放在 Instance ID 单元格的悬停卡片中，可从中复制
+- MCP 的 `run`、`recon` 等按客户端操作的工具可直接使用 Instance ID、内网 IP 或主机名指定目标；匹配到多台主机时返回候选 ID
+- 新增 MCP 工具 `run_batch`，在当前 Project 的多台客户端上并发执行同一命令并按主机汇总，每台主机都有独立的 `audit_id` 供 `read_run_result` 和 `search_run_result` 回读
+
+### Bugfix
+
+- Clients 页面的行操作菜单在点击空白处或按 Esc 后会关闭
+- Agentic IR 收起 History 后，Running 列表填满侧栏而不再留空
+
 ## v2.29.0 <DateTag>2026-09-09</DateTag>
 
 ### New Features
