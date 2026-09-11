@@ -10,6 +10,13 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.30.1 <DateTag>2026-09-11</DateTag>
+
+### New Features
+
+- Configure egress 的确认窗口会列出即将下发的出方向规则，规则以服务端配置 `egress.rules` 为唯一来源，缺省时回退到内置规则
+- 单机部署因 playbook 重试耗尽或客户端在超时前始终未回连而失败时，失败信息与 Deploy 表单会提示先为该实例 Configure egress 再重新部署
+
 ## v2.30.0 <DateTag>2026-09-10</DateTag>
 
 ### New Features
