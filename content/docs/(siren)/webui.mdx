@@ -119,7 +119,7 @@ Projects 页面支持：
 客户端最多归属到一个 Project。未归属客户端只在 Global 视图中出现；进入 Project 视图后，Clients、Shells、Agentic IR、Files 和 Investigations 都只允许选择当前 Project 的客户端。
 
 <Callout title="部署归属" type="info">
-  在 Project 视图下通过 Web 控制台单机或批量部署 SIREN 客户端时，SIREN 会同时核对活动部署目标、来源 IP 和客户端稳定身份；多台主机共享同一个出口 IP 时也能分别归属到当前 Project。无论从 Web 控制台、服务端 REPL 还是 MCP 发起部署，自动关联成功且尚无备注的客户端都会使用 ECS Instance ID 作为备注；批量部署显式填写 Note 时会优先使用该内容。已有备注始终保留，只有显式 Note 与已有备注冲突时才会显示 warning。服务端 REPL 部署不带 Project 上下文，仍保持全局行为。
+  在 Project 视图下通过 Web 控制台单机或批量部署 SIREN 客户端时，SIREN 会同时核对活动部署目标、来源 IP 和客户端稳定身份；多台主机共享同一个出口 IP 时也能分别归属到当前 Project。无论从 Web 控制台、服务端 REPL 还是 MCP 发起部署，未填写 Note 时都不会自动用 ECS Instance ID 填充备注；批量部署显式填写 Note 时，会在自动关联成功且客户端尚无备注时保存该内容。已有备注始终保留，显式填写 Note 而客户端已有备注时会显示 warning。服务端 REPL 部署不带 Project 上下文，仍保持全局行为。
 </Callout>
 
 ### Clients
@@ -130,10 +130,12 @@ Clients 页面对应服务端 REPL 的 `ls`、`note`、`allow`、`deploy` 和 `c
 - 按 ID、Instance ID、IP、主机名、Project 或备注筛选，并按主要字段排序。
 - 多选客户端后批量分配 Project 或执行清理。
 - 编辑备注。备注绑定到客户端稳定身份，客户端重连后会自动恢复。
+- 客户端选择器优先显示备注；没有备注时显示 Instance ID，再回退到主机名。
 - 分配 Project。Global 视图中可以把客户端分配到某个 Project，或移回未归属状态。
 - 打开快捷入口。从客户端行可直接进入 Files 或 Process Analysis。
 - 没有在线客户端时，页面会显示三步引导：部署客户端、等待连接、从客户端行开始排查。
 - 执行 SOAR 操作，包括 `allow` 放行、配置 SIREN 出方向、单机部署和批量部署。
+- 列表按设置的频率自动刷新，单机或批量部署结束后也会立即刷新一次。
 - 查看近期部署任务。页面刷新后仍可恢复当前进度和最近结果，进行中的任务每 2 秒更新一次。
 - 清理客户端。单个或批量清理都会要求输入确认短语后再执行 **Clean & Terminate**。
 

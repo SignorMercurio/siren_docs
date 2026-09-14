@@ -10,6 +10,14 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.30.2 <DateTag>2026-09-14</DateTag>
+
+### Bugfix
+
+- 部署时不再自动用 ECS Instance ID 填充空备注，避免与 Clients 列表的 Instance ID 列重复；显式填写的 Note 和已有备注保留原有处理规则
+- 客户端选择器在没有备注时显示 Instance ID，再回退到主机名，便于识别目标主机
+- 单机或批量部署结束后立即刷新 Clients 列表，及时显示连接结果
+
 ## v2.30.1 <DateTag>2026-09-11</DateTag>
 
 ### New Features
