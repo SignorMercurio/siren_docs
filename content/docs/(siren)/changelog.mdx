@@ -15,12 +15,23 @@ export const DateTag = ({ children }) => (
 ### New Features
 
 - Clients 主机详情 tooltip 新增客户端版本，旧客户端未上报时显示 **Not reported**，无需增加列表列宽
-- Clients 新增 **Recent cleanups**，展示 WebUI 与 REPL 发起的清理结果，区分等待回报、文件已清理、延迟删除、失败和未收到回报；客户端下线或刷新页面后仍可查看
+- Clients 新增 **Recent activity**，统一展示近期部署与 WebUI、REPL 发起的清理结果，区分等待回报、文件已清理、延迟删除、失败和未收到回报；客户端下线或刷新页面后仍可查看
 - 近期清理记录保留全服务端最近 20 条，按发起时的 Project 过滤，服务端重启后清空；结果绑定发起时的客户端连接，避免重连后误关联
+
+### Improvements
+
+- Clients 的 **Provisioning** 统一提供 **Allow access**、**Configure egress** 和 **Deploy SIREN**，页内输入 1–20 个目标，自动去重、逐项展示结果，并支持仅重试失败目标
+- 部署支持每行填写 Instance ID、可选公网 IP 和备注；出方向规则在执行前直接展示，结果未确认时提示先核对近期活动
+- 插件安装限制输出并在取消时终止子进程；chkrootkit 保留完整输出，并正确报告工具执行失败
+- 升级先完成新程序的复制和权限设置，再替换现有程序，准备失败时保留原有文件
 
 ### Bugfix
 
 - 修复窄屏主机详情内容可能超出卡片宽度的问题
+- 修复切换 Project 后旧文件操作结果和 AIR 会话列表影响新视图的问题
+- 修复 Clients 新增行时备注按钮抢焦点的问题
+- 修复端口转发连接结束后协程仍等待，以及读取同时返回数据和 EOF 时丢失末尾数据的问题
+- 修复采集与插件超时未保留错误类型、JSON 请求未拒绝尾随垃圾的问题
 
 ## v2.30.5 <DateTag>2026-09-15</DateTag>
 

@@ -134,21 +134,23 @@ Clients 页面对应服务端 REPL 的 `ls`、`note`、`allow`、`deploy` 和 `c
 - 分配 Project。Global 视图中可以把客户端分配到某个 Project，或移回未归属状态。
 - 打开快捷入口。从客户端行可直接进入 Files 或 Process Analysis。
 - 没有在线客户端时，页面会显示三步引导：部署客户端、等待连接、从客户端行开始排查。
-- 执行 SOAR 操作，包括 `allow` 放行、配置 SIREN 出方向、单机部署和批量部署。
+- 在页内 **Provisioning** 中执行 **Allow access**、**Configure egress** 或 **Deploy SIREN**，每次输入 1–20 个目标。
 - 列表按设置的频率自动刷新，单机或批量部署结束后也会立即刷新一次。
 - 查看近期部署任务。页面刷新后仍可恢复当前进度和最近结果，进行中的任务每 2 秒更新一次。
 - 行操作菜单依次为 **Files → Recon → Process analysis → Clean & terminate**。Recon 会打开 Investigations 的 Recon 标签并选中该客户端，仍需选择 Profile 后手动执行。
-- 清理客户端。单个或批量清理都会要求输入确认短语后再执行 **Clean & Terminate**。下方 **Recent cleanups** 展示近期结果：等待回报、文件已清理、延迟删除、失败或未收到回报。记录在客户端下线后仍保留，刷新页面可恢复；最多保留全服务端最近 20 条，按发起时的 Project 过滤，服务端重启后清空。
+- 清理客户端。单个或批量清理都会要求输入确认短语后再执行 **Clean & Terminate**。下方 **Recent activity** 展示近期结果：等待回报、文件已清理、延迟删除、失败或未收到回报。记录在客户端下线后仍保留，刷新页面可恢复；最多保留全服务端最近 20 条，按发起时的 Project 过滤，服务端重启后清空。
 
 <Callout title="配置 SIREN 出方向" type="info">
-  对出方向默认拒绝的阿里云 ECS，可填写 UID 和 Instance ID 后点击 **Configure egress**。确认窗口会展示目标和以下规则：`47.111.170.208/32` TCP 443 用于连接 SIREN 服务端，`47.79.65.205/32` TCP 443 用于下载客户端，`100.100.0.0/16` 全流量用于访问阿里云基础服务。执行后会创建或复用独立的 SIREN 安全组并挂载到实例，不会移除已有安全组；页面会显示 SOAR 进度以及最终的安全组 ID 和地域。已有宽泛放行规则不会自动收回；使用自定义服务端监听端口时，应同步调整服务端的出方向规则配置。
+  对出方向默认拒绝的阿里云 ECS，可填写 UID 和 Instance ID 后点击 **Configure egress**。页内会展示即将应用的出方向规则，默认包括：`47.111.170.208/32` TCP 443 用于连接 SIREN 服务端，`47.79.65.205/32` TCP 443 用于下载客户端，`100.100.0.0/16` 全流量用于访问阿里云基础服务。执行后会创建或复用独立的 SIREN 安全组并挂载到实例，不会移除已有安全组；页面会显示 SOAR 进度以及最终的安全组 ID 和地域。已有宽泛放行规则不会自动收回；使用自定义服务端监听端口时，应同步调整服务端的出方向规则配置。
 </Callout>
 
-<Callout title="批量部署规则" type="info">
-  点击 **Batch deploy** 会打开独立的批量部署窗口，支持同一 UID 下的 2-20 台 ECS。每行输入 `instanceId`、`instanceId,publicIp` 或 `instanceId,publicIp,note`；只填写备注时可写成 `instanceId,,note`。默认并发 3 台，单台失败不会中断其他目标。提交后窗口会关闭，可在近期部署列表继续查看进度。`success` 表示客户端已经连接，并显示实际 Client ID；playbook 完成后最多等待 30 秒，未连接的目标记为 `timed_out`。安装或启动命令失败时会立即显示其输出，不再继续等待客户端上线。
+<Callout title="Provisioning 输入与结果" type="info">
+  Allow access 每行填写一个客户端公网 IPv4 地址；Configure egress 和 Deploy SIREN 使用同一个 Alibaba Cloud UID，每行填写一个 Instance ID。部署可附带公网 IP 和备注，例如 `i-a`、`i-b,203.0.113.10`、`i-c,,web-1` 或 `i-d,203.0.113.11,db-1`。相同目标自动去重，同一实例的公网 IP 或备注冲突时需先修正。Allow access 和 Configure egress 逐项执行；部署默认并发 3 台，单个目标失败不会中断其他目标。
 </Callout>
 
-部署结果分为 `success`、`partial` 和 `failed`。只有所有目标均已连接且没有 warning 时才会清空输入；部分成功、失败或超时会保留原输入，便于核对和修正。单机部署因 playbook 重试耗尽或客户端在超时前始终未回连（`timed_out`）而失败时，失败信息与 Deploy 表单会提示先为该实例 **Configure egress** 再重新部署——这类失败通常意味着目标无法回连 SIREN。近期列表最多显示 20 次部署，可以完全收起；终态记录最长保留 30 分钟。这些记录只存在于当前服务端进程，服务端重启后不会恢复。
+操作结果逐项展示，重试只提交失败目标。部署成功以客户端实际连接为准；连接未确认或中途丢失部署结果时，先在 **Recent activity** 中核对，再决定是否重新部署。部署失败信息明确提示出口问题时，可以直接为相关目标 Configure egress。
+
+执行期间请保持浏览器页面打开。部署记录可在刷新页面后恢复；Allow access 和 Configure egress 的逐项结果仅保留在当前页面。Recent activity 合并展示近期部署和清理记录，进行中的记录优先排列；部署记录可展开查看日志。近期部署最多保留 20 次，终态记录最长保留 30 分钟，服务端重启后清空。
 
 <Callout title="需要手工确认客户端" type="warning">
   客户端稳定身份缺失、冲突或与目标来源 IP 不一致时，SIREN 不会回退为按 IP 猜测，也不会写入无法确认的 Project 或 Note。部署会显示 `manual_required`，请在 Clients 列表中核对主机后手工设置；页面不会提供自动重试，以免重复部署。
