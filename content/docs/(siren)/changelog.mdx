@@ -10,6 +10,18 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.31.0 <DateTag>2026-09-15</DateTag>
+
+### New Features
+
+- Clients 主机详情 tooltip 新增客户端版本，旧客户端未上报时显示 **Not reported**，无需增加列表列宽
+- Clients 新增 **Recent cleanups**，展示 WebUI 与 REPL 发起的清理结果，区分等待回报、文件已清理、延迟删除、失败和未收到回报；客户端下线或刷新页面后仍可查看
+- 近期清理记录保留全服务端最近 20 条，按发起时的 Project 过滤，服务端重启后清空；结果绑定发起时的客户端连接，避免重连后误关联
+
+### Bugfix
+
+- 修复窄屏主机详情内容可能超出卡片宽度的问题
+
 ## v2.30.5 <DateTag>2026-09-15</DateTag>
 
 ### Improvements

@@ -126,7 +126,7 @@ Projects 页面支持：
 
 Clients 页面对应服务端 REPL 的 `ls`、`note`、`allow`、`deploy` 和 `clean`。每行展示一个在线客户端，支持：
 
-- 查看 ID、系统、Instance ID、Private IP、Project 和备注列；悬停或聚焦 Instance ID 单元格会展开主机卡片，显示主机名、连接地址和完整内网 IP 列表，可直接从卡片中复制。
+- 查看 ID、系统、Instance ID、Private IP、Project 和备注列；悬停或聚焦 Instance ID 单元格会展开主机卡片，显示主机名、连接地址和完整内网 IP 列表，可直接从卡片中复制；同时展示客户端版本。旧客户端未上报版本时显示 **Not reported**。
 - 按 ID、Instance ID、IP、主机名、Project 或备注筛选，并按主要字段排序。
 - 多选客户端后批量分配 Project 或执行清理。
 - 编辑备注。备注绑定到客户端稳定身份，客户端重连后会自动恢复。
@@ -138,7 +138,7 @@ Clients 页面对应服务端 REPL 的 `ls`、`note`、`allow`、`deploy` 和 `c
 - 列表按设置的频率自动刷新，单机或批量部署结束后也会立即刷新一次。
 - 查看近期部署任务。页面刷新后仍可恢复当前进度和最近结果，进行中的任务每 2 秒更新一次。
 - 行操作菜单依次为 **Files → Recon → Process analysis → Clean & terminate**。Recon 会打开 Investigations 的 Recon 标签并选中该客户端，仍需选择 Profile 后手动执行。
-- 清理客户端。单个或批量清理都会要求输入确认短语后再执行 **Clean & Terminate**。
+- 清理客户端。单个或批量清理都会要求输入确认短语后再执行 **Clean & Terminate**。下方 **Recent cleanups** 展示近期结果：等待回报、文件已清理、延迟删除、失败或未收到回报。记录在客户端下线后仍保留，刷新页面可恢复；最多保留全服务端最近 20 条，按发起时的 Project 过滤，服务端重启后清空。
 
 <Callout title="配置 SIREN 出方向" type="info">
   对出方向默认拒绝的阿里云 ECS，可填写 UID 和 Instance ID 后点击 **Configure egress**。确认窗口会展示目标和以下规则：`47.111.170.208/32` TCP 443 用于连接 SIREN 服务端，`47.79.65.205/32` TCP 443 用于下载客户端，`100.100.0.0/16` 全流量用于访问阿里云基础服务。执行后会创建或复用独立的 SIREN 安全组并挂载到实例，不会移除已有安全组；页面会显示 SOAR 进度以及最终的安全组 ID 和地域。已有宽泛放行规则不会自动收回；使用自定义服务端监听端口时，应同步调整服务端的出方向规则配置。
