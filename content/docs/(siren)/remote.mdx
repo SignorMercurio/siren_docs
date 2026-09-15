@@ -76,7 +76,7 @@ REPL 适合已经登录控制主机、需要在终端里直接操作的场景。
 ```
 
 <Callout title="Shell 特性" type="info">
-  Shell 会话通过独立的 TLS 中继连接传输，不影响主控制通道。服务端需要安装 `tmux`，客户端也需要能回连服务端临时中继端口。如果不想依赖 tmux，可以使用 [Web 控制台的 Shells 页面](/webui#shells)。
+  Shell 会话通过独立的 TLS 中继连接传输，不影响主控制通道。服务端需要安装 `tmux`，客户端通过服务端主 TLS 端口（默认 TCP 443）回连，无需额外开放随机端口；服务端与客户端需同时升级到 v2.30.5 或更新版本。如果不想依赖 tmux，可以使用 [Web 控制台的 Shells 页面](/webui#shells)。
 </Callout>
 
 退出 Shell 的方式与退出普通终端相同（输入 `exit` 或按 `Ctrl+D`），退出后自动返回 SIREN Server REPL。

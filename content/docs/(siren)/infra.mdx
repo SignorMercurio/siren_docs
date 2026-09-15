@@ -17,7 +17,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 | -------- | -------- | -------- |
 | 控制主机 | 运行 `siren_server`，承载客户端连接、WebUI、MCP、Artifacts、Projects 和调查工作流 | 远程模式必需；Artifacts 与 Projects 默认落在服务端工作目录，Project 基准路径可用 `webui.projectsBaseDir` 调整 |
 | TLS 证书和私钥 | 客户端控制通道、WebUI / MCP HTTPS，以及交互式 Shell relay | 通过服务端配置 `cert` / `key` 指定；远程客户端不校验证书链，但浏览器访问的域名必须包含在证书中 |
-| 网络连通 | 客户端连接服务端、浏览器访问 WebUI / MCP、Shell relay 回连 | 客户端、WebUI 与 MCP 共用主 TLS 端口（默认 `443`）；交互式 Shell 会额外使用临时 relay 端口 |
+| 网络连通 | 客户端连接服务端、浏览器访问 WebUI / MCP、Shell relay 回连 | 客户端、WebUI、MCP 与交互式 Shell 共用主 TLS 端口（默认 `443`）；端口转发的服务端监听端口需按使用场景另行放通 |
 
 ## 可选通用依赖
 

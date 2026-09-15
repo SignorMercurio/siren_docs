@@ -150,10 +150,10 @@ Claude Code、Codex 和 Qoder 的模型、权限、沙箱、普通 Shell 审批�
 服务端 REPL 中的 `shell <Client ID>` 依赖服务端本机环境和客户端回连能力。请确认：
 
 - 服务端机器已安装 `tmux`。
-- 客户端能访问服务端 `listen` 地址和交互式 Shell 使用的临时端口。
+- 客户端能访问服务端 `listen` 地址（默认 TCP 443），且服务端与客户端均已升级到 v2.30.5 或更新版本。
 - `cert` 和 `key` 指向的证书、私钥可用。
 
-WebUI Shell 不依赖 `tmux`，但仍需要客户端能回连服务端临时端口。
+WebUI Shell 不依赖 `tmux`，通过同一个主 TLS 端口回连服务端。
 
 </Accordion>
 

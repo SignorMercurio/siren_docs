@@ -16,7 +16,7 @@ SIREN 客户端与服务端的主通道是 TLS TCP 连接。服务端默认监�
 
 主通道建立后，客户端必须先发送 `MsgClientHello`。服务端通过该帧完成客户端注册、恢复备注与项目归属，并缓存当前插件列表及 Recon Profile、artifact format 能力。后续插件发生安装、卸载、更新或启停变化时，客户端通过 `MsgPluginRegister` 刷新完整插件列表；结构化 `reload` 后通过 `MsgClientCapabilities` 刷新 Recon 能力。
 
-交互式 shell 会在主通道之外临时建立一个 TLS relay 连接；端口转发的数据则继续通过主通道上的 `MsgPortForwardData` 分片传输。
+交互式 shell 会在主通道之外建立一个共用服务端主端口的独立 TLS Shell 连接；端口转发的数据则继续通过主通道上的 `MsgPortForwardData` 分片传输。
 
 ## 标准帧
 
@@ -52,8 +52,8 @@ type Message struct {
 | `MsgRecon` | v2 请求包含协商后的 Snapshot format、客户端采集预算，并支持按 request ID 取消；成功结果包含 Profile、format、`complete|partial` 和 JSONL 文件名，随后紧跟一个 `MsgFile`。Profile v1 继续传 Markdown，旧协议仍使用空请求和文件名响应 |
 | `MsgUpload` | 第一帧为文件名，紧随其后的第二帧必须是 `MsgFile` 文件内容 |
 | `MsgPortForward`、`MsgPortForwardData` | 使用固定长度字段承载连接 ID、端口、目标主机和数据分片 |
-| `MsgShell` | `port:cols:rows` 文本，客户端据此连接临时 shell relay |
-| `MsgClean` | 无 payload |
+| `MsgShell` | JSON `{token, cols, rows}`，客户端通过主端口和 `siren-shell/1` ALPN 建立 Shell 连接 |
+| `MsgClean` | 请求无 payload；结果为 JSON，包含 `can_terminate`、`removed`、`scheduled` 和可选 `error` |
 | `MsgReloadConfig` | 可选 JSON；新版服务端请求 reload 后刷新能力，旧版空 payload 仍兼容 |
 
 ## 消息类型
@@ -68,10 +68,10 @@ type Message struct {
 | `MsgFile` | Client -> Server | `recon` 或 `upload` 的文件内容帧 |
 | `MsgRun` | Server -> Client / Client -> Server | 执行远程命令并返回输出 |
 | `MsgInfo` | Server -> Client / Client -> Server | 查询进程、端口或进程名相关信息 |
-| `MsgShell` | Server -> Client | 通知客户端连接临时 shell relay |
+| `MsgShell` | Server -> Client | 通知客户端通过主端口建立 Shell 连接 |
 | `MsgPortForward` | Server -> Client | 通知客户端为一次转发连接拨号目标服务 |
 | `MsgPortForwardData` | 双向 | 传输端口转发的数据分片 |
-| `MsgClean` | Server -> Client | 清理客户端痕迹并退出 |
+| `MsgClean` | 双向 | 下发清理请求；客户端回报清理结果后退出 |
 | `MsgReloadConfig` | Server -> Client | 重新加载客户端配置 |
 | `MsgPluginManage` | Server -> Client | 安装、卸载、更新或切换插件 |
 | `MsgPluginInvoke` | Server -> Client | 调用 command 类型插件 |
@@ -175,18 +175,18 @@ sequenceDiagram
     autonumber
     participant C as Client
     participant S as Server
-    participant R as Shell Relay
-    S-->>R: listen on ephemeral TLS port
-    S->>C: MsgShell [port:cols:rows]
-    C->>R: TLS connect
+    S->>C: MsgShell {token, cols, rows}
+    C->>S: TLS on main port, ALPN siren-shell/1
+    C->>S: single-use token
     C-->>C: start interactive shell
+    C->>S: startup status
     loop shell IO
-        R->>C: stdin bytes
-        C->>R: stdout / stderr bytes
+        S->>C: input or resize frame
+        C->>S: stdout / stderr bytes
     end
 ```
 
-`MsgShell` 只负责把 relay 端口和终端尺寸告诉客户端。真正的交互式输入输出不在主帧协议里传输，而是在临时 TLS relay 连接上直接转发。
+Shell 使用主监听端口（默认 TCP 443）上的独立 TLS 连接，不占用主控制通道。一次性 token 通过已认证的控制连接下发，Shell 连接先发送 token，再回报终端启动结果。输入与尺寸变更使用带长度的帧，输出为原始终端字节。主控制连接断开时，关联 Shell 一并关闭。本版不兼容旧 `port:cols:rows` 格式，服务端与客户端须一起升级。
 
 ### port forward
 

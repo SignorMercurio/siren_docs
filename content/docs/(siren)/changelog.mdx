@@ -10,6 +10,21 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.30.5 <DateTag>2026-09-15</DateTag>
+
+### Improvements
+
+- 交互式 Shell 共用服务端主 TLS 端口（默认 TCP 443），无需额外放通随机端口；支持终端尺寸同步、Tab 补全、方向键及全屏终端程序，启动失败会返回具体错误，连接关闭时清理关联会话
+- Configure egress 的默认 SIREN 回连规则收窄为 TCP 443；已有安全组中的宽泛规则不会自动移除，自定义监听端口需同步调整规则
+- Clean 会先停止当前任务和交互会话再删除文件，并向服务端回报清理结果；Windows 延迟删除与已完成删除分别记录，本地清理会拒绝删除 PID 文件指向仍在运行的另一客户端
+- Clients 行菜单在 Files 后新增 Recon，打开调查页面并选中该客户端，不自动开始采集；Investigations 三个工具标签增加图标
+
+### Bugfix
+
+- 修复从 Clients 打开 Recon 或进程分析时，调查页面原有标签与目标标签反复切换的问题
+
+**升级说明：** 本版 Shell 协议需要服务端与客户端一起升级，不兼容旧版 Shell 连接。端口转发仍保留；从外部访问其服务端监听端口时，需要单独放通该端口。
+
 ## v2.30.2 <DateTag>2026-09-14</DateTag>
 
 ### Bugfix
