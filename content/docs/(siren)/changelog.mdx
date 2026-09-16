@@ -10,6 +10,17 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.32.2 <DateTag>2026-09-16</DateTag>
+
+### Bug Fixes
+
+- Restore egress 对本次新建的专用安全组直接整组删除，不再依赖网卡和安全组引用的查询权限；删除前仍核对人工修改，删除失败时保留组内规则和恢复记录
+
+### Improvements
+
+- 优化 Provisioning 与恢复列表的布局、状态和进度展示，执行日志统一显示时间与级别，减少重复提示
+- 清理结果不再显示数量为零的延迟删除任务
+
 ## v2.32.1 <DateTag>2026-09-16</DateTag>
 
 ### Bug Fixes
