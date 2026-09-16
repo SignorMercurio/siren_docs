@@ -145,7 +145,15 @@ Clients 页面对应服务端 REPL 的 `ls`、`note`、`allow`、`deploy` 和 `c
 </Callout>
 
 <Callout title="Provisioning 输入与结果" type="info">
-  Allow access 每行填写一个客户端公网 IPv4 地址；Configure egress 和 Deploy SIREN 使用同一个 Alibaba Cloud UID，每行填写一个 Instance ID。部署可附带公网 IP 和备注，例如 `i-a`、`i-b,203.0.113.10`、`i-c,,web-1` 或 `i-d,203.0.113.11,db-1`。相同目标自动去重，同一实例的公网 IP 或备注冲突时需先修正。Allow access 和 Configure egress 逐项执行；部署默认并发 3 台，单个目标失败不会中断其他目标。
+  Allow access 每行填写一个客户端公网 IPv4 地址；Configure egress 和 Deploy SIREN 使用同一个 Alibaba Cloud UID，每行填写一个 Instance ID。部署可附带出口公网 IP 和备注，例如 `i-a`、`i-b,203.0.113.10`、`i-c,,web-1` 或 `i-d,203.0.113.11,db-1`。相同目标自动去重，同一实例的公网 IP 或备注冲突时需先修正。Allow access 和 Configure egress 逐项执行；部署默认并发 3 台，单个目标失败不会中断其他目标。
+</Callout>
+
+未填写出口 IP 时，部署先获取实例基本信息，再安装、启动客户端并执行一次最长 4 秒的连接探测。随后等待云防火墙日志，只有唯一确认公网出口后，才为该地址的 `/32` 和 SIREN 服务端口添加入方向规则。界面依次显示安装与探测、等待日志、放行和等待连接；日志一旦唯一匹配就立即放行，不等待固定窗口结束；日志迟迟未到时会超时失败。WebUI、REPL 和 MCP 使用同一流程。
+
+目标主机仍须能够下载客户端并向服务端发起连接。部署不会自动修改客户出方向策略。日志缺失、多个来源匹配、探测失败或身份校验失败时停止自动流程，失败信息会说明已经确认的安装状态。可填写经核对的出口 IPv4 重试，跳过自动发现。Windows 原生采集不可用的系统也应使用手填出口 IP，不需要安装第三方抓包驱动。
+
+<Callout title="动态出口" type="info">
+  单次探测只确认该次连接的出口。如果后续连接改用其他公网地址，客户端仍可能无法上线；SIREN 不会据此放行整个出口池。每次自动重试都会重新探测，不复用上次任务的证据。
 </Callout>
 
 操作结果逐项展示，重试只提交失败目标。部署成功以客户端实际连接为准；连接未确认或中途丢失部署结果时，先在 **Recent activity** 中核对，再决定是否重新部署。部署失败信息明确提示出口问题时，可以直接为相关目标 Configure egress。
