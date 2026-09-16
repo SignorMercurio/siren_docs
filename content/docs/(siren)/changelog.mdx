@@ -10,6 +10,13 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.32.1 <DateTag>2026-09-16</DateTag>
+
+### Bug Fixes
+
+- 修复 Configure egress 在 SOAR 执行成功、结果尚未返回时误报契约不匹配的问题；Configure、Restore 及重启后的状态核对会继续等待原执行结果
+- 等待超时后保留执行标识供核对，避免重复提交云端修改；剧本失败时展示实际错误
+
 ## v2.32.0 <DateTag>2026-09-16</DateTag>
 
 ### New Features
