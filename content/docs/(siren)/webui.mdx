@@ -134,7 +134,7 @@ Clients 页面对应服务端 REPL 的 `ls`、`note`、`allow`、`deploy` 和 `c
 - 分配 Project。Global 视图中可以把客户端分配到某个 Project，或移回未归属状态。
 - 打开快捷入口。从客户端行可直接进入 Files 或 Process Analysis。
 - 没有在线客户端时，页面会显示三步引导：部署客户端、等待连接、从客户端行开始排查。
-- 在页内 **Provisioning** 中执行 **Allow access**、**Configure egress** 或 **Deploy SIREN**，每次输入 1–20 个目标。
+- 在页内 **Provisioning** 中执行 **Allow access**、**Configure egress**、**Restore egress** 或 **Deploy SIREN**，每次输入 1–20 个目标。
 - 列表按设置的频率自动刷新，单机或批量部署结束后也会立即刷新一次。
 - 查看近期部署任务。页面刷新后仍可恢复当前进度和最近结果，进行中的任务每 2 秒更新一次。
 - 行操作菜单依次为 **Files → Recon → Process analysis → Clean & terminate**。Recon 会打开 Investigations 的 Recon 标签并选中该客户端，仍需选择 Profile 后手动执行。
@@ -142,6 +142,14 @@ Clients 页面对应服务端 REPL 的 `ls`、`note`、`allow`、`deploy` 和 `c
 
 <Callout title="配置 SIREN 出方向" type="info">
   对出方向默认拒绝的阿里云 ECS，可填写 UID 和 Instance ID 后点击 **Configure egress**。页内会展示即将应用的出方向规则，默认包括：`47.111.170.208/32` TCP 443 用于连接 SIREN 服务端，`47.79.65.205/32` TCP 443 用于下载客户端，`100.100.0.0/16` 全流量用于访问阿里云基础服务。执行后会创建或复用独立的 SIREN 安全组并挂载到实例，不会移除已有安全组；页面会显示 SOAR 进度以及最终的安全组 ID 和地域。已有宽泛放行规则不会自动收回；使用自定义服务端监听端口时，应同步调整服务端的出方向规则配置。
+</Callout>
+
+<Callout title="恢复出站规则" type="info">
+  在 **Restore egress** 中选择服务端保存的记录，每次最多恢复 20 个实例。恢复会撤销本次新增的关联和规则，还原调整过的 Drop 优先级；本次创建的专用组仅在空闲且未被修改时删除。原有配置及后续人工修改不会被整份覆盖；检测到冲突会保留记录并说明原因。
+
+  多实例共用的 Drop 规则等最后一个依赖实例结束后才恢复。在此之前显示 **Waiting for shared rules**。恢复记录不依赖客户端在线，页面刷新或服务端重启后仍保留；未解决记录持续保留，已恢复记录保留最近 20 条。旧操作没有恢复记录时不支持自动还原。
+
+  恢复可能切断客户端回连，需要清理客户端时先执行 Clean，再手动恢复。Clean 回报文件已清理或已安排删除后，页面会为匹配的恢复记录提供快捷入口，不自动执行。**Verify status** 用于核对执行是否结束及当前放行状态；SOAR 执行尚未结束或提交结果不明时禁止重复修改。恢复依据不完整时保留资源并提示人工检查。
 </Callout>
 
 <Callout title="Provisioning 输入与结果" type="info">
@@ -158,7 +166,7 @@ Clients 页面对应服务端 REPL 的 `ls`、`note`、`allow`、`deploy` 和 `c
 
 操作结果逐项展示，重试只提交失败目标。部署成功以客户端实际连接为准；连接未确认或中途丢失部署结果时，先在 **Recent activity** 中核对，再决定是否重新部署。部署失败信息明确提示出口问题时，可以直接为相关目标 Configure egress。
 
-执行期间请保持浏览器页面打开。部署记录可在刷新页面后恢复；Allow access 和 Configure egress 的逐项结果仅保留在当前页面。Recent activity 合并展示近期部署和清理记录，进行中的记录优先排列；部署记录可展开查看日志。近期部署最多保留 20 次，终态记录最长保留 30 分钟，服务端重启后清空。
+执行期间请保持浏览器页面打开。部署记录可在刷新页面后恢复；Allow access 的逐项结果仅保留在当前页面；Configure egress 和 Restore egress 的恢复记录保存于服务端，云端操作启动后不因浏览器断开而取消。Recent activity 合并展示近期部署和清理记录，进行中的记录优先排列；部署记录可展开查看日志。近期部署最多保留 20 次，终态记录最长保留 30 分钟，服务端重启后清空。
 
 <Callout title="需要手工确认客户端" type="warning">
   客户端稳定身份缺失、冲突或与目标来源 IP 不一致时，SIREN 不会回退为按 IP 猜测，也不会写入无法确认的 Project 或 Note。部署会显示 `manual_required`，请在 Clients 列表中核对主机后手工设置；页面不会提供自动重试，以免重复部署。
