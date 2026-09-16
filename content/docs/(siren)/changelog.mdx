@@ -10,6 +10,12 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.32.3 <DateTag>2026-09-16</DateTag>
+
+### Improvements
+
+- 客户端启动后前 60 秒内，首次连接失败后以 2 秒间隔重试，减少自动部署放行后的上线等待；首次连接成功或窗口结束后恢复原有退避策略
+
 ## v2.32.2 <DateTag>2026-09-16</DateTag>
 
 ### Bug Fixes
