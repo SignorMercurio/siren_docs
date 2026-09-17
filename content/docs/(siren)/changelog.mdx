@@ -10,6 +10,19 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.32.4 <DateTag>2026-09-17</DateTag>
+
+### Improvements
+
+- AIR GUI 支持在空闲时通过状态栏切换模型；Codex 可调整模型支持的推理强度，Pi 可选择已配置模型
+- Pi 新会话沿用操作者的思考默认设置，恢复会话时保留已选模型和思考等级
+
+### Bug Fixes
+
+- 修复 Qoder GUI 已结束的文字段落仍显示闪动光标的问题，光标仅跟随当前输出段落
+- 修复 Codex GUI 模型切换所需能力声明，避免切换请求被拒绝
+- 统一侧栏条目在有无数量标记时的高度，减少布局跳动
+
 ## v2.32.3 <DateTag>2026-09-16</DateTag>
 
 ### Improvements
