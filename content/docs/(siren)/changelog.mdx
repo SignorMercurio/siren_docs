@@ -10,6 +10,19 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.32.8 <DateTag>2026-09-21</DateTag>
+
+### Bug Fixes
+
+- 修复 SOAR 明确限流拒绝被误判为提交结果未知、阻塞同账号出站规则恢复的问题；保留网络超时等不确定结果的重复提交保护
+- 恢复失败时指出实际阻塞的实例、操作和步骤，避免将其他实例的异常误认为当前实例的问题
+
+### Improvements
+
+- Restore egress 移除常驻 Verify 按钮，仅对有执行 ID 的未决步骤提供 **Recheck execution**；缺少执行 ID 时提示人工核对，正常记录保留恢复操作
+- 重新查询只核对当前记录，恢复前仍检查同账号未完成的云端操作
+- 调整恢复列表的窄屏布局，避免实例 ID 被挤成竖排
+
 ## v2.32.4 <DateTag>2026-09-17</DateTag>
 
 ### Improvements
