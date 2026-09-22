@@ -14,6 +14,8 @@ import { Users, Terminal, Brain, Files, FolderKanban, FolderTree, Lock, Plug, Ke
 
 Web 控制台是 SIREN Server 的浏览器入口。它覆盖日常远程操作：Project 工作区、客户端列表、浏览器 Shell、Agentic IR、调查任务、文件管理、Artifacts、服务端日志、Dossier 和全局设置。需要在控制主机终端里直接操作时，可以改用 [服务端 REPL](/remote)。
 
+桌面侧栏默认显示图标，悬停或键盘聚焦时可查看名称。使用展开／折叠按钮切换导航宽度，选择会保存在当前浏览器；移动端继续使用完整抽屉导航。
+
 ## 启动与访问
 
 启用 `webui.enabled` 时，Web 控制台会随 `siren_server` 启动，并与远程客户端和 MCP 共用主 TLS 监听端口（默认 `0.0.0.0:443`）：
@@ -197,6 +199,10 @@ Agentic IR 页面通过 Codex、Claude Code、Pi 或 Qoder 完成 [Agentic 应�
 </Callout>
 
 GUI 以时间线交错展示 Agent 回复原文与聚合折叠的操作记录，计划、审批和提问出现在对应位置；输入框下方的状态条显示模型、上下文占用和 Provider 额度。支持模型切换的 Provider 可在空闲时点击状态条中的模型名称选择模型；Codex 还可调整当前模型支持的推理强度。Pi 列出服务器已配置的模型，新会话沿用操作者的思考默认设置，恢复会话保留之前的模型和思考等级。时间线支持 Cmd/Ctrl+F 检索与过滤，并可从状态条把当前会话导出为 Markdown。Agent 运行时仍可发送补充要求调整后续方向，也可以单独停止当前工作；调整方向不会撤销已经完成的命令、文件修改或远程操作。GUI 与 Terminal 都支持直接粘贴 PNG、JPEG、WebP 和 GIF 图片，单张最多 8 MiB、一次最多 4 张；SIREN 负责把图片转交给 Provider，具体模型能否识别由 Provider 和模型决定。Terminal 保留原有 PTY 行为。两种会话都托管在服务端，刷新浏览器或切换页面后可以重新接入并回放，进程不会因为页面离开而中断。所有入口都会使用 SIREN MCP，因此需要启用 [MCP 服务](/mcp#启用与访问)。Project 视图使用项目级 MCP，Global 视图使用全局 MCP；工作目录、历史恢复和 MCP 作用域规则见 [Agentic 应急响应](/air#webui-air)。
+
+GUI 回复中的编号脚注可点击打开来源卡片，查看证据摘要、数据来源、采集时间和原文入口；每条回复下方的 **Sources** 可展开全部来源。文件链接始终打开该会话所属 Project 的 Artifacts。Agent 会优先引用已有 Recon 报告、JSONL 等材料，并在现有权限允许时将重要的临时命令或查询原文保存到工作区的 `evidence/`。材料未取得、无法定位或保存失败时，来源说明会标明缺口。来源由 Agent 提供，卡片不自动认证证据真实性。
+
+Markdown 报告中的证据链接按报告所在目录解析，限定在同一工作区内。会话导出保留标准 Markdown 脚注，并区分各条消息的编号；历史消息不会自动补齐来源。
 
 ### Investigations
 
