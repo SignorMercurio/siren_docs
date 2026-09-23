@@ -89,7 +89,7 @@ Web 控制台使用 Session Cookie 鉴权。账号密码存储在 SQLite 数据�
 
 ## 功能页面
 
-左侧导航按用途分为四组：**Respond**（Clients、Agentic IR）、**Tools**（Shells、Files、Investigations）、**Evidence**（Artifacts、Dossier）和 **System**（Logs）。每个页面都有自己的 URL，例如 `#/investigations/recon` 或 `#/artifacts/<路径>?project=<id>`；刷新、浏览器前进后退和分享链接都会回到同一页面、同一工具标签、同一 AIR 会话或同一选中文件，浏览器标签页标题也随页面变化。
+左侧导航按用途分为四组：**Respond**（Clients、Agentic IR）、**Tools**（Shells、Files、Investigations）、**Evidence**（Artifacts、Reports）和 **System**（Logs）。每个页面都有自己的 URL，例如 `#/investigations/recon` 或 `#/artifacts/<路径>?project=<id>`；刷新、浏览器前进后退和分享链接都会回到同一页面、同一工具标签、同一 AIR 会话或同一选中文件，浏览器标签页标题也随页面变化。
 
 <Cards>
   <Card title="Projects" icon={<FolderKanban />}>按应急响应项目隔离客户端、Artifacts 和调查上下文</Card>
@@ -100,7 +100,7 @@ Web 控制台使用 Session Cookie 鉴权。账号密码存储在 SQLite 数据�
   <Card title="Files" icon={<Files />}>浏览、预览、下载和上传客户端文件</Card>
   <Card title="Artifacts" icon={<FolderTree />}>管理服务端取证文件和报告</Card>
   <Card title="Logs" icon={<ScrollText />}>查看服务端运行日志，按级别、组件和关键词过滤</Card>
-  <Card title="Dossier" icon={<BookOpenText />}>编辑 Markdown 应急报告</Card>
+  <Card title="Reports" icon={<BookOpenText />}>列出当前范围内的 Dossier 应急报告，并在 Dossier 中打开编辑</Card>
   <Card title="Settings" icon={<Settings />}>调整浏览器偏好，查看服务端与 AIR Provider 状态</Card>
 </Cards>
 
@@ -276,21 +276,24 @@ MCP `run` 会写入共享 `audit_id` 的 `mcp.run.requested` 和 `mcp.run.finish
   Logs 页面不区分角色：任何已登录用户都能查看服务端日志，其中包含来访 IP、用户名、客户端地址，以及 MCP `run` 的完整命令和有界返回结果等敏感信息。日志与 Project 无关，始终显示全局内容。大量远程命令输出也会增加内存占用；可按操作量调低 `logging.bufferSize`，设为 `0` 则完全关闭该页面。
 </Callout>
 
-### Dossier
+### Reports
 
-Dossier 是独立的 Markdown 报告编辑器，有两种打开方式：
+Reports 页面列出当前范围内符合 Dossier 规范的 Markdown 应急报告。Global 视图汇总服务端工作目录和所有 Project 目录，并显示每份报告所属的 Project；Project 视图只列出该 Project 目录内的报告。
 
-- 从左侧导航点击 **Dossier**，打开只读的默认模板 `webui.dossierDir/report.md`。可以查看和试改，但不能保存回该模板；即使当前处于 Project 视图，也不会自动切换到 Project 目录下的 `report.md`。
-- 在 Artifacts 中选中 `.md` 报告后，点击 Dossier 按钮编辑该报告。如果当前是 Project 视图，报告文件和粘贴资源会保留在 Project 目录内。
+- 只有 frontmatter 同时包含 `date`、`sir-seq`、`version` 和 `client` 的 `.md` 文件会被列出，Recon 派生报告和普通笔记不会混入。表格显示客户名称、文件路径、服务编号、版本和修改时间，按报告日期倒序排列。
+- 扫描只在首次进入某个范围时执行一次，之后不会自动刷新；新建或修改报告后点击 **Rescan** 重新扫描。扫描跳过隐藏目录、`node_modules`、`.assets` 资源目录和符号链接，并限制深度与条目数，超出时显示 **partial scan**。
+- 点击行尾 **Open in Dossier** 在新标签页中打开该报告编辑；Project 报告会保留在其 Project 目录内。
+- 点击 **Blank template** 以只读方式打开默认模板 `webui.dossierDir/report.md`。可以查看和试改，但不能保存回该模板；实际报告需在 Artifacts 中创建 `.md` 文件后进入 Dossier 保存。
 
-Dossier 未部署、路径配置错误或默认 `report.md` 缺失时，Web 控制台会显示错误提示，但不影响其他功能。
+Dossier 是独立的 Markdown 报告编辑器，也可以在 Artifacts 中选中 `.md` 报告后点击 Dossier 按钮打开。Dossier 未部署、路径配置错误或默认 `report.md` 缺失时，Reports 页面仍会列出报告，但会显示错误提示并禁用打开按钮，不影响其他功能。
 
 详细部署、配置、语法和编辑流程见 [Dossier 文档](/dossier)。
 
 <Callout title="常见问题" type="warn">
-  - 点击 Dossier 后提示不可用：通常是 Dossier 编辑器文件未部署，或 `webui.dossierDir` 指向了错误目录。
-  - 点击 Dossier 后提示默认报告不可用：确认 `webui.dossierDir/report.md` 存在。`webui.dossierDir` 可以使用绝对路径，也可以放在 `siren_server` 工作目录外。
-  - 需要保存报告：先在 Artifacts 中创建或选择实际的 `.md` 报告，再从该文件进入 Dossier；左侧入口的默认模板不能被覆盖。
+  - Reports 页面提示 Dossier 不可用：通常是 Dossier 编辑器文件未部署，或 `webui.dossierDir` 指向了错误目录。
+  - **Blank template** 不可用：确认 `webui.dossierDir/report.md` 存在。`webui.dossierDir` 可以使用绝对路径，也可以放在 `siren_server` 工作目录外。
+  - 报告没有出现在 Reports 中：确认文件以 `.md` 结尾、frontmatter 位于文件开头且四个字段齐全，然后点击 **Rescan**。
+  - 需要保存报告：先在 Artifacts 中创建或选择实际的 `.md` 报告，再从该文件或 Reports 页面进入 Dossier；默认模板不能被覆盖。
   - Artifacts 中没有 Dossier 按钮：只有 `.md` 报告支持在 Dossier 中编辑。
   - 旧 HTML 报告无法直接预览：Artifacts 不再内置 HTML 预览，可下载后查看；新的应急报告建议使用 Markdown。
 </Callout>

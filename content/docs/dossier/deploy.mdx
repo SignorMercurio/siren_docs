@@ -11,7 +11,7 @@ Dossier 是静态浏览器应用。部署到 SIREN 时，只需要把构建后�
 
 ## SIREN WebUI 部署
 
-示例配置从 `/opt/siren/dossier` 读取 Dossier 编辑器文件，并把 `/opt/siren/dossier/report.md` 作为左侧 Dossier 入口的默认报告。
+示例配置从 `/opt/siren/dossier` 读取 Dossier 编辑器文件，并把 `/opt/siren/dossier/report.md` 作为 Reports 页面 **Blank template** 打开的默认报告。
 
 <Steps>
 <Step>
@@ -52,7 +52,7 @@ webui:
   dossierDir: /opt/siren/dossier
 ```
 
-修改后重启 `siren_server`，再从 WebUI 左侧点击 **Dossier**。
+修改后重启 `siren_server`，再在 WebUI **Reports** 页面点击 **Blank template**。
 
 `dossierDir` 本身可以是符号链接，便于切换部署版本；目录内供浏览器访问的资源必须是实际文件。静态服务会拒绝根目录以下的符号链接、隐藏路径和特殊文件，并禁止目录列表。报告源文件也必须是普通文件。
 

@@ -22,7 +22,7 @@ webui:
 | --- | --- |
 | `webui.dossierDir` | Dossier 编辑器文件目录。可以是绝对路径，也可以位于 `siren_server` 工作目录外 |
 
-配置后，WebUI 左侧 Dossier 入口会打开该目录下的 `report.md` 作为默认报告，静态文件通过 `/dossier/` 路径提供。
+配置后，WebUI Reports 页面的 **Blank template** 会打开该目录下的 `report.md` 作为默认报告，静态文件通过 `/dossier/` 路径提供。
 
 ## 可用性检查
 
@@ -30,7 +30,7 @@ WebUI 会通过 `/api/dossier/status` 检查：
 
 - `webui.dossierDir` 已配置
 - 目录下存在 `index.html`
-- 目录下存在 `report.md`（左侧 Dossier 默认入口所需；Artifacts 打开的其他 `.md` 报告只需要 Dossier 运行时可用）
+- 目录下存在 `report.md`（Reports 页面 **Blank template** 所需；Artifacts 打开的其他 `.md` 报告只需要 Dossier 运行时可用）
 
 如果 Dossier 未部署、路径配置错误或默认报告缺失，WebUI 会显示错误提示，不影响 Clients、Shells、AIR、Artifacts 等其他功能。
 
@@ -45,7 +45,7 @@ SIREN 中的 Dossier 报告源文件必须以 `.md` 结尾。WebUI 对报告源�
 - 保存前会检查 `/api/auth/check`。登录过期、鉴权接口缺失或反向代理未转发该接口时，Dossier 会阻止保存正文和粘贴图片。
 
 <Callout title="默认报告边界" type="info">
-  默认 Dossier 报告可以位于服务端工作目录外，但必须在 `webui.dossierDir` 目录内。即使当前处于 WebUI Project 视图，左侧 Dossier 入口也不会自动改成 Project 目录下的 `report.md`。SIREN 会解析符号链接，阻止默认报告逃逸到 Dossier 目录外。
+  默认 Dossier 报告可以位于服务端工作目录外，但必须在 `webui.dossierDir` 目录内。即使当前处于 WebUI Project 视图，**Blank template** 也不会自动改成 Project 目录下的 `report.md`。SIREN 会解析符号链接，阻止默认报告逃逸到 Dossier 目录外。
 </Callout>
 
 ## 附件目录
