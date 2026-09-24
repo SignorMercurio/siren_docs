@@ -14,7 +14,7 @@ import { Users, Terminal, Brain, Files, FolderKanban, FolderTree, Lock, Plug, Ke
 
 Web 控制台是 SIREN Server 的浏览器入口。它覆盖日常远程操作：Project 工作区、客户端列表、浏览器 Shell、Agentic IR、调查任务、文件管理、Artifacts、服务端日志、Dossier 和全局设置。需要在控制主机终端里直接操作时，可以改用 [服务端 REPL](/remote)。
 
-桌面侧栏默认显示图标，悬停或键盘聚焦时可查看名称。使用展开／折叠按钮切换导航宽度，选择会保存在当前浏览器；移动端继续使用完整抽屉导航。
+桌面侧栏默认显示图标，悬停或键盘聚焦时可查看名称。使用侧栏顶部的展开／折叠按钮切换导航宽度：折叠后悬停顶部的 SIREN 标志即可展开；也可以按 Cmd+B（macOS）或 Ctrl+B 切换，焦点在输入框或终端内时快捷键不生效。选择会保存在当前浏览器；移动端继续使用完整抽屉导航。
 
 ## 启动与访问
 
@@ -258,7 +258,7 @@ Logs 页面显示服务端运行日志，内容与启动 `siren_server` 的终�
 页面提供：
 
 - 关键词搜索。匹配日志正文和所有结构化字段值，例如直接搜索客户端 ID、IP 或事件名。
-- 级别过滤。Debug、Info、Warning、Error 可多选；不选表示全部。
+- 级别过滤。Debug、Info、Warning、Error 可多选；**All** 表示不限级别，点击可清除已选级别。
 - 组件过滤。下拉选项来自当前缓冲区中实际出现过的组件，例如 `server`、`webui`、`client`、`mcp`。
 - Live / Pause。Live 时约每 3 秒追加新日志，已滚动到底部会自动跟随；向上翻阅时不会被打断。Pause 后停止拉取，恢复 Live 会从暂停位置继续。
 - 复制和下载当前列表内容，便于附到工单或报告中。
