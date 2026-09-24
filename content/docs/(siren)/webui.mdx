@@ -282,7 +282,7 @@ Reports 页面列出当前范围内符合 Dossier 规范的 Markdown 应急报�
 
 - 只有 frontmatter 同时包含 `date`、`sir-seq`、`version` 和 `client` 的 `.md` 文件会被列出，Recon 派生报告和普通笔记不会混入。表格显示客户名称、文件路径、服务编号、版本和修改时间，按报告日期倒序排列。
 - 扫描只在首次进入某个范围时执行一次，之后不会自动刷新；新建或修改报告后点击 **Rescan** 重新扫描。扫描跳过隐藏目录、`node_modules`、`.assets` 资源目录和符号链接，并限制深度与条目数，超出时显示 **partial scan**。
-- 点击行尾 **Open in Dossier** 在新标签页中打开该报告编辑；Project 报告会保留在其 Project 目录内。
+- 点击行尾 **Open in Artifacts** 跳转到 Artifacts 页面查看该报告，左侧文件树会展开并选中对应文件；点击 **Open in Dossier** 在新标签页中打开该报告编辑，Project 报告会保留在其 Project 目录内。
 - 点击 **Blank template** 以只读方式打开默认模板 `webui.dossierDir/report.md`。可以查看和试改，但不能保存回该模板；实际报告需在 Artifacts 中创建 `.md` 文件后进入 Dossier 保存。
 
 Dossier 是独立的 Markdown 报告编辑器，也可以在 Artifacts 中选中 `.md` 报告后点击 Dossier 按钮打开。Dossier 未部署、路径配置错误或默认 `report.md` 缺失时，Reports 页面仍会列出报告，但会显示错误提示并禁用打开按钮，不影响其他功能。

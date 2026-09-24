@@ -10,6 +10,17 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.33.2 <DateTag>2026-09-24</DateTag>
+
+### Improvements
+
+- Reports 行尾新增 **Open in Artifacts**，跳转到 Artifacts 页面查看该报告并展开、选中文件树中的对应文件
+- Reports、Projects、Investigations 等页面取消最大宽度限制，在宽屏上撑满工作区；Settings 保持窄栏
+
+### Fixes
+
+- Artifacts 通过链接或跨页跳转打开文件时，文件树现在会展开到该文件所在目录，且不再保留上一次手动点击的高亮；从 Reports 连续打开不同文件不再回退到上一个文件
+
 ## v2.33.1 <DateTag>2026-09-24</DateTag>
 
 ### Improvements
