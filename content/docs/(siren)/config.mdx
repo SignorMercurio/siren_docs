@@ -55,9 +55,9 @@ plugins:
 | `server` | string | `127.0.0.1` | 远程模式下连接的服务端地址 |
 | `port` | int | `443` | 远程模式下连接的服务端端口 |
 | `recon.commandTimeout` | int | `30` | Recon 单个 source 命令和客户端远程命令执行的基础超时时间（秒）；MCP / AIR 慢命令建议服务端也设置相同值 |
-| `recon.collectionTimeout` | int | `270` | 客户端完成整个 Recon Profile 的总预算（秒）；远程 v2 请求会取该值与服务端下发预算中的较小值 |
-| `recon.defaultProfile` | string | `default` | 本地命令未传 `--profile` 或远程入口未指定 Profile 时使用的名称 |
-| `recon.profiles.<name>` | list | 见示例 | 命名的模块集合；只选择采集模块，不覆盖超时、资源上限或分析逻辑。`default` 为标准完整采集，`quick` 只移除 `file`，`hunt` 额外采集应用拓扑、运行载荷供应链、配置、近期应用活动和凭据证据 |
+| `recon.collectionTimeout` | int | `270` | 客户端完成整个 Recon Profile 的总预算（秒）；远程请求会取该值与服务端下发预算中的较小值 |
+| `recon.defaultProfile` | string | 必填（示例为 `default`） | 本地命令未传 `--profile` 或远程入口未指定 Profile 时使用的名称 |
+| `recon.profiles.<name>` | list | 必填，见示例 | 命名的模块集合；只选择采集模块，不覆盖超时、资源上限或分析逻辑。`default` 为标准完整采集，`quick` 只移除 `file`，`hunt` 额外采集应用拓扑、运行载荷供应链、配置、近期应用活动和凭据证据 |
 | `oss.region` | string | - | OSS Bucket 所在地域 |
 | `oss.bucketName` | string | - | OSS Bucket 名称 |
 | `oss.objectPath` | string | `tmp/siren_upload` | 本地 `siren upload` 的 OSS 路径前缀 |
@@ -66,7 +66,7 @@ plugins:
 | `plugins.<name>` | bool | - | 启用或禁用插件，command 与 recon 类型统一使用该开关 |
 Profile 名必须匹配 `^[a-z][a-z0-9_-]{0,63}$`。每个 Profile 包含 1 到 64 个不重复模块；未知模块会使配置加载失败。`Basic` 始终执行，不写入列表。recon 插件以 `plugin:<name>` 引用，例如 `custom: [user, process, plugin:collector]`；插件缺失或被 `plugins.<name>` 禁用时，采集开始前会失败。
 
-没有 `recon.profiles` 的旧配置会把已启用的传统 `recon.<module>` 与旧式 recon 插件合成为唯一的 `default`，并记录迁移提示。`topology`、`supplychain`、`config`、`activity` 和 `credential` 属于 opt-in 采集，不会被旧配置或无配置 fallback 自动启用；Linux 与 Windows 的内置 `hunt` 会显式包含这些模块。Linux 的 `rootkit` 仍保留在 `default`、`quick` 和用户自定义 Profile 中，但不进入 `hunt`。新旧结构同时存在时，以 Profile 为准，旧键被忽略。旧配置中残留的 `rules` 不影响启动，但会记录一次已忽略提示；这些规则不再参与 Recon。无效的远程 `reload` 会保留当前配置与上一个有效 Profile 快照。客户端配置正在被 Recon 或其他操作使用时，重载会提示稍后重试。
+`recon.profiles` 与 `recon.defaultProfile` 为必填项，`recon.defaultProfile` 必须指向已定义的 Profile；缺失或无效时客户端拒绝启动，不再从传统 `recon.<module>` 开关或插件启停状态推导 `default`。`topology`、`supplychain`、`config`、`activity` 和 `credential` 属于 opt-in 采集，只有被 Profile 显式引用时才会执行；Linux 与 Windows 的内置 `hunt` 会显式包含这些模块。Linux 的 `rootkit` 仍保留在 `default`、`quick` 和用户自定义 Profile 中，但不进入 `hunt`。残留的 `recon.<module>` 开关和 `rules` 不再生效。无效的远程 `reload` 会保留当前配置与上一个有效 Profile 快照。客户端配置正在被 Recon 或其他操作使用时，重载会提示稍后重试。
 
 ## 服务端配置
 
@@ -92,6 +92,21 @@ webui:                                          # Web 控制台
 recon:
   responseTimeout: 300                          # 所有远程 Recon 入口等待客户端的秒数
 
+egress:
+  rules:                                        # 必填：Configure egress 下发的出方向放行规则
+    - purpose: siren_server_callback            # 客户端回连 SIREN 服务端
+      ipProtocol: TCP
+      destCidrIp: 47.111.170.208/32
+      portRange: 443/443
+    - purpose: siren_client_download            # 下载客户端
+      ipProtocol: TCP
+      destCidrIp: 47.79.65.205/32
+      portRange: 443/443
+    - purpose: alibaba_cloud_infrastructure     # 阿里云基础服务
+      ipProtocol: ALL
+      destCidrIp: 100.100.0.0/16
+      portRange: -1/-1
+
 mcp:
   enabled: true                                 # 是否启用 MCP 服务
   runOutputMode: auto                          # run 长结果默认返回 auto 预览；full 返回完整有界结果
@@ -110,7 +125,7 @@ air:
   replayBufferBytes: 4194304                   # 每个会话的断线回放上限（字节）
   prompt: 启动安全应急响应，UID：%s，...        # 告警事件模式的 prompt 模板
   customPromptPrefix: 在 SIREN Client %d 上...  # 自定义 prompt 模式的前缀
-  # providers.<name> 用于 WebUI AIR 和 Manual 裸终端；服务端 REPL air 固定使用 Claude
+  # providers.<name> 用于 WebUI AIR 的 GUI 与 Terminal 会话
   providers:
     claude:
       cliPath: claude                          # Claude Code CLI 路径
@@ -146,16 +161,17 @@ air:
 | `webui.userDBPath` | string | `data/users.db` | WebUI 用户 SQLite 数据库路径（相对路径基于启动 CWD） |
 | `webui.dossierDir` | string | -（示例配置为 `/opt/siren/dossier`） | Dossier 编辑器文件目录，可位于服务端工作目录外；Reports 页面的 **Blank template** 以只读模板方式打开该目录下的 `report.md`，实际报告需从 Artifacts 或 Reports 进入后保存。目录留空、不可用或默认报告不可访问时，WebUI 会提示错误。详见 [Dossier 配置](/dossier/config) |
 | `webui.projectsBaseDir` | string | `""`（服务端当前工作目录） | WebUI Project 目录创建基准路径。创建 Project 时只允许在该目录下创建一个 basename 子目录；Project 重命名不会移动目录，删除 Project 只删除元数据并保留目录文件 |
-| `recon.responseTimeout` | int | `300` | REPL、WebUI 和 MCP 等远程 Recon 入口等待客户端结果的最长时间（秒）；旧 `mcp.reconTimeout` 仍作为兼容回退 |
+| `recon.responseTimeout` | int | `300` | REPL、WebUI 和 MCP 等远程 Recon 入口等待客户端结果的最长时间（秒）；`mcp.reconTimeout` 已移除，残留时不会生效 |
+| `egress.rules` | list | 必填，见示例 | WebUI **Configure egress** 下发的出方向放行规则，1 到 20 条。每条包含 snake_case `purpose`、`ipProtocol`（`TCP`、`UDP`、`ICMP`、`GRE` 或 `ALL`）、IPv4 `destCidrIp` 和 `portRange`（`ICMP`、`GRE`、`ALL` 须为 `-1/-1`）；`purpose` 与规则不能重复。部署依赖其中单端口 TCP 的 `siren_server_callback` 规则确定入方向放行的服务端口，未填写出口 IP 时还用它核对出口探测。启用 WebUI 时缺失或无效会使服务端拒绝启动，不再回退到内置默认规则 |
 | `mcp.enabled` | bool | `true` | 是否启用 [MCP 服务](/mcp)，独立于 `webui.enabled` |
-| `mcp.runOutputMode` | string | `auto` | MCP `run` 默认输出模式：`auto` 对超过 8 KiB 的结果返回可恢复首尾预览，`full` 返回客户端 50 KiB 上限内的完整结果；单次调用可用 `output_mode` 覆盖 |
+| `mcp.runOutputMode` | string | `auto` | MCP `run` 默认输出模式：`auto` 对超过 8 KiB 的结果返回可恢复首尾预览，`full` 在 50 KiB 内返回完整结果，超出时仍返回预览；单次调用可用 `output_mode` 覆盖 |
 | `mcp.cmdBlacklist` | list | 见 [MCP 集成](/mcp#命令黑名单) | MCP `run` 工具的命令黑名单，值为正则表达式列表 |
-| `air.provider` | string | `codex` | WebUI AIR 默认 Provider，可选 `codex`、`claude`、`qoder` 或 `pi`；页面中也可在每次启动会话时选择。服务端 REPL 的 `air` 命令固定使用 Claude Provider 配置 |
+| `air.provider` | string | `codex` | WebUI AIR 默认 Provider，可选 `codex`、`claude`、`qoder` 或 `pi`；页面中也可在每次启动会话时选择 |
 | `air.maxSessions` | int | `20` | WebUI GUI 与 Terminal 合计最大并发会话数；适用于 Manual、Custom、Event 和 Resume，设为 `0` 或负数表示不限制 |
 | `air.replayBufferBytes` | int | `4194304` | 每个会话用于断线重连的回放预算；Terminal 按原始输出字节、GUI 按序列化事件字节计算，设为 `0` 或负数时使用默认的 4 MiB |
-| `air.prompt` | string | 见示例配置 | 告警事件模式下的 prompt 模板，依次填入 `%s` UID、`%s` 安全中心告警 ID、`%d` Client ID（告警 ID 即 `air` 命令的 Security Center Alert ID，详见 [Agentic 应急响应](/air)） |
+| `air.prompt` | string | 见示例配置 | 告警事件模式下的 prompt 模板，依次填入 `%s` UID、`%s` 安全中心告警 ID、`%d` Client ID（告警 ID 即 WebUI Event 模式中的安全中心告警 ID，详见 [Agentic 应急响应](/air)） |
 | `air.customPromptPrefix` | string | 见示例配置 | 自定义 prompt 模式下的前缀（支持 `%d` Client ID） |
-| `air.providers.claude.cliPath` | string | `claude` | WebUI Claude Provider 和服务端 REPL `air` 命令使用的 Claude Code CLI 路径 |
+| `air.providers.claude.cliPath` | string | `claude` | WebUI Claude Provider 使用的 Claude Code CLI 路径 |
 | `air.providers.claude.args` | list | `[]` | 传递给 Claude CLI 的额外参数 |
 | `air.providers.codex.cliPath` | string | `codex` | WebUI Codex Provider 使用的 Codex CLI 路径 |
 | `air.providers.codex.args` | list | `[--no-alt-screen]` | 传递给 Codex CLI 的额外参数；默认使用 inline TUI 保留浏览器终端滚动历史，自定义时可移除该参数恢复 Codex 的 alternate screen 行为 |

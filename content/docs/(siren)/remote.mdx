@@ -46,7 +46,7 @@ REPL 适合已经登录控制主机、需要在终端里直接操作的场景。
 | Client ID  | Client OS  | Instance ID             | Private IP   | Hostname   | Client Address       | Note         | Plugins          | Recon Profiles         |
 +------------+------------+-------------------------+--------------+------------+----------------------+--------------+------------------+------------------------+
 | 0          | Linux      | i-bp1example0001        | 10.0.1.10    | web-1      | 203.0.113.10:33724   | -            | jdump,chkrootkit | default*,quick         |
-| 1          | Linux      | -                       | 10.0.1.11    | db-1       | 198.51.100.5:42180   | web01        | -                | legacy default         |
+| 1          | Linux      | -                       | 10.0.1.11    | db-1       | 198.51.100.5:42180   | web01        | -                | default*,quick,hunt    |
 +------------+------------+-------------------------+--------------+------------+----------------------+--------------+------------------+------------------------+
 ```
 
@@ -104,7 +104,7 @@ Linux victim 5.15.0-91-generic #101-Ubuntu SMP x86_64 GNU/Linux
   </Accordion>
 </Accordions>
 
-单条命令的返回内容有大小限制，超过约 50 KiB 时会被截断。长输出建议写入文件后用 WebUI Files 下载，或通过 `upload` 保存到 [Artifacts](/analysis/upload) 查看。
+单条命令在 REPL 中最多显示前 50 KiB 输出，超出部分会被截断并附带截断提示。长输出建议写入文件后用 WebUI Files 下载，或通过 `upload` 保存到 [Artifacts](/analysis/upload) 查看。
 
 ## 更多功能
 

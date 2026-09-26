@@ -14,7 +14,7 @@ SIREN 的功能可以按应急响应流程理解：接入目标主机，收集�
 <Cards>
     <Card title="本地与远程模式" icon={<Radio />} href="/index#模式选择">本地模式适合离线单机排查；远程模式通过 SIREN Server 管理在线客户端</Card>
     <Card title="自动化信息收集" icon={<Info />} href="/recon">生成有明确范围和上限的 JSONL 主机快照与派生 Markdown</Card>
-    <Card title="服务端 REPL" icon={<Terminal />} href="/remote">在控制主机终端管理客户端、执行命令、打开 Shell 和启动 AIR</Card>
+    <Card title="服务端 REPL" icon={<Terminal />} href="/remote">在控制主机终端管理客户端、执行命令和打开 Shell</Card>
     <Card title="Web 控制台" icon={<LayoutDashboard />} href="/webui">通过浏览器管理 Projects、Clients、Shells、Investigations、Files、Artifacts 和 Reports</Card>
     <Card title="Projects 工作区" icon={<FolderKanban />} href="/webui#projects">按应急响应项目隔离客户端、操作目标、AIR 工作目录和取证目录</Card>
     <Card title="部署与放行" icon={<Rocket />} href="/index#内部环境通过云助手一键部署">通过云助手部署客户端，或使用 `allow` 放行目标主机出口 IP</Card>
@@ -22,7 +22,7 @@ SIREN 的功能可以按应急响应流程理解：接入目标主机，收集�
 
 ## 自动化信息收集
 
-Recon 会在目标主机上采集客观状态。基础信息始终采集，其他模块由命名 Profile 组合；`default` 标准完整采集，`quick` 只跳过文件模块，显式 opt-in 的 `hunt` 生成面向 Agent 的当前主机安全审计快照。新客户端优先使用结构化 Snapshot JSONL v2；Profile 不承载分析规则或结论，工具缺失、失败和截断会明确进入快照状态。
+Recon 会在目标主机上采集客观状态。基础信息始终采集，其他模块由命名 Profile 组合；`default` 标准完整采集，`quick` 只跳过文件模块，显式 opt-in 的 `hunt` 生成面向 Agent 的当前主机安全审计快照。Recon 使用结构化 Snapshot JSONL v2；Profile 不承载分析规则或结论，工具缺失、失败和截断会明确进入快照状态。
 
 <Cards>
     <Card title="系统与用户" icon={<Users />} href="/recon">系统版本、资源使用、用户列表、权限用户、登录历史和新增用户记录</Card>
@@ -65,7 +65,7 @@ SIREN 把客户端文件系统、服务端取证目录和报告编辑分成不�
 这些能力用于扩展调查入口和自动化方式。MCP 面向 AI 客户端，插件系统用于扩展 SIREN 客户端能力。
 
 <Cards>
-    <Card title="Agentic IR" icon={<Brain />} href="/air">在 Web 控制台中运行 Claude / Codex / Qoder / Pi 辅助排查会话，或在服务端 REPL 中运行 Claude 会话</Card>
+    <Card title="Agentic IR" icon={<Brain />} href="/air">在 Web 控制台中运行 Claude / Codex / Qoder / Pi 辅助排查会话</Card>
     <Card title="MCP 集成" icon={<Plug />} href="/mcp">让支持 MCP 的 AI 客户端列出 SIREN 客户端、执行命令或获取告警详情</Card>
     <Card title="插件系统" icon={<Puzzle />} href="/plugins">安装、卸载、更新和启停 `command` 与 `recon` 插件</Card>
     <Card title="插件列表" icon={<Download />} href="/plugins/list">查看当前可用插件和内置示例插件</Card>

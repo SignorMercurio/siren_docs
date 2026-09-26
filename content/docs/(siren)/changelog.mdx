@@ -10,6 +10,28 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.33.4 <DateTag>2026-09-27</DateTag>
+
+### Breaking Change
+
+- 客户端与服务端须同时升级到 v2.33.4：旧版执行协议、Recon v0/v1 与 Snapshot JSONL v1、不带 SIREN ALPN 的连接和版本协商全部移除，新旧版本之间不再互通
+- 服务端配置 `egress.rules` 改为必填，不再回退到内置规则；启用 WebUI 时缺失或无效会拒绝启动
+- 移除 `mcp.reconTimeout`，统一使用 `recon.responseTimeout`；`recon.profiles` 与 `recon.defaultProfile` 必填，`OptIn` 和 `recon.<plugin>` 旧写法不再生效
+- 不再迁移旧数据：旧版 egress 记录中的限流拒绝不再自动识别，缺少颜色的旧项目不再自动补色
+- 移除 `/api/deploy`，部署统一走批量接口；MCP 单台部署按单目标批量处理
+- MCP `run` 结果移除 `limitations` 字段，审计日志移除 `result` 字段；已淘汰的执行结果统一返回 `not_found`
+- REPL 移除 `air` 命令
+
+### Improvements
+
+- Agentic IR GUI 输入 `/model` 直接打开状态栏的模型选择器
+- 在历史会话上点击 **Continue session** 会新开恢复标签页，已打开时直接切换过去
+- REPL `run` 输出最多显示 50 KiB，超出部分标注截断
+
+### Fixes
+
+- Agentic IR 在打开某个会话链接的情况下新建会话时，新标签页会正确激活并更新地址，不再跳回原来的标签页
+
 ## v2.33.2 <DateTag>2026-09-24</DateTag>
 
 ### Improvements
