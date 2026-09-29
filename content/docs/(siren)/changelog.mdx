@@ -10,6 +10,21 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.33.8 <DateTag>2026-09-29</DateTag>
+
+### Improvements
+
+- Agentic IR 的 Running 列表改为以 Provider 图标区分会话，只在启动中或已退出时标出状态；当天的会话只显示时间，未填写任务的 Manual 会话命名为 “Manual · 会话 ID”
+- Codex AIR 不再强制自动批准 SIREN MCP 工具，改由操作员自己的 Codex 配置决定；需要确认时 GUI 会显示审批卡片，可选择允许一次、本会话允许或拒绝
+
+### Fixes
+
+- Agentic IR GUI 使用 Pi 时，切换或新建 Pi 会话后不再报 “MCP server "siren" is already registered”
+- 服务端只接受自己发起的 upload、Recon 和文件操作结果，并按消息类型限制客户端帧大小；REPL `upload` 遇到同名文件时追加数字后缀，不再覆盖之前的证据
+- 客户端上报的主机名、插件等元数据会去除控制字符并限制长度，含控制字符或过长的 Agent ID 会被拒绝
+- WebUI Markdown 预览不再渲染表单、按钮和内联样式；WebUI 接口拒绝跨站请求，JSON 接口要求 `application/json`
+- Shells 面板不再响应远端程序的 OSC 52 剪贴板写入，Agentic IR Terminal 仍保留复制支持
+
 ## v2.33.6 <DateTag>2026-09-28</DateTag>
 
 ### Improvements

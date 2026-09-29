@@ -192,7 +192,7 @@ Agentic IR 页面通过 Codex、Claude Code、Pi 或 Qoder 完成 [Agentic 应�
 
 也可以切换到 **Resume** 模式，搜索并选择当前视图工作目录对应的历史会话。历史先以只读时间线打开，只有点击 **Continue session** 后才会在新标签中启动 Provider，并用原 session ID 继续；只读历史标签保持不变，再次点击会切换到已打开的恢复标签。
 
-左侧的 Running 会显示任务、客户端、Provider、状态和启动时间；History 默认收起在侧栏底部，展开后显示首个任务、最近一条可见对话、分支和更新时间，便于在恢复前确认会话内容。
+左侧的 Running 以 Provider 图标区分会话，显示任务、客户端与入口信息和启动时间，只在启动中或已退出时标出状态；History 默认收起在侧栏底部，展开后显示首个任务、最近一条可见对话、分支和更新时间，便于在恢复前确认会话内容。
 
 <Callout title="恢复范围" type="info">
   Resume 只读取当前视图工作目录对应的 Provider history，不会跨 Project 列出其他目录的历史会话，也不会向浏览器暴露本机 JSONL 文件路径。

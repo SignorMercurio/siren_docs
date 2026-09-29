@@ -94,6 +94,7 @@ Recon 请求与结果 JSON 控制帧最大为 `64 KiB`；Snapshot 的后续 `Msg
 - 客户端握手帧必须是 `MsgClientHello`，且握手 payload 最大为 `64 KiB`。
 - 成功的结构化 `MsgRecon` 结果与 `MsgUpload` 文件名后面必须紧跟 `MsgFile`。如果第二帧类型不匹配，连接会被关闭，避免错误字节流被继续解释为协议帧；结构化 Recon 错误不发送文件帧。
 - 超过单帧大小限制、raw 日志行过长或读取到无法识别的服务端消息时，接收方会把连接视为不可恢复。
+- 客户端运行在被调查主机上，服务端把它发来的帧视为不可信：每种客户端消息类型都有独立的大小上限，读取正文前检查；未列出的类型不允许携带载荷。`upload`、Recon 结果和文件操作响应只在服务端发起对应请求后接受（迟到的 Recon 结果仍计一次），未请求的帧体直接丢弃、不缓存。握手与插件元数据会去除控制字符并限制长度。
 - 除 `MsgRunV2`、`MsgInfo`、`MsgFSResponse`、`MsgPluginResponse`、`MsgPluginRegister` 等明确有响应消息的流程外，管理类消息通常不单独返回 ACK。
 
 ## 关键流程
@@ -135,7 +136,7 @@ sequenceDiagram
     S-->>S: save artifact
 ```
 
-`recon` 会先解析客户端本地 Profile，再按固定顺序执行内置采集和显式引用的 recon 插件。服务端为每个客户端维护单飞 operation；请求 ID 防止迟到响应串入后续操作。服务端等待超时时会立即释放 operation，并向客户端发送同 request ID 的取消请求；迟到结果可保存，但不能满足新请求。服务端只接受 Snapshot JSONL v2，校验通过后生成 Markdown。`upload` 使用相同的文件边界，把客户端文件保存到服务端 `uploads/client-<id>/` 下。
+`recon` 会先解析客户端本地 Profile，再按固定顺序执行内置采集和显式引用的 recon 插件。服务端为每个客户端维护单飞 operation；请求 ID 防止迟到响应串入后续操作。服务端等待超时时会立即释放 operation，并向客户端发送同 request ID 的取消请求；迟到结果可保存，但不能满足新请求。服务端只接受 Snapshot JSONL v2，校验通过后生成 Markdown。`upload` 使用相同的文件边界，把客户端文件保存到服务端 `uploads/client-<id>/` 下；同名文件追加数字后缀，不覆盖之前的证据。
 
 ### run / info / filesystem
 
