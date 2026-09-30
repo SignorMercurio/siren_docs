@@ -10,6 +10,14 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.33.10 <DateTag>2026-09-30</DateTag>
+
+### Fixes
+
+- 客户端连接出现 TLS 读取错误（如 `bad record MAC`）时，服务端会断开并注销该客户端，不再反复刷错误日志、占满 CPU；客户端随后自动重连
+- Artifacts 切换 Project 或 Global 视图后，上传目标回到当前视图的根目录，不再沿用上一视图中选中的文件夹而报 `no such file or directory`
+- WebUI 的错误提示不再在末尾多出空行
+
 ## v2.33.9 <DateTag>2026-09-30</DateTag>
 
 ### Improvements
