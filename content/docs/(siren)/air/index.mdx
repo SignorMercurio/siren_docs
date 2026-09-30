@@ -47,7 +47,7 @@ GUI 固定提供以下常用命令：
 - `/status`：显示连接、Provider、模型、会话、Project、轮次、上下文及已有额度窗口，仅在本地展示，不写入 Provider 历史。
 - Codex `/compact`：在空闲时压缩上下文，进度显示在时间线中。
 - Codex `/review`：选择未提交改动、基准分支、指定 Commit 或自定义要求，结果以内联 Review 形式返回。
-- Codex / Qoder `/model`：打开状态条中的模型选择器，读取当前 CLI 提供的模型，选择后更新当前会话模型；Qoder 仅在当前会话公布模型配置时显示。
+- `/model`：打开状态条中的模型选择器，读取当前 CLI 提供的模型，选择后更新当前会话模型，只在当前会话生效；Codex、Claude 和 Pi 还可调整当前模型支持的推理强度（Pi 即思考等级），Qoder 仅在当前会话公布模型配置时显示。
 - Codex `/mcp`：只读查看 MCP Server 的认证状态和工具数量，运行期间也可使用。
 
 Claude 会补充其当前会话通过机器协议公布的命令，这些命令仅在空闲时执行。Qoder 的 Skills、插件、MCP prompts 和 workflows 可能触发模型推理，GUI 不把它们混入本地命令菜单；请在 Terminal 中使用。若 CLI 版本不支持某项 GUI 命令，只有该命令会失败，会话仍可继续。Terminal 仍是 Skills、更多 Provider 设置和其他高级斜杠命令的完整入口。
