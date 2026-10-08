@@ -11,7 +11,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 ## 何时使用
 
 - 应急处置结束、不再需要目标主机回连服务端时。
-- 执行 [痕迹清除（Clean）](/misc/clean) 之后。恢复只撤销 SIREN 记录过的规则，不触碰原有配置和后续人工改动。
+- 执行 [痕迹清除（Clean）](/cleanup) 之后。恢复只撤销 SIREN 记录过的规则，不触碰原有配置和后续人工改动。
 
 <Callout title="先 Clean 再 Restore" type="warn">
   恢复会撤销客户端回连所需的出方向放行，可能切断客户端。需要清理客户端时，先执行 Clean，再手动恢复出站规则。Clean 回报“文件已清理”或“已安排删除”后，面板会为匹配的恢复记录给出快捷入口（**N cleaned clients have egress changes to restore. Review**），但不会自动执行。恢复不依赖客户端在线。

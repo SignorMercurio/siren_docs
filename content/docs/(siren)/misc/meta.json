@@ -1,5 +1,7 @@
 {
-  "title": "命令与维护",
-  "pages": ["clean", "server"],
+  "title": "服务端命令",
+  "pages": [
+    "server"
+  ],
   "icon": "Wrench"
 }

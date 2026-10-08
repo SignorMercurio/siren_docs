@@ -51,7 +51,7 @@ import { Card, Cards } from "fumadocs-ui/components/card";
 
 **报告中的链接**
 
-在 [Artifacts](/webui#artifacts) 中预览 Markdown 报告时，报告内的相对链接按报告所在目录解析，可以用 `..` 指向上级目录，但不能超出工作区；点击后在 Artifacts 中打开目标文件。以 `/` 开头的路径和以 `.` 开头的目录或文件不可点击。
+在 [Artifacts](/artifacts) 中预览 Markdown 报告时，报告内的相对链接按报告所在目录解析，可以用 `..` 指向上级目录，但不能超出工作区；点击后在 Artifacts 中打开目标文件。以 `/` 开头的路径和以 `.` 开头的目录或文件不可点击。
 
 ## 报告存放位置
 
@@ -62,7 +62,7 @@ Agent 在 Provider 的工作目录中生成报告和 `evidence/` 目录，工作
 | Project | 该 Project 的目录 | 该 Project 的 Artifacts |
 | Global | `siren_server` 进程的当前工作目录 | Global 视图的 Artifacts |
 
-Agent 写入或明确链接 `.md` 报告后，该轮末尾会出现 **Report** 卡，提供 **Preview** 和 **Edit in Dossier**，用法见 [GUI 时间线](/air/gui#report-卡)。在 Dossier 中继续编辑和导出报告的流程见 [Dossier 工作流](/dossier/workflow)。
+Agent 写入或明确链接 `.md` 报告后，该轮末尾会出现 **Report** 卡，提供 **Preview** 和 **Edit in Dossier**，用法见 [GUI 时间线](/air/gui#report-卡)。在 Dossier 中继续编辑和导出报告的流程见 [Dossier 工作流](/reports)。
 
 ## 导出会话
 
@@ -76,7 +76,7 @@ Agent 写入或明确链接 `.md` 报告后，该轮末尾会出现 **Report** �
 2. **打开原件，而不是只看摘要**。点击来源卡片中的链接，在 Artifacts 中查看 `evidence/` 文件或 Recon 报告，确认摘录与结论一致。
 3. **核对采集信息**。检查记录的命令或查询语句、主机、采集时间和时区、日志时间范围，以及是否注明了截断或缺失。
 4. **留意脚注中声明的缺口**。注明 “保存失败”“无法定位” 的来源，只能作为线索。
-5. **对关键事实独立复核**。必要时在 [Shells](/webui#shells) 或 [Investigations](/webui#investigations) 中自行执行命令或查看进程，不要只依赖 Agent 的转述。安全中心告警卡展示的是数据源返回的等级，不是失陷判定。
+5. **对关键事实独立复核**。必要时在 [Shells](/shells) 或 [Investigations](/webui#investigations) 中自行执行命令或查看进程，不要只依赖 Agent 的转述。安全中心告警卡展示的是数据源返回的等级，不是失陷判定。
 6. **核对操作记录**。在时间线中用 **Failed**、**Commands**、**Files** 过滤，确认 Agent 实际执行过、而非只是计划执行的操作，以及是否有失败被忽略。
 
 <Cards>

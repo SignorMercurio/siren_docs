@@ -10,6 +10,15 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.33.11 <DateTag>2026-10-08</DateTag>
+
+### Fixes
+
+- WebUI Artifacts 不再列出服务端自身的文件：`data/` 状态目录、账号库、正在使用的配置文件、TLS 证书和私钥以及 `siren_server` 二进制既不能浏览、下载，也不能被上传覆盖、重命名或删除；包含它们的目录不能打包下载、重命名或删除
+- Dossier 目录位于服务端工作目录或 Project 目录内时，Reports 不再把 Dossier 自带的 `report.md` 模板及其副本列为报告
+- 配置中省略 `air.customPromptPrefix` 时，Custom 会话使用内置前缀，开场提示词不再出现 `%!(EXTRA int=N)` 残留
+- `siren_server --config` 的帮助说明改为实际的查找规则：依次在当前目录和 `config/` 下查找 `server_config.yaml`
+
 ## v2.33.10 <DateTag>2026-09-30</DateTag>
 
 ### Fixes
@@ -639,7 +648,7 @@ export const DateTag = ({ children }) => (
 
 ### Upgrade Notes
 
-- 使用 Dossier 前需要先部署 Dossier 编辑器文件和默认 `report.md`，默认目录为 `/opt/siren/dossier`，自定义路径请参考 [Dossier 配置文档](/dossier/config)
+- 使用 Dossier 前需要先部署 Dossier 编辑器文件和默认 `report.md`，默认目录为 `/opt/siren/dossier`，自定义路径请参考 [部署 Dossier](/server/dossier)
 - Artifacts 不再直接预览 HTML 报告；历史 HTML 报告可下载后查看，新的应急报告建议使用 Markdown + Dossier
 
 ---

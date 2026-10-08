@@ -175,7 +175,7 @@ Agentic IR 会话在控制主机本机启动 Provider CLI，并让它通过 `web
 | `data/client_notes.json` | 客户端备注 |
 | `data/egress.json` | **Configure egress** 的恢复记录 |
 | `uploads/client-<ID>/` | 服务端 REPL `upload` 拉取的文件 |
-| 工作目录本身 | Global 视图的 Artifacts 根目录，Recon 报告、AccessKey 报告等默认写在这里 |
+| 工作目录本身 | Global 视图的 Artifacts 根目录，Recon 报告、AccessKey 报告等默认写在这里。上面列出的服务端文件不会在 Artifacts 中出现 |
 | `webui.projectsBaseDir` 下的子目录 | 各 Project 的 Artifacts 目录；未设置时同样位于工作目录下 |
 
 备份或迁移服务端时，复制整个工作目录（包括 `.env`）和 Project 目录即可。

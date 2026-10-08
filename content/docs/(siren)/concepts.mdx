@@ -84,7 +84,7 @@ SIREN Server（控制主机，WebUI、MCP 和客户端共用一个 TLS 端口，
 | **Process Analysis** | Linux 客户端，按 PID、Port 或 Name 查询 | 结果只显示在页面上，不写文件 |
 | **AccessKey** | UID、AccessKey ID、可选 Region，经 SOAR 查询云 API 调用记录 | `AK_*.md` 报告，始终写入 Global Artifacts |
 
-AIR 能通过 MCP 的 `recon` 工具执行 Recon。Process Analysis 和 AccessKey 不在 MCP 工具里，只能在 WebUI 中运行。详见 [Recon](/recon)、[进程分析](/analysis/info) 和 [AccessKey 调查](/ak)。
+AIR 能通过 MCP 的 `recon` 工具执行 Recon。Process Analysis 和 AccessKey 不在 MCP 工具里，只能在 WebUI 中运行。详见 [Recon](/recon)、[进程分析](/process) 和 [AccessKey 调查](/ak)。
 
 ## Artifacts 与 Reports
 
@@ -92,7 +92,7 @@ AIR 能通过 MCP 的 `recon` 工具执行 Recon。Process Analysis 和 AccessKe
 
 **Reports** 不是另一个存储位置，而是 Artifacts 中 Dossier 格式报告的列表。一个 `.md` 文件要出现在 Reports 页，文件开头必须是 `---` frontmatter，并同时包含 `date`、`sir-seq`、`version` 和 `client` 四个字段。Recon 生成的 `.md` 和普通笔记不满足这个条件，所以不会列出。Reports 在 Dossier 编辑器中打开，前提是服务端配置了 `webui.dossierDir`。
 
-详见 [Artifacts](/webui#artifacts)、[Reports](/webui#reports) 和 [Dossier 语法](/dossier/syntax)。
+详见 [Artifacts](/artifacts)、[Reports](/reports) 和 [Dossier 语法](/reports/syntax)。
 
 ## Provisioning 与出站恢复
 

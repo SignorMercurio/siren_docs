@@ -1,0 +1,88 @@
+---
+title: 浏览器 Shell
+description: 在 Shells 页面打开客户端的交互式终端：多标签、复制粘贴、尺寸，以及会话何时保持、何时结束
+icon: SquareTerminal
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+**Shells** 页面（`#/shells`）在浏览器中提供客户端主机的交互式终端，可以运行 `vim`、`top` 这类需要完整终端的程序。同一台客户端可以同时打开多个 Shell 标签。
+
+## 打开 Shell
+
+1. 在 [Clients](/clients#行内操作) 页找到目标客户端，点击行内的 Shell 图标。
+2. WebUI 新开一个 Shell 标签并跳到 Shells 页面。终端先显示 `Connecting…`，客户端就绪后显示 `Connected to client <ID> (<OS>)`。
+
+Shells 页面本身没有新建按钮；没有打开任何 Shell 时，页面提示从 Clients 页打开。侧栏 **Shells** 旁的数字是当前打开的标签数。
+
+标签名格式为 `C<Client ID> <OS>`，客户端有 Note 时追加 ` · <Note>`。
+
+## 管理标签
+
+- 点击标签切换，点击标签上的 × 关闭。关闭不需要确认，会立即结束该 Shell。
+- 拖动标签调整顺序；也可以在标签获得焦点时按 Shift+← / Shift+→ 移动。
+- 标签获得焦点时，← / → 在标签之间切换。
+
+## 客户端上运行的 Shell
+
+| 客户端系统 | 启动的 Shell |
+| --- | --- |
+| Linux、macOS | 按顺序使用第一个存在的 `/bin/zsh`、`/bin/bash`、`/bin/sh`。设置 `TERM=xterm-256color` 和 `HISTFILE=/dev/null`，本次 Shell 的命令不会写入主机的历史文件 |
+| Windows | 有 PowerShell 时使用 PowerShell（`-NoProfile`，输出编码设为 UTF-8）；否则使用 `cmd.exe`，代码页设为 65001 |
+
+Shell 以客户端进程的用户身份运行，继承客户端的环境变量和工作目录。
+
+## 连接方式
+
+打开 Shell 时，服务端通知客户端，客户端再向它当前连接的服务端地址和端口另建一条 TLS 连接专门承载这个 Shell，不占用控制通道。因此：
+
+- 不需要额外开放端口，Shell 和 WebUI、客户端控制连接共用服务端主 TLS 端口（默认 TCP 443），见 [单一 TLS 端口](/server#单一-tls-端口)。
+- 服务端不需要 tmux。
+- 客户端必须在 15 秒内建立这条连接，否则终端中显示错误。
+
+每个 Shell 是独立的终端，不与其他浏览器共享。
+
+## 会话何时保持、何时结束
+
+| 操作 | 结果 |
+| --- | --- |
+| 切换到 WebUI 其他页面 | Shell 继续运行，回到 Shells 页后可以接着输入 |
+| 在 Global 与 Project、或不同 Project 之间切换 | 在其他范围打开的 Shell 全部关闭，只保留在新范围中打开的 |
+| 刷新页面、关闭浏览器标签页或退出登录 | 全部 Shell 关闭，无法恢复 |
+| 网络中断，或客户端断开连接 | 该 Shell 结束，终端显示 `--- session ended ---`。Shell 不会自动重连，需要从 Clients 页重新打开 |
+| 关闭标签 | 结束该 Shell |
+
+Shell 没有空闲超时；服务端每 15 秒向浏览器发送心跳，45 秒收不到响应才判定连接断开。
+
+Shell 结束时，客户端会强制结束这个 Shell 及其前台任务。需要在断开后继续运行的命令，请在 Shell 中用 `nohup`、`setsid` 或 tmux 等方式自行脱离。
+
+<Callout title="Project 范围" type="info">
+  Project 视图下只能对当前 Project 的客户端打开 Shell。Project 不是权限边界，任何账号都可以切到其他范围操作任意客户端，见 [账号的权限范围](/server/security#账号的权限范围)。
+</Callout>
+
+## 复制与粘贴
+
+| 操作 | 方式 |
+| --- | --- |
+| 复制选中文本 | 选中后按 Cmd+C（macOS）或 Ctrl+C（其他系统）。没有选中内容时，Ctrl+C 照常发给 Shell，用于中断命令 |
+| 右键菜单 | 右键会选中光标下的单词，并弹出浏览器原生菜单，可直接复制或粘贴 |
+| 粘贴文本 | 浏览器原生粘贴，内容原样发给 Shell |
+| 程序写入剪贴板（OSC 52） | 一律忽略。Shell 的输出来自正在调查的主机，SIREN 不允许它改写你的剪贴板 |
+
+Shells 不支持粘贴图片。
+
+## 尺寸与滚动
+
+终端跟随面板大小自动调整，并把新的行列数同步给客户端上的终端。行列数限制在 30–500 列、8–200 行之间。终端保留约 1,000 行滚动历史；需要完整留存的输出，请重定向到文件后用 [Files](/files) 下载。
+
+## 命令行
+
+服务端 REPL 也能打开交互式 Shell 或执行单条命令，见 [服务端 REPL](/remote#远程命令执行)：
+
+```bash
+>>> shell <Client ID>
+>>> run <Client ID> <Command>
+```
+
+- `shell` 通过 `tmux new-window` 在服务端新开一个 tmux 窗口并接入客户端 Shell，只有服务端运行在 tmux 中时才能使用，见 [保持服务端运行](/server#保持服务端运行)。
+- `run` 执行一条命令后返回结果，不需要 tmux，适合不需要交互的命令。

@@ -155,11 +155,11 @@ air:
 | `logging.level` | string | `info` | 最低日志级别，可选 `debug`、`info`、`warning` 或 `error`；`success` 与 `info` 使用同一级别 |
 | `logging.format` | string | `text` | 日志格式，可选适合终端阅读的 `text` 或每行一个对象的 `json` |
 | `logging.output` | string | `stderr` | 服务端运行日志输出流，可选 `stderr`、`stdout` 或 `none`（不输出到终端，仅保留 Logs 页面缓冲） |
-| `logging.bufferSize` | int | `5000` | [Web 控制台 Logs 页面](/webui#logs)在内存中保留的最近日志条数；服务重启后清空，设为 `0` 或负数则关闭该页面 |
+| `logging.bufferSize` | int | `5000` | [Web 控制台 Logs 页面](/logs)在内存中保留的最近日志条数；服务重启后清空，设为 `0` 或负数则关闭该页面 |
 | `webui.enabled` | bool | `true` | 是否启用 [Web 控制台](/webui)。关闭后若 `mcp.enabled` 仍为 `true`，`/mcp` 会继续在共享端口上提供服务 |
 | `webui.publicURL` | string | `""` | WebUI AIR 注入 MCP 时使用的绝对 HTTPS Origin，不得包含路径、query 或凭证；使用 AIR 时必须设置。服务端本机应将该域名解析到本机的非 loopback 内网地址，不能指向 `127.0.0.1` 或 `::1` |
 | `webui.userDBPath` | string | `data/users.db` | WebUI 用户 SQLite 数据库路径（相对路径基于启动 CWD） |
-| `webui.dossierDir` | string | -（示例配置为 `/opt/siren/dossier`） | Dossier 编辑器文件目录，可位于服务端工作目录外；Reports 页面的 **Blank template** 以只读模板方式打开该目录下的 `report.md`，实际报告需从 Artifacts 或 Reports 进入后保存。目录留空、不可用或默认报告不可访问时，WebUI 会提示错误。详见 [Dossier 配置](/dossier/config) |
+| `webui.dossierDir` | string | -（示例配置为 `/opt/siren/dossier`） | Dossier 编辑器文件目录，可位于服务端工作目录外；Reports 页面的 **Blank template** 以只读模板方式打开该目录下的 `report.md`，实际报告需从 Artifacts 或 Reports 进入后保存。目录留空、不可用或默认报告不可访问时，WebUI 会提示错误。详见 [Dossier 配置](/reports) |
 | `webui.projectsBaseDir` | string | `""`（服务端当前工作目录） | WebUI Project 目录创建基准路径。创建 Project 时只允许在该目录下创建一个 basename 子目录；Project 重命名不会移动目录，删除 Project 只删除元数据并保留目录文件 |
 | `recon.responseTimeout` | int | `300` | REPL、WebUI 和 MCP 等远程 Recon 入口等待客户端结果的最长时间（秒）；`mcp.reconTimeout` 已移除，残留时不会生效 |
 | `egress.rules` | list | 必填，见示例 | WebUI **Configure egress** 下发的出方向放行规则，1 到 20 条。每条包含 snake_case `purpose`、`ipProtocol`（`TCP`、`UDP`、`ICMP`、`GRE` 或 `ALL`）、IPv4 `destCidrIp` 和 `portRange`（`ICMP`、`GRE`、`ALL` 须为 `-1/-1`）；`purpose` 与规则不能重复。部署依赖其中单端口 TCP 的 `siren_server_callback` 规则确定入方向放行的服务端口，未填写出口 IP 时还用它核对出口探测。启用 WebUI 时缺失或无效会使服务端拒绝启动，不再回退到内置默认规则 |
@@ -170,7 +170,7 @@ air:
 | `air.maxSessions` | int | `20` | WebUI GUI 与 Terminal 合计最大并发会话数；适用于新建和继续的会话，设为 `0` 或负数表示不限制 |
 | `air.replayBufferBytes` | int | `4194304` | 每个会话用于断线重连的回放预算；Terminal 按原始输出字节、GUI 按序列化事件字节计算，设为 `0` 或负数时使用默认的 4 MiB |
 | `air.prompt` | string | 见示例配置 | 告警事件模式下的 prompt 模板，依次填入 `%s` UID、`%s` 安全中心告警 ID、`%d` Client ID（告警 ID 即 WebUI Event 模式中的安全中心告警 ID，详见 [Agentic 应急响应](/air)） |
-| `air.customPromptPrefix` | string | 见示例配置 | 自定义 prompt 模式下的前缀（支持 `%d` Client ID） |
+| `air.customPromptPrefix` | string | `在 SIREN Client %d 上启动安全应急响应。` | 自定义 prompt 模式下的前缀（支持 `%d` Client ID） |
 | `air.providers.claude.cliPath` | string | `claude` | WebUI Claude Provider 使用的 Claude Code CLI 路径 |
 | `air.providers.claude.args` | list | `[]` | 传递给 Claude CLI 的额外参数 |
 | `air.providers.codex.cliPath` | string | `codex` | WebUI Codex Provider 使用的 Codex CLI 路径 |
@@ -193,11 +193,11 @@ air:
 
 结构化运行事件使用稳定的 `event` 字段，常见关联字段包括 `request_id`、`client_id`、`session_id` 和 `duration_ms`。成功的常规 MCP 列表调用及工具启动过程属于 `debug` 诊断信息，默认 `info` 级别不会输出；工具完成、失败、超时和其他运行状态仍按相应级别记录。
 
-日志不会记录 HTTP query、请求正文、Cookie、token、prompt、命令正文或凭证。Artifacts、Reports 和远程文件错误也不会写入用户提交的路径或文件名；需要关联 WebUI 故障时，可使用响应头 `X-Request-ID` 对应日志中的 `request_id`。
+日志不会记录 HTTP query、请求正文、Cookie、token、prompt 或凭证。例外是 MCP 命令审计：`mcp.run.requested` 和 `mcp.run.finished` 会记录完整命令，见 [日志与审计](/logs)。Artifacts、Reports 和远程文件的错误日志不写入用户提交的路径或文件名；需要关联 WebUI 故障时，可使用响应头 `X-Request-ID` 对应日志中的 `request_id`。
 
-SIREN 不直接创建日志文件或执行轮转。需要持久化时，应由 systemd、容器运行时或其他进程管理器采集所选输出流并负责保留与轮转。
+SIREN 不直接创建日志文件或执行轮转。服务端需要在 tmux 中运行（见 [保持服务端运行](/server#保持服务端运行)），需要持久化时，可把 `logging.output` 指向的输出流重定向或用 tmux 的 `pipe-pane` 采集，并自行负责保留与轮转。
 
-`logging.bufferSize` 额外在内存中保留最近若干条日志，供 [Web 控制台 Logs 页面](/webui#logs)查看。保留的内容同样受 `logging.level` 约束，`logging.output` 设为 `none` 时也照常保留；缓冲区仅存在于内存中，服务重启后清空，不能替代上述持久化方案。
+`logging.bufferSize` 额外在内存中保留最近若干条日志，供 [Web 控制台 Logs 页面](/logs)查看。保留的内容同样受 `logging.level` 约束，`logging.output` 设为 `none` 时也照常保留；缓冲区仅存在于内存中，服务重启后清空，不能替代上述持久化方案。
 
 > WebUI GUI 与 Terminal 都复用 `air.providers.<name>`。所有入口都会注入当前范围的 SIREN MCP：Project 使用 `/mcp/project/<id>`，Global 使用 `/mcp`。Manual 只启动空白 Provider 会话；Custom 和 Event 再加入种子 prompt，从 History 继续的会话带上原会话 ID。两种界面都受 WebUI 全局鉴权保护。
 

@@ -20,15 +20,15 @@ SIREN Server REPL 用于管理在线客户端、下发远程操作，以及处�
 | `ls` | `ls` | 列出所有已连接客户端 | [远程模式](/remote) |
 | `note` | `note <Client ID> [Note]` | 设置或清空客户端备注 | [远程模式](/remote) |
 | `allow` | `allow <IP>` | 放行受害主机出口 IP 访问 SIREN Server | [出站与入站放行](/onboard/egress) |
-| `deploy` | `deploy <UID> <Instance ID> [Public IP]` | 通过云助手部署客户端 | [快速开始](/index) |
-| `deploy-batch` | `deploy-batch <UID> <instanceId[,publicIp[,note]]>...` | 批量部署 2-20 台客户端 | [快速开始](/index) |
+| `deploy` | `deploy <UID> <Instance ID> [Public IP]` | 通过云助手部署客户端 | [一键部署](/onboard/provisioning) |
+| `deploy-batch` | `deploy-batch <UID> <instanceId[,publicIp[,note]]>...` | 批量部署 2-20 台客户端 | [一键部署](/onboard/provisioning) |
 | `shell` | `shell <Client ID>` | 启动交互式远程 Shell | [远程模式](/remote#远程命令执行) |
 | `run` | `run <Client ID> <Command>` | 在客户端执行单条命令并返回结果 | [远程模式](/remote#单条命令执行) |
 | `recon` | `recon <Client ID> [Profile]` | 启动自动化信息收集；省略时使用客户端默认 Profile | [信息收集](/recon) |
 | `ak` | `ak <UID> <AccessKey ID> [Region]` | 调查 AccessKey 调用历史 | [AccessKey 调查](/ak) |
-| `info` | `info <Client ID> <PID \| -p Port \| -n Name>` | 查看进程详情（仅 Linux） | [进程分析](/analysis/info) |
-| `upload` | `upload <Client ID> <Client file path>` | 将客户端文件保存到服务端 Artifacts | [文件管理](/analysis/upload#命令行上传) |
-| `clean` | `clean <Client ID>` | 清除客户端痕迹并终止客户端 | [痕迹清除](/misc/clean) |
+| `info` | `info <Client ID> <PID \| -p Port \| -n Name>` | 查看进程详情（仅 Linux） | [进程分析](/process) |
+| `upload` | `upload <Client ID> <Client file path>` | 将客户端文件保存到服务端 Artifacts | [文件管理](/files#命令行) |
+| `clean` | `clean <Client ID>` | 清除客户端痕迹并终止客户端 | [痕迹清除](/cleanup) |
 | `reload` | `reload <Client ID>` | 不重连即重新加载客户端配置 | [本页](#重新加载客户端配置) |
 | `fwd` | `fwd <Client ID> <src_port:target_addr>` | 建立端口转发 | [端口转发](/portforward) |
 | `lsfwd` | `lsfwd` | 列出所有端口转发 | [端口转发](/portforward) |

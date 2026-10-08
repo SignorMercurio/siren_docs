@@ -1,0 +1,125 @@
+---
+title: Artifacts
+description: 浏览、预览、上传和整理服务端上的调查产出与证据文件
+icon: Archive
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
+
+Artifacts 页管理服务端上的证据目录。Recon 快照、AccessKey 报告、AIR 产出和手工上传的文件都保存在这里，可以在页面中预览、下载、上传和整理。
+
+## 根目录
+
+Artifacts 的根目录随当前范围变化，页面顶部显示当前范围（**Global** 或 Project 名称）：
+
+| 范围 | 根目录 |
+| --- | --- |
+| Global | `siren_server` 进程的当前工作目录 |
+| Project | 该 Project 的目录，见 [Projects](/projects#基准目录) |
+
+`webui.projectsBaseDir` 留空时，Project 目录建在服务端工作目录下，因此在 Global 视图中也能看到它们。
+
+<Callout title="Global 根目录就是服务端工作目录" type="warn">
+  任何已登录账号都能在 Global 视图中下载、上传、重命名和删除服务端工作目录下的文件。服务端自身的状态和配置文件受保护（见 [服务端自身文件](#服务端自身文件)），工作目录中的其他文件都会列出，不要在这里存放与调查无关的敏感文件。账号权限见 [账号的权限范围](/server/security#账号的权限范围)。
+</Callout>
+
+## 文件从哪里来
+
+| 来源 | 文件 | 写入位置 |
+| --- | --- | --- |
+| [Recon](/recon) | `SIREN_<主机名>_<时间戳>_client-<ID>_req-<请求号>.recon.jsonl`（权威快照）和同名 `.md`（由快照生成） | 客户端所属 Project 的根目录；客户端未归属 Project 时写入 Global 根目录。与当前视图无关 |
+| [AccessKey 调查](/ak) | `AK_<UID>_<AccessKey ID>_<时间>.md` | 始终写入 Global 根目录 |
+| [Agentic IR](/air/evidence#报告存放位置) | Agent 生成的报告和 `evidence/` 目录 | 启动会话时所在范围的根目录 |
+| 服务端 REPL `upload` | `uploads/client-<Client ID>/<文件名>`；同名文件已存在时依次保存为 `<文件名>.1`、`<文件名>.2`，不覆盖 | 始终写入 Global 根目录，即使客户端已归属 Project |
+| Dossier 粘贴图片 | `<报告名>.assets/pasted/paste-<时间>-<序号>.<扩展名>` | 报告所在目录，见 [报告](/reports#粘贴图片) |
+| Artifacts 页 **Upload** | 上传的文件 | 页面顶部 **Target** 所示目录 |
+
+Recon、AccessKey 调查和 AIR 完成后的 **Open Report** / **Preview** 按钮会直接跳到 Artifacts 并选中对应文件。
+
+## 浏览与预览
+
+左侧是文件树，右侧是预览区。文件树上方的 **Search...** 可以按名称过滤，刷新按钮重新读取目录。
+
+点击文件后在右侧预览：
+
+- **文本**：5 MiB 以内的文本文件直接显示。二进制文件显示 `Preview not supported for binary files`，可以下载后查看。
+- **Markdown**：`.md` 和 `.markdown` 渲染后显示；有两个以上一至三级标题时，右侧显示 **Contents** 目录。报告中的相对链接点击后在 Artifacts 中打开目标文件，解析规则见 [链接如何打开](/air/evidence#链接如何打开)。
+- **图片**：PNG、JPEG、GIF、WebP 显示图片尺寸，默认 **Fit**（适应预览区），也可以切到 **100%**，或用放大缩小按钮在 25% 到 400% 之间按 25% 调整。
+
+HTML 报告不会在页面中渲染，下载后用浏览器打开。
+
+## 文件操作
+
+在文件树中右键文件或目录，菜单中有 **Download**、**Rename** 和 **Delete**。选中文件后，预览区右上角也有同样三个按钮。
+
+| 操作 | 说明 |
+| --- | --- |
+| **Download** | 单个文件不超过 100 MiB。目录打包为 `<目录名>.tar.gz` 下载，自动排除点号开头的文件和子目录，打包内容合计不超过 100 MiB |
+| **Upload** | 点击 **Upload** 选择一个或多个文件，或把文件拖到页面任意位置，按顺序上传到 **Target** 目录。单个文件不超过 100 MiB，不支持上传目录。目标已有同名文件时，逐个弹出 **Overwrite existing artifact?**，选择 **Overwrite file** 或 **Skip file** |
+| **New Folder** | 在 **Target** 目录下新建目录，创建后 **Target** 自动切到新目录 |
+| **Rename** | 只改名称，不能移动到其他目录。目标名称已存在时直接报错，不会覆盖 |
+| **Delete** | 删除文件，或递归删除目录及其中全部内容。操作前需要确认，删除后无法从 WebUI 恢复 |
+
+**Target** 默认是根目录（显示为 `Global Artifacts` 或 `<Project> Artifacts`）。在文件树中点开某个目录，它就成为新的 **Target**，并在树中标出 `Target`。切换范围后 **Target** 回到根目录。
+
+<Callout title="操作的是服务端真实文件" type="warn">
+  覆盖、重命名和删除都直接作用于控制主机上的文件。执行前确认页面顶部的范围和目标路径。
+</Callout>
+
+## 路径限制
+
+- **隐藏路径**：以 `.` 开头的文件和目录（如 `.env`、`.ssh`）不会列出，也不能通过路径直接访问。上传、新建目录和重命名时也不能使用以 `.` 开头的名称。
+- **范围边界**：所有路径都限制在当前根目录内，包含 `..` 的路径和绝对路径会被拒绝。符号链接只有在解析后仍位于当前根目录内时才能读取；重命名和删除不作用于符号链接本身。
+- **上传覆盖**：覆盖时只替换普通文件，同名目标是目录或符号链接时报错。
+
+### 服务端自身文件
+
+服务端的状态文件与 Global Artifacts 共用工作目录。以下路径不会出现在文件树中，也不能预览、下载、上传覆盖、重命名或删除；解析符号链接后指向它们的路径同样被拒绝：
+
+| 路径 | 默认位置 |
+| --- | --- |
+| 状态目录（Project 列表、客户端 ID、出站记录等） | `data/` |
+| 账号库 | `webui.userDBPath`，默认 `data/users.db` |
+| TLS 证书和私钥 | `cert`、`key` 配置项指向的文件 |
+| 服务端配置文件 | 实际加载的 `server_config.yaml` |
+| 服务端程序 | 正在运行的 `siren_server` 可执行文件 |
+
+包含上述任一路径的目录（例如存放证书的 `certs/`）仍会列出，其中的其他文件也可以正常访问，但整个目录不能打包下载、重命名或删除。
+
+## 在 Dossier 中编辑
+
+选中 `.md` 文件后，预览区右上角会出现 **Dossier** 按钮，在新标签页用 Dossier 打开该文件编辑。保存会直接写回这个文件；Project 视图下打开的文件保存在该 Project 目录中。`.markdown` 文件只能预览，没有 **Dossier** 按钮。
+
+Dossier 未部署或暂不可用时，点击按钮会提示原因，部署见 [部署 Dossier](/server/dossier)。编辑、粘贴图片和导出见 [报告](/reports)。
+
+## 分享链接
+
+选中文件后，浏览器地址栏会更新为指向该文件的链接：
+
+```text
+https://siren.example.com/#/artifacts/evidence/20261008-1430-ps-a1b2.txt?project=<Project ID>
+```
+
+Global 范围的文件没有 `?project=` 部分。其他操作员打开链接后，WebUI 会切换到对应范围并选中该文件；对方同样需要先登录。
+
+## 常见问题
+
+<Accordions>
+<Accordion title="找不到刚生成的文件">
+点击文件树上方的刷新按钮。确认页面顶部的范围是否正确：Recon 结果跟随客户端的 Project 归属，AccessKey 报告和 REPL `upload` 始终在 Global。
+</Accordion>
+<Accordion title="点击 Download 没有反应">
+通常是文件超过 100 MiB，或目录内普通文件合计超过 100 MiB。页面不会弹出提示，错误只出现在浏览器开发者工具的控制台中。改为分别下载子目录或单个文件，或直接在控制主机上打包。
+</Accordion>
+<Accordion title="重命名提示已存在">
+同一目录下已有同名文件或目录。Rename 不会覆盖已有条目，先处理同名对象再重试。
+</Accordion>
+<Accordion title="上传或新建时报 hidden filenames not allowed">
+名称以 `.` 开头。Artifacts 不允许创建隐藏文件或目录，换一个名称。
+</Accordion>
+</Accordions>
+
+## 命令行
+
+服务端 REPL 没有浏览 Artifacts 的命令。可以在控制主机上直接查看上述目录。从在线客户端拉取单个文件到 Artifacts 用 REPL 的 `upload <Client ID> <文件路径>`，结果写入 Global 根目录下的 `uploads/client-<Client ID>/`，用法见 [Files](/files)。

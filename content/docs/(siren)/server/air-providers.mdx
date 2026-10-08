@@ -183,13 +183,9 @@ Custom 和 Event 入口用以下模板生成种子 prompt：
 | `air.instancePrompt` | Event：ECS 实例 ID | UID、实例 ID、Client ID | `启动安全应急响应，UID：%s，ECS 实例 ID：%s，SIREN Client ID：%d，请先获取该实例的相关告警` |
 | `air.assetPrompt` | Event：云安全中心资产 UUID | UID、资产 UUID、Client ID | `启动安全应急响应，UID：%s，云安全中心资产 UUID：%s，SIREN Client ID：%d，请先获取该资产的相关告警` |
 | `air.timeRangePrompt` | 实例或资产目标限定了时间范围时追加 | 时间范围 | `，告警时间范围：%s` |
-| `air.customPromptPrefix` | Custom：加在用户 prompt 之前 | Client ID | 无；示例配置为 `在 SIREN Client %d 上启动安全应急响应。` |
+| `air.customPromptPrefix` | Custom：加在用户 prompt 之前 | Client ID | `在 SIREN Client %d 上启动安全应急响应。` |
 
 占位符按表中顺序填入，`%s` 为文本，`%d` 为数字，修改模板时需保持数量和顺序不变。时间范围以 `最近 7 天`、`2026-10-01 08:00 至 2026-10-02 08:00` 或 `2026-10-01 08:00 至今` 的形式填入。
-
-<Callout title="保留 customPromptPrefix" type="warn">
-  `air.customPromptPrefix` 没有内置默认值。删除该项后，Custom 会话的 prompt 开头会出现 Go 的格式化残留（如 `%!(EXTRA int=5)`）。随服务端发布的 `server_config.yaml` 已包含该项。
-</Callout>
 
 ## 边界
 

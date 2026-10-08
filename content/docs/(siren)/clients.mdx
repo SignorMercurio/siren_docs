@@ -67,14 +67,14 @@ Note 按客户端的稳定身份保存，客户端重连或服务端重启后仍
 
 | 入口 | 结果 |
 | --- | --- |
-| Shell 图标 | 新开一个浏览器 Shell 标签，并跳到 [Shells](/webui#shells) |
+| Shell 图标 | 新开一个浏览器 Shell 标签，并跳到 [Shells](/shells) |
 | AIR 图标 | 跳到 [Agentic IR](/air)，切换到 **Custom** 模式并选中该客户端 |
-| **More actions** → **Files** | 跳到 [Files](/webui#files)，并选中该客户端 |
+| **More actions** → **Files** | 跳到 [Files](/files)，并选中该客户端 |
 | **More actions** → **Recon** | 跳到 Investigations 的 Recon 标签并选中该客户端；选择 Profile 后点 **Start Recon** 才开始执行，见 [Recon](/recon) |
-| **More actions** → **Process analysis** | 跳到 Investigations 的 Process Analysis 标签并选中该客户端，见 [进程分析](/analysis/info)。非 Linux 客户端显示为不可用的 **Process analysis (Linux only)** |
+| **More actions** → **Process analysis** | 跳到 Investigations 的 Process Analysis 标签并选中该客户端，见 [进程分析](/process)。非 Linux 客户端显示为不可用的 **Process analysis (Linux only)** |
 | **More actions** → **Clean & terminate** | 打开 **Clean & Terminate** 确认框，输入该客户端的 ID 后点 **Send cleanup request** |
 
-**Clean & terminate** 让客户端删除 SIREN 管理的文件并退出，服务端无法确认最终删除结果。清理范围和结果状态见 [痕迹清除](/misc/clean)。
+**Clean & terminate** 让客户端删除 SIREN 管理的文件并退出，服务端无法确认最终删除结果。清理范围和结果状态见 [痕迹清除](/cleanup)。
 
 ## 批量操作
 
@@ -119,7 +119,7 @@ Note 按客户端的稳定身份保存，客户端重连或服务端重启后仍
 - 默认显示 5 条，点 **Show all N** 展开全部。右侧按钮可以折叠整个区域，折叠状态保存在当前浏览器。
 - 部署记录可以点开查看逐步日志，刷新页面后进行中的部署仍可在这里继续查看。
 
-部署结果不确定时，先在这里核对，再决定是否重试，见 [一键部署](/onboard/provisioning)。清理记录的状态含义见 [痕迹清除](/misc/clean)。
+部署结果不确定时，先在这里核对，再决定是否重试，见 [一键部署](/onboard/provisioning)。清理记录的状态含义见 [痕迹清除](/cleanup)。
 
 ## 常见问题
 
@@ -127,7 +127,7 @@ Note 按客户端的稳定身份保存，客户端重连或服务端重启后仍
 
 - 确认当前范围。未归属的客户端只在 Global 显示，归属其他 Project 的客户端也不会出现在当前 Project 视图。
 - 清空筛选框。
-- 确认客户端确实已连上服务端，可在 [Logs](/webui#logs) 中查看接入失败的记录。
+- 确认客户端确实已连上服务端，可在 [Logs](/logs) 中查看接入失败的记录。
 
 **重新部署后 Note 和 Project 没了**
 

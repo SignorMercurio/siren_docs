@@ -51,11 +51,11 @@ cd /opt/siren
 所有账号权限相同，没有角色区分。Project 是工作区划分，不是权限边界，任何账号都可以切换到任意 Project 或 Global 视图。一个 WebUI 账号可以：
 
 - 操作所有在线客户端：Shell、Files 上传覆盖、Recon、清理，以及部署和出站放行等云端写操作。
-- 在 Global 视图的 Artifacts 中浏览、下载、上传、重命名和删除服务端工作目录下的所有文件，包括 `server_config.yaml`、`certs/` 中的私钥和 `data/` 中的账号库与状态文件。只有 `.env` 这类以点号开头的文件和目录不会列出。
+- 在 Global 视图的 Artifacts 中浏览、下载、上传、重命名和删除服务端工作目录下的取证文件。服务端自身的文件不会出现，也不能被访问或修改：`data/` 状态目录、账号库、正在使用的配置文件、TLS 证书和私钥，以及 `siren_server` 二进制。包含这些文件的目录不能打包下载、重命名或删除。`.env` 等以点号开头的文件和目录同样不会列出。
 - 查看 Logs 页面中的全部服务端日志，见 [Logs 包含敏感信息](#logs-包含敏感信息)。
 - 启动 Agentic IR。Provider CLI 以服务端进程的身份运行在控制主机上，其自带的 Shell 和文件工具直接作用于控制主机；是否需要审批、是否启用沙箱由 Provider 自身配置决定。
 
-因此 WebUI 账号应只发给可以完全信任、相当于控制主机管理员的操作员。如需缩小暴露面，可以把 `cert` / `key` 和 `webui.userDBPath` 指向工作目录以外的绝对路径。
+因此 WebUI 账号应只发给可以完全信任、相当于控制主机管理员的操作员。
 
 ## MCP 鉴权
 
@@ -103,7 +103,7 @@ Reports 页面的 **Blank template** 以只读方式打开 `dossierDir/report.md
 
 ## Logs 包含敏感信息
 
-Logs 页面不区分账号，也不按 Project 过滤，任何已登录账号都能看到全部服务端日志，包括来访 IP、登录用户名、客户端地址，以及 MCP `run` 的完整命令。日志保存在内存中，条数由 `logging.bufferSize` 控制；设为 `0` 可完全关闭该页面。详见 [Web 控制台](/webui#logs)。
+Logs 页面不区分账号，也不按 Project 过滤，任何已登录账号都能看到全部服务端日志，包括来访 IP、登录用户名、客户端地址，以及 MCP `run` 的完整命令。日志保存在内存中，条数由 `logging.bufferSize` 控制；设为 `0` 可完全关闭该页面。详见 [Web 控制台](/logs)。
 
 ## 公网暴露建议
 

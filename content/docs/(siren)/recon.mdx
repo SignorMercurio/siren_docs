@@ -1,151 +1,195 @@
 ---
 title: 自动化信息收集
-description: 运行 Recon 生成有明确范围和上限的主机快照
-icon: Info
+description: 用 Recon 在客户端上采集一份有范围、有上限的主机快照，保存到 Artifacts
+icon: ScanSearch
 ---
 
-import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
+import { Step, Steps } from "fumadocs-ui/components/steps";
 
-自动化信息收集（Recon）会在目标主机上生成有明确范围和上限的客观快照。Recon 生成 `snapshot-jsonl-v2`，其中的 `*.recon.jsonl` 是权威证据；`*.md` 由同一份快照确定性生成，供 WebUI、MCP 和人工快速浏览。Recon Profile 只选择模块，不覆盖超时、资源上限或分析逻辑。
+Recon 在目标主机上按 Profile 采集一份主机快照：账户、进程、网络、计划任务、启动项、环境变量、文件、应用配置等，`hunt` Profile 还会补充应用拓扑、配置原文、近期应用日志和凭据材料。结果是一份权威的 `*.recon.jsonl` 快照和一份由它渲染的 Markdown 报告，保存到服务端 Artifacts，供人工浏览和 [Agentic IR](/air) 分析。
 
-Recon 不判断主机状态是否正常，也不执行白名单、黑名单、矿工、Webshell、Rootkit symbol 或不安全配置判定。原始环境变量、凭证、配置和历史记录会按采集范围写入快照；对已经读取的配置、凭据和供应链文本，Recon 还会在固定上限内记录可定位的内容形态事实，例如疑似访问密钥、令牌、密码赋值或 URL 用户信息。派生事实只保留模式 ID、行号、脱敏值和完整值的 SHA-256，不给出风险结论；是否存在风险仍由 [Agentic 应急响应](/air) 或其他分析流程结合上下文判断。
+Recon 只采集事实，不判断主机是否被入侵，也不做白名单、黑名单、矿工、Webshell、Rootkit 或漏洞判定。对已读取的配置、凭据和依赖文本，它会记录疑似密钥、令牌、密码赋值等内容形态，只保留模式、行号、脱敏值和 SHA-256，不给出风险结论。
 
 <Callout title="前置条件" type="info">
-  目标主机需要具备足够权限运行 Recon：Linux 通常需要 root，Windows 需要管理员权限。快照可能包含凭证和其他敏感配置，应只在受控链路和目录中保存。本地模式会把 JSONL 与 Markdown 一起上传到 OSS，需要先[设置 OSS 访问凭证](/server/prerequisites#oss-凭证)；WebUI 和服务端 REPL 不需要 OSS。
+  客户端必须以 root（Linux）或管理员（Windows）身份运行，否则采集在开始前失败，报 `user with root permission required` 一类错误。快照会包含环境变量、配置、历史记录和凭据原文，应只保存在受控的服务端目录中。
 </Callout>
 
-## 使用方式
+## 发起 Recon
 
-```text tab="WebUI"
-Investigations -> Recon -> 选择客户端和 Profile -> Start Recon
+<Steps>
+<Step>
+### 打开 Recon
+
+在侧栏打开 **Investigations**，切到 **Recon** 标签（`#/investigations/recon`）。也可以在 [Clients 页](/clients) 的目标行点 **More actions** → **Recon**，会跳到这里并预先选中该客户端。
+</Step>
+<Step>
+### 选择客户端和 Profile
+
+**Client** 下拉框列出当前范围内的在线客户端；在 Project 视图中只能选本 Project 的客户端。**Profile** 下拉框只列出该客户端上报的 Profile，并默认选中它的 `recon.defaultProfile`。Profile 的区别见 [Profile](#profile)。
+</Step>
+<Step>
+### 点击 **Start Recon**
+
+按钮变为 **Recon Running**，右侧开始显示阶段进度。采集期间表单锁定。
+</Step>
+</Steps>
+
+除了手动发起，AIR 会话也会通过 MCP 工具 `recon` 按需触发采集，外部 Agent 同样可以调用，参数是 `client_id` 和可选的 `profile`，见 [MCP](/mcp#可用工具)。三种入口（WebUI、MCP、服务端 REPL）共用同一套规则和保存位置。
+
+## 查看进度
+
+结果区标题行显示 `client #<ID> · <Profile> · <N> steps` 和已用时间，下方逐项列出阶段：
+
+| 阶段 | 含义 |
+| --- | --- |
+| `Dispatch Recon` | 服务端已下发请求 |
+| `Recon.Basic` | 基础信息，每次都会采集 |
+| `Recon.User`、`Recon.Process`、`Recon.Network` … | Profile 中的各模块，按固定顺序执行 |
+| `Recon.Plugin.<name>` | Profile 引用的 recon 插件 |
+| `Save report to Artifacts` | 服务端接收快照、校验并生成 Markdown |
+
+采集完成后横幅变为 **Recon report ready**。如果有模块被截断、超时或缺少权限和工具，快照状态为 partial，横幅显示 **Recon report ready · partial snapshot**。partial 快照仍然有效，已完成部分照常保存，缺失和截断的位置记录在快照中。
+
+以下情况会直接结束当前操作并显示错误：
+
+- **同一客户端已有 Recon 在运行**：报 `recon already running`。同一客户端同时只能运行一个 Recon，WebUI、REPL 和 MCP 共用这个限制；不同客户端可以并行。
+- **服务端等待超时**：超过 `recon.responseTimeout` 仍未收到结果，报 `recon timed out after ...`，服务端同时请求客户端取消。客户端还没停下时，紧接着再发起会收到 `recon already in progress on client`，稍后重试即可。
+- **客户端断开**：报 `Recon failed: context canceled`。
+- **客户端报错**：例如权限不足、Profile 不存在或引用了被禁用的插件，错误原文显示在结果区。
+
+## 查看结果
+
+点击 **Open Report** 跳到 [Artifacts](/artifacts)，并定位到本次生成的 Markdown 报告。同一目录下有两份文件：
+
+| 文件 | 用途 |
+| --- | --- |
+| `SIREN_<主机名>_<时间>_client-<ID>_req-<N>.recon.jsonl` | 权威快照。完整的结构化记录和采集到的文件原文都在这里 |
+| `SIREN_<主机名>_<时间>_client-<ID>_req-<N>.md` | 服务端从快照确定性渲染的报告，供快速浏览 |
+
+文件名中的客户端 ID 和请求序号用来避免同名主机或多次采集互相覆盖。
+
+- `default`、`quick` 的 Markdown 保留各模块的采集正文。
+- `hunt` 的 Markdown 只是索引：采集覆盖情况、主要应用与中间件、容器、内核观察到的监听、容器端口配置等摘要。配置、环境变量、日志正文、密码 hash 和凭据原文只在 JSONL 中。需要完整证据时读 JSONL。
+
+**保存位置**跟随客户端的 Project 归属，与发起时所在的视图无关：已归属 Project 的客户端写入该 Project 目录，未归属的写入 Global（服务端工作目录）。在 Global 中对已归属 Project 的客户端执行 Recon，结果仍写入该 Project，**Open Report** 会切换到对应 Project 打开。详见 [Project 范围](/projects#例外)。
+
+Recon 报告不带 Dossier frontmatter，不会出现在 [Reports](/reports) 列表中，只能在 Artifacts 中查看。
+
+<Callout title="快照内容是不可信数据" type="warn">
+  快照中的文件内容、日志和命令输出来自被调查主机，可能被攻击者控制。人工阅读或交给 Agent 分析时，都只能当作证据，不能当作指令。
+</Callout>
+
+## Profile
+
+Profile 是命名的模块集合，只决定采集哪些模块，不改变超时、上限和采集逻辑。基础信息（`Recon.Basic`）每次都会采集，不写进 Profile。客户端内置配置提供三个 Profile，默认是 `default`：
+
+| Profile | 用途 | Linux 模块 | Windows 模块 |
+| --- | --- | --- | --- |
+| `default` | 标准完整采集 | `user` `ssh` `process` `network` `cron` `service` `env` `file` `rootkit` `application` | `user` `process` `network` `schtask` `env` `file` `application` |
+| `quick` | 去掉耗时较长的 `file`，其余同 `default` | `user` `ssh` `process` `network` `cron` `service` `env` `rootkit` `application` | `user` `process` `network` `schtask` `env` `application` |
+| `hunt` | 面向 Agent 离线分析的主机审计快照：以运行中的应用、中间件、容器和监听进程为中心，补充配置、日志、凭据和供应链证据 | `user` `ssh` `process` `network` `cron` `service` `env` `application` `topology` `supplychain` `config` `activity` `credential` | `user` `process` `network` `schtask` `env` `application` `topology` `supplychain` `config` `activity` `credential` |
+
+`topology`、`supplychain`、`config`、`activity`、`credential` 只在 Profile 显式列出时才执行，内置 Profile 中只有 `hunt` 包含它们。`hunt` 不包含 `file` 和 `rootkit`。
+
+### 自定义 Profile
+
+Profile 定义在客户端的 `config.yaml` 中，例如增加一个只看进程和网络的 Profile：
+
+```yaml title="config.yaml（Linux 客户端）"
+recon:
+  defaultProfile: default
+  profiles:
+    default: [user, ssh, process, network, cron, service, env, file, rootkit, application]
+    quick: [user, ssh, process, network, cron, service, env, rootkit, application]
+    hunt: [user, ssh, process, network, cron, service, env, application, topology, supplychain, config, activity, credential]
+    netonly: [process, network]
 ```
 
-```bash tab="服务端 REPL"
+- Profile 名须匹配 `^[a-z][a-z0-9_-]{0,63}$`，每个 Profile 1 到 64 个不重复模块，模块名必须是本平台存在的模块。
+- recon 插件以 `plugin:<name>` 写入，例如 `[user, process, plugin:chkrootkit]`，并由 `plugins.<name>` 控制启停。安装插件不会自动加入任何 Profile；引用缺失或已禁用的插件时，配置校验失败。见 [插件](/plugins)。
+- 列表顺序不影响执行顺序：内置模块按固定顺序执行，插件按名称排序。
+- 改完后重启客户端，或在服务端 REPL 执行 `reload <Client ID>`。新配置无效时客户端保留上一份有效的 Profile；重载成功后客户端会重新上报 Profile，WebUI 的下拉框随之更新。
+
+配置项的完整说明见 [客户端配置](/config#客户端配置)。
+
+## 模块
+
+下表按模块列出采集内容。同名模块在 Linux 和 Windows 上的采集项不同。
+
+| 模块 | 平台 | 采集内容 |
+| --- | --- | --- |
+| 基础信息（始终采集） | 两者 | 时间、OS、主机标识、主 IP、网络接口、CPU、内存、磁盘与挂载 |
+| `user` | 两者 | 账户、组、当前会话、登录记录和登录与新增用户事件；Linux 另有 sudoers 和 `/etc/passwd` 元数据 |
+| `ssh` | Linux | `sshd_config`、用户 SSH 配置与公钥、认证失败事件、PAM 与 inetd 配置 |
+| `process` | 两者 | 一次完整进程快照，包括父进程、路径和命令行 |
+| `network` | 两者 | Socket 快照、hosts、DNS、路由；Linux 另有防火墙规则，Windows 另有网络共享 |
+| `cron` | Linux | 用户级和系统级 cron 任务、cron 日志 |
+| `schtask` | Windows | 计划任务、启动文件夹、系统启动项、注册表启动项和服务列表 |
+| `service` | Linux | 服务快照、服务文件、`/etc/rc.local` 和 init 启动项 |
+| `env` | 两者 | Linux：环境变量、运行中进程的环境变量、`LD_PRELOAD` 与 `/etc/ld.so.preload`、profile/rc 文件和 alias；Windows：环境变量、PATH、PowerShell 配置与历史、Defender 排除项 |
+| `file` | 两者 | Linux：Shell 历史、临时目录、SUID、已删除仍打开的文件、最近 24 小时修改的文件、大文件；Windows：临时目录、最近访问的文件、近 30 天变更的系统目录可执行文件、最近 24 小时修改的事件日志文件、启动目录文件、卷影副本 |
+| `rootkit` | Linux | 已加载内核模块列表。名称沿用旧称，不做 Rootkit 检测 |
+| `application` | 两者 | Linux：Redis 配置、容器运行时与容器；Windows：远程桌面配置、IIS 配置、近 3 天修改的 IIS 日志文件列表、Defender 状态 |
+| `topology` | 两者 | 按实例归并的 Web 服务、中间件、容器和监听进程，以及它们与进程、Socket、配置、挂载之间可直接观察到的关系 |
+| `supplychain` | 两者 | 运行中应用和容器载荷的可执行文件 SHA-256、版本来源、依赖清单和容器镜像引用；不枚举全部软件包，不访问镜像仓库 |
+| `config` | 两者 | 运行态直接引用的配置文件原文，以及 systemd/Windows 服务、Compose、Kubernetes、IIS 等部署材料 |
+| `activity` | 两者 | 当前运行应用和容器直接关联的近期本地日志尾部；不读取 Windows 事件日志 |
+| `credential` | 两者 | Linux：密码 hash 与策略、SSH 私钥、云 CLI、Kubernetes、Docker、数据库等客户端凭据文件；Windows：密码策略、Credential Manager 元数据、AutoLogon、IIS 连接字符串等，不采集 SAM/SECURITY/LSA |
+
+Recon 只使用主机上已有的工具，不安装任何软件。工具缺失或权限不足时，对应 source 记为 unavailable，快照变为 partial。
+
+## 超时
+
+| 配置项 | 位置 | 默认 | 作用 |
+| --- | --- | --- | --- |
+| `recon.commandTimeout` | 客户端 `config.yaml` | `30` 秒 | 每条底层采集命令的超时。一条命令超时只影响它自己的 source。同一个值也用于客户端执行远程命令、插件和本地 OSS 上传 |
+| `recon.collectionTimeout` | 客户端 `config.yaml` | `270` 秒 | 整个 Profile 的采集预算。用尽后停止，已完成的部分照常保存，未执行的模块记录在快照中，快照为 partial |
+| `recon.responseTimeout` | 服务端 `server_config.yaml` | `300` 秒 | WebUI、REPL 和 MCP 等待客户端结果的上限。服务端发请求时会把采集预算压到 `responseTimeout - 30` 秒，客户端取它与 `collectionTimeout` 中较小的值 |
+
+默认配置下，远程 Recon 的实际采集预算是 270 秒，服务端最多等 300 秒。调大采集预算时，要同时调大服务端的 `recon.responseTimeout`，否则仍被压到 `responseTimeout - 30`。配置文件位置见 [配置文件](/config)。
+
+## 快照格式
+
+以下是阅读 JSONL 时需要的最少背景。
+
+- 格式为 `snapshot-jsonl-v2`，每行一个事件，依次为 `snapshot_start`、`module_start`、`record`、`source_result`、`module_end`、`snapshot_end`。服务端只接受这一格式，其他版本会被拒绝。
+- `record` 的 `data.recordType` 为 `entity`、`relation`、`fact`、`evidence_file` 或插件输出的 `plugin_text`。实体和关系使用稳定 ID，可以按关系追踪，例如组件 → 进程 → Socket。
+- 每个 source 和模块的状态为 `ok`、`partial`、`unavailable` 或 `failed`；整份快照为 `complete` 或 `partial`。已检查但不存在的对象记为 `not_present`，按设计不采集的记为 `not_collected`，这两种不会让快照变成 partial。
+- 上限：单个 source 2,000 条记录；单个模块 10,000 条或 16 MiB；单个文本字段 1 MiB；整份快照 128 MiB。达到上限时停止对应采集并标记 `truncated`。
+
+## 命令行
+
+**服务端 REPL**：
+
+```bash
 >>> recon <Client ID> [Profile]
 ```
 
-```bash tab="本地模式"
-./siren recon [--profile quick|hunt]
+省略 Profile 时使用客户端的默认 Profile。命令立即返回，完成后在终端打印报告路径；保存位置与 WebUI 相同。见 [服务端 REPL](/remote)。
+
+**本地模式**（在目标主机上直接运行客户端，不连服务端）：
+
+```bash
+./siren recon [--profile quick]
 ```
 
-## WebUI 流程
-
-1. 打开 [Web 控制台](/webui#investigations)，进入 **Investigations** 页面。
-2. 在 **Recon** 表单中选择在线客户端和该客户端实际提供的 Profile。
-3. 点击 **Start Recon**，等待客户端回传阶段进度。
-4. 报告生成后，点击 **Open Report** 打开派生 Markdown。`hunt` 的 Markdown 是紧凑索引，完整证据位于同目录的权威 JSONL；部分采集完成时页面会显示简短的 partial 提示。
-
-WebUI 会展示本次 operation 的真实 Profile 与采集阶段，比如 `Recon.Basic`、`Recon.User`、`Recon.Process`、`Save report to Artifacts`。同一客户端同时只能运行一个 Recon，不同客户端可并行；冲突、断连、客户端错误和超时都会直接结束当前状态。Project 视图下只能选择当前 Project 的客户端，报告也会写入该 Project 的 Artifacts 目录。
-
-## 查看数据
-
-| 使用方式 | 保存位置 |
-| --- | --- |
-| WebUI | 保存到服务端 Artifacts；已归属 Project 的客户端写入 Project 目录，未归属客户端写入 Global Artifacts |
-| 服务端 REPL | 与 WebUI 一样保存到服务端 Artifacts，目录由客户端的 Project 归属决定 |
-| 本地模式 | 在当前目录生成 JSONL 与 Markdown，并分别上传到 OSS 的 `<oss.docObjectPath>/<file name>` |
-
-同一次本地采集会生成 `SIREN_<host>_<timestamp>.recon.jsonl` 和同名 `.md`。远程模式只传输 JSONL，服务端校验后生成 Markdown，并在保存名中加入客户端与请求标识，避免同名主机或并发结果相互覆盖；两者位于同一 Global 或 Project Artifacts 目录。`default` / `quick` 的 Markdown 保留采集正文，`hunt` 的 Markdown 只提供应用拓扑、覆盖范围和采集质量摘要。Dossier 只编辑派生 Markdown，不修改权威快照。
-
-Snapshot JSONL v2 按顺序包含 `snapshot_start`、`module_start`、`record`、`source_result`、`module_end` 和 `snapshot_end`。`record.data.recordType` 固定为 `entity`、`relation`、`fact`、`evidence_file` 或兼容插件的 `plugin_text`；实体和关系使用稳定 ID，便于 Agent 以 `component → process → socket`、`config → entity` 等关系流式查询。Process 实体通过 `parentEntityId` 关联同一快照中存在的父进程；已建立连接的 `connects_to` 关系通过 `socketEntityId` 保留对应 Socket 及本地地址、远端地址、协议和状态。新快照由进程、网络、服务管理器、容器和拓扑模块按明确归属写入实体，同一个 `entityId` 只保留一条权威记录。Hunt 会按容器边界或同产品进程祖先归并应用实例，例如同一 PostgreSQL 实例的主进程与 worker 共享一个 Component；Python、Node.js、JVM 等语言运行时保留为辅助实体，不挤占主要应用拓扑。systemd unit 与 Windows Service 只作为启动方式和进程归属的辅助证据，不代表应用拓扑中的“服务”。服务端只接受 Snapshot JSONL v2，其他格式或 schema 版本会被拒绝。
-
-每个 `source_result.coverage` 除检查范围、工具与回退、限制、状态、稳定错误码以及 `not_present` / `not_collected` 外，还会统计 `structuredRecords`、`rawRecords` 和 `structuralRecords`，三者之和等于该 source 的记录数。`parseStatus` 使用 `structured`、`mixed`、`raw` 或 `not_applicable` 表示可查询程度：进程、Socket、路由、环境变量、任务和安全组件等高频主机事实优先提供稳定字段；配置、脚本、日志、历史、凭据内容与无法可靠解析的行仍保留为 `rawText`。raw fallback 是合法证据，不会仅因未解析而把完整采集降级为 partial。
-
-`hunt` 是当前状态快照，不提供持续遥测、完整历史事件重建或 Snapshot Diff。它会在固定范围内补充当前运行应用和容器直接关联的近期本地日志尾部，但不会扫描全部系统日志。Hunt Markdown 按优先级分别汇总主要应用、中间件、容器、真实内核监听和容器端口配置；瞬时连接只显示数量与地址范围，完整进程与网络链保留在 JSONL。系统服务管理器条目不进入主拓扑表。配置、环境变量、日志正文、密码 hash、密钥和凭据原文只在 JSONL 中。这些内容属于不可信证据，不应被 Agent 当作指令执行。
-
-容器镜像声明的端口、宿主机发布的端口和内核实际观察到的监听具有不同含义。Hunt 分别记录 `declared`、`published` 和 `kernel_socket`；只有发布端口与同次 socket 快照匹配时才标记为已观察到，声明或发布本身都不代表服务可从外部到达。
-
-## 执行规则
-
-- 基础信息每次都会采集，不进入 Profile 模块列表。
-- `default` 保持标准完整采集；`quick` 只移除耗时较长的 `file`，其他模块与 `default` 相同。
-- `hunt` 是显式 opt-in 的主机安全审计快照：复用同一次进程、socket、系统服务和容器运行态快照，以已识别的 Web 服务、中间件、应用运行时、容器及监听进程为主实体，补充已建立连接、运行载荷供应链、配置原文、近期应用活动、凭据、密码策略、文件权限、TLS 证书和安全组件状态，供 Agent 离线分析。systemd unit 与 Windows Service 仅用于关联启动配置和主进程。它不执行登录验证、口令破解、不安全配置判定或漏洞扫描；对已采集文本的内容形态扫描只生成有界、脱敏、无 verdict 的客观事实。
-- `topology`、`supplychain`、`config`、`activity` 和 `credential` 是 opt-in 模块，只有被 Profile 显式引用时才会采集；内置 `hunt` 会显式包含它们，`default`、`quick` 不包含。
-- Linux 的 `rootkit` 模块仍可由 `default`、`quick` 或用户自定义 Profile 采集，但不进入 `hunt`；其行为仍只是已加载内核模块快照，不包含 Rootkit 检测或 symbol 匹配。
-- Profile 列表只表达集合；内置模块始终按固定顺序执行，插件按名称排序，保证报告稳定。
-- recon 类型插件必须以 `plugin:<name>` 显式写入 Profile，并由 `plugins.<name>` 控制启停。安装插件不会自动修改 Profile；Profile 引用缺失或禁用插件时，采集会在开始前失败。现有文本插件按 `plugin_text` / `text/markdown` 写入快照，插件执行错误会使快照变为 partial。
-- `chkrootkit` 仍是可选 recon 插件，但不进入任何预置 Profile。插件输出不代表 Recon 核心具备检测能力。
-- 每个 source 的底层采集命令都有独立超时，默认 30 秒，可通过[客户端配置](/config#客户端配置)中的 `recon.commandTimeout` 修改。某个 source 超时不会占用后续 source 的预算，未完成状态会关联到实际 source。
-- 整个 Profile 默认有 270 秒客户端采集预算，可通过 `recon.collectionTimeout` 修改。远程请求还会根据服务端等待时间下发更短预算；预算耗尽会保留已完成的 Basic 和模块结果，并明确列出未执行模块。服务端等待超时时会结束 operation、释放该客户端的单飞占用并请求取消；迟到 artifact 仍可安全保存，但不会关联到新 operation。
-- Recon 不安装 `netstat`、`lsof` 或其他软件。Linux socket 依次尝试已安装的 `ss`、`netstat`，路由依次尝试 `ip`、`route`，已删除但仍打开的文件优先读取 `/proc`、已有 `lsof` 时回退；都不可用时明确记录 `unavailable`。
-- Linux 文件模块按底层文件系统去重真实本地挂载，每个文件系统只遍历一次，并从同一遍历生成 SUID、最近 24 小时 mtime/ctime 和大文件视图；Windows 大目录、进程、socket、任务和服务查询按稳定字段排序后再应用数量上限。
-- 单个 source 最多 2,000 条；单个模块最多 10,000 条或 16 MiB；单个文本字段最多 1 MiB；整份快照最多 128 MiB。达到上限时停止对应采集并记录 `truncated=true`。
-- `config` 对运行参数、service、`EnvironmentFile`、include/reference、单文件容器挂载和支持产品的标准配置保留完整内容，每文件上限 256 KiB。应用工作目录、可执行目录和目录型容器挂载中的普通 JSON/YAML/XML/TOML 只稳定选择最多 64 个：文件实体保存完整元数据，另附最多 64 KiB 的 `evidence_preview` 前缀；preview 是声明范围，不会仅因原文件较大产生 partial。每次仍最多选择 500 个文件、遍历 100,000 个目录项；include/reference 闭包最多检查 500 个文件、深度最多 4 层。运行输出、会话、报告、日志、开发 fixture、依赖、构建产物、容器层和业务源码默认排除，被运行态直接引用的文件可覆盖 broad discovery 排除。
-- `supplychain` 只覆盖同一次运行态拓扑中的主应用、中间件、真实监听程序、运行中容器载荷及关联语言运行时，不生成全系统软件包清单。每次最多对 128 个不同可执行文件做流式 SHA-256，reader 会同时执行 64 MiB 单文件上限和 512 MiB 总读取上限；读取失败前已经消费的字节也计入总量，读取期间变化的文件不会输出可能不一致的摘要。进程、Socket 或容器 producer 只返回部分事实时，已取得的证据仍保留但 source 为 partial；producer 失败且没有事实时记为 unavailable，容器 runtime 确认未安装才记为 `not_present`。版本仅从对应系统包、Windows 文件元数据或 Go build info 获取。依赖清单只从运行载荷工作目录、可执行目录、显式参数和运行中容器挂载中发现，最大深度 2、最多 64 个文件；超过 256 KiB 的文件保存完整元数据并附最多 64 KiB preview，不因这项声明范围单独产生 partial。容器镜像只记录本地运行时已经返回的 image/tag/digest，不访问 registry 或扫描镜像层。
-- evidence metadata 的完整文件 SHA-256 另受每文件 8 MiB、每份 Snapshot 合计 64 MiB 的读取边界约束；超出时保存已声明前缀的摘要，并用 `hashScope`、`hashBytes` 和 `hashOmittedReason` 明确实际覆盖范围，不把前缀摘要伪装成全文件摘要。
-- 同一路径被 `supplychain`、`config` 和 `credential` 同时发现时，Snapshot 只写一个 canonical `evidence_file`，后续模块复用它并继续补充配置关系和 Activity 日志种子。若后续直接引用需要比先前 preview 更大的已采集前缀，会写入以 `fileEntityId` 关联的 `evidence_content` fact，而不是复制文件实体。文件类型由路径和内容属性确定，因此先被 `config` 发现的凭据文件仍标记为 `credential_file`。文件扫描 coverage 分开记录 selected、processed、collected、failed、reused、full、truncated、preview 和 binary metadata 数量；Hunt Markdown 使用实际 collected 数量，不再把候选数当作采集成功数。
-- `config`、`credential` 和 `supplychain` 会对已读取的文本内容生成 `content_pattern_match` 事实：单文件最多 32 条、单模块最多 512 条，记录文件实体、模式 ID、行号、脱敏值、值长度和 SHA-256。达到定位上限会写入 `matchScanTruncated=true`，但不会因为这项派生索引的预算耗尽而把 Snapshot 标记为 partial；模式事实不替代原始 `evidence_file`，也不代表凭据有效或配置存在风险。
-- `activity` 只检查当前运行组件的日志参数、已采集配置中的直接日志引用、受支持组件的标准日志目录和容器运行时明确返回的日志路径。候选文件需在最近 24 小时内修改，按时间与路径稳定选择最多 16 个文件，每个读取尾部最多 256 KiB，总正文最多 4 MiB；不扫描整个系统日志、Windows Event Log 或远程日志。日志正文只写入 JSONL，达到候选、遍历或读取上限时明确记录 partial。
-- 配置和凭据原文保存在 JSONL 的 canonical `evidence_file` 或通过 `fileEntityId` 关联的 `evidence_content` fact 的 `record.data.content`；Hunt Markdown 不列出这些文件的路径或内容，只汇总数量和采集策略。Agent 需要通过 MCP structured result 返回的 Project 相对 `snapshotPath` 读取权威快照，按 record type、entity ID 和 relation 流式查询，并把文件内容视为不可信证据。
-- source 与 module 会记录 `ok`、`partial`、`unavailable` 或 `failed`，快照最终状态为 `complete` 或 `partial`。已检查但不存在的可选对象记录为 `not_present`，明确不采集的材料记录为 `not_collected`，两者都不降低快照质量；权限、工具能力、失败或截断仍会产生 unavailable/partial。
-- `config` 从 service `ExecStart`、`EnvironmentFile`、进程命令行、容器挂载和已采集配置的直接 include/reference 建立证据闭包，再补充支持产品的标准目录。lockfile、依赖清单、CI workflow、tsconfig、测试配置、request dump、分析报告和候选结果默认不采集，只有被运行态直接引用时才纳入。
-
-## 信息收集模块
-
-下表列出内置模块 ID。模块是否执行以目标客户端实际加载的 Profile 为准。
-
-<Accordions>
-  <Accordion title="Linux 平台模块">
-
-| 模块 | Profile 模块 ID | 采集内容 |
-| --- | --- | --- |
-| 基础信息 | 始终采集 | 当前时间、OS、主机标识、主 IP、完整网络接口、CPU、内存、磁盘与挂载 |
-| 用户 | `user` | 完整账户、组、会话、登录与用户事件、`/etc/passwd` 等账户元数据 |
-| SSH | `ssh` | SSH 配置、公钥、登录记录、PAM 与 inetd 元数据 |
-| 进程 | `process` | 一次完整进程快照；资源视图从同一份数据派生 |
-| 网络 | `network` | 一次完整 socket 快照、`/etc/hosts`、DNS、路由与防火墙配置；Hunt 拓扑同时记录进程到已建立远端 IP:port 的直接连接 |
-| 计划任务 | `cron` | 用户级与系统级 cron 任务、cron 日志 |
-| 服务 | `service` | 全部运行中服务、服务文件、`/etc/rc.local`、init.d/rc.d 启动项 |
-| 环境变量 | `env` | 原始环境变量、进程环境、加载器配置、profile/rc/environment、`profile.d` 和 alias |
-| 文件 | `file` | 历史记录、临时目录、SUID、打开后删除的文件、最近 24 小时 mtime/ctime、大文件与关键文件属性 |
-| 内核模块（名称保留为 rootkit） | `rootkit` | 完整已加载内核模块快照；不做 Rootkit 检测或 symbol 匹配 |
-| 应用 | `application` | Redis、当前已安装的 Docker、CRI 与 Podman 容器运行时等客观配置；进程相关视图从 process 数据获取 |
-| 应用与服务拓扑 | `topology` | 按实例归并的 Web 服务、中间件、监听工具、容器、进程、真实 Socket 与容器端口配置，以及直接可观测的 `runs`、`listens`、`connects_to`、`mounts`、`configured_by`、`uses_runtime` 关系；组件版本来自系统包、文件元数据或 Go build info，`java -jar` 启动的应用另记录 JAR 路径及可用的 manifest 名称和版本；语言运行时和 systemd unit 仅作为辅助证据 |
-| 配置与部署材料 | `config` | 运行态引用、include/reference、标准产品目录、systemd、Compose、Kubernetes manifest 和常见配置原文；broad 普通结构化文件只保存完整元数据与有界 preview，开发材料和运行输出默认不采集 |
-| 近期应用活动 | `activity` | 当前运行应用与容器直接关联的近期本地日志尾部；固定 24 小时候选窗口和有界文件/字节范围，正文仅写入 JSONL |
-| 凭据与认证材料 | `credential` | Linux 密码 hash 与策略、SSH 私钥、云 CLI、Kubernetes、Docker、数据库和包管理器客户端凭据文件原文或二进制元数据 |
-| 运行载荷供应链证据 | `supplychain` | 运行应用、监听程序和容器载荷的可执行文件 SHA-256、对应版本来源、依赖清单/有界 preview 与容器镜像引用；不枚举全系统软件包、不访问 registry，也不判断漏洞、可信度或篡改 |
-
-  </Accordion>
-  <Accordion title="Windows 平台模块">
-
-| 模块 | Profile 模块 ID | 采集内容 |
-| --- | --- | --- |
-| 基础信息 | 始终采集 | 当前时间、OS、主机标识、主 IP、完整网络接口、CPU、内存、磁盘与挂载 |
-| 用户 | `user` | 完整本地账户、本地组与成员、当前会话、登录和用户事件 |
-| 进程 | `process` | 一次完整进程快照，包括父进程、路径、命令行、创建时间和内存字段 |
-| 网络 | `network` | TCP/UDP socket 快照、hosts、DNS、路由和网络共享 |
-| 计划任务 | `schtask` | 计划任务名称、状态、用户、动作和触发器，以及启动文件夹、系统启动项、注册表启动项（Run/RunOnce）和服务启动项 |
-| 环境变量 | `env` | 原始环境变量、PATH、PowerShell 配置与历史、Windows Defender 排除项 |
-| 文件 | `file` | 临时目录、最近访问文件、近 30 天变更的系统目录可执行文件、近 1 天变更的系统日志、启动目录文件、卷影副本 |
-| 应用 | `application` | 远程桌面、IIS、近 3 天 IIS 日志和 Windows Defender 客观配置 |
-| 应用与服务拓扑 | `topology` | 按实例归并的 Web 服务、中间件、监听工具、容器、进程、真实 Socket 与容器端口配置及其直接可观测关系；语言运行时和 Windows Service 仅作为辅助证据 |
-| 运行载荷供应链证据 | `supplychain` | 运行应用、监听程序和容器载荷的可执行文件 SHA-256、Windows 文件版本或 Go build info、依赖清单/有界 preview 与容器镜像引用；不枚举全部已安装软件，也不判断漏洞或可信度 |
-| 配置与部署材料 | `config` | 进程/服务目录、IIS、Docker、containerd、Compose、Kubernetes manifest 和 appsettings/web.config；broad 普通结构化文件只保存完整元数据与有界 preview |
-| 近期应用活动 | `activity` | 当前运行应用、IIS 与容器直接关联的近期本地日志尾部；不读取 Windows Event Log，正文仅写入 JSONL |
-| 凭据与认证材料 | `credential` | 本地密码策略、账户证据、Credential Manager 元数据、AutoLogon、IIS connection string 和用户文本凭据；SAM/SECURITY/LSA 明确记为 not_collected |
-
-  </Accordion>
-</Accordions>
+在当前目录生成 `SIREN_<主机名>_<时间>.recon.jsonl` 和同名 `.md`，然后把两者上传到 OSS 的 `<oss.bucketName>/<oss.docObjectPath>/<文件名>`。上传需要先在环境变量中设置 [OSS 凭证](/server/prerequisites#oss-凭证)；上传失败时命令报错退出，本地文件保留。WebUI 和 REPL 不使用 OSS。
 
 ## 相关内容
 
 <Cards>
-  <Card title="Web 控制台：Investigations" href="/webui#investigations">
-    在浏览器中下发 Recon、查看阶段进度并打开报告
+  <Card title="Artifacts" href="/artifacts">
+    浏览、预览和下载 Recon 结果
   </Card>
-  <Card title="文件管理" href="/analysis/upload">
-    查看服务端 Artifacts 和客户端文件管理能力
+  <Card title="Agentic IR" href="/air">
+    让 Agent 触发 Recon 并基于快照分析
   </Card>
-  <Card title="配置文件" href="/config#客户端配置">
-    配置 Recon Profile、超时时间和 OSS 上传路径
+  <Card title="客户端配置" href="/config#客户端配置">
+    Profile、超时和 OSS 路径
   </Card>
-  <Card title="插件系统" href="/plugins">
-    了解 recon 类型插件如何并入信息收集报告
-  </Card>
-  <Card title="MCP 集成" href="/mcp#可用工具">
-    让 AIR 通过 `recon` MCP 工具按需触发一次采集
+  <Card title="插件" href="/plugins">
+    把 recon 插件加入 Profile
   </Card>
 </Cards>
