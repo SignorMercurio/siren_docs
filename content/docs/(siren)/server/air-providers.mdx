@@ -15,6 +15,7 @@ sources:
   - internal/server/air_codex_shared.go
   - internal/server/air_history.go
   - internal/server/air_mcp.go
+  - internal/server/mcp_auth.go
   - scripts/install_pi_provider.sh
   - scripts/merge_pi_provider_config.mjs
   - config/pi-agent/
@@ -32,7 +33,7 @@ Agentic IR（AIR）会话运行在 SIREN 服务端上：服务端以 `siren_serv
 ## 前置条件
 
 - 服务端运行在 Linux 上。SIREN 服务端只发布 `linux_amd64` 包；在 Windows 上运行的服务端，AIR 的 GUI 和 Terminal 两种界面都不可用。
-- 已启用 MCP，配置好 `SIREN_MCP_ADMIN_TOKEN`、`SIREN_MCP_RAVEN_TOKEN`，并设置 `webui.publicURL`，详见 [前置条件与凭证](/server/prerequisites)。所有入口（包括 Manual）都会注入当前范围的 SIREN MCP。`webui.publicURL` 缺失或无效时，Provider 状态仍可能显示可用，但启动任何会话都会失败，并报 `webui.publicURL is required for AIR MCP` 或 `webui.publicURL must ...`。
+- 已启用 MCP，配置好 `SIREN_MCP_ADMIN_TOKEN`，并设置 `webui.publicURL`，详见 [前置条件与凭证](/server/prerequisites)。所有入口（包括 Manual）都会注入当前范围的 SIREN MCP。`webui.publicURL` 缺失或无效时，Provider 状态仍可能显示可用，但启动任何会话都会失败，并报 `webui.publicURL is required for AIR MCP` 或 `webui.publicURL must ...`。
 
 ## 支持的 Provider
 

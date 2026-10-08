@@ -17,5 +17,5 @@ checked against) and `sources` (the code its claims depend on).
 When documenting a new release, run it, update each listed page against the new
 code, then set its `verifiedAgainst` to the new version. When a page starts
 describing new code, add those paths to its `sources`. The check needs sibling
-checkouts at `../siren`, `../dossier`, and `../raven`, or the `SIREN_DIR`,
-`DOSSIER_DIR`, and `RAVEN_DIR` environment variables.
+checkouts at `../siren` and `../dossier`, or the `SIREN_DIR` and `DOSSIER_DIR`
+environment variables.

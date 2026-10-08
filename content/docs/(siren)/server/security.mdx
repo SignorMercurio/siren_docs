@@ -33,7 +33,6 @@ SIREN Server 在一个 TLS 端口上同时提供 Web 控制台、MCP 和客户�
 | --- | --- | --- |
 | Web 控制台页面与 `/api/*` | 登录会话 Cookie | 启动时没有任何账号则完全不鉴权，见 [WebUI 账号](#webui-账号) |
 | `/mcp`、`/mcp/project/<id>` | Bearer 凭证 | 与 WebUI 会话无关，关闭 WebUI 后仍然要求，见 [MCP 鉴权](#mcp-鉴权) |
-| `/api/mcp/group-session` | Raven 服务凭证 | 只能换取 Project 凭证 |
 | 托管客户端连接 | 无 | 依靠网络放行控制来源，见 [客户端与服务端之间](#客户端与服务端之间) |
 | `/dossier/` | 无 | 见 [`/dossier/` 不鉴权](#dossier-不鉴权) |
 | 登录页、前端静态文件、`/api/version` | 无 | `/api/version` 返回服务端版本号 |
@@ -78,15 +77,15 @@ cd /opt/siren
 
 ## MCP 鉴权
 
-所有 MCP 请求都必须携带 `Authorization: Bearer <token>`，WebUI 登录会话不能代替它。只有管理凭证 `SIREN_MCP_ADMIN_TOKEN` 能访问全局 `/mcp` 和任意 Project；Raven 和 AIR 使用的都是限定到单个范围、会过期或随会话吊销的凭证，签发的凭证只在内存中，服务端重启后全部失效。各类凭证的范围和有效期见 [MCP 鉴权](/reference/mcp#鉴权)。
+所有 MCP 请求都必须携带 `Authorization: Bearer <token>`，WebUI 登录会话不能代替它。只有管理凭证 `SIREN_MCP_ADMIN_TOKEN` 能访问全局 `/mcp` 和任意 Project；AIR 使用的是限定到单个范围、随会话吊销的凭证，签发的凭证只在内存中，服务端重启后全部失效。各类凭证的范围和有效期见 [MCP 鉴权](/reference/mcp#鉴权)。
 
 Agentic IR 启动 Provider CLI 时：
 
-- 从子进程环境中剔除 `SIREN_MCP_ADMIN_TOKEN`、`SIREN_MCP_RAVEN_TOKEN` 和 `RAVEN_SIREN_MCP_TOKEN`，Agent 拿不到管理凭证。
+- 从子进程环境中剔除 `SIREN_MCP_ADMIN_TOKEN` 等长期 MCP 凭证，Agent 拿不到管理凭证。
 - 会话凭证通过会话期间存在的私有配置文件或环境变量传入，不出现在命令行参数和 Provider 的持久配置中。
 - 其他环境变量原样继承，包括 `SOAR_ACCESS_KEY_*` 和 `ALIBABA_CLOUD_ACCESS_KEY_*`。Agent 能在控制主机上执行命令时，就能读到这些凭证。
 
-外部 MCP 客户端的配置和工具列表见 [MCP](/reference/mcp)，Raven 见 [Raven 群项目](/reference/raven)。
+外部 MCP 客户端的配置和工具列表见 [MCP](/reference/mcp)。
 
 ### 命令黑名单只作用于 MCP
 
@@ -121,7 +120,7 @@ Logs 页面不区分账号，也不按 Project 过滤，任何已登录账号都
   - 启动前用 `siren_server user add` 创建至少一个账号，启动后在 Settings 中确认 **Authentication** 显示已登录用户。
   - 使用覆盖访问域名、且受浏览器信任的证书，见 [更换证书](/server#更换证书)。
   - 用安全组、防火墙或 VPN 把主 TLS 端口限制为操作者和已放行的目标主机；端口转发的监听端口同样只对需要的来源开放。
-  - 为 `SIREN_MCP_ADMIN_TOKEN` 和 `SIREN_MCP_RAVEN_TOKEN` 使用不同的高强度随机值，保存在权限为 `600` 的 `.env` 或服务环境中。
+  - 为 `SIREN_MCP_ADMIN_TOKEN` 使用高强度随机值，保存在权限为 `600` 的 `.env` 或服务环境中。
   - 只把 WebUI 账号发给可信操作员；人员变动时删除账号并重启服务端。
   - 不要在 Dossier 目录中放置其他文件，也不要在 Blank template 中粘贴敏感截图。
 </Callout>

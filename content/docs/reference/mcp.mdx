@@ -40,7 +40,6 @@ MCP 由 `server_config.yaml` 中的 `mcp.enabled` 控制，默认 `true`，与 `
 | --- | --- |
 | `/mcp` | Global：可以看到和操作所有在线客户端 |
 | `/mcp/project/<id>` | 单个 Project：`ls` 只列出该 Project 的客户端；`run`、`run_batch`、`recon` 拒绝其他客户端；结果回读只能读同一端点产生的结果；`deploy` 新接入的客户端归入该 Project |
-| `/api/mcp/group-session` | Raven 的凭证申请接口，不是 MCP 端点，见 [Raven 群项目](/reference/raven) |
 
 `<id>` 是 Project ID，形如 `project-3`。在 WebUI 中切换到该 Project 后，浏览器地址栏的 `?project=` 参数就是它。
 
@@ -64,11 +63,9 @@ MCP 由 `server_config.yaml` 中的 `mcp.enabled` 控制，默认 `true`，与 `
 | 凭证 | 来源 | 可访问 | 有效期 |
 | --- | --- | --- | --- |
 | 管理凭证 | 服务端环境变量 `SIREN_MCP_ADMIN_TOKEN` | `/mcp` 和任意 `/mcp/project/<id>` | 长期 |
-| Raven 服务凭证 | 服务端环境变量 `SIREN_MCP_RAVEN_TOKEN` | 只能调用 `/api/mcp/group-session` 申请群项目凭证，不能调用任何 MCP 工具 | 长期 |
-| Raven 项目凭证 | 用服务凭证申请 | 只能访问对应的 `/mcp/project/<id>` | 1 小时 |
 | AIR 会话凭证 | 每个 AIR 会话启动时签发 | Project 会话只能访问本 Project 的路径，Global 会话只能访问 `/mcp` | 会话结束时吊销 |
 
-- `mcp.enabled` 为 `true` 时，两个环境变量必须都非空且互不相同，否则服务端启动即退出，报 `MCP requires distinct SIREN_MCP_ADMIN_TOKEN and SIREN_MCP_RAVEN_TOKEN`。不使用 MCP 和 AIR 时，可以设 `mcp.enabled: false`。
+- `mcp.enabled` 为 `true` 时，`SIREN_MCP_ADMIN_TOKEN` 必须非空，否则服务端启动即退出，报 `MCP requires SIREN_MCP_ADMIN_TOKEN`。不使用 MCP 和 AIR 时，可以设 `mcp.enabled: false`。
 - 签发的凭证只保存在服务端内存中，服务端重启后全部失效。同时有效的签发凭证最多 10,000 个，用满后新的签发会失败。
 - 凭证放在受保护的服务环境文件中，不要写进 `server_config.yaml`、Project 目录、URL 或聊天消息。各类凭证的安全含义见 [MCP 鉴权](/server/security#mcp-鉴权)。
 
@@ -76,7 +73,7 @@ MCP 由 `server_config.yaml` 中的 `mcp.enabled` 控制，默认 `true`，与 `
 
 每个 AIR 会话（GUI 或 Terminal）启动时，服务端为它签发一个绑定会话范围的凭证，会话结束时立即吊销。MCP 地址由 `webui.publicURL` 加上 `/mcp` 或 `/mcp/project/<id>` 拼成；`webui.publicURL` 为空或不是纯 HTTPS Origin 时，会话无法启动，分别报 `webui.publicURL is required for AIR MCP`、`webui.publicURL must be an absolute https URL` 或 `webui.publicURL must contain only an https origin`。
 
-启动 Provider 进程时，服务端先从继承的环境中删除 `SIREN_MCP_ADMIN_TOKEN`、`SIREN_MCP_RAVEN_TOKEN`、`RAVEN_SIREN_MCP_TOKEN` 和已有的 `SIREN_AIR_MCP_TOKEN`，再把本会话凭证写入 `SIREN_AIR_MCP_TOKEN`。各 Provider 读取凭证的方式：
+启动 Provider 进程时，服务端先从继承的环境中删除 `SIREN_MCP_ADMIN_TOKEN` 等长期 MCP 凭证和已有的 `SIREN_AIR_MCP_TOKEN`，再把本会话凭证写入 `SIREN_AIR_MCP_TOKEN`。各 Provider 读取凭证的方式：
 
 | Provider | 注入方式 |
 | --- | --- |
@@ -371,9 +368,6 @@ MCP 的日志记录在服务端日志中，组件为 `mcp`，可以在 [Logs](/l
 <Cards>
   <Card title="Agentic IR" href="/air">
     在 WebUI 中让 Agent 通过这些工具开展调查
-  </Card>
-  <Card title="Raven 群项目" href="/reference/raven">
-    钉钉群如何通过 Project 凭证使用 SIREN MCP
   </Card>
   <Card title="服务端配置" href="/reference/server-config">
     `mcp.*`、`webui.publicURL` 与监听端口

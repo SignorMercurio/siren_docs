@@ -274,8 +274,7 @@ SIREN 不创建日志文件，也不做轮转。Logs 页面缓冲只在内存中
 
 | 变量 | 用途 | 何时读取 |
 | --- | --- | --- |
-| `SIREN_MCP_ADMIN_TOKEN` | 运维 MCP 客户端访问 `/mcp` 和任意 `/mcp/project/<id>` 的 Bearer 凭证 | 启动时。`mcp.enabled: true` 时必填，且必须与下一项不同 |
-| `SIREN_MCP_RAVEN_TOKEN` | 只供 Raven 换取 Project 凭证。不使用 Raven 也要设置一个不同的随机值 | 启动时，要求同上 |
+| `SIREN_MCP_ADMIN_TOKEN` | 运维 MCP 客户端访问 `/mcp` 和任意 `/mcp/project/<id>` 的 Bearer 凭证 | 启动时。`mcp.enabled: true` 时必填 |
 | `SOAR_ACCESS_KEY_ID` / `SOAR_ACCESS_KEY_SECRET` | SOAR 调用凭证，用于 **Allow access**、**Configure egress**、**Restore egress**、**Deploy SIREN**、出口发现和 AccessKey 调查。两者必须成对设置 | 首次调用 SOAR 时，之后缓存；见 [SOAR 凭证](/server/prerequisites#soar-凭证) |
 | `ALIBABA_CLOUD_ACCESS_KEY_ID` / `ALIBABA_CLOUD_ACCESS_KEY_SECRET` | 两个 `SOAR_*` 变量都未设置时，经阿里云 SDK 默认凭证链使用 | 同上 |
 | `SOAR_TRIGGER_QPS` | 触发 SOAR 剧本的速率上限，默认 `10`。持续出现 `Throttling.User` 时调低 | 首次调用 SOAR 时 |

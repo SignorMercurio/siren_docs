@@ -10,16 +10,16 @@
 //     - dossier:src/source.js
 //
 // Sources are git pathspecs relative to the SIREN checkout. A `<repo>:` prefix
-// selects a sibling checkout instead (dossier, raven). Pages that describe no
+// selects a sibling checkout instead (dossier). Pages that describe no
 // code, such as the changelog, declare `sources: []`.
 //
 // Sibling sources are compared against `<repo>VerifiedAgainst` (for example
-// `ravenVerifiedAgainst: v1.16.0` or a commit) when the page sets it, and
+// `dossierVerifiedAgainst: 6a69582` or a release tag) when the page sets it, and
 // otherwise against the sibling commit that was current when the SIREN
 // version was released.
 //
 // Usage: node scripts/check-drift.mjs [--strict]
-//   SIREN_DIR, DOSSIER_DIR, RAVEN_DIR override the sibling checkout paths.
+//   SIREN_DIR and DOSSIER_DIR override the sibling checkout paths.
 //   --strict exits 1 when any page is stale, unmapped, or names a source that
 //   matches no tracked file.
 
@@ -32,7 +32,6 @@ const docsDir = join(root, 'content/docs');
 const repos = {
   siren: process.env.SIREN_DIR ?? resolve(root, '../siren'),
   dossier: process.env.DOSSIER_DIR ?? resolve(root, '../dossier'),
-  raven: process.env.RAVEN_DIR ?? resolve(root, '../raven'),
 };
 const strict = process.argv.includes('--strict');
 // Pages verified this many minor versions behind the current release are

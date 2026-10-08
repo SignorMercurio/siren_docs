@@ -41,9 +41,11 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
 </Accordion>
 
-<Accordion title="启动时报 MCP requires distinct SIREN_MCP_ADMIN_TOKEN and SIREN_MCP_RAVEN_TOKEN">
+<Accordion title="启动时报 MCP requires SIREN_MCP_ADMIN_TOKEN">
 
-默认启用 MCP 时，这两个环境变量必须非空且互不相同。写入工作目录下的 `.env` 即可，见 [MCP 凭证](/server/prerequisites#mcp-凭证)。
+默认启用 MCP 时，环境变量 `SIREN_MCP_ADMIN_TOKEN` 必须非空。写入工作目录下的 `.env` 即可，见 [MCP 凭证](/server/prerequisites#mcp-凭证)。
+
+v2.33.12 及更早版本报 `MCP requires distinct SIREN_MCP_ADMIN_TOKEN and SIREN_MCP_RAVEN_TOKEN`：这些版本还要求再设置一个与它不同的随机值 `SIREN_MCP_RAVEN_TOKEN`，升级后可以删除。
 
 </Accordion>
 

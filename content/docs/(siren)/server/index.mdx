@@ -89,14 +89,13 @@ cd /opt/siren
 
 ### 配置 MCP 凭证
 
-默认配置启用 MCP。服务端要求环境变量 `SIREN_MCP_ADMIN_TOKEN` 和 `SIREN_MCP_RAVEN_TOKEN` 均非空且互不相同，否则拒绝启动。Agentic IR 也依赖这两个凭证。最简单的做法是写入工作目录下的 `.env`：
+默认配置启用 MCP。服务端要求环境变量 `SIREN_MCP_ADMIN_TOKEN` 非空，否则拒绝启动。Agentic IR 也依赖这个凭证。最简单的做法是写入工作目录下的 `.env`：
 
 ```bash title="控制主机"
 cd /opt/siren
 umask 077
 cat > .env <<EOF
 SIREN_MCP_ADMIN_TOKEN=$(openssl rand -hex 32)
-SIREN_MCP_RAVEN_TOKEN=$(openssl rand -hex 32)
 EOF
 ```
 

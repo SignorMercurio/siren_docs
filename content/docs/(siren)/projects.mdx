@@ -7,7 +7,6 @@ sources:
   - internal/server/projects.go
   - internal/server/project_names.go
   - internal/server/project_storage.go
-  - internal/server/group_projects.go
   - internal/server/handler_recon.go
   - internal/server/handler.go
   - internal/server/app.go
@@ -122,10 +121,6 @@ Project ID 的格式是 `project-<编号>`，可以在 Artifacts 链接的 `?pro
 - **Recon 结果跟随客户端的归属**，与当前视图无关。在 Global 中对已归属 Project 的客户端执行 Recon，结果写入该 Project 目录。
 - **服务端 REPL 的 `upload` 始终写入 Global**，路径是服务端工作目录下的 `uploads/client-<Client ID>/`，即使客户端已归属某个 Project。
 - **`/mcp` 端点不受 Project 限制**：使用 `SIREN_MCP_ADMIN_TOKEN` 的外部代理能看到所有客户端。
-
-## Raven 群项目
-
-Raven 为每个钉钉群自动创建并绑定一个 Project。群绑定的 Project 不能删除，点击 **Delete project** 会报 `group-bound projects cannot be deleted`；命名和权限规则见 [Raven 群项目](/reference/raven)。
 
 ## 数据存放位置
 

@@ -118,7 +118,7 @@ Settings 中服务端的 **Version** 与 Clients 页每台客户端的 **Version
 | 位置 | 要求 | 不满足时的报错 |
 | --- | --- | --- |
 | 服务端 `cert` / `key` | 证书和私钥能加载 | `configure server TLS: ...` |
-| 服务端环境变量 | `mcp.enabled` 为 `true`（默认）时，`SIREN_MCP_ADMIN_TOKEN` 和 `SIREN_MCP_RAVEN_TOKEN` 非空且不同 | `MCP requires distinct SIREN_MCP_ADMIN_TOKEN and SIREN_MCP_RAVEN_TOKEN` |
+| 服务端环境变量 | `mcp.enabled` 为 `true`（默认）时，`SIREN_MCP_ADMIN_TOKEN` 非空 | `MCP requires SIREN_MCP_ADMIN_TOKEN` |
 | 服务端 `egress.rules` | `webui.enabled` 为 `true`（默认）时，1–20 条有效规则 | `egress.rules...` 开头的错误 |
 | 客户端 `recon.profiles`、`recon.defaultProfile` | 都已定义，且默认 Profile 在列表中 | `invalid Recon Profile configuration: ...` |
 
@@ -193,7 +193,7 @@ diff /opt/siren/server_config.yaml /tmp/server_config.new.yaml
 
 按 [备份](#备份) 停止旧服务端并打包，在新主机上解压到**相同的绝对路径**。`data/projects.json` 记录的是 Project 目录的绝对路径，路径变化后对应的 Project 无法访问，见 [基准目录](/projects#基准目录)。各 Provider 按工作目录保存会话历史，路径不变才能在 History 中继续旧会话。
 
-保留 `.env` 中的 `SIREN_MCP_ADMIN_TOKEN` 和 `SIREN_MCP_RAVEN_TOKEN` 不变，且访问域名不变时，外部 MCP 客户端和 Raven 不需要改配置。
+原样复制 `.env`、且访问域名不变时，外部 MCP 客户端不需要改配置。
 
 </Step>
 <Step>

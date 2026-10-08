@@ -9,6 +9,7 @@ const config = {
   async redirects() {
     return [
       { source: '/credential', destination: '/server/prerequisites', permanent: true },
+      { source: '/reference/raven', destination: '/reference/mcp', permanent: true },
       { source: '/infra', destination: '/server/prerequisites', permanent: true },
       { source: '/dossier/deploy', destination: '/server/dossier', permanent: true },
       { source: '/analysis/info', destination: '/process', permanent: true },

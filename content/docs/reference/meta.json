@@ -14,7 +14,6 @@
     "client-cli",
     "---集成---",
     "mcp",
-    "raven",
     "---插件---",
     "plugins",
     "plugin-dev",

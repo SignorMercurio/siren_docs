@@ -119,7 +119,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 1. **完成报告并导出需要留存的材料**。在 [Reports](/reports) 中完成事件报告；需要保留 AIR 会话过程时，在 GUI 中[导出 Markdown](/air/gui#导出-markdown)。还需要从受害主机取回的文件，用 [Files](/files) 下载，清理后就无法再访问。
 2. **清理客户端**。按[上文](#在-webui-中清理)对本次事件的所有客户端执行 **Clean & terminate**，在 Recent activity 中确认每条都是 **Files cleaned** 或 **Deletion scheduled**；其余状态登录主机核对。
 3. **恢复出站规则**。如果用过 **Configure egress**，在 Provisioning 面板的 **Restore egress** 标签中恢复，见 [恢复出站规则](/restore-egress)。顺序必须在清理之后，因为恢复会切断客户端回连。清理成功后面板会提示 `N cleaned clients have egress changes to restore`，点 **Review** 即可选中对应记录；这个提示依赖内存中的清理记录，服务端重启后不再出现，但恢复记录本身仍在。**Allow access**（包括一键部署时自动执行的那一步）为客户端 IP 添加的入方向放行没有恢复记录，Restore egress 不会撤销，不再需要时到云端手动移除。
-4. **处理 Project**。可以保留 Project 以便日后查阅；也可以在 Projects 页点 **Delete project**，它只删除 Project 元数据并解除客户端归属，Project 目录和其中的文件都保留在服务端。Raven 群绑定的 Project 不能删除。见 [Project 范围](/projects#管理-project)。
+4. **处理 Project**。可以保留 Project 以便日后查阅；也可以在 Projects 页点 **Delete project**，它只删除 Project 元数据并解除客户端归属，Project 目录和其中的文件都保留在服务端。见 [Project 范围](/projects#管理-project)。
 5. **按需备份**。证据和状态都在服务端磁盘上：
    - 服务端工作目录：其中的 `data/`（账号库、Project 元数据、客户端身份映射、备注、出站恢复记录）、`.env`，以及 Global 范围的 Artifacts。
    - 各 Project 目录（位于 `webui.projectsBaseDir` 下），包含该 Project 的 Recon 结果、AIR 产出和报告。

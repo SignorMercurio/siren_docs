@@ -35,7 +35,7 @@ SIREN 由一台控制主机上的 SIREN Server 和装在目标主机上的客户
 
 ### 部署服务端
 
-在控制主机上用 root 运行安装脚本，创建 Web 控制台账号，并把两个不同的 MCP 凭证写入工作目录下的 `.env`：
+在控制主机上用 root 运行安装脚本，创建 Web 控制台账号，并把 MCP 管理凭证写入工作目录下的 `.env`：
 
 ```bash title="控制主机"
 curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren_server.sh | sh
@@ -44,7 +44,6 @@ cd /opt/siren
 umask 077
 cat > .env <<EOF
 SIREN_MCP_ADMIN_TOKEN=$(openssl rand -hex 32)
-SIREN_MCP_RAVEN_TOKEN=$(openssl rand -hex 32)
 EOF
 ```
 

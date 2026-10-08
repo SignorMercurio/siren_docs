@@ -33,7 +33,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 | --- | --- | --- | --- |
 | [TLS 证书和私钥](#tls-证书和私钥) | 所有连接 | `cert` / `key` | 服务端无法启动 |
 | [WebUI 用户库](#webui-用户库) | Web 控制台登录 | `siren_server user add`、`webui.userDBPath` | Web 控制台不鉴权，任何人可匿名操作 |
-| [MCP 凭证](#mcp-凭证) | MCP、Agentic IR、Raven | 环境变量 | 启用 MCP 时服务端拒绝启动；Agentic IR 无法启动会话 |
+| [MCP 凭证](#mcp-凭证) | MCP、Agentic IR | 环境变量 | 启用 MCP 时服务端拒绝启动；Agentic IR 无法启动会话 |
 | [出站规则 `egress.rules`](#出站规则-egressrules) | **Configure egress**、客户端部署 | `server_config.yaml` | 启用 WebUI 时服务端拒绝启动；未启用 WebUI 时部署失败 |
 | [出口发现 `egress.discovery`](#出口发现-egressdiscovery) | 部署时自动识别目标主机出口 IP | `server_config.yaml`，云防火墙日志 | 使用内置默认值；查询失败时需手动填写出口 IP |
 | [SOAR 凭证](#soar-凭证) | **Allow access**、**Configure egress**、**Restore egress**、**Deploy SIREN**、出口发现、AccessKey 调查 | 环境变量 | 这些操作报错，其他功能不受影响 |
@@ -56,13 +56,12 @@ MCP 凭证和 SOAR 凭证都通过环境变量读取，不要写进 `server_conf
 
 ```bash title="/opt/siren/.env"
 SIREN_MCP_ADMIN_TOKEN=<随机字符串>
-SIREN_MCP_RAVEN_TOKEN=<另一个随机字符串>
 SOAR_ACCESS_KEY_ID=<AccessKey ID>
 SOAR_ACCESS_KEY_SECRET=<AccessKey Secret>
 ```
 
 <Callout title="AIR 子进程会继承服务端环境" type="warn">
-  Agentic IR 启动 Provider CLI 时会剔除 `SIREN_MCP_ADMIN_TOKEN`、`SIREN_MCP_RAVEN_TOKEN` 和 `RAVEN_SIREN_MCP_TOKEN`，但其他环境变量原样传入，包括 SOAR 和阿里云 AccessKey。详见 [账号与安全边界](/server/security#mcp-鉴权)。
+  Agentic IR 启动 Provider CLI 时会剔除 `SIREN_MCP_ADMIN_TOKEN` 等长期 MCP 凭证，但其他环境变量原样传入，包括 SOAR 和阿里云 AccessKey。详见 [账号与安全边界](/server/security#mcp-鉴权)。
 </Callout>
 
 ## TLS 证书和私钥
@@ -84,19 +83,13 @@ SOAR_ACCESS_KEY_SECRET=<AccessKey Secret>
 
 ## MCP 凭证
 
-- **用于**：`/mcp` 和 `/mcp/project/<id>` 的 Bearer 鉴权、Agentic IR 会话访问 SIREN 工具、Raven 申请群项目凭证。
-- **配置**：两个环境变量，必须都非空且互不相同：
-
-| 变量 | 用途 |
-| --- | --- |
-| `SIREN_MCP_ADMIN_TOKEN` | 运维用 MCP 客户端访问全局 `/mcp` 或任意 Project 路径 |
-| `SIREN_MCP_RAVEN_TOKEN` | 只用于 Raven 换取一小时有效的 Project 凭证，不能直接调用 MCP 工具。Raven 侧的 `RAVEN_SIREN_MCP_TOKEN` 须与它相同 |
-
-- **缺失时**：`mcp.enabled: true`（默认）时服务端拒绝启动，提示 `MCP requires distinct SIREN_MCP_ADMIN_TOKEN and SIREN_MCP_RAVEN_TOKEN`。不使用 Raven 也要为 `SIREN_MCP_RAVEN_TOKEN` 设置一个不同的随机值。
+- **用于**：`/mcp` 和 `/mcp/project/<id>` 的 Bearer 鉴权、Agentic IR 会话访问 SIREN 工具。
+- **配置**：环境变量 `SIREN_MCP_ADMIN_TOKEN`，非空的随机字符串。运维用 MCP 客户端凭它访问全局 `/mcp` 或任意 Project 路径。
+- **缺失时**：`mcp.enabled: true`（默认）时服务端拒绝启动，提示 `MCP requires SIREN_MCP_ADMIN_TOKEN`。
 
 可以用 `openssl rand -hex 32` 生成。Agentic IR 不需要手工配置 MCP：每个会话会自动获得只在会话期间有效的凭证。外部 MCP 客户端的接入方法见 [MCP 集成](/reference/mcp#端点)。
 
-也可以设置 `mcp.enabled: false` 关闭 MCP，此时不再要求这两个变量；但 Agentic IR 通过 MCP 操作客户端，关闭后无法使用。
+也可以设置 `mcp.enabled: false` 关闭 MCP，此时不再要求这个变量；但 Agentic IR 通过 MCP 操作客户端，关闭后无法使用。
 
 ## 出站规则 `egress.rules`
 
