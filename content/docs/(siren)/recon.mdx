@@ -58,6 +58,8 @@ Recon 只采集事实，不判断主机是否被入侵，也不做白名单、�
 
 除了手动发起，AIR 会话也会通过 MCP 工具 `recon` 按需触发采集，外部 Agent 同样可以调用，参数是 `client_id` 和可选的 `profile`，见 [MCP](/reference/mcp#工具)。三种入口（WebUI、MCP、服务端 REPL）共用同一套规则和保存位置。
 
+![Investigations 页的 Recon 标签，已选择客户端和 hunt Profile](../../img/recon-start.png)
+
 ## 查看进度
 
 结果区标题行显示 `client #<ID> · <Profile> · <N> steps` 和已用时间，下方逐项列出阶段：

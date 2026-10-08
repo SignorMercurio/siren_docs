@@ -7,7 +7,10 @@
 - Preserve established Chinese terminology and the surrounding MDX structure.
 - Reuse Fumadocs components already imported by nearby pages before introducing
   a new pattern.
-- Store new documentation images under a `content/img/` directory (currently
-  absent; create it with the first image).
+- Store documentation images under `content/img/` and reference them with a
+  relative Markdown image path, for example `![alt](../../img/clients-table.png)`.
+- Capture WebUI screenshots from a local test server with example data:
+  RFC 5737 public IPs, private-range addresses, placeholder instance IDs and
+  UIDs. Never show real hosts, accounts, or paths from the capturing machine.
 - Preserve the current documentation-site visual style unless the task requests
   a redesign or visual change.
