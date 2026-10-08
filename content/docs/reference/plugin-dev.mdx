@@ -2,7 +2,7 @@
 title: 插件开发
 description: 插件清单、程序约定、构建与发布到插件市场
 icon: Code
-verifiedAgainst: v2.33.11
+verifiedAgainst: v2.33.12
 sources:
   - internal/plugin/plugin.go
   - internal/plugin/manage.go
@@ -64,7 +64,7 @@ _plugins/
 
 | 字段 | 必填 | 说明 |
 | --- | --- | --- |
-| `name` | 是 | 插件名，匹配 `^[a-zA-Z0-9][a-zA-Z0-9_-]*$`，1–128 个字符。必须与市场目录名、安装时请求的名字一致。也是配置键 `plugins.<name>` 和 Profile 引用 `plugin:<name>` 中的名字 |
+| `name` | 是 | 插件名，匹配 `^[a-zA-Z0-9][a-zA-Z0-9_-]*$`，1–64 个字符。必须与市场目录名、安装时请求的名字一致。也是配置键 `plugins.<name>` 和 Profile 引用 `plugin:<name>` 中的名字 |
 | `type` | 是 | `recon` 或 `command`。其他值的插件可以安装，但既不会进入 Recon，也不会注册为命令 |
 | `platforms` | 是 | 支持的平台列表，格式 `<GOOS>_<GOARCH>`。不包含客户端当前平台时安装失败 |
 | `entrypoint` | 是 | 可执行文件名，所有平台共用。不能为空，不能包含 `..`、`/` 或 `\` |
@@ -84,17 +84,16 @@ _plugins/
 
 这是 SIREN 客户端发布的全部平台，插件只能面向这三个。`make build-plugins` 默认只构建两个 Linux 平台。面向 Windows 时注意：
 
-- Makefile 为 Windows 生成的文件名带 `.exe`，而客户端按 `<平台>/<entrypoint>` 下载。`entrypoint` 所有平台共用，同时支持 Linux 和 Windows 的插件需要保证各平台目录下的文件名一致。
+- `entrypoint` 所有平台共用，写不带扩展名的名字（如 `myplugin`）。Windows 客户端遇到没有扩展名的 `entrypoint` 时下载并执行 `<entrypoint>.exe`，与 Makefile 为 Windows 生成的文件名一致；`entrypoint` 已带扩展名时按原样使用。
 - setup 脚本固定用 `sh` 执行，Windows 主机通常没有 `sh`，不要为 Windows 插件声明 `setup`。
 
 ### 服务端展示限制
 
-客户端上报插件列表时，服务端会截断和限制字段。超出后插件仍然安装在客户端上，但远程使用会受影响：
+客户端上报插件列表时，服务端会限制字段。超出后插件仍然安装在客户端上，但远程使用会受影响：
 
 | 项 | 上限 | 超出时 |
 | --- | --- | --- |
 | 单台客户端的插件数 | 64 | 服务端拒绝该客户端的连接握手 |
-| `name` | 64 字节 | 被截断，REPL 无法按名字调用 |
 | `version` | 64 字节 | 被截断 |
 | `usage` | 256 字节 | 被截断 |
 
@@ -160,7 +159,7 @@ dist/plugins/myplugin/
 | 文件 | 地址 |
 | --- | --- |
 | 清单 | `{marketplace}/{name}/manifest.json` |
-| 可执行文件 | `{marketplace}/{name}/{platform}/{entrypoint}` |
+| 可执行文件 | `{marketplace}/{name}/{platform}/{entrypoint}`；Windows 上不带扩展名的 `entrypoint` 加 `.exe` |
 | setup 脚本 | `{marketplace}/{name}/{setup}` |
 
 默认市场为 `https://oss-siren.oss-cn-hongkong.aliyuncs.com/plugins`。上传后在测试客户端上执行 `plugins <Client ID> install <name>`，再用 `plugins <Client ID>` 确认安装结果。

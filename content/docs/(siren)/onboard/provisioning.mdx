@@ -2,7 +2,7 @@
 title: 一键部署
 description: 通过 WebUI Provisioning 向阿里云 ECS 批量安装并接入 SIREN 客户端
 icon: CloudUpload
-verifiedAgainst: v2.33.11
+verifiedAgainst: v2.33.12
 sources:
   - internal/server/webui/frontend/src/components/Provisioning.tsx
   - internal/server/webui/frontend/src/provisioning.ts
@@ -30,7 +30,7 @@ import { Steps, Step } from "fumadocs-ui/components/steps";
 - 目标是阿里云 ECS，且云助手状态正常。
 - 服务端已配置 SOAR 平台访问凭证与 `egress.rules`，详见 [前置条件与凭证](/server/prerequisites)。
 - 已知目标实例所属账号的 Alibaba Cloud UID。
-- 服务端的公网地址是 `47.111.170.208`。一键部署安装的是官方发布的客户端安装包，其 `config.yaml` 固定连接这个地址，安装脚本启动客户端时也不传 `-s`。自建服务端用一键部署时，客户端会连向这个地址而不是你的服务端，部署会一直等不到回连；请改用 [手动安装客户端](/onboard/manual) 并用 `-s` 指定服务端。
+- `egress.rules` 中 `siren_server_callback` 规则的 `destCidrIp` 是服务端的公网 IP，且只含这一个 IPv4 地址（`/32`）。部署时 SIREN 把这个地址和规则的端口写入目标主机客户端的 `config.yaml`，客户端据此回连，所以自建服务端也能一键部署。规则不是单个 IPv4 地址时部署直接失败，提示 `SIREN callback must configure exactly one server IP (destCidrIp ending in /32)`。
 
 ## 操作步骤
 

@@ -2,7 +2,7 @@
 title: 插件
 description: recon 插件与 command 插件的启用方式、管理命令和内置插件
 icon: Puzzle
-verifiedAgainst: v2.33.11
+verifiedAgainst: v2.33.12
 sources:
   - internal/plugin/plugin.go
   - internal/plugin/manage.go
@@ -36,7 +36,7 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 - 启停开关：客户端 `config.yaml` 中的 `plugins.<name>`（布尔值）。recon 插件还必须写进 Profile 才会执行。
 - 执行时的工作目录是插件自己的目录，插件写出的相对路径文件都落在 `plugins/<name>/` 下。
 - 每次执行的超时是客户端的 `recon.commandTimeout`（默认 30 秒），见[超时与输出](#超时与输出)。
-- 插件名为 1–128 个字符，以字母或数字开头，只能包含字母、数字、`-` 和 `_`。
+- 插件名为 1–64 个字符，以字母或数字开头，只能包含字母、数字、`-` 和 `_`。
 
 ## 内置插件
 

@@ -11,6 +11,18 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.33.12 <DateTag>2026-10-08</DateTag>
+
+### Improvements
+
+- 一键部署的客户端改为连接发起部署的服务端：服务端把 `egress.rules` 中 `siren_server_callback` 的地址和端口写入客户端的 `config.yaml`，自建服务端也能使用一键部署。该规则的 `destCidrIp` 必须是单个 IPv4 地址（`/32`），否则部署直接失败
+- 客户端安装脚本新增 `--server`、`--port`（Windows 为 `-Server`、`-Port`），安装时把服务端地址写入 `config.yaml`
+
+### Fixes
+
+- Windows 客户端安装和执行插件时，对不带扩展名的 `entrypoint` 使用 `<entrypoint>.exe`，与发布的插件文件名一致
+- 插件名上限统一为 64 个字符：客户端拒绝安装和加载名字超长或含非法字符的插件，服务端拒绝上报此类插件的客户端，不再把名字截断后登记
+
 ## v2.33.11 <DateTag>2026-10-08</DateTag>
 
 ### Fixes

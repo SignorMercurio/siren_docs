@@ -2,7 +2,7 @@
 title: 手动安装客户端
 description: 在能访问服务端的主机上安装并启动 SIREN 客户端
 icon: SquareTerminal
-verifiedAgainst: v2.33.11
+verifiedAgainst: v2.33.12
 sources:
   - scripts/get_siren.sh
   - scripts/get_siren.ps1
@@ -42,7 +42,7 @@ iwr -Uri 'https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.ps1' -UseBasi
 - Windows：`C:\Windows\Temp\siren`
 
 <Callout title="重装不会更新已有安装" type="warn">
-  安装完好（程序能运行且 `config.yaml` 非空）时，再次运行安装脚本会跳过下载，既不升级程序也不改动配置。只有安装损坏时才会重新安装，并用包内自带的 `config.yaml` 替换现有配置，手工改动会丢失。升级客户端见 [升级与数据](/upgrade)。
+  安装完好（程序能运行且 `config.yaml` 非空）时，再次运行安装脚本会跳过下载，既不升级程序也不改动配置；只有传了 `--server`、`--port` 时会改写这两个键。只有安装损坏时才会重新安装，并用包内自带的 `config.yaml` 替换现有配置，手工改动会丢失。升级客户端见 [升级与数据](/upgrade)。
 </Callout>
 
 ## 启动客户端
@@ -60,6 +60,8 @@ Set-Location C:\Windows\Temp\siren
 ```
 
 省略 `-s`、`-p` 时使用 `config.yaml` 中的 `server`、`port`。安装包预置的 `server` 是官方服务端地址 `47.111.170.208`，连接自建服务端时必须传 `-s`；修改过服务端连接端口时把 `443` 换成实际端口。
+
+也可以在安装时把地址写进 `config.yaml`，之后启动客户端不必再传 `-s`、`-p`。Linux 上运行 `curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sh -s -- --server <SIREN Server IP> --port 443`；Windows 的安装脚本对应参数为 `-Server`、`-Port`。安装脚本只改写顶层的 `server`、`port` 两个键；安装已完好而跳过下载时同样会改写。
 
 ### 重连行为
 

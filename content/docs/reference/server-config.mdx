@@ -2,7 +2,7 @@
 title: 服务端配置
 description: server_config.yaml 的全部配置项、默认值、命令行覆盖和环境变量
 icon: FileCog
-verifiedAgainst: v2.33.11
+verifiedAgainst: v2.33.12
 sources:
   - config/server_config.yaml
   - cmd/server/cli/root.go
@@ -294,7 +294,7 @@ Agentic IR 启动 Provider CLI 时会剔除 MCP 凭证变量，其余环境变�
 
 | 键 | 安装包示例 | 内置默认值 | 影响 |
 | --- | --- | --- | --- |
-| `egress.rules` | 三条规则，`siren_server_callback` 指向官方服务端 `47.111.170.208` | 无（必填） | 自建服务端部署前必须改成自己的公网 IP 和端口 |
+| `egress.rules` | 三条规则，`siren_server_callback` 指向官方服务端 `47.111.170.208` | 无（必填） | 自建服务端部署前必须改成自己的公网 IP 和端口；一键部署的客户端也连这个地址 |
 | `mcp.cmdBlacklist` | 30 条破坏性命令规则 | 无 | 删除该键即不拦截任何命令 |
 | `webui.dossierDir` | `/opt/siren/dossier` | `""` | 目录需单独部署，见 [部署 Dossier](/server/dossier) |
 | `air.instancePrompt`、`air.assetPrompt`、`air.timeRangePrompt` | 以注释形式给出 | 见 [air](#air) | 取消注释后才覆盖默认值 |

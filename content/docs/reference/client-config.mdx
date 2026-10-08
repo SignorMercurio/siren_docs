@@ -2,7 +2,7 @@
 title: 客户端配置
 description: 客户端 config.yaml 的全部配置项、平台默认值、Profile 校验与插件开关
 icon: FileSliders
-verifiedAgainst: v2.33.11
+verifiedAgainst: v2.33.12
 sources:
   - config/config_linux.yaml
   - config/config_windows.yaml
@@ -51,7 +51,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ### 重装与配置
 
-安装包内带一份 `config.yaml`。安装完好时重新运行安装脚本（包括一键部署）会跳过下载，现有配置不变；只有安装损坏时才会重新安装，并用包内的文件替换现有配置，手工修改会丢失。见 [手动安装客户端](/onboard/manual)。
+安装包内带一份 `config.yaml`。安装完好时重新运行安装脚本（包括一键部署）会跳过下载，现有配置除 `server`、`port` 外不变（安装脚本带了服务端地址参数时会改写这两个键）；只有安装损坏时才会重新安装，并用包内的文件替换现有配置，手工修改会丢失。见 [手动安装客户端](/onboard/manual)。
 
 ## 平台默认配置
 
@@ -104,7 +104,7 @@ oss:
 ```
 
 <Callout title="包内 server 指向官方服务端" type="info">
-  安装包内的 `server` 是官方 SIREN 服务端地址。一键部署和安装脚本以 `siren client -c <config.yaml>` 启动客户端，不传 `-s`，因此连接的就是这个地址。手动启动时用 `-s` / `-p` 指定自己的服务端，见 [手动安装客户端](/onboard/manual#启动客户端)。
+  安装包内的 `server` 是官方 SIREN 服务端地址。一键部署时安装脚本会把它和 `port` 改写成服务端 `siren_server_callback` 规则中的地址和端口，见 [一键部署](/onboard/provisioning#前置条件)。手动安装时用安装脚本的 `--server` / `--port`（Windows 为 `-Server` / `-Port`）写入，或启动时用 `-s` / `-p` 指定，见 [手动安装客户端](/onboard/manual#启动客户端)。
 </Callout>
 
 ## 连接

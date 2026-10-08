@@ -2,7 +2,7 @@
 title: 前置条件与凭证
 description: 按功能列出 SIREN Server 依赖的证书、账号、凭证和外部服务
 icon: ListChecks
-verifiedAgainst: v2.33.11
+verifiedAgainst: v2.33.12
 sources:
   - config/server_config.yaml
   - cmd/server/cli/root.go
@@ -119,7 +119,7 @@ egress:
       portRange: 443/443
 ```
 
-部署时 SIREN 按这条规则的端口，为目标主机的出口 IP 放行到服务端的入站连接；自动识别出口 IP 时，还要求客户端探测连接的目标地址和端口与这条规则完全一致，否则提示 `probe destination differs from configured SIREN callback; no IP was allowed`。安装包自带的 `siren_server_callback` 地址 `47.111.170.208` 也是一键部署出的客户端固定连接的地址，自建服务端无法使用一键部署，见 [一键部署的前置条件](/onboard/provisioning#前置条件)；`siren_client_download`、`alibaba_cloud_infrastructure` 两条默认规则用于下载客户端和访问阿里云基础服务。规则如何下发和恢复见 [出站放行](/onboard/egress)。
+部署时 SIREN 按这条规则的端口，为目标主机的出口 IP 放行到服务端的入站连接；自动识别出口 IP 时，还要求客户端探测连接的目标地址和端口与这条规则完全一致，否则提示 `probe destination differs from configured SIREN callback; no IP was allowed`。一键部署还会把这条规则的地址和端口写入客户端的 `config.yaml`，因此 `destCidrIp` 必须是单个 IPv4 地址（`/32`），见 [一键部署的前置条件](/onboard/provisioning#前置条件)。安装包自带的地址 `47.111.170.208` 是官方服务端，自建服务端必须改成自己的公网 IP；`siren_client_download`、`alibaba_cloud_infrastructure` 两条默认规则用于下载客户端和访问阿里云基础服务。规则如何下发和恢复见 [出站放行](/onboard/egress)。
 
 ## 出口发现 `egress.discovery`
 
