@@ -48,15 +48,19 @@ SIREN 支持本地模式和远程模式。多数应急场景建议使用远程�
 
     服务端安装包不包含 TLS 私钥。首次安装会在控制主机的 `/opt/siren/certs/` 生成仅覆盖 `localhost` 和 `127.0.0.1` 的初始自签证书；再次运行安装器升级时，已有 `server_config.yaml` 和证书均会保留。需要通过公开域名访问 WebUI 时，请在启动前换成覆盖该域名且受浏览器信任的证书，并更新 `server_config.yaml` 中的 `cert` / `key`。
 
-    首次启动前，创建 Web 控制台账号。随后启动服务端，并保持进程运行：
+    首次启动前，创建 Web 控制台账号，并在服务端环境中设置两个不同的 MCP 凭证。默认配置启用了 MCP，缺少任一凭证或两者相同时，服务端会拒绝启动。随后启动服务端，并保持进程运行：
 
     ```bash title="控制主机"
     cd /opt/siren
     ./siren_server user add admin
+    export SIREN_MCP_ADMIN_TOKEN='<随机字符串>'
+    export SIREN_MCP_RAVEN_TOKEN='<另一个随机字符串>'
     ./siren_server
     ```
 
-    SIREN Server 默认在同一个 `443` TLS 端口接收客户端连接，并提供 [Web 控制台](/webui) 和 [MCP 服务](/mcp)。浏览器访问需要证书覆盖服务端域名；使用 WebUI AIR 时，还要将 `webui.publicURL` 设置为该域名的 HTTPS Origin。详见 [配置文件](/config)。
+    凭证可以用 `openssl rand -hex 32` 生成。请保存在受保护的服务环境中，不要写入 `server_config.yaml` 或项目文件。不使用 MCP 和 AIR 时，也可以在 `server_config.yaml` 中设置 `mcp.enabled: false`，但 AIR 通过 MCP 调用 SIREN 工具，关闭后 AIR 会话无法操作客户端。
+
+    SIREN Server 默认在同一个 `443` TLS 端口接收客户端连接，并提供 [Web 控制台](/webui) 和 [MCP 服务](/mcp)。浏览器访问需要证书覆盖服务端域名；使用 WebUI AIR 时，还要将 `webui.publicURL` 设置为该域名的 HTTPS Origin，并在控制主机上把该域名解析到本机的非回环内网地址。详见 [配置文件](/config)。
 
     <Callout title="按需配置" type="info">
       需要在 Web 控制台中编辑报告时，部署 [Dossier](/dossier/deploy)；需要按事件隔离客户端和取证目录时，配置 `webui.projectsBaseDir` 并使用 [Projects](/webui#projects)。这些配置不影响客户端连接和 Recon。

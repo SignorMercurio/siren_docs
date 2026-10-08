@@ -24,7 +24,7 @@ make deploy-dry-run
 make deploy
 ```
 
-`make deploy` 会先构建编辑器，再把 Dossier 运行时发布到 `SIREN:/opt/siren/dossier`。只发布运行时可使用 `make deploy-runtime`；需要更改目标时，设置 `DOSSIER_DEPLOY_DIR`、`DOSSIER_DEPLOY_HOST` 或 `DOSSIER_DEPLOY_PATH`。
+`make deploy` 会先构建编辑器，再把 Dossier 运行时发布到 `SIREN:/opt/siren/dossier`。只发布运行时可使用 `make deploy-runtime`；需要更改目标时，设置 `DOSSIER_DEPLOY_DIR`（rsync 目标，默认 `SIREN:/opt/siren/dossier`）。`make deploy` 还会把报告模板同步到 Sleuth skill 目录（`SKILL_DIR`，默认 `../sleuth/skills/sleuth/assets`），该目录不存在或不可写时会中止部署。
 
 </Step>
 <Step>
@@ -39,7 +39,7 @@ npm run build
 
 sudo mkdir -p /opt/siren/dossier
 sudo rsync -av --exclude '.DS_Store' index.html editor.css editor.js report.md /opt/siren/dossier/
-sudo rsync -av --delete --exclude '.DS_Store' --exclude 'assets/pasted/' assets /opt/siren/dossier/
+sudo rsync -av --delete --exclude '.DS_Store' --exclude 'assets/pasted/' --exclude 'assets/examples/' assets /opt/siren/dossier/
 ```
 
 </Step>

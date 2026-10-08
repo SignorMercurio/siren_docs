@@ -16,13 +16,13 @@ Agentic 应急响应（AIR）用于把 Claude Code、Codex、Qoder 或 Pi 接入
 AIR 是交互式会话。操作员可以在结构化时间线或真实终端中观察执行过程、回答追问、补充指令或停止会话，不应把它当成完全无人值守的自动处置流程。
 
 <Callout title="前置条件" type="info">
-  需要在服务端配置可用的 Claude、Codex、Qoder 或 Pi CLI 路径（`air.providers.<name>.cliPath`），并启用、配置独立凭证的 [MCP 服务](/mcp#启用与访问)。Event 模式需要[设置 SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)。AIR 通过 WebUI 启动。
+  需要在服务端配置可用的 Claude、Codex、Qoder 或 Pi CLI 路径（`air.providers.<name>.cliPath`），并启用、配置独立凭证的 [MCP 服务](/mcp#启用与访问)。Event 模式只把 UID 和告警目标写入种子 prompt，告警查询依赖 Provider 自身可用的工具或 Skill，SIREN 不代为查询。AIR 通过 WebUI 启动。
 </Callout>
 
 ## 使用方式
 
 ```text title="WebUI"
-Agentic IR -> 选择 Provider ->（可选）切换 Terminal 开关 -> 选择 Manual / Custom / Event / Resume -> Start
+Agentic IR -> 选择 Provider ->（可选）切换 Terminal 开关 -> 选择 Manual / Custom / Event -> Start
 ```
 
 ## WebUI AIR
@@ -52,7 +52,7 @@ GUI 固定提供以下常用命令：
 
 Claude 会补充其当前会话通过机器协议公布的命令，这些命令仅在空闲时执行。Qoder 的 Skills、插件、MCP prompts 和 workflows 可能触发模型推理，GUI 不把它们混入本地命令菜单；请在 Terminal 中使用。若 CLI 版本不支持某项 GUI 命令，只有该命令会失败，会话仍可继续。Terminal 仍是 Skills、更多 Provider 设置和其他高级斜杠命令的完整入口。
 
-GUI 输入框支持直接粘贴图片（如告警截图、拓扑图），每条消息最多 4 张、单张不超过 8 MiB，支持 png / jpeg / webp / gif。粘贴后以缩略图形式暂存，可单独移除，随消息一并发送给 Agent；会话时间线中以图片数量徽标呈现。Claude 与 Codex 支持图片，Qoder 以其 CLI 上报的能力为准；Pi 当前使用的 Qwen Aegis 不接受图片输入。
+GUI 输入框支持直接粘贴图片（如告警截图、拓扑图），每条消息最多 4 张、单张不超过 8 MiB，支持 png / jpeg / webp / gif。粘贴后以缩略图形式暂存，可单独移除，随消息一并发送给 Agent；会话时间线中以图片数量徽标呈现。Claude 与 Codex 支持图片，Qoder 以其 CLI 上报的能力为准；Pi 默认的 Qwen Aegis 不接受图片输入。
 
 需要集中查看长输出时，可点击侧栏分隔线上的箭头收起启动、Running 和 History 区域；再次点击即可恢复。刷新页面后侧栏总是展开，从 Clients 行内进入 Agentic IR 时也会自动展开。History 默认收起在侧栏底部，点击标题即可展开。
 
@@ -61,7 +61,8 @@ GUI 输入框支持直接粘贴图片（如告警截图、拓扑图），每条�
 - **Manual**：启动不带客户端或种子 prompt 的空白会话，适合临时通用操作；仍会注入当前范围的 SIREN MCP。
 - **Custom**：选择客户端并输入自定义 prompt，SIREN 会追加客户端上下文并注入 SIREN MCP。
 - **Event**：选择客户端，输入 Alibaba Cloud UID，并选择一种事件目标：安全中心告警 ID（Event）、ECS 实例 ID（ECS）或云安全中心资产 UUID（Asset）。告警 ID 直接定位单条告警；实例或资产目标会让 Agent 查询其关联告警，并可展开 **Time range** 高级选项限定告警时间范围（最近 3/7/30 天，或自定义起止时间，默认不限定）。
-- **Resume**：从当前视图工作目录对应的历史会话中选择一条。点击历史只会读取本地记录；确认 **Continue session** 后才会在新标签中用原 session ID 继续，只读历史标签保持不变，再次点击会切换到已打开的恢复标签。
+
+要继续以前的会话，展开侧栏底部的 **History**，搜索并点击当前视图工作目录对应的历史会话。历史先以只读时间线打开；点击 **Continue session**（或 Provider 支持时点击 **Continue in Terminal**）后，才会在新标签中用原 session ID 继续。只读历史标签保持不变，再次点击会切换到已打开的恢复标签。
 
 <Callout title="Security Center Alert ID" type="info">
   Event 目标中的告警 ID 指阿里云安全中心告警详情页“基础信息”中的“告警 ID”，不是页面下方“关联安全事件”里的“事件 ID”。
@@ -71,9 +72,9 @@ GUI 输入框支持直接粘贴图片（如告警截图、拓扑图），每条�
 
 报告、证据和文件变更只会显示 Project 范围内的安全相对路径。历史时间线初始为只读，长内容和较早记录按需加载。
 
-额度显示遵循 Provider 当前公开能力：Codex 与 Claude 以 5h / 7d 窗口展示订阅额度和重置倒计时，Claude 的额度在收到用量事件或手动刷新后更新；Qoder Personal 在状态条显示模型与上下文，并提供 Usage 页面入口；Pi 显示 Qwen Aegis 模型与上下文占用，不估算订阅额度。上下文占用和订阅额度始终分开展示，过期数据会标记为 stale。
+额度显示遵循 Provider 当前公开能力：Codex 与 Claude 以 5h / 7d 窗口展示订阅额度和重置倒计时，Claude 的额度在收到用量事件或手动刷新后更新；Qoder Personal 在状态条显示模型与上下文，并提供 Usage 页面入口；Pi 显示当前模型与上下文占用，不估算订阅额度。上下文占用和订阅额度始终分开展示，过期数据会标记为 stale。
 
-SIREN Server 正常重启时会结束仍在运行的 Provider，并给 Claude、Codex、Qoder 和 Pi 最多 5 秒完成各自的历史落盘。服务恢复后，页面会重新读取当前 Provider 和工作目录的 **History**；已经由 Provider 保存的会话可以继续 Resume，不需要刷新整个页面。强制杀进程、主机断电，或 Provider 尚未创建会话记录时只能尽力恢复，不能保证历史一定存在。
+SIREN Server 正常重启时会结束仍在运行的 Provider，并给 Claude、Codex、Qoder 和 Pi 最多 5 秒完成各自的历史落盘。服务恢复后，页面会重新读取当前 Provider 和工作目录的 **History**；已经由 Provider 保存的会话可以从 History 继续，不需要刷新整个页面。强制杀进程、主机断电，或 Provider 尚未创建会话记录时只能尽力恢复，不能保证历史一定存在。
 
 <Callout title="Project 作用域" type="info">
   在 Project 视图下启动 WebUI AIR 时，Provider 工作目录会切到当前 Project 目录，History 只列出该目录下的历史会话。SIREN 注入 `/mcp/project/<id>`，工具只能操作当前 Project 的客户端；Global 视图注入 `/mcp`，可访问全局范围。
@@ -82,7 +83,7 @@ SIREN Server 正常重启时会结束仍在运行的 Provider，并给 Claude、
 <Callout title="配置边界" type="info">
   - **SIREN 只做**：使用 `air.providers.<name>.cliPath` 和 `args` 启动对应 CLI，为所有入口注入当前范围的 SIREN MCP，并按需加入种子 prompt 或恢复会话 ID；GUI 只使用 Provider 公开的机器协议。
   - **Claude、Codex、Qoder**：模型、权限、沙箱、普通 Shell 审批和操作者已有 MCP 的工具确认规则由 CLI 自身决定。
-  - **Pi**：复用服务端用户的全局 Pi、插件、Skills、配置和 memory，固定使用 Qwen Aegis；文件、Shell、MCP 和子 agent 操作直接执行，不产生权限审批。ask-user 只用于补充信息或业务选择。
+  - **Pi**：复用服务端用户的全局 Pi、插件、Skills、配置和 memory，新会话默认使用 Qwen Aegis，GUI 空闲时可通过模型选择器或 `/model` 切换模型和思考等级；文件、Shell、MCP 和子 agent 操作直接执行，不产生权限审批。ask-user 只用于补充信息或业务选择。
   - **GUI 审批**：Claude、Codex 和 Qoder 仅在 Provider 返回需要确认时显示“允许一次 / 本会话允许 / 拒绝”；本会话规则只保存在当前会话，不写入用户级永久配置。
   - **Qoder**：不会修改全局 Qoder 设置或强制跳过权限确认。
   - 如需限制其他可用工具，请在对应 CLI 的用户配置中处理。
@@ -109,7 +110,7 @@ SIREN Server 正常重启时会结束仍在运行的 Provider，并给 Claude、
 
 ### 交互式排查
 
-Agent 通过 [MCP 集成](/mcp) 使用 `ls`、`run`、`recon` 获取客户端线索。用户明确要求向某台 ECS 部署 SIREN 时，Agent 也可以调用 `deploy` 并等待客户端实际连接；调查或诊断请求本身不构成部署授权。操作员可以在 GUI 时间线或 Terminal 中继续追问或调整方向。
+Agent 通过 [MCP 集成](/mcp) 使用 `ls`、`run`、`run_batch`、`recon` 获取客户端线索，并用 `read_run_result`、`search_run_result` 回读长输出。用户明确要求向某台 ECS 部署 SIREN 时，Agent 也可以调用 `deploy` 并等待客户端实际连接；调查或诊断请求本身不构成部署授权。操作员可以在 GUI 时间线或 Terminal 中继续追问或调整方向。
 
 </Step>
 <Step>

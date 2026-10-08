@@ -36,7 +36,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 | SOAR 平台及访问凭证 | WebUI / REPL 的 `allow`、`deploy`、`deploy-batch`，[MCP 的单机 `deploy`](/mcp#可用工具)，以及 [AccessKey 调查](/ak) | 仅使用这些内部能力时需要；优先读取 `SOAR_ACCESS_KEY_ID` / `SOAR_ACCESS_KEY_SECRET`，未设置时回退到 Alibaba Cloud SDK 默认凭证链 |
 
 <Callout title="注意" type="warn">
-  WebUI 鉴权只保护浏览器页面。MCP 客户端直接访问 `/mcp` 时不携带浏览器会话，请通过防火墙、安全组、VPN 或 ACL 限制主 TLS 端口的访问来源。
+  WebUI 账号只保护浏览器页面。MCP 不使用浏览器会话，而是要求每个请求携带 `Authorization: Bearer <token>`，凭证来自服务端环境变量 `SIREN_MCP_ADMIN_TOKEN`，详见 [MCP 集成](/mcp#启用与访问)。主 TLS 端口仍建议通过防火墙、安全组、VPN 或 ACL 限制访问来源。
 </Callout>
 
 ## 相关内容

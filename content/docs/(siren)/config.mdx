@@ -45,7 +45,7 @@ oss:
 
 plugins:
   marketplace: https://example.com/plugins  # 插件市场地址
-  collector: true                           # 所有类型插件统一开关
+  collector: true                           # plugins.<name>：启用或禁用名为 collector 的插件
 ```
 
 ### 配置项说明
@@ -202,7 +202,7 @@ SIREN 不直接创建日志文件或执行轮转。需要持久化时，应由 s
 > WebUI GUI 与 Terminal 都复用 `air.providers.<name>`。所有入口都会注入当前范围的 SIREN MCP：Project 使用 `/mcp/project/<id>`，Global 使用 `/mcp`。Manual 只启动空白 Provider 会话；Custom、Event、Resume 再按需加入种子 prompt 或恢复会话 ID。两种界面都受 WebUI 全局鉴权保护。
 
 <Callout title="AIR 配置边界" type="info">
-  AIR 的 Provider 配置只保留 Provider、prompt、CLI 路径和额外参数；会话并发与重连回放容量分别由 `air.maxSessions` 和 `air.replayBufferBytes` 控制。Claude Code、Codex 和 Qoder 的模型、权限、沙箱、普通 Shell 审批等行为由各自配置决定；GUI 仅展示 Provider 主动返回的审批，不写入用户级永久规则。Pi 复用全局 Pi 配置并固定使用 Qwen Aegis，文件、Shell、MCP 和子 agent 操作不产生权限审批。旧版 AIR 细分字段和独立的 `agentTerminal.*` 配置块已移除，残留时不会生效。
+  AIR 的 Provider 配置只保留 Provider、prompt、CLI 路径和额外参数；会话并发与重连回放容量分别由 `air.maxSessions` 和 `air.replayBufferBytes` 控制。Claude Code、Codex 和 Qoder 的模型、权限、沙箱、普通 Shell 审批等行为由各自配置决定；GUI 仅展示 Provider 主动返回的审批，不写入用户级永久规则。Pi 复用全局 Pi 配置，新会话默认使用 Qwen Aegis，GUI 空闲时可切换到 Pi 已配置的其他模型；文件、Shell、MCP 和子 agent 操作不产生权限审批。旧版 AIR 细分字段和独立的 `agentTerminal.*` 配置块已移除，残留时不会生效。
 </Callout>
 
 <Callout title="v1.x 升级提示" type="warn">

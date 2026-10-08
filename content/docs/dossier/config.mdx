@@ -13,14 +13,12 @@ import { Callout } from "fumadocs-ui/components/callout";
 ```yaml title="server_config.yaml"
 webui:
   enabled: true
-  listen: 0.0.0.0
-  port: 8080
   dossierDir: /opt/siren/dossier
 ```
 
 | 配置项 | 说明 |
 | --- | --- |
-| `webui.dossierDir` | Dossier 编辑器文件目录。可以是绝对路径，也可以位于 `siren_server` 工作目录外 |
+| `webui.dossierDir` | Dossier 编辑器文件目录，默认为空（不启用 Dossier）。可以是绝对路径，也可以位于 `siren_server` 工作目录外 |
 
 配置后，WebUI Reports 页面的 **Blank template** 会打开该目录下的 `report.md` 作为默认报告，静态文件通过 `/dossier/` 路径提供。
 
@@ -42,7 +40,7 @@ SIREN 中的 Dossier 报告源文件必须以 `.md` 结尾。WebUI 对报告源�
 - 单个报告源文件最大 10 MiB
 - 默认报告通过内部保留路径 `__dossier__/report.md` 映射到 `webui.dossierDir/report.md`
 - Artifacts 中的其他 `.md` 报告位于当前 Artifacts 作用域：Global 视图是 `siren_server` 工作目录，Project 视图是对应 Project 目录
-- 保存前会检查 `/api/auth/check`。登录过期、鉴权接口缺失或反向代理未转发该接口时，Dossier 会阻止保存正文和粘贴图片。
+- 保存正文和粘贴图片都直接走上述受保护接口。登录过期时 SIREN 返回 401，Dossier 会提示保存失败；反向代理返回登录页等非预期响应时也按失败处理，不会误报保存成功。
 
 <Callout title="默认报告边界" type="info">
   默认 Dossier 报告可以位于服务端工作目录外，但必须在 `webui.dossierDir` 目录内。即使当前处于 WebUI Project 视图，**Blank template** 也不会自动改成 Project 目录下的 `report.md`。SIREN 会解析符号链接，阻止默认报告逃逸到 Dossier 目录外。

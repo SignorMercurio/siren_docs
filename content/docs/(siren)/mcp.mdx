@@ -45,7 +45,7 @@ MCP 服务由[配置文件](/config#服务端配置)中的 `mcp.enabled` 控制�
 | 工具 | 参数 | 描述 |
 | --- | --- | --- |
 | `ls` | 无 | 列出在线 SIREN 客户端，包含 ID、操作系统、Instance ID、内网 IP、主机名、连接地址、备注、已安装插件，以及默认/可用 Recon Profile |
-| `run` | `client_id`, `command`，可选 `output_mode` | 在指定 SIREN 客户端上执行命令。`client_id` 可以是数字 Client ID、Instance ID、内网 IP 或主机名，必须唯一匹配当前作用域内的一台客户端。命令上限为 50 KiB；每次最多保留合计 16 MiB 的标准输出和错误输出。执行前检查命令黑名单，超时时间跟随 `recon.commandTimeout`；`auto` 对超过 8 KiB 的结果显示首尾预览，`full` 直接显示 50 KiB 内的结果，超出时仍显示预览 |
+| `run` | `client_id`, `command`，可选 `output_mode` | 在指定 SIREN 客户端上执行命令。`client_id` 可以是数字 Client ID、Instance ID、内网 IP 或主机名，必须唯一匹配当前作用域内的一台客户端。命令上限为 50 KiB；每次最多保留合计 16 MiB 的标准输出和错误输出。执行前检查命令黑名单，超时时间跟随客户端配置 `recon.commandTimeout`；`auto` 对超过 8 KiB 的结果显示首尾预览，`full` 直接显示 50 KiB 内的结果，超出时仍显示预览 |
 | `run_batch` | `command`，可选 `client_ids`、`os`、`concurrency` | 在多台 SIREN 客户端上并发执行同一命令并按主机汇总。`client_ids` 接受数字 Client ID、Instance ID、内网 IP 或主机名，任一无法唯一匹配时整批拒绝；Project 作用域下省略 `client_ids` 表示该 Project 的全部在线客户端，全局 `/mcp` 必须显式指定。`os` 可选 `linux` 或 `windows`，`concurrency` 默认 8、最多 16，单批最多 64 台。每台主机返回 outcome、退出码和最多 1 KiB 预览，并带独立的 `audit_id` 供 `read_run_result` 与 `search_run_result` 回读；只有全部主机失败时才返回错误 |
 | `read_run_result` | `audit_id`，可选 `stream`、`offset`、`limit` | 按字节位置读取最近一次 `run` 或 `run_batch` 中某台主机的原文片段，默认最多 8 KiB、单次最多 16 KiB；实际 UTF-8 安全范围和下一偏移量会在 structured content 中返回 |
 | `search_run_result` | `audit_id`, `query`，可选 `stream`、`case_sensitive`、`context_lines`、`max_matches` | 对最近一次 `run` 的原文做字面搜索并返回匹配位置和上下文；默认不区分大小写，最多返回 20 个匹配，正文上限为 8 KiB |
