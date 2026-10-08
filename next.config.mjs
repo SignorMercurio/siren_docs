@@ -18,6 +18,17 @@ const config = {
       { source: '/dossier/syntax', destination: '/reports/syntax', permanent: true },
       { source: '/dossier/workflow', destination: '/reports', permanent: true },
       { source: '/dossier/config', destination: '/reports', permanent: true },
+      { source: '/remote', destination: '/reference/repl', permanent: true },
+      { source: '/misc', destination: '/reference/repl', permanent: true },
+      { source: '/misc/server', destination: '/reference/repl', permanent: true },
+      { source: '/portforward', destination: '/reference/portforward', permanent: true },
+      { source: '/config', destination: '/reference/server-config', permanent: true },
+      { source: '/mcp', destination: '/reference/mcp', permanent: true },
+      { source: '/dir', destination: '/reference', permanent: true },
+      { source: '/protocol', destination: '/reference', permanent: true },
+      { source: '/features', destination: '/overview', permanent: true },
+      { source: '/plugins/development', destination: '/reference/plugin-dev', permanent: true },
+      { source: '/plugins/:path*', destination: '/reference/plugins', permanent: true },
     ];
   },
 };

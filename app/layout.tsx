@@ -27,7 +27,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
                 transform(option, node) {
                   const colors: Record<string, string> = {
                     "/": "#818cf8",
-                    "/plugins": "#f59e0b",
+                    "/reference": "#f59e0b",
                   };
                   const color =
                     colors[option.url] ?? "var(--color-fd-foreground)";

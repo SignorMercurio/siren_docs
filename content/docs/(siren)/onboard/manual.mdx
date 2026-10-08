@@ -32,8 +32,8 @@ iwr -Uri 'https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.ps1' -UseBasi
 - Linux：`/opt/siren`
 - Windows：`C:\Windows\Temp\siren`
 
-<Callout title="重装会替换配置" type="warn">
-  再次运行安装脚本会用包内自带的 `config.yaml` 替换现有配置（旧文件先备份到临时目录，安装成功后删除）。手工改过的 `config.yaml` 会因此丢失，改动请在重装后重新应用。
+<Callout title="重装不会更新已有安装" type="warn">
+  安装完好（程序能运行且 `config.yaml` 非空）时，再次运行安装脚本会跳过下载，既不升级程序也不改动配置。只有安装损坏时才会重新安装，并用包内自带的 `config.yaml` 替换现有配置，手工改动会丢失。升级客户端见 [升级与数据](/upgrade)。
 </Callout>
 
 ## 启动客户端
@@ -50,7 +50,7 @@ Set-Location C:\Windows\Temp\siren
 .\siren.exe client -s <SIREN Server IP> -p 443
 ```
 
-`-s` 默认 `127.0.0.1`，`-p` 默认 `443`；修改过服务端连接端口时把 `443` 换成实际端口。
+省略 `-s`、`-p` 时使用 `config.yaml` 中的 `server`、`port`。安装包预置的 `server` 是官方服务端地址 `47.111.170.208`，连接自建服务端时必须传 `-s`；修改过服务端连接端口时把 `443` 换成实际端口。
 
 ### 重连行为
 

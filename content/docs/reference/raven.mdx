@@ -1,0 +1,87 @@
+---
+title: Raven 群项目
+description: Raven 钉钉机器人如何按群绑定 Project，并以 Project 凭证使用 SIREN MCP
+icon: MessagesSquare
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+Raven 是内部的钉钉机器人。在钉钉群中直接回复或主动回复时，Raven 以该群专属 Project 的身份调用 [SIREN MCP](/reference/mcp)：每个群对应一个 Project，只能看到和操作归属这个 Project 的客户端。
+
+## 工作方式
+
+1. Raven 用服务凭证调用 SIREN 的 `POST /api/mcp/group-session`，提交群的 `openConversationId` 和显示名称。
+2. SIREN 找到绑定该群的 Project，没有则新建，并签发一个 1 小时有效、只能访问该 Project 的凭证。
+3. Raven 用这个凭证连接 `/mcp/project/<id>`，向群对话提供 6 个工具：`ls`、`run`、`read_run_result`、`search_run_result`、`recon`、`deploy`（在 Raven 中以 `siren_<工具名>` 出现）。`run_batch` 不提供。
+4. 凭证剩余不到 1 分钟时，Raven 在下一次调用前重新申请；连接空闲 10 分钟后关闭。调用中途传输出错时，Raven 不会自动重放，因为操作可能已经执行。
+
+只有钉钉渠道的直接回复和主动回复提供 SIREN 工具，Raven 的其他渠道（MAS、Responses）不提供。SIREN 暂时不可用只影响该轮的 SIREN 工具，不影响普通聊天。
+
+## 配置
+
+| 位置 | 配置 | 说明 |
+| --- | --- | --- |
+| SIREN 服务端环境 | `SIREN_MCP_RAVEN_TOKEN` | Raven 服务凭证，必须与 `SIREN_MCP_ADMIN_TOKEN` 不同，见 [鉴权](/reference/mcp#鉴权) |
+| Raven 环境 | `RAVEN_SIREN_MCP_TOKEN` | 必须与 SIREN 的 `SIREN_MCP_RAVEN_TOKEN` 相同。不要填 SIREN 的管理凭证 |
+| Raven 环境 | `RAVEN_SIREN_MCP_URL` | SIREN 的 HTTPS 地址，Raven 只取其 Origin；不能包含用户名、密码、查询参数或片段。默认指向内部生产 SIREN |
+
+服务凭证只能申请 Project 凭证，用它直接访问任何 MCP 端点都会返回 `401`。Raven 的部署预检用 `HEAD /api/mcp/group-session` 验证服务凭证，有效时返回 `204`，不会创建 Project。
+
+## 群凭证接口
+
+`/api/mcp/group-session` 接受 `HEAD` 和 `POST`，响应带 `Cache-Control: no-store`。
+
+请求体为 JSON，最大 8 KiB，出现未定义的字段即拒绝：
+
+| 字段 | 必填 | 说明 |
+| --- | --- | --- |
+| `openConversationId` | 是 | 钉钉群的原始会话 ID。原样比较，区分大小写；不能为空、不能有首尾空白或控制字符，最长 1024 字节 |
+| `displayName` | `nameSource` 不是 `placeholder` 时必填 | Project 显示名称，去掉首尾空白后为 1–128 个字符 |
+| `nameSource` | 否 | `customer`（客户全称）、`group`（群名）或 `placeholder`，省略时为 `placeholder` |
+
+成功时返回：
+
+```json
+{
+  "projectId": "project-7",
+  "mcpPath": "/mcp/project/project-7",
+  "token": "<64 位十六进制>",
+  "expiresAt": 1791446400000
+}
+```
+
+`expiresAt` 是 Unix 毫秒时间戳。签发的凭证只保存在 SIREN 内存中，服务端重启后全部失效，Raven 会在下次调用时重新申请。
+
+| 状态 | 原因 |
+| --- | --- |
+| `400` | 请求体不是合法 JSON、含未知字段、字段值不合规（`invalid group session request`），或名称不合规（`invalid display name`） |
+| `401` | 服务凭证缺失或不正确 |
+| `405` | 其他 HTTP 方法 |
+| `503` | 无法创建或读取 Project（`group project unavailable`），或凭证容量已满（`group access unavailable`） |
+
+## 群与 Project 的绑定
+
+- **绑定键**：原始 `openConversationId`。同一个群里的多个机器人对应同一个 Project；名称相同的不同群不会合并。
+- **首次创建**：以请求中的名称新建 Project，目录名在此时按 [目录名规则](/projects#目录名规则) 从名称生成。名称含中文等非 ASCII 字符时，目录名末尾追加 Project 编号，例如 `示例科技-7`。之后改名不会改变目录名。
+- **占位名称**：`nameSource` 为 `placeholder` 时，Project 命名为 `DingTalk <openConversationId>`（超过 128 个字符时截断）。之后第一次带 `customer` 或 `group` 名称的请求会把占位名称替换掉，这种自动补齐只发生一次。
+- **不会覆盖已有名称**：名称不是占位名称后，Raven 再提交的名称一律忽略。在 [Projects 页](/projects) 手动改名后，名称来源变为手动，也不会再被覆盖。
+- **名称只用于显示**：群名、客户名都不参与权限判断。
+
+Raven 的取名方式：每次建立连接前查询该群的客户名称，只有唯一一个客户时用客户全称（`customer`）；否则用钉钉回调中的群名（`group`），群名形如 `【安全】<客户>安全管家应急响应服务` 时只取其中的客户部分。查询失败或没有有效名称时，Raven 不申请凭证，因此不会创建以群 ID 命名的占位 Project。
+
+<Callout title="群绑定的 Project 不能删除" type="warn">
+  在 Projects 页删除群绑定的 Project 会报 `group-bound projects cannot be deleted`。目前没有解绑、合并群 Project，或把历史主机自动迁移进群 Project 的功能；需要时由管理员在 Clients 页手动分配客户端。
+</Callout>
+
+## 权限边界
+
+| 检查 | 行为 |
+| --- | --- |
+| Project 凭证访问 `/mcp` 或其他 Project | `403` |
+| 结果回读与搜索 | 只能读同一 Project 端点产生的结果，见 [结果保存](/reference/mcp#结果保存) |
+| `deploy` 的 UID | Raven 在提交前检查 UID 是否为纯数字、且在该群绑定状态为 `bound` 的 UID 名单内（名单来自客户映射，缓存 7 天）；不在名单内则拒绝，不会到达 SIREN。一个按机器人、企业和群 ID 精确识别的应急预备服务群例外，可使用任意数字 UID |
+| `deploy` 的目标归属 | 已知该实例属于其他 Project 时，SIREN 在修改云端前拒绝；客户端连接绑定时再次检查，冲突时保留原归属，需要人工处理 |
+
+群绑定、Project 访问权限和云账号 UID 是三项独立的检查。
+
+这套机制只隔离 MCP 层面的资源访问，不提供独立进程、资源配额或网络隔离。Raven 服务本身和 SIREN 管理员都在信任边界之内：持有 Raven 服务凭证就能为任意群 ID 申请 Project 凭证。

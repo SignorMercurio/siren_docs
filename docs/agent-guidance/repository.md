@@ -2,8 +2,11 @@
 
 ## Project map
 
-- `content/docs/(siren)/` is the canonical SIREN end-user documentation.
-- `content/img/` contains documentation screenshots and images.
+- `content/docs/(siren)/` is the task-oriented SIREN user guide, organized
+  around the WebUI.
+- `content/docs/reference/` is the reference root: configuration keys, server
+  REPL and client CLI, MCP, Raven, plugins, snapshot format, and limits.
+- Moved or deleted pages need a permanent redirect in `next.config.mjs`.
 - `app/`, `components/`, and `lib/` contain the Next.js/Fumadocs site shell and
   shared UI code.
 - `source.config.ts` configures the Fumadocs content source.

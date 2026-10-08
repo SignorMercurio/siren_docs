@@ -42,10 +42,10 @@ import { Callout } from "fumadocs-ui/components/callout";
 - 同一账号下有未完成的操作时会先核对，再继续。
 
 <Callout title="规则是唯一事实源" type="info">
-  Configure egress 应用的出站规则完全来自服务端必填配置 `egress.rules`，确认框展示的就是将要授权的规则。默认包含三条：服务端回连（`siren_server_callback`，TCP 443）、客户端下载地址（`siren_client_download`，TCP 443）、阿里云基础服务（`alibaba_cloud_infrastructure`，全流量 `100.100.0.0/16`）。最多 20 条，字段与完整键见 [配置文件](/config#服务端配置)。使用自定义服务端监听端口时，应同步调整 `egress.rules` 中的回连端口。
+  Configure egress 应用的出站规则完全来自服务端必填配置 `egress.rules`，确认框展示的就是将要授权的规则。默认包含三条：服务端回连（`siren_server_callback`，TCP 443）、客户端下载地址（`siren_client_download`，TCP 443）、阿里云基础服务（`alibaba_cloud_infrastructure`，全流量 `100.100.0.0/16`）。最多 20 条，字段与完整键见 [配置文件](/reference/server-config)。使用自定义服务端监听端口时，应同步调整 `egress.rules` 中的回连端口。
 </Callout>
 
-出站发现依赖 `egress.discovery`（云防火墙日志库），用于一键部署自动识别回连 IP，键同样见 [配置文件](/config#服务端配置)。
+出站发现依赖 `egress.discovery`（云防火墙日志库），用于一键部署自动识别回连 IP，键同样见 [配置文件](/reference/server-config)。
 
 ## 持久化与恢复
 

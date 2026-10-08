@@ -18,7 +18,7 @@ SIREN Server 在一个 TLS 端口上同时提供 Web 控制台、MCP 和客户�
 | 托管客户端连接 | 无 | 依靠网络放行控制来源，见 [客户端与服务端之间](#客户端与服务端之间) |
 | `/dossier/` | 无 | 见 [`/dossier/` 不鉴权](#dossier-不鉴权) |
 | 登录页、前端静态文件、`/api/version` | 无 | `/api/version` 返回服务端版本号 |
-| [端口转发](/portforward)监听端口 | 无 | 在服务端所有网卡上监听，能访问该端口即可连到转发目标 |
+| [端口转发](/reference/portforward)监听端口 | 无 | 在服务端所有网卡上监听，能访问该端口即可连到转发目标 |
 | 服务端 REPL | 控制主机终端 | 只能在运行 `siren_server` 的终端中使用 |
 
 ## WebUI 账号
@@ -59,16 +59,7 @@ cd /opt/siren
 
 ## MCP 鉴权
 
-所有 MCP 请求都必须携带 `Authorization: Bearer <token>`，WebUI 登录会话不能代替它。服务端认可以下几类凭证：
-
-| 凭证 | 来源 | 可访问范围 | 有效期 |
-| --- | --- | --- | --- |
-| 管理凭证 | 环境变量 `SIREN_MCP_ADMIN_TOKEN` | 全局 `/mcp` 和任意 `/mcp/project/<id>` | 长期 |
-| Raven 服务凭证 | 环境变量 `SIREN_MCP_RAVEN_TOKEN` | 只能调用 `/api/mcp/group-session` 申请群项目凭证，不能调用 MCP 工具 | 长期 |
-| Raven 项目凭证 | 由 Raven 服务凭证申请 | 只能访问对应的 `/mcp/project/<id>` | 1 小时 |
-| AIR 会话凭证 | 每个 Agentic IR 会话自动签发 | Project 会话只能访问本 Project 路径；Global 会话只能访问全局 `/mcp` | 会话结束时吊销 |
-
-签发的凭证只保存在服务端内存中，服务端重启后全部失效。
+所有 MCP 请求都必须携带 `Authorization: Bearer <token>`，WebUI 登录会话不能代替它。只有管理凭证 `SIREN_MCP_ADMIN_TOKEN` 能访问全局 `/mcp` 和任意 Project；Raven 和 AIR 使用的都是限定到单个范围、会过期或随会话吊销的凭证，签发的凭证只在内存中，服务端重启后全部失效。各类凭证的范围和有效期见 [MCP 鉴权](/reference/mcp#鉴权)。
 
 Agentic IR 启动 Provider CLI 时：
 
@@ -76,7 +67,7 @@ Agentic IR 启动 Provider CLI 时：
 - 会话凭证通过会话期间存在的私有配置文件或环境变量传入，不出现在命令行参数和 Provider 的持久配置中。
 - 其他环境变量原样继承，包括 `SOAR_ACCESS_KEY_*` 和 `ALIBABA_CLOUD_ACCESS_KEY_*`。Agent 能在控制主机上执行命令时，就能读到这些凭证。
 
-外部 MCP 客户端的配置、工具列表和 Raven 群项目说明见 [MCP 集成](/mcp)。
+外部 MCP 客户端的配置和工具列表见 [MCP](/reference/mcp)，Raven 见 [Raven 群项目](/reference/raven)。
 
 ### 命令黑名单只作用于 MCP
 
@@ -86,7 +77,7 @@ Agentic IR 启动 Provider CLI 时：
 - Web 控制台的 Shells 和 Files
 - Agentic IR 中 Provider 自带的 Shell 工具（在控制主机上执行）
 
-黑名单中无法编译的正则会被跳过，只记录一条 `mcp.blacklist_pattern.invalid` 警告日志，服务端照常启动。修改黑名单后请检查日志，确认没有规则被跳过。黑名单的默认规则和匹配方式见 [MCP 集成](/mcp#命令黑名单)。
+黑名单中无法编译的正则会被跳过，服务端照常启动，每个 MCP 请求都会记录一条 `mcp.blacklist_pattern.invalid` 警告日志。修改黑名单后请检查日志，确认没有规则被跳过。黑名单的匹配方式见 [命令黑名单](/reference/mcp#命令黑名单)。
 
 ## `/dossier/` 不鉴权
 

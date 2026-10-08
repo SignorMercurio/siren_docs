@@ -76,7 +76,7 @@ Provider 要求确认某个操作时，时间线中会出现 **Approval required
 
 ## Agent 能做什么
 
-Agent 通过 SIREN MCP 操作客户端，可用工具如下，参数和限制见 [MCP 集成](/mcp#可用工具)：
+Agent 通过 SIREN MCP 操作客户端，可用工具如下，参数和限制见 [MCP 集成](/reference/mcp#工具)：
 
 | 工具 | 用途 |
 | --- | --- |
@@ -89,7 +89,7 @@ Agent 通过 SIREN MCP 操作客户端，可用工具如下，参数和限制见
 
 <Callout title="边界" type="warn">
   - **范围**：Project 会话只能看到和操作本 Project 的客户端。
-  - **命令黑名单**：`run` 和 `run_batch` 下发前都会检查 [命令黑名单](/mcp#命令黑名单)，命中时不会执行。
+  - **命令黑名单**：`run` 和 `run_batch` 下发前都会检查 [命令黑名单](/reference/mcp#命令黑名单)，命中时不会执行。
   - **`deploy`**：会修改安全组并在目标主机上安装软件。工具说明要求 Agent 只在你明确要求部署到某台实例时调用，调查或诊断请求本身不构成授权。这是给模型的约束，不是 SIREN 的硬开关；调用前是否需要你审批取决于 Provider 配置。
   - **告警查询**：SIREN MCP 不提供告警查询工具，Event 模式能否拉取告警取决于 Provider 自身的工具或 Skill。
   - **Provider 自带的工具**：Agent 自己的 Shell、文件读写等工具直接在 SIREN 服务端上、以 `siren_server` 的系统用户和会话工作目录执行，不经过 SIREN 的命令黑名单。是否需要审批由各 CLI 的用户配置决定，各 Provider 的差异见 [Provider 差异](/air/providers)。

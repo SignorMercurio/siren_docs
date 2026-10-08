@@ -1,0 +1,91 @@
+---
+title: 客户端命令行
+description: siren 客户端二进制的子命令、参数与本地模式
+icon: SquareTerminal
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+客户端二进制 `siren` 既是常驻连接服务端的 Agent，也提供若干可直接在目标主机上运行的子命令。本页是完整的命令参考；[信息收集](/recon)、[进程分析](/process)、[文件管理](/files)、[痕迹清除](/cleanup)、[出站放行](/onboard/egress) 等指南页中的「命令行」小节都指向这里。
+
+<Callout title="日常无需手动运行" type="info">
+  客户端通常由 [一键部署](/onboard/provisioning) 或 [手动安装](/onboard/manual) 拉起并以连接模式运行。下列子命令主要用于本地模式或排查场景。
+</Callout>
+
+## 全局参数
+
+| 参数 | 默认值 | 说明 |
+| --- | --- | --- |
+| `-c`, `--config` | 依次查找工作目录和 `config/` 下的 `config.yaml` | 配置文件路径 |
+| `-v`, `--version` | — | 打印版本 |
+
+配置键的完整说明见 [客户端配置](/reference/client-config)。
+
+## 命令
+
+| 命令 | 用法 | 说明 |
+| --- | --- | --- |
+| `client` | `siren client [-s <host>] [-p <port>]` | 连接服务端，进入常驻客户端模式 |
+| `recon` | `siren recon [--profile <name>]` | 本地执行信息收集，结果上传 OSS |
+| `info` | `siren info <pid> \| -p <port> \| -n <name>` | 查看进程详情（仅 Linux） |
+| `upload` | `siren upload <file path>` | 将本地文件上传到 OSS |
+| `clean` | `siren clean` | 清除 SIREN 管理的客户端文件并退出 |
+| `probe-egress` | `siren probe-egress [--json]` | 观测一次出站 SYN，用于出口发现 |
+| `upgrade` | `siren upgrade [-y]` | 检查并升级客户端二进制，`-y` 跳过确认 |
+| `plugins` | `siren plugins [install\|uninstall\|toggle\|update <name>]` | 列出或管理本地插件 |
+
+已安装的 command 类插件还会注册各自的顶层子命令，见 [插件](/reference/plugins)。
+
+### client
+
+连接服务端并进入常驻客户端模式。`-s` / `-p` 省略时使用配置文件中的 `server` / `port`，默认 `127.0.0.1:443`。
+
+```bash title="目标主机"
+siren client -s 203.0.113.10 -p 443
+```
+
+### recon
+
+在本地执行一次信息收集。省略 `--profile` 时使用配置中的 `recon.defaultProfile`。生成的快照（`snapshot-jsonl-v2`，见 [快照格式](/reference/snapshot)）和报告都会上传到 OSS。
+
+```bash title="目标主机"
+siren recon --profile quick
+```
+
+### info
+
+查看进程详情，包含进程树、网络连接、容器与 systemd 信息等。可用 `-p` 按监听端口、`-n` 按进程名查找；按名字命中多个进程时打印候选列表。
+
+```bash title="目标主机"
+siren info 1234
+siren info -p 8080
+siren info -n nginx
+```
+
+<Callout title="仅 Linux" type="warn">
+  `info` 子命令只在 Linux 客户端上可用。
+</Callout>
+
+### upload
+
+将本地文件上传到 OSS，用于把取证产物带回。
+
+```bash title="目标主机"
+siren upload /var/log/auth.log
+```
+
+### clean
+
+清除 SIREN 在客户端留下的文件并退出，需要交互确认。详见 [痕迹清除](/cleanup)。
+
+### probe-egress
+
+从客户端向服务端地址发出一次出站 SYN 并观测其五元组，供基于云防火墙的出口发现使用。读取配置中的 `server` / `port` 作为目标。`--json` 输出结构化证据。详见 [出站放行](/onboard/egress)。
+
+```bash title="目标主机"
+siren probe-egress --json
+```
+
+## 本地模式
+
+当目标主机无法回连服务端时，可作为次要方案在该主机上直接运行 `recon`、`info`、`upload`、`clean`，无需连接服务端。`recon` 和 `upload` 会把结果写入 OSS，因此本地模式需要在客户端配置 [OSS 凭证](/server/prerequisites#oss-凭证)；拿到结果后再从 OSS 下载分析。

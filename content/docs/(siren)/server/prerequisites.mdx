@@ -76,7 +76,7 @@ SOAR_ACCESS_KEY_SECRET=<AccessKey Secret>
 
 - **缺失时**：`mcp.enabled: true`（默认）时服务端拒绝启动，提示 `MCP requires distinct SIREN_MCP_ADMIN_TOKEN and SIREN_MCP_RAVEN_TOKEN`。不使用 Raven 也要为 `SIREN_MCP_RAVEN_TOKEN` 设置一个不同的随机值。
 
-可以用 `openssl rand -hex 32` 生成。Agentic IR 不需要手工配置 MCP：每个会话会自动获得只在会话期间有效的凭证。外部 MCP 客户端的接入方法见 [MCP 集成](/mcp#启用与访问)。
+可以用 `openssl rand -hex 32` 生成。Agentic IR 不需要手工配置 MCP：每个会话会自动获得只在会话期间有效的凭证。外部 MCP 客户端的接入方法见 [MCP 集成](/reference/mcp#端点)。
 
 也可以设置 `mcp.enabled: false` 关闭 MCP，此时不再要求这两个变量；但 Agentic IR 通过 MCP 操作客户端，关闭后无法使用。
 
@@ -101,7 +101,7 @@ egress:
       portRange: 443/443
 ```
 
-部署时 SIREN 按这条规则的端口，为目标主机的出口 IP 放行到服务端的入站连接；自动识别出口 IP 时，还要求客户端探测连接的目标地址和端口与这条规则完全一致，否则提示 `probe destination differs from configured SIREN callback; no IP was allowed`。安装包自带的 `siren_server_callback` 地址不是你的服务端，部署前必须修改；`siren_client_download`、`alibaba_cloud_infrastructure` 两条默认规则用于下载客户端和访问阿里云基础服务。规则如何下发和恢复见 [出站放行](/onboard/egress)。
+部署时 SIREN 按这条规则的端口，为目标主机的出口 IP 放行到服务端的入站连接；自动识别出口 IP 时，还要求客户端探测连接的目标地址和端口与这条规则完全一致，否则提示 `probe destination differs from configured SIREN callback; no IP was allowed`。安装包自带的 `siren_server_callback` 地址 `47.111.170.208` 也是一键部署出的客户端固定连接的地址，自建服务端无法使用一键部署，见 [一键部署的前置条件](/onboard/provisioning#前置条件)；`siren_client_download`、`alibaba_cloud_infrastructure` 两条默认规则用于下载客户端和访问阿里云基础服务。规则如何下发和恢复见 [出站放行](/onboard/egress)。
 
 ## 出口发现 `egress.discovery`
 
@@ -174,7 +174,7 @@ SOAR 客户端在第一次使用时创建并缓存。之后修改 `.env` 或 She
 
 | 方向 | 需要放通 |
 | --- | --- |
-| 入方向 | 主 TLS 端口（默认 `443`）对目标主机出口 IP 和操作者开放；使用[端口转发](/portforward)时另开对应端口 |
+| 入方向 | 主 TLS 端口（默认 `443`）对目标主机出口 IP 和操作者开放；使用[端口转发](/reference/portforward)时另开对应端口 |
 | 服务端出方向 | `oss-siren.oss-cn-hongkong.aliyuncs.com`（安装、升级和启动时的版本检查）、SOAR 接入点 `sophonsoar.aliyuncs.com`、各 AIR Provider 的模型服务 |
 | 目标主机出方向 | 客户端下载地址和服务端连接端口，可用 **Configure egress** 下发 |
 
@@ -197,7 +197,7 @@ $env:OSS_ACCESS_KEY_SECRET="<YOUR_ACCESS_KEY_SECRET>"
 
 Linux 示例中，凭证命令前的空格配合 `HISTCONTROL=ignoreboth` 可避免写入 Bash 历史；`export HISTCONTROL=ignoreboth` 本身不要加空格。Windows 不支持此特性。
 
-Bucket 和上传路径由客户端配置 `oss.region`、`oss.bucketName`、`oss.objectPath`、`oss.docObjectPath` 指定，见 [配置文件](/config#客户端配置)。凭证缺失或无权限时，`siren recon` 的采集结果仍保存在本机，但命令以上传错误结束。
+Bucket 和上传路径由客户端配置 `oss.region`、`oss.bucketName`、`oss.objectPath`、`oss.docObjectPath` 指定，见 [配置文件](/reference/client-config)。凭证缺失或无权限时，`siren recon` 的采集结果仍保存在本机，但命令以上传错误结束。
 
 <Accordions>
   <Accordion title="OSS 凭证授权策略">
@@ -220,4 +220,4 @@ Bucket 和上传路径由客户端配置 `oss.region`、`oss.bucketName`、`oss.
 
 ## 插件市场
 
-客户端配置 `plugins.marketplace` 指定插件市场的 HTTP(S) 地址（例如 OSS Bucket 地址），只在安装或更新[插件](/plugins)时需要。已安装的插件保存在客户端工作目录的 `plugins/` 下。
+客户端配置 `plugins.marketplace` 指定插件市场的 HTTP(S) 地址（例如 OSS Bucket 地址），只在安装或更新[插件](/reference/plugins)时需要。已安装的插件保存在客户端工作目录的 `plugins/` 下。

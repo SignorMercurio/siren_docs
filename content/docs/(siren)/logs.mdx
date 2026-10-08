@@ -36,7 +36,7 @@ Logs 不区分 Project，任何范围下都显示全部服务端日志。
 - 写满后从最早的记录开始淘汰，页头显示 `N older dropped`，不会静默截断。
 - 设为 `0` 或负数则不保留，页面显示 `Server log retention is off`。修改后需要重启服务端。
 
-需要长期留存时，由 systemd、容器运行时等采集服务端的输出流。`logging.level`、`logging.format`、`logging.output` 的完整说明见 [日志输出](/config#日志输出)。
+SIREN 不写日志文件；需要长期留存时见 [日志格式与留存](/reference/server-config#日志格式与留存)，`logging.*` 各键见 [服务端配置](/reference/server-config#logging)。
 
 ## 常用审计事件
 
@@ -57,9 +57,9 @@ WebUI 只记录失败的请求、成功的修改类操作和慢请求，不记�
 
 ### MCP 命令审计
 
-AIR 或外部 MCP 客户端每调用一次 `run`，日志中会出现两条共享同一 `audit_id` 的记录：执行前的 `mcp.run.requested` 和结束时的 `mcp.run.finished`。`run_batch` 中每台主机各有一个 `audit_id`。被黑名单拦截、目标被拒绝、发送失败、取消、超时或远端执行失败的调用也有完成记录，其 `outcome` 说明结果。
+AIR 或外部 MCP 客户端每调用一次 `run`，日志中会出现两条共享同一 `audit_id` 的记录：执行前的 `mcp.run.requested` 和结束时的 `mcp.run.finished`。`run_batch` 中每台主机各有一个 `audit_id`。被黑名单拦截、目标被拒绝、发送失败、取消、超时或远端执行失败的 `run` 也有完成记录，其 `outcome` 说明结果；`run_batch` 整批被黑名单拦截或目标解析失败时，只有一条 `mcp.tool.finished`，没有逐台主机的记录。
 
-在组件下拉框选择 `mcp`，再搜索命令片段、Client ID、outcome 或 `audit_id`。日志中有完整命令，但不包含命令输出；输出需要通过 MCP 的 `read_run_result` 按 `audit_id` 回读，且只保留 60 分钟。完成记录的字段含义见 [命令审计](/mcp#命令审计)。
+在组件下拉框选择 `mcp`，再搜索命令片段、Client ID、outcome 或 `audit_id`。日志中有完整命令，但不包含命令输出；输出需要通过 MCP 的 `read_run_result` 按 `audit_id` 回读，且只保留 60 分钟。完成记录的字段含义见 [命令审计](/reference/mcp#审计日志)。
 
 <Callout title="日志包含敏感信息" type="warn">
   任何已登录账号都能查看全部日志，其中包括来访 IP、登录用户名、客户端地址，以及 MCP `run` 的完整命令。需要缩小暴露面时，可以调低 `logging.bufferSize` 或设为 `0` 关闭该页面，见 [Logs 包含敏感信息](/server/security#logs-包含敏感信息)。

@@ -1,0 +1,25 @@
+{
+  "title": "参考",
+  "description": "命令行、配置、集成与格式",
+  "root": true,
+  "icon": "BookOpen",
+  "pages": [
+    "index",
+    "---配置---",
+    "server-config",
+    "client-config",
+    "---命令行---",
+    "repl",
+    "portforward",
+    "client-cli",
+    "---集成---",
+    "mcp",
+    "raven",
+    "---插件---",
+    "plugins",
+    "plugin-dev",
+    "---格式与限制---",
+    "snapshot",
+    "limits"
+  ]
+}

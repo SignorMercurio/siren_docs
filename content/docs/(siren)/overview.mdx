@@ -1,79 +1,118 @@
 ---
 title: SIREN 概述
-description: 了解 SIREN 的核心概念和能力
+description: SIREN 是什么、由哪些部分组成、能做哪些事
 icon: BookOpen
 ---
 
-import { Card, Cards } from "fumadocs-ui/components/card";
 import { Callout } from "fumadocs-ui/components/callout";
-import { Search, Radio, Brain, Shield, Feather, FileText, Puzzle, FolderKanban, LayoutDashboard, BookOpenText } from 'lucide-react';
+import { Card, Cards } from "fumadocs-ui/components/card";
+import { Rocket, Lightbulb, ServerCog, LayoutDashboard } from 'lucide-react';
 
 <Callout title="注意" type="warn">
   SIREN 仅面向合法的应急响应和安全分析场景。运行信息收集、远程 Shell、文件操作、端口转发或痕迹清除前，请确认你有权调查目标系统。
 </Callout>
 
-## 什么是 SIREN？
+SIREN（**S**wift **I**ncident **R**esponse **E**vidence **N**avigator）是面向主机应急响应的工具。它把接入目标主机、收集证据、远程排查、AI 辅助调查和报告整理放进同一个 Web 控制台，适合在事件处理中快速接入少量主机并留存证据。
 
-SIREN（**S**wift **I**ncident **R**esponse **E**vidence **N**avigator）是面向主机应急响应的工具。它把信息收集、远程操作、文件管理、AI 辅助排查和报告整理放到同一套工作流里，适合在事件处理中快速接入目标主机并留存证据。
+## 工作方式
 
-SIREN 支持本地模式和远程模式。本地模式直接在目标主机上运行，适合离线单机排查；远程模式由 SIREN Server 管理在线客户端，提供服务端 REPL、Web 控制台、Artifacts、Projects、Agentic IR 和 MCP 服务。需要内部 SOAR 能力时，还可以放行、部署目标主机，或调查 AccessKey。
+- **一台服务端，多个客户端**：SIREN Server 运行在一台 Linux 控制主机上；每台被调查主机运行一个 SIREN 客户端，由客户端主动连接服务端。目标主机只需要能访问服务端的一个端口，不需要开放任何入站端口。
+- **一个 TLS 端口**：客户端接入、交互式 Shell、Web 控制台、MCP 和 Dossier 共用服务端的同一个 TLS 端口（默认 `443`），按 TLS 握手中的 ALPN 分流。分流规则见 [单一 TLS 端口](/server#单一-tls-端口)。
+- **浏览器即操作台**：日常操作都在 Web 控制台中完成，Agentic IR 也只能在 Web 控制台中使用。服务端终端里的 [服务端 REPL](/reference/repl) 用于少数 WebUI 没有的操作，例如端口转发和插件管理。
 
-## 设计理念
+WebUI 中反复出现的名词（Client ID、Global 与 Project、Artifacts 与 Reports 等）见 [核心概念](/concepts)。
 
-<Cards>
-  <Card title="单二进制部署" icon={<Feather />}>
-    Go 静态编译客户端，减少目标主机上的运行时依赖
-  </Card>
-  <Card title="证据优先" icon={<FileText />}>
-    Recon、Files、Artifacts 和 Dossier 都围绕证据收集、留存和报告交付展开
-  </Card>
-  <Card title="本地与远程并存" icon={<Radio />}>
-    本地模式适合隔离环境；远程模式适合多客户端统一管理和远程排查
-  </Card>
-  <Card title="可扩展" icon={<Puzzle />}>
-    插件系统扩展客户端能力，MCP 让 AI 助手接入 SIREN 工具
-  </Card>
-</Cards>
+## 能力地图
 
-## 核心能力
+按一次应急响应的顺序分组，组名与 WebUI 侧栏相同。侧栏之外的入口：Provisioning 在 Clients 页内，Projects 在侧栏顶部的 **Project scope** 菜单中，MCP、Raven 和插件没有页面入口。
 
-<Cards>
-  <Card title="信息收集" icon={<Search />} href="/recon">
-    通过命名 Profile 采集系统、用户、进程、网络、计划任务、服务、文件、内核模块和应用配置，生成权威 JSONL 快照与派生 Markdown
-  </Card>
-  <Card title="远程操作" icon={<Radio />} href="/remote">
-    通过 TLS 连接在线客户端，支持服务端 REPL、远程命令、交互式 Shell 和端口转发
-  </Card>
-  <Card title="Web 控制台" icon={<LayoutDashboard />} href="/webui">
-    在浏览器中管理 Clients、Shells、Investigations、Files、Artifacts、Projects 和 Dossier
-  </Card>
-  <Card title="调查与分析" icon={<Shield />} href="/webui#investigations">
-    执行 AccessKey 调查、客户端 Recon 和 Linux 进程分析，并跳转到 Artifacts 查看结果
-  </Card>
-  <Card title="Agentic IR 与 MCP" icon={<Brain />} href="/air">
-    在 Web 控制台中启动 Claude / Codex / Qoder / Pi 会话，并通过 MCP 使用 SIREN 工具
-  </Card>
-  <Card title="Projects 工作区" icon={<FolderKanban />} href="/projects">
-    按应急响应项目隔离客户端、操作目标、Artifacts 目录和 AIR 工作目录
-  </Card>
-  <Card title="文件与报告" icon={<BookOpenText />} href="/files">
-    管理客户端 Files、服务端 Artifacts 和 Dossier Markdown 应急报告
-  </Card>
-  <Card title="插件系统" icon={<Puzzle />} href="/plugins">
-    安装和管理 command / recon 插件，扩展独立命令或信息收集模块
-  </Card>
-</Cards>
+### Respond：接入与响应
 
-## 架构设计
+| 能力 | 用途 |
+| --- | --- |
+| [Clients](/clients) | 在线客户端列表：编辑 Note、分配 Project，从客户端行打开 Shell、Files、Recon 等；结案时 [Clean & terminate](/cleanup) |
+| Provisioning | 通过 SOAR 操作阿里云 ECS：[Deploy SIREN](/onboard/provisioning) 一键部署客户端、**Allow access** 放行回连、[Configure egress](/onboard/egress) 放行出站，结案后 [Restore egress](/restore-egress) |
+| [Agentic IR](/air) | 在服务端运行 Codex、Claude Code、Pi 或 Qoder，通过 SIREN MCP 排查客户端；操作员审批、追问并控制过程 |
 
-### 本地模式
+### Tools：手工排查
 
-在目标主机上直接运行 `siren`。Recon 的 JSONL 与 Markdown 生成在本地；如配置 OSS，两份 artifact 都会上传。此模式不需要 SIREN Server，也不提供 Web 控制台、MCP 或远程 Shell。
+| 能力 | 用途 |
+| --- | --- |
+| [Recon](/recon) | 按 Profile 采集有范围、有上限的主机快照，产出 `.recon.jsonl` 和 Markdown 报告；只记录事实，不下结论 |
+| [Process Analysis](/process) | 按 PID、监听端口或进程名查看 Linux 客户端的进程详情、进程链、容器和 systemd 线索 |
+| [AccessKey](/ak) | 经 SOAR 查询泄露 AccessKey 的云上调用记录，生成 `AK_*.md` 报告 |
+| [Shells](/shells) | 浏览器中的多标签交互式终端，切换页面不断开 |
+| [Files](/files) | 浏览、预览、下载和上传在线客户端主机上的文件 |
 
-![arch_local](../../img/arch_local.png)
+### Evidence：证据与报告
+
+| 能力 | 用途 |
+| --- | --- |
+| [Artifacts](/artifacts) | 服务端证据目录，按 Global 或 Project 划分；Recon、AccessKey、AIR 产出和手工上传的文件都在这里 |
+| [Reports](/reports) | 列出 Artifacts 中的 Dossier 报告，在 Dossier 编辑器中编写、校样并导出 PDF、HTML 或 Markdown；语法见 [报告语法](/reports/syntax) |
+
+### System：工作区与集成
+
+| 能力 | 用途 |
+| --- | --- |
+| [Projects](/projects) | 按事件隔离客户端、AIR 会话和证据目录 |
+| [Logs](/logs) | 查看服务端内存中最近的运行日志，按关键词、级别和组件过滤 |
+| [Settings](/webui#settings) | 账号菜单中查看鉴权、Dossier 和 AIR runtime 等服务端状态 |
+| [MCP](/reference/mcp) | `/mcp` 与 `/mcp/project/<id>` 端点，让 AIR 和外部 MCP 客户端列出客户端、执行命令、运行 Recon |
+| [Raven](/reference/raven) | 钉钉群机器人按群绑定 Project，只能访问本群 Project 的客户端 |
+| [插件](/reference/plugins) | `command` 和 `recon` 两类客户端插件（如 `jdump`、`chkrootkit`），通过命令行安装和管理；开发见 [插件开发](/reference/plugin-dev) |
+| [服务端 REPL](/reference/repl) | 服务端终端中的命令行，提供 [端口转发](/reference/portforward) 等 WebUI 没有的操作 |
+
+## 架构
 
 ### 远程模式
 
-在控制主机运行 `siren_server`，目标主机运行 `siren client` 并通过 TLS 连接服务端。服务端负责客户端管理、命令下发、Artifacts 保存、Project 目录隔离、Web 控制台和 MCP 服务；Dossier、SOAR、OSS、Codex / Claude / Qoder / Pi CLI 等能力按需接入。
+远程模式是 SIREN 的主要用法：
 
-![arch_remote](../../img/arch_remote.png)
+```text
+ 操作员浏览器 ─┐
+ 外部 MCP 客户端 ─┤ HTTPS
+ Raven ──────────┘   │
+                     ▼
+ ┌─ SIREN Server ── Linux 控制主机，单一 TLS 端口（默认 443）─────────┐
+ │  Web 控制台   MCP   客户端接入   Dossier 静态页面                  │
+ │  Artifacts 与 Project 目录    AIR Provider CLI（Codex / Claude …） │
+ └──────────────────────────────────────────────────────────────────┘
+          ▲ TLS，由客户端主动发起           │ 按需：SOAR、模型服务
+          │                                 ▼
+   ┌──────┴──────┬─────────────┐      阿里云 ECS / 云助手 / 云防火墙
+ Client       Client        Client
+ 被调查主机（Linux / Windows），每台一个客户端
+```
+
+- **服务端**保存所有产出：Recon 快照、AccessKey 报告、AIR 会话产出、手工上传的文件都写在服务端工作目录或 Project 目录中，不需要 OSS。AIR 的 Provider CLI 也在服务端本机运行，浏览器只负责显示和输入。安装与运行方式见 [安装服务端](/server)。
+- **客户端**是单个静态编译的可执行文件，支持 Linux 和 Windows（平台见 [客户端平台](/onboard#客户端平台)）。它与服务端保持长连接，断线后自动重连；Recon 只使用目标主机上已有的系统工具，不安装其他软件。接入方式见 [选择接入方式](/onboard)。
+- **外部依赖按功能启用**：只用客户端接入、Shell、Files、Recon 和 Artifacts 时，服务端不依赖外部服务；SOAR、Dossier、AIR Provider 等只影响各自的功能。完整清单见 [前置条件与凭证](/server/prerequisites)。
+
+### 本地模式
+
+目标主机网络隔离、或数据不允许离开主机时，可以不部署服务端，直接在目标主机上运行 `siren recon`、`siren info` 等子命令。结果写在目标主机本地，并上传到配置的 OSS。本地模式没有 Web 控制台、Agentic IR、MCP 和远程 Shell。命令与参数见 [客户端命令行](/reference/client-cli)。
+
+## 设计取舍
+
+- **客户端尽量轻**：目标主机上只需要一个可执行文件和一份配置，主动外连，用完通过 Clean & terminate 删除。依赖集中在控制主机一侧。
+- **证据优先**：Recon 只采集事实，工具缺失或输出截断会如实记入快照；判断留给操作员和 Agentic IR。所有产出集中在服务端，便于留存和写报告。
+- **人在回路**：Agentic IR 是交互式会话，不是无人值守的自动处置。Agent 需要审批或提问时会停下来等操作员回应，结论写入报告前需要人工核对。
+- **短期接入**：面向一次事件中的少量主机，不做长期驻留和大规模终端管理。和其他工具的定位差异见 [工具对比](/comparison)。
+
+## 下一步
+
+<Cards>
+  <Card title="快速开始" href="/" icon={<Rocket />}>
+    从安装服务端到第一个 AIR 会话
+  </Card>
+  <Card title="核心概念" href="/concepts" icon={<Lightbulb />}>
+    Client ID、Project 范围、Artifacts 与 Reports
+  </Card>
+  <Card title="安装服务端" href="/server" icon={<ServerCog />}>
+    在控制主机上部署 SIREN Server
+  </Card>
+  <Card title="WebUI 导览" href="/webui" icon={<LayoutDashboard />}>
+    Web 控制台的导航和各页面用途
+  </Card>
+</Cards>

@@ -14,6 +14,7 @@ import { Steps, Step } from "fumadocs-ui/components/steps";
 - 目标是阿里云 ECS，且云助手状态正常。
 - 服务端已配置 SOAR 平台访问凭证与 `egress.rules`，详见 [前置条件与凭证](/server/prerequisites)。
 - 已知目标实例所属账号的 Alibaba Cloud UID。
+- 服务端的公网地址是 `47.111.170.208`。一键部署安装的是官方发布的客户端安装包，其 `config.yaml` 固定连接这个地址，安装脚本启动客户端时也不传 `-s`。自建服务端用一键部署时，客户端会连向这个地址而不是你的服务端，部署会一直等不到回连；请改用 [手动安装客户端](/onboard/manual) 并用 `-s` 指定服务端。
 
 ## 操作步骤
 
@@ -84,5 +85,5 @@ i-demo0004,203.0.113.11,db-1
 - **手动指定出口 IP**：SOAR 无法返回出口 IP，或系统不支持自动抓包（如需要第三方抓包驱动的 Windows 系统）时，在目标行第二列填入经核对的公网出口 IP，SIREN 会跳过自动发现直接放行。目标主机出口 IP 可在主机上用 `curl ifconfig.co/ip` 获取。
 
 <Callout title="命令行等价" type="info">
-  服务端 REPL 的 `deploy-batch` 和 MCP 的 `deploy` 工具走的是同一套部署流程。REPL 用法见 [服务端 REPL](/remote)；外部 Agent 通过 MCP 发起部署见 [MCP 集成](/mcp)。
+  服务端 REPL 的 `deploy-batch` 和 MCP 的 `deploy` 工具走的是同一套部署流程。REPL 用法见 [服务端 REPL](/reference/repl)；外部 Agent 通过 MCP 发起部署见 [MCP 集成](/reference/mcp)。
 </Callout>

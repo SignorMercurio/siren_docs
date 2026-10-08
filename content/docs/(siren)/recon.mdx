@@ -36,7 +36,7 @@ Recon 只采集事实，不判断主机是否被入侵，也不做白名单、�
 </Step>
 </Steps>
 
-除了手动发起，AIR 会话也会通过 MCP 工具 `recon` 按需触发采集，外部 Agent 同样可以调用，参数是 `client_id` 和可选的 `profile`，见 [MCP](/mcp#可用工具)。三种入口（WebUI、MCP、服务端 REPL）共用同一套规则和保存位置。
+除了手动发起，AIR 会话也会通过 MCP 工具 `recon` 按需触发采集，外部 Agent 同样可以调用，参数是 `client_id` 和可选的 `profile`，见 [MCP](/reference/mcp#工具)。三种入口（WebUI、MCP、服务端 REPL）共用同一套规则和保存位置。
 
 ## 查看进度
 
@@ -108,11 +108,11 @@ recon:
 ```
 
 - Profile 名须匹配 `^[a-z][a-z0-9_-]{0,63}$`，每个 Profile 1 到 64 个不重复模块，模块名必须是本平台存在的模块。
-- recon 插件以 `plugin:<name>` 写入，例如 `[user, process, plugin:chkrootkit]`，并由 `plugins.<name>` 控制启停。安装插件不会自动加入任何 Profile；引用缺失或已禁用的插件时，配置校验失败。见 [插件](/plugins)。
+- recon 插件以 `plugin:<name>` 写入，例如 `[user, process, plugin:chkrootkit]`，并由 `plugins.<name>` 控制启停。安装插件不会自动加入任何 Profile；引用缺失或已禁用的插件时，配置校验失败。见 [插件](/reference/plugins)。
 - 列表顺序不影响执行顺序：内置模块按固定顺序执行，插件按名称排序。
-- 改完后重启客户端，或在服务端 REPL 执行 `reload <Client ID>`。新配置无效时客户端保留上一份有效的 Profile；重载成功后客户端会重新上报 Profile，WebUI 的下拉框随之更新。
+- 改完后在服务端 REPL 执行 `reload <Client ID>`。新配置无效时重载被拒绝，客户端保留上一份有效的 Profile；此时直接重启客户端会因配置无效而退出。重载成功后客户端会重新上报 Profile，WebUI 的下拉框随之更新。
 
-配置项的完整说明见 [客户端配置](/config#客户端配置)。
+配置项的完整说明见 [客户端配置](/reference/client-config)。
 
 ## 模块
 
@@ -144,20 +144,15 @@ Recon 只使用主机上已有的工具，不安装任何软件。工具缺失�
 
 | 配置项 | 位置 | 默认 | 作用 |
 | --- | --- | --- | --- |
-| `recon.commandTimeout` | 客户端 `config.yaml` | `30` 秒 | 每条底层采集命令的超时。一条命令超时只影响它自己的 source。同一个值也用于客户端执行远程命令、插件和本地 OSS 上传 |
+| `recon.commandTimeout` | 客户端 `config.yaml` | `30` 秒 | 每条底层采集命令的超时。一条命令超时只影响它自己的 source。同一个值也用于插件和本地 OSS 上传；远程 `run` 取服务端与客户端同名键中较小的值，见 [执行时限](/reference/mcp#执行时限) |
 | `recon.collectionTimeout` | 客户端 `config.yaml` | `270` 秒 | 整个 Profile 的采集预算。用尽后停止，已完成的部分照常保存，未执行的模块记录在快照中，快照为 partial |
 | `recon.responseTimeout` | 服务端 `server_config.yaml` | `300` 秒 | WebUI、REPL 和 MCP 等待客户端结果的上限。服务端发请求时会把采集预算压到 `responseTimeout - 30` 秒，客户端取它与 `collectionTimeout` 中较小的值 |
 
-默认配置下，远程 Recon 的实际采集预算是 270 秒，服务端最多等 300 秒。调大采集预算时，要同时调大服务端的 `recon.responseTimeout`，否则仍被压到 `responseTimeout - 30`。配置文件位置见 [配置文件](/config)。
+默认配置下，远程 Recon 的实际采集预算是 270 秒，服务端最多等 300 秒。调大采集预算时，要同时调大服务端的 `recon.responseTimeout`，否则仍被压到 `responseTimeout - 30`。配置文件位置见 [配置文件](/reference/server-config)。
 
 ## 快照格式
 
-以下是阅读 JSONL 时需要的最少背景。
-
-- 格式为 `snapshot-jsonl-v2`，每行一个事件，依次为 `snapshot_start`、`module_start`、`record`、`source_result`、`module_end`、`snapshot_end`。服务端只接受这一格式，其他版本会被拒绝。
-- `record` 的 `data.recordType` 为 `entity`、`relation`、`fact`、`evidence_file` 或插件输出的 `plugin_text`。实体和关系使用稳定 ID，可以按关系追踪，例如组件 → 进程 → Socket。
-- 每个 source 和模块的状态为 `ok`、`partial`、`unavailable` 或 `failed`；整份快照为 `complete` 或 `partial`。已检查但不存在的对象记为 `not_present`，按设计不采集的记为 `not_collected`，这两种不会让快照变成 partial。
-- 上限：单个 source 2,000 条记录；单个模块 10,000 条或 16 MiB；单个文本字段 1 MiB；整份快照 128 MiB。达到上限时停止对应采集并标记 `truncated`。
+Recon 的权威结果是 `snapshot-jsonl-v2` 格式的 JSONL，每行一个事件；同名 `.md` 由它派生，便于阅读。整份快照标记为 `partial` 时，说明有模块没采全，原因写在各模块的状态里。事件结构、状态值和上限见 [Recon 快照格式](/reference/snapshot)。
 
 ## 命令行
 
@@ -167,7 +162,7 @@ Recon 只使用主机上已有的工具，不安装任何软件。工具缺失�
 >>> recon <Client ID> [Profile]
 ```
 
-省略 Profile 时使用客户端的默认 Profile。命令立即返回，完成后在终端打印报告路径；保存位置与 WebUI 相同。见 [服务端 REPL](/remote)。
+省略 Profile 时使用客户端的默认 Profile。命令立即返回，完成后在终端打印报告路径；保存位置与 WebUI 相同。见 [服务端 REPL](/reference/repl)。
 
 **本地模式**（在目标主机上直接运行客户端，不连服务端）：
 
@@ -186,10 +181,10 @@ Recon 只使用主机上已有的工具，不安装任何软件。工具缺失�
   <Card title="Agentic IR" href="/air">
     让 Agent 触发 Recon 并基于快照分析
   </Card>
-  <Card title="客户端配置" href="/config#客户端配置">
+  <Card title="客户端配置" href="/reference/client-config">
     Profile、超时和 OSS 路径
   </Card>
-  <Card title="插件" href="/plugins">
+  <Card title="插件" href="/reference/plugins">
     把 recon 插件加入 Profile
   </Card>
 </Cards>

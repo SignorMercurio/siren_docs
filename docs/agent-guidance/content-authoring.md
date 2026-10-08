@@ -7,6 +7,7 @@
 - Preserve established Chinese terminology and the surrounding MDX structure.
 - Reuse Fumadocs components already imported by nearby pages before introducing
   a new pattern.
-- Store new documentation images under `content/img/`.
+- Store new documentation images under a `content/img/` directory (currently
+  absent; create it with the first image).
 - Preserve the current documentation-site visual style unless the task requests
   a redesign or visual change.

@@ -96,4 +96,4 @@ Files 不提供删除、重命名、新建目录或修改权限。需要这些�
 - 只能拉取普通文件，单个文件最大 1 GiB。文件路径可以包含空格，例如 Windows 的 `C:\Program Files\...`。
 - 保存成功后，服务端日志中出现 `artifact.upload.saved` 事件，带保存路径，可在 [Logs](/logs) 中查看。
 
-**本地模式** 的 `./siren upload` 把当前主机上的文件上传到阿里云 OSS，对象路径为 `<oss.objectPath>/<文件名>`，默认前缀 `tmp/siren_upload`，桶和地域由客户端配置的 `oss.bucketName`、`oss.region` 决定，见 [客户端配置](/config#客户端配置)。使用前需要在该主机上设置 [OSS 凭证](/server/prerequisites#oss-凭证)。
+**本地模式** 的 `./siren upload` 把当前主机上的文件上传到阿里云 OSS，对象路径为 `<oss.objectPath>/<文件名>`，安装包配置的前缀为 `tmp/siren_upload`，桶和地域由客户端配置的 `oss.bucketName`、`oss.region` 决定，见 [客户端配置](/reference/client-config)。使用前需要在该主机上设置 [OSS 凭证](/server/prerequisites#oss-凭证)。

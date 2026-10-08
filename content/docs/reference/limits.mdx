@@ -1,0 +1,189 @@
+---
+title: 限制速查
+description: SIREN 的大小、数量和超时上限一览
+icon: Gauge
+---
+
+import { Card, Cards } from "fumadocs-ui/components/card";
+
+本页汇总 SIREN 中所有固定或可配置的大小、数量和超时上限，按功能分组。**配置项**一列为空的值固定，不能通过配置修改；可配置的键见 [服务端配置](/reference/server-config) 和 [客户端配置](/reference/client-config)。**说明**链接到解释该限制的页面，**源码**一列供维护者核对，路径相对于 SIREN 仓库，标注 `dossier:` 的位于 Dossier 仓库。
+
+## Clients 与 Projects
+
+| 限制 | 值 | 配置项 | 说明 | 源码 |
+| --- | --- | --- | --- | --- |
+| 客户端备注 | 256 个字符 | | [Clients 页](/clients) | `internal/server/clientnote/note.go` |
+| Project 名称 | 128 个字符 | | [Projects](/projects) | `internal/server/project_names.go` |
+
+## 客户端文件
+
+| 限制 | 值 | 配置项 | 说明 | 源码 |
+| --- | --- | --- | --- | --- |
+| 每个目录列出的条目 | 1,000 个 | | [客户端文件](/files) | `internal/protocol/fs.go` |
+| 文本预览 | 5 MiB | | [客户端文件](/files) | `internal/protocol/fs.go` |
+| 下载单个文件 | 100 MiB | | [客户端文件](/files) | `internal/protocol/fs.go` |
+| 下载目录 | 普通文件合计 100 MiB，压缩包 100 MiB | | [客户端文件](/files) | `internal/client/files.go` |
+| 上传单个文件 | 100 MiB | | [客户端文件](/files) | `internal/server/webui/webui_client_files.go` |
+| 读取、下载、上传等待客户端 | 2 分钟 | | [客户端文件](/files) | `internal/server/client_files.go` |
+| REPL `upload` 单个文件 | 1 GiB | | [客户端文件](/files) | `internal/protocol/protocol.go` |
+| REPL `upload` 同名文件的副本 | 1,000 份（原名加 `.1` 到 `.999`） | | [客户端文件](/files) | `internal/server/handler.go` |
+
+## Artifacts
+
+| 限制 | 值 | 配置项 | 说明 | 源码 |
+| --- | --- | --- | --- | --- |
+| 文本预览 | 5 MiB | | [Artifacts](/artifacts) | `internal/server/artifact_resolver.go` |
+| 图片预览 | 100 MiB | | [Artifacts](/artifacts) | `internal/server/webui/webui_artifacts.go` |
+| 下载单个文件 | 100 MiB | | [Artifacts](/artifacts) | `internal/server/webui/webui_artifacts.go` |
+| 下载目录（`.tar.gz`） | 普通文件合计 100 MiB | | [Artifacts](/artifacts) | `internal/server/webui/webui_artifacts.go` |
+| 上传单个文件 | 100 MiB | | [Artifacts](/artifacts) | `internal/server/webui/webui_artifacts.go` |
+
+## Reports 与 Dossier
+
+| 限制 | 值 | 配置项 | 说明 | 源码 |
+| --- | --- | --- | --- | --- |
+| 报告扫描深度 | 根目录下 5 层子目录 | | [Reports](/reports) | `internal/server/artifact_dossier.go` |
+| 每个根目录检查的条目 | 20,000 个，超出时显示 **partial scan** | | [Reports](/reports) | `internal/server/artifact_dossier.go` |
+| 报告源文件 | 10 MiB | | [Reports](/reports) | `internal/server/webui/webui_reports.go` |
+| 识别报告时读取的文件开头 | 16 KiB，frontmatter 须在此范围内 | | [Reports](/reports) | `internal/server/artifact_dossier.go` |
+| 粘贴图片 | 单张 100 MiB | | [Reports](/reports) | `internal/server/webui/webui_reports.go` |
+| 加载、保存报告 | 15 秒 | | [Reports](/reports) | `dossier: src/siren-adapter.js` |
+| 上传粘贴的图片 | 每张 45 秒 | | [Reports](/reports) | `dossier: src/source-panel.js` |
+| 导出前等待图片和字体就绪 | 各 30 秒 | | [Reports](/reports) | `dossier: src/pages.js`、`dossier: src/export.js` |
+
+## 进程分析
+
+| 限制 | 值 | 配置项 | 说明 | 源码 |
+| --- | --- | --- | --- | --- |
+| 按名称匹配的候选进程 | 50 个 | | [进程分析](/process) | `internal/protocol/info.go` |
+| 每次查询等待客户端 | 30 秒 | | [进程分析](/process) | `internal/server/info_requests.go` |
+| 页面保留的查询结果 | 最近 10 条 | | [进程分析](/process) | `internal/server/webui/frontend/src/pages/InvestigationsPage.tsx` |
+
+## Shells
+
+| 限制 | 值 | 配置项 | 说明 | 源码 |
+| --- | --- | --- | --- | --- |
+| 客户端建立 Shell 连接 | 15 秒 | | [Shells](/shells) | `internal/server/shell.go` |
+| 心跳间隔 / 判定断开 | 15 秒 / 45 秒 | | [Shells](/shells) | `internal/server/webui/webui_shell.go` |
+
+Shell 没有空闲超时。
+
+## Recon 与快照
+
+| 限制 | 值 | 配置项 | 说明 | 源码 |
+| --- | --- | --- | --- | --- |
+| 同一客户端同时运行的 Recon | 1 个 | | [自动化信息收集](/recon) | `internal/server/recon_operation.go` |
+| 单条采集命令 | 30 秒 | 客户端 `recon.commandTimeout` | [自动化信息收集](/recon#超时) | `pkg/utils/utils.go` |
+| 整个 Profile 的采集预算 | 270 秒 | 客户端 `recon.collectionTimeout` | [自动化信息收集](/recon#超时) | `internal/recon/func.go` |
+| 服务端等待结果 | 300 秒；下发的采集预算为该值减 30 秒 | 服务端 `recon.responseTimeout` | [自动化信息收集](/recon#超时) | `internal/server/recon_operation.go` |
+| 整份快照 | 128 MiB | | [快照格式](/reference/snapshot#上限) | `internal/reconartifact/schema.go` |
+| 单个模块 | 10,000 条记录或 16 MiB | | [快照格式](/reference/snapshot#上限) | `internal/reconartifact/schema.go` |
+| 单个 source | 2,000 条记录 | | [快照格式](/reference/snapshot#上限) | `internal/reconartifact/schema.go` |
+| 单个文本字段 | 1 MiB | | [快照格式](/reference/snapshot#上限) | `internal/reconartifact/schema.go` |
+| 证据文件（`config`、`credential`） | 每次 500 个文件、遍历 100,000 个条目、单文件 256 KiB；全文件哈希单文件 8 MiB、合计 64 MiB | | [快照格式](/reference/snapshot#上限) | `internal/recon/hunt_files.go` |
+| 疑似凭据定位 | 每个文件 32 条，每个模块 512 条 | | [快照格式](/reference/snapshot#上限) | `internal/recon/content_patterns.go` |
+| 运行载荷（`supplychain`） | 128 个可执行文件，单个 64 MiB、合计 512 MiB；依赖清单 64 个 | | [快照格式](/reference/snapshot#上限) | `internal/recon/supplychain.go` |
+| 近期活动（`activity`） | 最近 24 小时、16 个文件、每个尾部 256 KiB、合计 4 MiB | | [快照格式](/reference/snapshot#上限) | `internal/recon/activity.go` |
+
+## 一键部署与出站
+
+| 限制 | 值 | 配置项 | 说明 | 源码 |
+| --- | --- | --- | --- | --- |
+| 每批目标（部署、Allow access、Configure egress） | 1–20 个 | | [一键部署](/onboard/provisioning) | `internal/server/webui/frontend/src/provisioning.ts`、`internal/server/webui/webui_soar.go` |
+| 部署并发 | 3 台 | | [一键部署](/onboard/provisioning) | `internal/server/deploy_batch.go` |
+| 出站探测 | 约 4 秒 | | [一键部署](/onboard/provisioning) | `internal/egressprobe/probe.go` |
+| 等待云防火墙日志关联出口 IP | 120 秒 | | [前置条件与凭证](/server/prerequisites) | `internal/server/deployment_discovery.go` |
+| 等待客户端连接 | 30 秒 | | [一键部署](/onboard/provisioning) | `internal/server/deployment_manager.go` |
+| 近期部署记录 | 20 条，终态记录保留 30 分钟 | | [一键部署](/onboard/provisioning) | `internal/server/deployment_manager.go` |
+| 出站放行规则 | 1–20 条 | 服务端 `egress.rules` | [出站放行](/onboard/egress) | `internal/server/egress.go` |
+| 每次恢复的出站记录 | 20 个实例 | | [恢复出站规则](/restore-egress) | `internal/server/webui/frontend/src/components/EgressRecovery.tsx` |
+| 保留的已恢复记录 | 最近 20 条 | | [恢复出站规则](/restore-egress) | `internal/server/egress_store.go` |
+
+## 清理
+
+| 限制 | 值 | 配置项 | 说明 | 源码 |
+| --- | --- | --- | --- | --- |
+| 清理前停止任务、Shell 和端口转发 | 10 秒 | | [清理](/cleanup) | `internal/client/cleanup.go` |
+| 等待客户端回报清理结果 | 30 秒 | | [清理](/cleanup) | `internal/server/cleanup_history.go` |
+| 保留的清理记录 | 最近 20 条 | | [清理](/cleanup) | `internal/server/cleanup_history.go` |
+
+## AIR
+
+| 限制 | 值 | 配置项 | 说明 | 源码 |
+| --- | --- | --- | --- | --- |
+| 同时运行的会话 | 20 个，全服务端合计；`0` 或负数不限制 | `air.maxSessions` | [会话管理](/air/sessions) | `internal/server/agent_session_registry.go` |
+| 每个会话的回放缓存 | 4 MiB；`0` 或负数时使用默认值 | `air.replayBufferBytes` | [会话管理](/air/sessions) | `internal/server/agent_session_registry.go` |
+| 粘贴图片 | 每条消息或每次粘贴 4 张，单张 8 MiB | | [GUI](/air/gui)、[Terminal](/air/terminal) | `internal/server/webui/frontend/src/imagePaste.ts`、`internal/server/webui/webui_air.go` |
+| 断线自动重连 | 连续 5 次 | | [会话管理](/air/sessions) | `internal/server/webui/frontend/src/reconnectBudget.ts` |
+| 会话历史列表 | 50 条 | | [会话管理](/air/sessions) | `internal/server/webui/frontend/src/air/useAgentSessions.ts` |
+| 服务端关闭时等待 Provider 退出 | 5 秒 | | [会话管理](/air/sessions) | `internal/server/agent_session_registry.go` |
+| 每轮 Report 卡 | 10 张 | | [GUI](/air/gui) | `internal/server/webui/frontend/src/air/toolResults.ts` |
+| 结果卡列出的主机或告警 | 20 个 | | [GUI](/air/gui) | `internal/server/webui/frontend/src/components/AIRToolResults.tsx` |
+| Terminal 滚动历史 | 20,000 行 | | [Terminal](/air/terminal) | `internal/server/webui/frontend/src/components/TerminalPanel.tsx` |
+| TUI 写入剪贴板（OSC 52） | 用户在终端内操作后 2 秒内 | | [Terminal](/air/terminal) | `internal/server/webui/frontend/src/components/TerminalPanel.tsx` |
+
+## MCP
+
+| 限制 | 值 | 配置项 | 说明 | 源码 |
+| --- | --- | --- | --- | --- |
+| `run` / `run_batch` 命令长度 | 50 KiB | | [MCP](/reference/mcp) | `internal/protocol/run_v2.go` |
+| 单条命令时限 | 30 秒，取服务端与客户端配置中较小的值；服务端再多等 10 秒 | 服务端和客户端 `recon.commandTimeout` | [MCP](/reference/mcp#执行时限) | `internal/server/run_v2.go`、`internal/client/run_v2.go` |
+| 捕获的输出 | 标准输出与错误输出合计 16 MiB | | [MCP](/reference/mcp) | `pkg/utils/utils.go` |
+| `auto` 模式原样返回 | 8 KiB；更大时返回首尾各约 4 KiB | `mcp.runOutputMode` | [MCP](/reference/mcp) | `internal/server/mcp_run_results.go` |
+| `full` 模式原样返回 | 50 KiB；更大时仍返回首尾预览 | `mcp.runOutputMode` | [MCP](/reference/mcp) | `internal/server/mcp_run_results.go` |
+| 同一客户端同时执行的命令 | 1 条，MCP 与 REPL 共用 | | [MCP](/reference/mcp#同一客户端的并发) | `internal/client/run_v2.go` |
+| 客户端发送完成回复 | 30 秒，超时断开连接 | | [MCP](/reference/mcp#同一客户端的并发) | `internal/client/session_dispatch.go` |
+| `run_batch` 主机数 | 64 台 | | [MCP](/reference/mcp) | `internal/server/mcp_run_batch.go` |
+| `run_batch` 并发 | 默认 8，最多 16 | | [MCP](/reference/mcp) | `internal/server/mcp_run_batch.go` |
+| `run_batch` 每台主机预览 | 1 KiB，内联合计 50 KiB | | [MCP](/reference/mcp) | `internal/server/mcp_run_batch.go` |
+| `read_run_result` 单次读取 | 默认 8 KiB，最多 16 KiB | | [MCP](/reference/mcp#长结果回读) | `internal/server/mcp_run_results.go` |
+| `search_run_result` | 最多 20 个匹配、正文 8 KiB、查询 1,024 字节、上下文默认 2 行最多 10 行 | | [MCP](/reference/mcp#长结果回读) | `internal/server/mcp_run_results.go` |
+| 可回读结果的保存 | 60 分钟；合计 512 条或 32 MiB，超出淘汰最早的 | | [MCP](/reference/mcp#结果保存) | `internal/server/mcp_run_results.go` |
+| `recon` 返回的 Markdown 正文 | 2 MiB，完整内容读 `reportPath` 或 `snapshotPath` | | [MCP](/reference/mcp) | `internal/server/mcp.go` |
+| Raven 项目凭证有效期 | 1 小时 | | [账号与安全边界](/server/security) | `internal/server/mcp_auth.go` |
+| 同时有效的 MCP 访问凭证 | 10,000 个，Raven 项目凭证与 AIR 会话凭证合计；满时先清理已过期的，仍满则拒绝签发 | | [MCP](/reference/mcp#鉴权) | `internal/server/mcp_auth.go` |
+
+## 账号与登录
+
+| 限制 | 值 | 配置项 | 说明 | 源码 |
+| --- | --- | --- | --- | --- |
+| 登录失败锁定 | 同一来源 IP 15 分钟内失败 5 次，锁定到第一次失败满 15 分钟 | | [账号与安全边界](/server/security) | `internal/server/webui/auth.go` |
+| WebUI 会话有效期 | 30 天，服务端重启后失效 | | [账号与安全边界](/server/security) | `internal/server/webui/auth.go` |
+| 同时保存的 WebUI 会话 | 10,000 个，超出时淘汰最早的 | | [账号与安全边界](/server/security) | `internal/server/webui/auth.go` |
+
+## Logs
+
+| 限制 | 值 | 配置项 | 说明 | 源码 |
+| --- | --- | --- | --- | --- |
+| 服务端内存中保留的日志 | 5,000 条；`0` 或负数关闭 Logs 页 | `logging.bufferSize` | [Logs](/logs) | `cmd/server/cli/root.go` |
+| 修改过滤条件后加载 | 最新 500 条 | | [Logs](/logs) | `internal/server/webui/frontend/src/logs/useServerLogs.ts` |
+| 页面显示 | 最近 2,000 条 | | [Logs](/logs) | `internal/server/webui/frontend/src/logs/logQuery.ts` |
+
+## 客户端连接
+
+| 限制 | 值 | 配置项 | 说明 | 源码 |
+| --- | --- | --- | --- | --- |
+| 单次拨号 | 10 秒 | | [手动安装客户端](/onboard/manual) | `internal/client/client.go` |
+| 启动后首次连接失败 | 前 60 秒内每 2 秒重试，不计入重连次数 | | [手动安装客户端](/onboard/manual) | `internal/client/client.go` |
+| 断线重连 | 最多 10 次，间隔 8 秒、16 秒，之后每次 30 秒（等待合计约 4.5 分钟），用尽后客户端退出 | | [安装服务端](/server) | `internal/client/client.go` |
+
+## 服务端 REPL
+
+| 限制 | 值 | 配置项 | 说明 | 源码 |
+| --- | --- | --- | --- | --- |
+| `run` 在终端显示的输出 | 50 KiB，超出部分截断 | | [服务端 REPL](/reference/repl) | `internal/server/run_v2.go` |
+| `run` 时限 | 同 MCP 单条命令时限 | 服务端和客户端 `recon.commandTimeout` | [服务端 REPL](/reference/repl) | `internal/server/run_v2.go` |
+
+## 相关内容
+
+<Cards>
+  <Card title="服务端配置" href="/reference/server-config">
+    `recon.responseTimeout`、`air.*`、`logging.bufferSize` 等可配置项
+  </Card>
+  <Card title="客户端配置" href="/reference/client-config">
+    Recon 采集超时与 Profile
+  </Card>
+  <Card title="Recon 快照格式" href="/reference/snapshot">
+    快照上限的详细说明
+  </Card>
+</Cards>

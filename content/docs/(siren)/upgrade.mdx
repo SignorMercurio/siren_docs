@@ -1,0 +1,212 @@
+---
+title: 升级与数据
+description: 升级服务端和客户端、支持的平台、升级后要核对的配置，以及服务端数据的备份与迁移
+icon: CircleFadingArrowUp
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+本页说明怎样把服务端和客户端升级到新版本、各平台的发布包、升级后要核对的配置，以及服务端数据存在哪里、怎样备份和迁移。每个版本具体改了什么见 [更新日志](/changelog)。
+
+## 版本一致
+
+服务端和客户端必须运行同一版本。两端之间没有兼容层，SIREN 也不比对两端版本，不会提示版本不一致；版本不同时，客户端可能连不上，或者部分操作失败。
+
+查看版本：
+
+- **服务端**：从左下角账号菜单打开 **Settings**，看 **Server** 一栏的 **Version**。
+- **客户端**：在 [Clients](/clients#表格列) 页悬停 **Instance ID** 单元格，主机卡片中的 **Version**。
+- **命令行**：`siren --version`、`siren_server --version`。
+
+安装脚本、`upgrade` 子命令和一键部署都只取发布地址上的**最新**版本，不能指定版本，也不能降级。所以新版本发布后，新安装或新部署的客户端就是新版本；服务端没有跟上时，新接入的客户端会与它不一致。服务端启动时会在后台检查新版本，有新版本时日志提示 `new version available; run './siren_server upgrade' to upgrade`。看到这条提示后应尽快把服务端和客户端一起升级。
+
+## 升级
+
+`upgrade` 子命令先比较本机版本与发布版本，有新版本时询问是否升级（`-y` 跳过确认），然后下载对应安装包，只替换可执行文件。配置文件、证书、`data/` 和客户端身份都不变。正在运行的进程不会切换到新文件，必须重启。
+
+推荐按以下顺序升级，让客户端在服务端重启前就已拿到新程序：
+
+<Steps>
+<Step>
+
+### 替换客户端程序
+
+服务端还是旧版本时，在 [Shells](/shells) 中逐台打开客户端的 Shell，执行：
+
+```bash tab="Linux"
+/opt/siren/siren upgrade -y
+```
+
+```powershell tab="Windows"
+C:\Windows\Temp\siren\siren.exe upgrade -y
+```
+
+手动安装到其他目录的，换成实际路径。这一步只替换磁盘上的程序，运行中的客户端进程仍是旧版本，Shell 不会断开。
+
+客户端的 `upgrade` 按系统 DNS 解析发布地址 `oss-siren.oss-cn-hongkong.aliyuncs.com`，目标主机无法解析或访问它时会下载失败。它沿用当前安装包的类型：兼容包（`legacy`）升级后仍是兼容包。
+
+<Callout title="重新运行安装脚本不会升级客户端" type="warn">
+  客户端安装脚本发现已有安装完好（程序和 `config.yaml` 都在，且程序能运行）时会跳过下载。对已安装的主机，用 `upgrade` 升级。
+</Callout>
+
+</Step>
+<Step>
+
+### 升级并重启服务端
+
+```bash title="控制主机"
+cd /opt/siren
+./siren_server upgrade -y
+```
+
+然后 `tmux attach -t siren` 回到服务端终端，按 `Ctrl+C` 停止旧进程，再执行 `./siren_server` 启动新版本。重启会清空哪些状态见下文 [重启的影响](#重启的影响)。
+
+重新运行服务端安装脚本也能升级，效果相同，并会额外校验安装包的 SHA-256；它同样保留已有的 `server_config.yaml` 和证书。
+
+</Step>
+<Step>
+
+### 重启客户端
+
+已接入的客户端会自动重连新服务端，但进程仍是旧版本，需要重启：
+
+- **一键部署的主机**：在 Clients 页的 **Provisioning** 中对这些实例再执行一次 [Deploy SIREN](/onboard/provisioning)，从 Global 视图或客户端所属的 Project 视图发起。安装脚本发现已有安装完好会跳过下载，停止旧客户端进程，用第 1 步替换好的程序重新启动。客户端身份不变，Client ID、Note 和 Project 归属保持原样。
+- **手动启动的客户端**：在主机上停止旧进程，用原来的命令重新运行 `siren client`。
+
+不要用 **Clean & terminate** 后重新部署代替升级。清理会删除客户端身份，重新部署得到的是新的 Client ID，原来的 Note 和 Project 归属不会沿用。
+
+</Step>
+<Step>
+
+### 核对版本
+
+Settings 中服务端的 **Version** 与 Clients 页每台客户端的 **Version** 应一致。客户端启动失败时，先看下文 [升级后核对配置](#升级后核对配置)。
+
+</Step>
+</Steps>
+
+### 重启的影响
+
+以下状态只保存在服务端内存中，重启后清空：WebUI 登录会话（操作者需要重新登录）、Logs 页面缓冲、签发的 MCP 会话凭证、运行中的 Agentic IR 会话、近期部署与清理记录、MCP `run` 结果缓存，以及所有端口转发。
+
+已连接的客户端会自动重连，按客户端身份恢复原 Client ID、Note 和 Project 归属。客户端连续 10 次重连失败（约 5 分钟）后会放弃并退出，见 [重连行为](/onboard/manual#重连行为)，所以停机时间要尽量短。运行中的 AIR 会话在关闭时结束，之后可以从 History 继续，见 [服务端重启](/air/sessions#服务端重启)。
+
+## 升级后核对配置
+
+`upgrade` 不修改 `server_config.yaml` 和客户端的 `config.yaml`。新版本新增的必填项要手动补上，新版本的 Breaking Change 会在 [更新日志](/changelog) 中列出。
+
+以下配置缺失或无效时，服务端或客户端会拒绝启动：
+
+| 位置 | 要求 | 不满足时的报错 |
+| --- | --- | --- |
+| 服务端 `cert` / `key` | 证书和私钥能加载 | `configure server TLS: ...` |
+| 服务端环境变量 | `mcp.enabled` 为 `true`（默认）时，`SIREN_MCP_ADMIN_TOKEN` 和 `SIREN_MCP_RAVEN_TOKEN` 非空且不同 | `MCP requires distinct SIREN_MCP_ADMIN_TOKEN and SIREN_MCP_RAVEN_TOKEN` |
+| 服务端 `egress.rules` | `webui.enabled` 为 `true`（默认）时，1–20 条有效规则 | `egress.rules...` 开头的错误 |
+| 客户端 `recon.profiles`、`recon.defaultProfile` | 都已定义，且默认 Profile 在列表中 | `invalid Recon Profile configuration: ...` |
+
+各项的配置方法见 [前置条件与凭证](/server/prerequisites)，客户端配置键见 [客户端配置](/reference/client-config)。
+
+要对照新版本自带的配置模板，可以从安装包中直接取出：
+
+```bash title="控制主机"
+curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/siren_server.tar.gz \
+  | tar -xzOf - server_config.yaml > /tmp/server_config.new.yaml
+diff /opt/siren/server_config.yaml /tmp/server_config.new.yaml
+```
+
+客户端模板同理，在 `siren_linux.tar.gz` 中取 `config.yaml`。
+
+## 支持的平台
+
+**服务端**只发布 Linux x86_64 版本（`siren_server.tar.gz`），安装脚本在其他架构上直接退出。
+
+**客户端**支持 Linux x86_64、Linux ARM64 和 Windows x64，另有旧内核 Linux 和 Windows 7 时代系统的兼容包，不支持 macOS。安装包与系统版本的对应见 [客户端平台](/onboard#客户端平台)。
+
+## 服务端数据
+
+服务端的相对路径都按启动时的工作目录（默认 `/opt/siren`）解析。
+
+| 路径 | 内容 |
+| --- | --- |
+| `server_config.yaml` | 服务端配置 |
+| `.env` | MCP、SOAR 等凭证 |
+| `certs/` | 默认 TLS 证书和私钥 |
+| `data/users.db` | WebUI 账号库，可用 `webui.userDBPath` 改到其他位置 |
+| `data/projects.json` | Project 列表、各 Project 目录的绝对路径、客户端归属 |
+| `data/client_ids.json` | 客户端身份与 Client ID 的对应关系 |
+| `data/client_notes.json` | 客户端 Note |
+| `data/egress.json` | **Configure egress** 的恢复记录。丢失后无法再用 [Restore egress](/restore-egress) 撤销已下发的出站规则 |
+| `uploads/client-<ID>/` | 服务端 REPL `upload` 拉取的文件 |
+| 工作目录中的其他文件 | Global 范围的 Artifacts，例如 Recon 结果和 AccessKey 报告 |
+| `webui.projectsBaseDir` 下的子目录 | 各 Project 的 Artifacts 和报告；未设置时位于工作目录下 |
+| `webui.dossierDir` | Dossier 静态文件，以及 Blank template 中粘贴的图片 |
+
+服务端之外还有一处：Agentic IR 的会话记录由各 Provider CLI 保存在服务端用户自己的目录中（Pi 为 `air.providers.pi.agentDir`），见 [准备 AIR Provider](/server/air-providers)。
+
+客户端主机上只有程序、配置、插件、本地 Recon 文件和客户端身份，清单见 [清理范围](/cleanup#清理范围)。
+
+## 备份
+
+1. 在 tmux 中按 `Ctrl+C` 停止服务端，避免复制时账号库和状态文件正在写入。
+2. 打包工作目录，以及位于工作目录之外的 Project 基准目录、`webui.userDBPath`、`webui.dossierDir`：
+
+   ```bash title="控制主机"
+   tar -czf /root/siren-backup-$(date +%Y%m%d).tar.gz -C / opt/siren
+   ```
+
+3. 需要保留 AIR 会话历史时，一并备份各 Provider 的目录。
+4. 重新启动服务端。
+
+备份中含有 `.env` 凭证和全部取证材料，按敏感数据保管。
+
+## 迁移到另一台主机
+
+<Steps>
+<Step>
+
+### 准备新主机
+
+新主机同样需要是 Linux x86_64，并安装 tmux。工作目录中的 `siren_server` 会随数据一起复制过去，版本保持不变，不需要在新主机上运行安装脚本。
+
+</Step>
+<Step>
+
+### 复制数据
+
+按 [备份](#备份) 停止旧服务端并打包，在新主机上解压到**相同的绝对路径**。`data/projects.json` 记录的是 Project 目录的绝对路径，路径变化后对应的 Project 无法访问，见 [基准目录](/projects#基准目录)。各 Provider 按工作目录保存会话历史，路径不变才能在 History 中继续旧会话。
+
+保留 `.env` 中的 `SIREN_MCP_ADMIN_TOKEN` 和 `SIREN_MCP_RAVEN_TOKEN` 不变，且访问域名不变时，外部 MCP 客户端和 Raven 不需要改配置。
+
+</Step>
+<Step>
+
+### 重建主机相关的部分
+
+以下内容不在工作目录中，需要在新主机上重新完成：
+
+- 安装并以服务端用户登录 AIR Provider CLI，见 [准备 AIR Provider](/server/air-providers)。
+- 在新主机的 `/etc/hosts` 中把 `webui.publicURL` 的域名解析到新主机的内网地址，见 [webui.publicURL](/server#webuipublicurl)。
+- 证书需要覆盖新的访问域名，见 [更换证书](/server#更换证书)。
+
+</Step>
+<Step>
+
+### 处理网络地址
+
+尽量保留原公网 IP，例如把弹性公网 IP 转绑到新主机。客户端连接的服务端地址在启动时就已确定：
+
+- 手动启动的客户端使用 `-s` 参数或 `config.yaml` 中的 `server`。
+- 一键部署的客户端使用发布包自带 `config.yaml` 中预置的 `server`，与发起部署的是哪台服务端无关。
+
+公网 IP 变化后，已接入的客户端重连失败后会退出，需要在目标主机上改地址重新启动。同时要把 `egress.rules` 中 `siren_server_callback` 的 `destCidrIp` 改成新地址；已经执行过 **Configure egress** 的实例，其出站安全组仍只放行旧地址。新主机的入方向也要重新放行这些客户端的出口 IP。
+
+</Step>
+<Step>
+
+### 启动并核对
+
+在 tmux 中启动服务端，在 Settings 中确认 **Authentication**、**Dossier** 和 **AIR runtime** 正常，在 Clients 页确认客户端以原 Client ID 重新上线。
+
+</Step>
+</Steps>

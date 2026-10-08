@@ -1,0 +1,45 @@
+---
+title: 参考
+description: 配置项、命令行、MCP 与插件的完整说明
+icon: BookOpen
+---
+
+import { Card, Cards } from "fumadocs-ui/components/card";
+
+这里按条目列出配置键、命令语法、接口和数据格式。日常操作在 Web 控制台完成，步骤见 [使用指南](/)；需要查准确的默认值、命令参数或上限时再来这里。
+
+## 配置
+
+<Cards>
+  <Card title="服务端配置" href="/reference/server-config">`server_config.yaml`、命令行参数与环境变量</Card>
+  <Card title="客户端配置" href="/reference/client-config">客户端 `config.yaml`、Recon Profile 与插件开关</Card>
+</Cards>
+
+## 命令行
+
+<Cards>
+  <Card title="服务端 REPL" href="/reference/repl">服务端控制台命令，以及 WebUI 没有的操作</Card>
+  <Card title="端口转发" href="/reference/portforward">只能在 REPL 中使用的端口转发</Card>
+  <Card title="客户端命令行" href="/reference/client-cli">客户端子命令与本地模式</Card>
+</Cards>
+
+## 集成
+
+<Cards>
+  <Card title="MCP" href="/reference/mcp">端点、鉴权、工具列表与审计</Card>
+  <Card title="Raven 群项目" href="/reference/raven">钉钉群与 Project 的绑定</Card>
+</Cards>
+
+## 插件
+
+<Cards>
+  <Card title="插件" href="/reference/plugins">内置插件、启用方式与管理命令</Card>
+  <Card title="插件开发" href="/reference/plugin-dev">编写与构建插件</Card>
+</Cards>
+
+## 格式与限制
+
+<Cards>
+  <Card title="Recon 快照格式" href="/reference/snapshot">`snapshot-jsonl-v2` 的结构与状态值</Card>
+  <Card title="限制速查" href="/reference/limits">大小、数量与超时上限</Card>
+</Cards>
