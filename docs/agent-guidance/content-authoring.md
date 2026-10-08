@@ -12,5 +12,8 @@
 - Capture WebUI screenshots from a local test server with example data:
   RFC 5737 public IPs, private-range addresses, placeholder instance IDs and
   UIDs. Never show real hosts, accounts, or paths from the capturing machine.
+- Draw architecture and relationship diagrams as images, not ASCII art: provide
+  light and dark WebP variants and render them with `<ThemeImage>`. Plain code
+  blocks remain fine for directory trees and file formats.
 - Preserve the current documentation-site visual style unless the task requests
   a redesign or visual change.

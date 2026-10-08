@@ -23,19 +23,16 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
+import conceptsDark from "../../img/concepts-dark.webp";
+import conceptsLight from "../../img/concepts-light.webp";
 
 这页解释 WebUI 里反复出现的几个名词，每个名词只给定义和相互关系，具体操作见各自的页面。
 
-```text
-SIREN Server（控制主机，WebUI、MCP 和客户端共用一个 TLS 端口，默认 443）
-├── WebUI ── 侧栏顶部 Project scope：Global ／ 某个 Project
-│   ├── Clients ── Provisioning（Allow access / Configure egress / Restore egress / Deploy SIREN）
-│   ├── Agentic IR ── 通过 SIREN MCP 操作客户端
-│   ├── Investigations ── Recon / Process Analysis / AccessKey
-│   └── Artifacts ⊃ Reports
-├── MCP ── /mcp（Global）、/mcp/project/<id>（单个 Project）
-└── Client × N ── 每台被调查主机上的客户端，主动回连服务端
-```
+<ThemeImage
+  light={conceptsLight}
+  dark={conceptsDark}
+  alt="SIREN 概念关系：SIREN Server 提供 WebUI、MCP 和客户端接入；WebUI 下有 Clients、Agentic IR、Investigations 和包含 Reports 的 Artifacts；每台被调查主机上的 Client 主动回连服务端"
+/>
 
 ## SIREN Server 与 Client
 

@@ -2,6 +2,7 @@ import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { File, Folder, Files } from '@/components/mdx/files-with-desc';
 import { Mermaid } from '@/components/mdx/mermaid';
+import { ThemeImage } from '@/components/mdx/theme-image';
 import type { MDXComponents } from 'mdx/types';
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
@@ -12,6 +13,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Folder,
     Files,
     Mermaid,
+    ThemeImage,
     ...components,
   };
 }
