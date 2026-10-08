@@ -117,33 +117,9 @@ SIREN 目前没有单独的改密命令。请确保服务端使用与原实例�
 
 <Accordion title="WebUI AIR 启动失败怎么办？">
 
-先确认服务端能找到配置中的 Provider CLI：
+先打开 **Settings**，在 **Server** 一栏查看每个 Provider 实际可用的界面和不可用原因。常见原因是服务端找不到 Provider CLI、CLI 未以服务端用户登录、未设置 `webui.publicURL`，或 Pi 缺少认证文件。逐项排查方法见 [准备 AIR Provider](/server/air-providers#常见问题)。
 
-```yaml
-air:
-  provider: codex
-  providers:
-    claude:
-      cliPath: claude
-      args: []
-    codex:
-      cliPath: codex
-      args: [--no-alt-screen]
-    qoder:
-      cliPath: qodercli
-      args: []
-    pi:
-      cliPath: pi
-      args: []
-```
-
-`cliPath` 必须在服务端进程的 `PATH` 里可执行，或者写成绝对路径。WebUI 的所有 AIR 会话都会注入当前范围的 SIREN MCP，因此还要确认 `mcp.enabled` 没有关闭，并将 `webui.publicURL` 设置为证书覆盖的绝对 HTTPS Origin。服务端本机应把该域名解析到本机的非 loopback 内网地址，不能指向 `127.0.0.1` 或 `::1`。
-
-Claude Code、Codex 和 Qoder 的模型、权限、沙箱、普通 Shell 审批和 MCP 工具确认等行为由它们自己的配置决定。Codex 默认使用 `--no-alt-screen` 保留浏览器终端滚动历史；如果自定义 `args`，可按需保留或移除该参数。Pi 新会话默认使用 Qwen Aegis（GUI 空闲时可切换模型），并以无权限审批方式执行文件、Shell、MCP 和子 agent 操作。更多边界见 [Agentic 应急响应](/air#webui-air)。
-
-Pi 会话报 “Failed to register the SIREN MCP server: MCP server "siren" is already registered” 时，检查 Pi `agentDir` 下的 `mcp.json`（默认 `/root/.pi/agent/mcp.json`）是否写入了名为 `siren` 的服务器。SIREN 会为每个 Pi 会话动态注册当前范围的 SIREN MCP 并注入会话凭证；静态的 `siren` 条目会与之冲突，还会把所有会话固定到某一个 Project 和一份随会话失效的凭证。删除该条目即可，不需要手工配置 SIREN MCP。
-
-页面会先检查 Provider CLI 是否支持 GUI 所需的公开协议。若 GUI 显示不兼容，可切换到 Terminal 继续使用真实 TUI；运行中的会话不会自动切换界面。Terminal 能运行但 GUI 不可用时，请先升级对应 CLI，再刷新 Agentic IR 页面重新检查。
+会话启动后才失败时，面板会显示具体原因和 **Retry**，见 [启动与管理会话](/air/sessions#停止与结束)。
 
 </Accordion>
 

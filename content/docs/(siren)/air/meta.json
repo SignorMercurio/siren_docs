@@ -1,4 +1,4 @@
 {
   "title": "Agentic 应急响应",
-  "pages": ["example"]
+  "pages": ["sessions", "gui", "providers", "terminal", "evidence", "example"]
 }

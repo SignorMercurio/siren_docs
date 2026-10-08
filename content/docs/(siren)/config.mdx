@@ -167,7 +167,7 @@ air:
 | `mcp.runOutputMode` | string | `auto` | MCP `run` 默认输出模式：`auto` 对超过 8 KiB 的结果返回可恢复首尾预览，`full` 在 50 KiB 内返回完整结果，超出时仍返回预览；单次调用可用 `output_mode` 覆盖 |
 | `mcp.cmdBlacklist` | list | 见 [MCP 集成](/mcp#命令黑名单) | MCP `run` 工具的命令黑名单，值为正则表达式列表 |
 | `air.provider` | string | `codex` | 浏览器所选 Provider 不可用时回退使用的 Provider，可选 `codex`、`claude`、`qoder` 或 `pi`。浏览器默认沿用上次选择或 Settings 中固定的 Provider |
-| `air.maxSessions` | int | `20` | WebUI GUI 与 Terminal 合计最大并发会话数；适用于 Manual、Custom、Event 和 Resume，设为 `0` 或负数表示不限制 |
+| `air.maxSessions` | int | `20` | WebUI GUI 与 Terminal 合计最大并发会话数；适用于新建和继续的会话，设为 `0` 或负数表示不限制 |
 | `air.replayBufferBytes` | int | `4194304` | 每个会话用于断线重连的回放预算；Terminal 按原始输出字节、GUI 按序列化事件字节计算，设为 `0` 或负数时使用默认的 4 MiB |
 | `air.prompt` | string | 见示例配置 | 告警事件模式下的 prompt 模板，依次填入 `%s` UID、`%s` 安全中心告警 ID、`%d` Client ID（告警 ID 即 WebUI Event 模式中的安全中心告警 ID，详见 [Agentic 应急响应](/air)） |
 | `air.customPromptPrefix` | string | 见示例配置 | 自定义 prompt 模式下的前缀（支持 `%d` Client ID） |
@@ -199,7 +199,7 @@ SIREN 不直接创建日志文件或执行轮转。需要持久化时，应由 s
 
 `logging.bufferSize` 额外在内存中保留最近若干条日志，供 [Web 控制台 Logs 页面](/webui#logs)查看。保留的内容同样受 `logging.level` 约束，`logging.output` 设为 `none` 时也照常保留；缓冲区仅存在于内存中，服务重启后清空，不能替代上述持久化方案。
 
-> WebUI GUI 与 Terminal 都复用 `air.providers.<name>`。所有入口都会注入当前范围的 SIREN MCP：Project 使用 `/mcp/project/<id>`，Global 使用 `/mcp`。Manual 只启动空白 Provider 会话；Custom、Event、Resume 再按需加入种子 prompt 或恢复会话 ID。两种界面都受 WebUI 全局鉴权保护。
+> WebUI GUI 与 Terminal 都复用 `air.providers.<name>`。所有入口都会注入当前范围的 SIREN MCP：Project 使用 `/mcp/project/<id>`，Global 使用 `/mcp`。Manual 只启动空白 Provider 会话；Custom 和 Event 再加入种子 prompt，从 History 继续的会话带上原会话 ID。两种界面都受 WebUI 全局鉴权保护。
 
 <Callout title="AIR 配置边界" type="info">
   AIR 的 Provider 配置只保留 Provider、prompt、CLI 路径和额外参数；会话并发与重连回放容量分别由 `air.maxSessions` 和 `air.replayBufferBytes` 控制。Claude Code、Codex 和 Qoder 的模型、权限、沙箱、普通 Shell 审批等行为由各自配置决定；GUI 仅展示 Provider 主动返回的审批，不写入用户级永久规则。Pi 复用全局 Pi 配置，新会话默认使用 Qwen Aegis，GUI 空闲时可切换到 Pi 已配置的其他模型；文件、Shell、MCP 和子 agent 操作不产生权限审批。旧版 AIR 细分字段和独立的 `agentTerminal.*` 配置块已移除，残留时不会生效。

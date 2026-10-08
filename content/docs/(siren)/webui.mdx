@@ -48,27 +48,7 @@ Project 视图下，Shell 只能连接当前 Project 的客户端。切换 Proje
 
 ### Agentic IR
 
-Agentic IR 页面通过 Codex、Claude Code、Pi 或 Qoder 完成 [Agentic 应急响应](/air)。所有新会话默认使用结构化 GUI 时间线，也可以在启动前选择 Terminal，使用 Provider 的真实 TUI、斜杠命令和自定义 statusline。
-
-新建会话可选以下入口模式：
-
-- **Manual**，不带客户端或种子 prompt 的空白会话，适合临时通用操作；GUI 和 Terminal 均会自动注入当前范围的 SIREN MCP，无需在 Provider 的静态配置中重复添加同名服务。
-- **Custom**，选择客户端并输入应急响应指令。
-- **Event**，选择客户端并输入阿里云 UID，再选择事件目标：告警 ID（Event）、ECS 实例 ID（ECS）或资产 UUID（Asset）。实例或资产目标可展开 **Time range** 限定告警时间范围。
-
-要继续以前的会话，展开侧栏底部的 **History**，搜索并选择当前视图工作目录对应的历史会话。历史先以只读时间线打开，只有点击 **Continue session** 或 **Continue in Terminal** 后才会在新标签中启动 Provider，并用原 session ID 继续；只读历史标签保持不变，再次点击会切换到已打开的恢复标签。
-
-左侧的 Running 以 Provider 图标区分会话，显示任务、客户端与入口信息和启动时间，只在启动中或已退出时标出状态；History 默认收起在侧栏底部，展开后显示首个任务、最近一条可见对话、分支和更新时间，便于在恢复前确认会话内容。
-
-<Callout title="恢复范围" type="info">
-  History 只读取当前视图工作目录对应的 Provider history，不会跨 Project 列出其他目录的历史会话，也不会向浏览器暴露本机 JSONL 文件路径。
-</Callout>
-
-GUI 以时间线交错展示 Agent 回复原文与聚合折叠的操作记录，计划、审批和提问出现在对应位置；输入框下方的状态条显示模型、上下文占用和 Provider 额度。支持模型切换的 Provider 可在空闲时点击状态条中的模型名称或输入 `/model` 打开模型选择器；Codex、Claude 和 Pi 还可调整当前模型支持的推理强度（Pi 即思考等级）；切换只作用于当前会话，不改动操作者的 Provider 配置。Pi 列出服务器已配置的模型，新会话沿用操作者的思考默认设置，恢复会话保留之前的模型和思考等级。时间线支持 Cmd/Ctrl+F 检索与过滤，并可从状态条把当前会话导出为 Markdown。Agent 运行时仍可发送补充要求调整后续方向，也可以单独停止当前工作；调整方向不会撤销已经完成的命令、文件修改或远程操作。GUI 与 Terminal 都支持直接粘贴 PNG、JPEG、WebP 和 GIF 图片，单张最多 8 MiB、一次最多 4 张；SIREN 负责把图片转交给 Provider，具体模型能否识别由 Provider 和模型决定。Terminal 保留原有 PTY 行为。两种会话都托管在服务端，刷新浏览器或切换页面后可以重新接入并回放，进程不会因为页面离开而中断。所有入口都会使用 SIREN MCP，因此需要启用 [MCP 服务](/mcp#启用与访问)。Project 视图使用项目级 MCP，Global 视图使用全局 MCP；工作目录、历史恢复和 MCP 作用域规则见 [Agentic 应急响应](/air#webui-air)。
-
-GUI 回复中的编号脚注可点击打开来源卡片，查看证据摘要、数据来源、采集时间和原文入口；每条回复下方的 **Sources** 可展开全部来源。文件链接始终打开该会话所属 Project 的 Artifacts。Agent 会优先引用已有 Recon 报告、JSONL 等材料，并在现有权限允许时将重要的临时命令或查询原文保存到工作区的 `evidence/`。材料未取得、无法定位或保存失败时，来源说明会标明缺口。来源由 Agent 提供，卡片不自动认证证据真实性。
-
-Markdown 报告中的证据链接按报告所在目录解析，限定在同一工作区内。会话导出保留标准 Markdown 脚注，并区分各条消息的编号；历史消息不会自动补齐来源。
+通过 Claude Code、Codex、Qoder 或 Pi 辅助排查。左栏启动新会话、查看 **Running** 和 **History**，右侧以标签页展示 GUI 时间线或 Terminal。见 [Agentic 应急响应](/air)。
 
 ### Investigations
 

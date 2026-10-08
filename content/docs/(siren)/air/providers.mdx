@@ -1,0 +1,106 @@
+---
+title: Provider 差异
+description: Codex、Claude Code、Qoder 和 Pi 在 AIR GUI 中的审批、提问、命令、模型、额度和图片支持差异
+icon: Boxes
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+AIR 的四个 Provider 共用同一套 [GUI 时间线](/air/gui)，但审批、提问、命令和额度等能力来自各自 CLI 公开的机器协议，表现并不相同。本页只列出这些差异；在服务端安装、登录和检查 Provider 见 [准备 AIR Provider](/server/air-providers)。
+
+## 对比总览
+
+| 能力 | Codex | Claude Code | Qoder | Pi |
+| --- | --- | --- | --- | --- |
+| 界面 | GUI、Terminal | GUI、Terminal | GUI、Terminal | GUI、Terminal |
+| 操作审批 | 由 Codex 配置决定 | 由 Claude Code 配置决定 | 由 Qoder 决定 | 无 |
+| 审批选项 | **Allow once**、**Allow for session**、**Decline**，Codex 提供时还有 **Decline and stop** | **Allow once**、**Allow for session**、**Decline** | **Allow once**、**Decline**、**Allow for session** | — |
+| 提问卡 | 有 | 有 | 无 | 有（由 Pi 扩展发起） |
+| 运行中调整方向 | 追加到当前轮次 | 中断当前轮次后作为新消息发送 | 中断当前轮次后作为新消息发送 | 追加到当前轮次 |
+| `/model` | 模型 + 推理强度 | 模型 + 推理强度 | 仅模型，且需会话公布模型配置 | 模型 + 思考等级 |
+| 其他 GUI 命令 | `/compact`、`/review`、`/mcp` | 会话公布的命令和 Skills | 无 | `/compact` 和 Pi 公布的命令 |
+| 上下文占用 | 显示 | 不显示 | 显示 | 显示 |
+| 订阅额度 | 显示 | 显示 | 不显示，提供 **Usage** 外链 | 不显示 |
+| 粘贴图片 | 支持 | 支持 | 支持 | 取决于当前模型 |
+
+所有 Provider 都提供 `/status`，用法见 [GUI 时间线](/air/gui#斜杠命令)。
+
+## 界面
+
+四个 Provider 都支持 GUI 和 Terminal 两种界面，实际能否使用取决于服务端的可用性检查，见 [准备 AIR Provider](/server/air-providers#检查可用性)。GUI 不可用而 Terminal 可用时，可以先用 [Terminal 界面](/air/terminal)。
+
+## 审批
+
+GUI 只在 Provider 主动请求确认时显示审批卡，是否需要确认由 Provider 自身的配置决定，SIREN 不会预先放行任何工具，也不会替 Provider 跳过确认。
+
+- **Codex**：命令执行、文件修改和 MCP 工具调用会按操作者的 Codex 审批策略请求确认。按钮来自 Codex 当次给出的可选决定；**Decline and stop** 表示拒绝并停止当前轮次。**Allow for session** 的范围由 Codex 自身决定。
+- **Claude Code**：Claude Code 按自己的权限设置决定哪些工具需要确认，GUI 通过 SIREN 提供的审批工具接收请求，卡片摘要为 “Claude requested permission to use &lt;工具名&gt;”。选择 **Allow for session** 后，同名工具在本会话剩余时间内自动放行。
+- **Qoder**：只提供 **Allow once** 和 **Decline**，以及由 SIREN 实现的 **Allow for session**：同类工具调用在本会话内自动选择 “允许一次”。Qoder 自带的 “总是允许 / 总是拒绝” 选项不会出现，避免写入持久规则。Qoder GUI 通过 SIREN 读写文件或执行终端命令时，路径只能位于本会话的工作目录内，不会通过符号链接写入。
+- **Pi**：文件、Shell、MCP 和子 Agent 操作直接执行，不产生审批卡。
+
+**Allow for session** 只在当前会话内有效，不写入 Provider 的用户级配置；会话结束或继续历史会话后需要重新确认。
+
+## 提问
+
+| Provider | 提问来源 | 选项 |
+| --- | --- | --- |
+| Codex | Codex 的用户输入请求 | Codex 提供的选项 |
+| Claude Code | SIREN 为 GUI 会话提供的提问工具；Claude Code 自带的 AskUserQuestion 在 GUI 中被禁用 | Agent 给出的选项 |
+| Qoder | 不产生提问卡，需要补充信息时直接在回复中提问 | — |
+| Pi | Pi 扩展的选择、确认、输入和编辑请求 | 选择请求为扩展给出的选项；确认请求为 **Yes** / **No**；输入和编辑请求直接输入文字 |
+
+所有提问卡都可以选择 **Answer in your own words** 输入自由回答，见 [GUI 时间线](/air/gui#审批与提问)。
+
+## 运行中调整方向
+
+运行中发送的消息都会作为方向调整显示，但 Provider 的处理方式不同：
+
+- **Codex、Pi**：调整内容追加到正在运行的轮次，Agent 在当前轮次中继续。
+- **Claude Code、Qoder**：SIREN 先中断当前轮次，再把调整内容作为新消息发送。被中断轮次中尚未完成的操作不会继续，等待中的审批也会被取消。
+
+## 模型与推理强度
+
+在空闲时点击状态条中的模型名称，或输入 `/model`，打开模型选择器。列表读取当前 CLI 提供的模型，Provider 的默认模型标注 `default`；支持推理强度的模型下方显示 **Reasoning** 级别。切换模型时，原推理强度在新模型支持时保留，否则使用新模型的默认级别。运行中不能切换。
+
+| Provider | 模型 | 推理强度 | 说明 |
+| --- | --- | --- | --- |
+| Codex | 支持 | 支持 | — |
+| Claude Code | 支持 | 支持 | Claude Code 报告模型菜单后，`/model` 改为打开 SIREN 的模型选择器；读取失败时会话照常可用，只是没有选择器 |
+| Qoder | 当前会话公布模型配置时支持 | 不支持 | 未公布时 `/model` 不出现在命令菜单中 |
+| Pi | 支持，列出服务器上 Pi 已配置的模型 | 支持（思考等级） | 只有当前模型列出可选思考等级；切换到新模型后，先沿用 Pi 自动调整的等级，再按需修改 |
+
+模型和推理强度的切换只作用于当前会话，不写入 Provider 的配置文件。新会话使用 Provider 自身的默认模型（Pi 固定从 Qwen Aegis 开始，见 [准备 AIR Provider](/server/air-providers#pi)）；继续历史会话时不强制指定模型。
+
+## GUI 命令
+
+| Provider | 命令 | 可用时机 |
+| --- | --- | --- |
+| Codex | `/compact`：压缩当前上下文，进度显示在时间线中 | 空闲 |
+| Codex | `/review`：选择 **Uncommitted changes**、**Base branch**、**Specific commit** 或 **Custom instructions** 后点击 **Start inline review**，Review 结果以内联方式返回时间线 | 空闲 |
+| Codex | `/mcp`：只读列出 MCP Server 的名称、认证状态和工具数量 | 随时 |
+| Claude Code | 当前会话公布的斜杠命令和 Skills；描述和参数提示从服务端用户的 `~/.claude`、工作目录各级 `.claude` 和插件中读取 | 空闲 |
+| Qoder | 只有 `/model` | 空闲 |
+| Pi | `/compact`，以及 Pi 公布的扩展命令等 | 空闲 |
+
+- CLI 版本不支持某项命令时，只有该命令报错（例如提示升级 CLI 或改用 AIR Terminal），会话可以继续。
+- 菜单中没有的 `/xxx`：Codex、Claude Code 和 Pi 会把整条内容作为普通消息原样发给 Provider；Qoder 会在发送前拒绝，避免 TUI 专属命令被当作普通问题送入模型。
+- Qoder 的 Skills、插件、MCP prompts 和 workflows，以及其他 Provider 的 TUI 专属命令和设置，请在 [Terminal 界面](/air/terminal) 中使用。
+
+## 额度与上下文
+
+| Provider | 上下文占用 | 订阅额度 |
+| --- | --- | --- |
+| Codex | 每轮更新 | Codex 返回的额度窗口（如 5h、7d）、剩余百分比和重置倒计时；会话开始、手动刷新和 Codex 推送额度更新时刷新 |
+| Claude Code | 不显示（Claude Code 不报告上下文上限） | 收到 Claude Code 的额度事件时更新；在额度可用之前，每轮结束后 SIREN 会在后台执行一次 `/usage` 读取额度，手动刷新时也会执行（运行中则等当前轮次结束） |
+| Qoder | 显示 | Qoder Personal 不提供可编程额度，状态条显示 **Usage** 外链，打开 Qoder 网站的用量页 |
+| Pi | 显示 | 不估算订阅额度 |
+
+状态条中各项的含义见 [GUI 时间线](/air/gui#状态条)。
+
+## 图片输入
+
+GUI 中 Codex、Claude Code 和 Qoder 都接受粘贴图片。Pi 以当前模型声明的输入能力为准：模型未声明图片输入时，粘贴会被拒绝；切换到支持图片的模型后即可粘贴。SIREN 只负责把图片转交给 Provider，模型能否理解图片由 Provider 和模型决定。格式和数量限制见 [GUI 时间线](/air/gui#粘贴图片)。
+
+<Callout title="SIREN 不改动 Provider 配置" type="info">
+  本页所有会话级操作（审批的 **Allow for session**、模型和推理强度切换）都只在当前会话内生效，不会写入 CLI 的用户级配置。SIREN 启动 CLI 时做了哪些事、哪些设置需要在 CLI 自身配置中修改，见 [准备 AIR Provider](/server/air-providers#边界)。
+</Callout>
