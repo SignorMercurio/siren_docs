@@ -11,188 +11,32 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
-## v2.33.12 <DateTag>2026-10-08</DateTag>
-
-### Improvements
-
-- 一键部署的客户端改为连接发起部署的服务端：服务端把 `egress.rules` 中 `siren_server_callback` 的地址和端口写入客户端的 `config.yaml`，自建服务端也能使用一键部署。该规则的 `destCidrIp` 必须是单个 IPv4 地址（`/32`），否则部署直接失败
-- 客户端安装脚本新增 `--server`、`--port`（Windows 为 `-Server`、`-Port`），安装时把服务端地址写入 `config.yaml`
-
-### Fixes
-
-- Windows 客户端安装和执行插件时，对不带扩展名的 `entrypoint` 使用 `<entrypoint>.exe`，与发布的插件文件名一致
-- 插件名上限统一为 64 个字符：客户端拒绝安装和加载名字超长或含非法字符的插件，服务端拒绝上报此类插件的客户端，不再把名字截断后登记
-
-## v2.33.11 <DateTag>2026-10-08</DateTag>
-
-### Fixes
-
-- WebUI Artifacts 不再列出服务端自身的文件：`data/` 状态目录、账号库、正在使用的配置文件、TLS 证书和私钥以及 `siren_server` 二进制既不能浏览、下载，也不能被上传覆盖、重命名或删除；包含它们的目录不能打包下载、重命名或删除
-- Dossier 目录位于服务端工作目录或 Project 目录内时，Reports 不再把 Dossier 自带的 `report.md` 模板及其副本列为报告
-- 配置中省略 `air.customPromptPrefix` 时，Custom 会话使用内置前缀，开场提示词不再出现 `%!(EXTRA int=N)` 残留
-- `siren_server --config` 的帮助说明改为实际的查找规则：依次在当前目录和 `config/` 下查找 `server_config.yaml`
-
-## v2.33.10 <DateTag>2026-09-30</DateTag>
-
-### Fixes
-
-- 客户端连接出现 TLS 读取错误（如 `bad record MAC`）时，服务端会断开并注销该客户端，不再反复刷错误日志、占满 CPU；客户端随后自动重连
-- Artifacts 切换 Project 或 Global 视图后，上传目标回到当前视图的根目录，不再沿用上一视图中选中的文件夹而报 `no such file or directory`
-- WebUI 的错误提示不再在末尾多出空行
-
-## v2.33.9 <DateTag>2026-09-30</DateTag>
-
-### Improvements
-
-- Agentic IR GUI 使用 Claude 时可在空闲时通过状态栏或 `/model` 切换模型和推理强度，会话启动后、首轮对话前即可选择；切换只作用于当前会话，不改动操作者的 Claude 配置
-- Pi GUI 的模型选择器新增思考等级，可调整当前模型支持的等级；不支持推理的模型不显示等级
-- Codex、Claude 和 Pi 在切换前校验所选模型和推理强度，切换进行中暂不接受新消息
-
-## v2.33.8 <DateTag>2026-09-29</DateTag>
-
-### Improvements
-
-- Agentic IR 的 Running 列表改为以 Provider 图标区分会话，只在启动中或已退出时标出状态；当天的会话只显示时间，未填写任务的 Manual 会话命名为 “Manual · 会话 ID”
-- Codex AIR 不再强制自动批准 SIREN MCP 工具，改由操作员自己的 Codex 配置决定；需要确认时 GUI 会显示审批卡片，可选择允许一次、本会话允许或拒绝
-
-### Fixes
-
-- Agentic IR GUI 使用 Pi 时，切换或新建 Pi 会话后不再报 “MCP server "siren" is already registered”
-- 服务端只接受自己发起的 upload、Recon 和文件操作结果，并按消息类型限制客户端帧大小；REPL `upload` 遇到同名文件时追加数字后缀，不再覆盖之前的证据
-- 客户端上报的主机名、插件等元数据会去除控制字符并限制长度，含控制字符或过长的 Agent ID 会被拒绝
-- WebUI Markdown 预览不再渲染表单、按钮和内联样式；WebUI 接口拒绝跨站请求，JSON 接口要求 `application/json`
-- Shells 面板不再响应远端程序的 OSC 52 剪贴板写入，Agentic IR Terminal 仍保留复制支持
-
-## v2.33.6 <DateTag>2026-09-28</DateTag>
-
-### Improvements
-
-- Agentic IR GUI 的操作记录与摘要行默认收起，运行中或失败时也不再自动展开，点击即可查看输入与输出
-- Artifacts 在根目录上传或新建目录时，目标显示为 “Global Artifacts” 或项目名 Artifacts，不再显示为 “.”
-
-### Fixes
-
-- Agentic IR GUI 使用 Pi 且扩展更新状态时，后续轮次的内容不再错排到会话最前面
-
-## v2.33.4 <DateTag>2026-09-27</DateTag>
-
-### Breaking Change
-
-- 客户端与服务端须同时升级到 v2.33.4：旧版执行协议、Recon v0/v1 与 Snapshot JSONL v1、不带 SIREN ALPN 的连接和版本协商全部移除，新旧版本之间不再互通
-- 服务端配置 `egress.rules` 改为必填，不再回退到内置规则；启用 WebUI 时缺失或无效会拒绝启动
-- 移除 `mcp.reconTimeout`，统一使用 `recon.responseTimeout`；`recon.profiles` 与 `recon.defaultProfile` 必填，`OptIn` 和 `recon.<plugin>` 旧写法不再生效
-- 不再迁移旧数据：旧版 egress 记录中的限流拒绝不再自动识别，缺少颜色的旧项目不再自动补色
-- 移除 `/api/deploy`，部署统一走批量接口；MCP 单台部署按单目标批量处理
-- MCP `run` 结果移除 `limitations` 字段，审计日志移除 `result` 字段；已淘汰的执行结果统一返回 `not_found`
-- REPL 移除 `air` 命令
-
-### Improvements
-
-- Agentic IR GUI 输入 `/model` 直接打开状态栏的模型选择器
-- 在历史会话上点击 **Continue session** 会新开恢复标签页，已打开时直接切换过去
-- REPL `run` 输出最多显示 50 KiB，超出部分标注截断
-
-### Fixes
-
-- Agentic IR 在打开某个会话链接的情况下新建会话时，新标签页会正确激活并更新地址，不再跳回原来的标签页
-
-## v2.33.2 <DateTag>2026-09-24</DateTag>
-
-### Improvements
-
-- Reports 行尾新增 **Open in Artifacts**，跳转到 Artifacts 页面查看该报告并展开、选中文件树中的对应文件
-- Reports、Projects、Investigations 等页面取消最大宽度限制，在宽屏上撑满工作区；Settings 保持窄栏
-
-### Fixes
-
-- Artifacts 通过链接或跨页跳转打开文件时，文件树现在会展开到该文件所在目录，且不再保留上一次手动点击的高亮；从 Reports 连续打开不同文件不再回退到上一个文件
-
-## v2.33.1 <DateTag>2026-09-24</DateTag>
-
-### Improvements
-
-- 侧栏展开／折叠按钮固定在顶部：折叠后悬停 SIREN 标志即可展开，新增 Cmd+B / Ctrl+B 快捷键；Agentic IR 左侧面板改用同样的按钮，位于会话标签栏最左侧
-- Logs 页面日志区域撑满窗口，级别过滤新增 **All**；Projects 页头与 Clients、Reports 统一为计数样式
-- 空态文案限制行宽并在工作区页面居中；Reports 的 Dossier 未配置提示改为警告色；Settings 与其他页面共用左边线
-
 ## v2.33.0 <DateTag>2026-09-23</DateTag>
 
-### Features
+### New Features
 
 - 新增 **Reports** 页面替代左侧的 Dossier 外链：列出当前范围内符合 Dossier 规范的 Markdown 应急报告，Global 视图汇总工作目录和所有 Project 并标注归属；行尾 **Open in Dossier** 打开编辑，**Blank template** 打开只读默认模板，**Rescan** 手动重新扫描
+- AIR GUI 支持编号证据脚注：点击编号查看来源说明，并从卡片打开已保存的原文；每条回复下方保留可展开的来源列表
+- Claude Code、Codex、Qoder 与 Pi 的 GUI 会话采用统一证据约定，说明数据来源、采集时间和查看位置，并在权限允许时保存重要的临时命令或查询结果
+- AIR GUI 可在空闲时通过状态栏切换模型：Codex 可调整推理强度，Pi 可选择已配置的模型
 
 ### Improvements
 
+- Markdown 报告预览支持脚注和同一工作区内的相对文件链接；导出会话时各条消息的脚注编号互不串位
+- 桌面侧栏默认折叠为图标，可展开并记住选择；悬停或键盘聚焦图标时显示名称
+- Provider 选项统一按 Codex、Claude、Pi、Qoder 排列，已保存的 Provider 偏好保留
+- Pi 新会话沿用操作者的思考默认设置，恢复会话时保留已选模型和思考等级
+- 客户端启动后 60 秒内以 2 秒间隔重试首次连接，缩短自动部署放行后的上线等待
+- Restore egress 对本次新建的专用安全组直接整组删除，不再依赖额外的查询权限；删除前仍核对人工修改
+- Restore egress 只对有执行 ID 的未决步骤提供 **Recheck execution**；恢复失败时指出实际阻塞的实例、操作和步骤
+- Provisioning 与恢复列表的布局、状态和进度展示更清晰，执行日志统一显示时间与级别
 - Artifacts 预览中的 Rename 按钮移到 Download 右侧，与右键菜单顺序一致
 
-## v2.32.10 <DateTag>2026-09-22</DateTag>
-
-### Features
-
-- AIR GUI 支持编号证据脚注：点击编号查看来源说明，并从卡片打开已保存的原文；每条回复下方保留可展开的来源列表
-- Claude Code、Codex、Qoder 与 Pi 的新建和恢复 GUI 会话采用统一证据约定，说明数据来源、采集时间和查看位置，并在权限允许时保存重要的临时命令或查询结果
-- Markdown 报告预览支持脚注和同一工作区内的相对文件链接；导出会话时隔离各条消息的脚注编号，避免来源串位
-
-### Improvements
-
-- 桌面侧栏默认折叠为图标，可展开并记住当前浏览器的选择；悬停或键盘聚焦图标时显示名称，移动端保留完整抽屉导航
-- 调整 AIR 会话列表搜索框的间距、文字和聚焦样式
-
-## v2.32.9 <DateTag>2026-09-22</DateTag>
-
-### Improvements
-
-- AIR 与设置页的 Provider 选项统一按 Codex、Claude、Pi、Qoder 排列，将 Qoder 移到最后；保留已保存的 Provider 偏好
-
-## v2.32.8 <DateTag>2026-09-21</DateTag>
-
 ### Bug Fixes
 
-- 修复 SOAR 明确限流拒绝被误判为提交结果未知、阻塞同账号出站规则恢复的问题；保留网络超时等不确定结果的重复提交保护
-- 恢复失败时指出实际阻塞的实例、操作和步骤，避免将其他实例的异常误认为当前实例的问题
-
-### Improvements
-
-- Restore egress 移除常驻 Verify 按钮，仅对有执行 ID 的未决步骤提供 **Recheck execution**；缺少执行 ID 时提示人工核对，正常记录保留恢复操作
-- 重新查询只核对当前记录，恢复前仍检查同账号未完成的云端操作
-- 调整恢复列表的窄屏布局，避免实例 ID 被挤成竖排
-
-## v2.32.4 <DateTag>2026-09-17</DateTag>
-
-### Improvements
-
-- AIR GUI 支持在空闲时通过状态栏切换模型；Codex 可调整模型支持的推理强度，Pi 可选择已配置模型
-- Pi 新会话沿用操作者的思考默认设置，恢复会话时保留已选模型和思考等级
-
-### Bug Fixes
-
-- 修复 Qoder GUI 已结束的文字段落仍显示闪动光标的问题，光标仅跟随当前输出段落
-- 修复 Codex GUI 模型切换所需能力声明，避免切换请求被拒绝
-- 统一侧栏条目在有无数量标记时的高度，减少布局跳动
-
-## v2.32.3 <DateTag>2026-09-16</DateTag>
-
-### Improvements
-
-- 客户端启动后前 60 秒内，首次连接失败后以 2 秒间隔重试，减少自动部署放行后的上线等待；首次连接成功或窗口结束后恢复原有退避策略
-
-## v2.32.2 <DateTag>2026-09-16</DateTag>
-
-### Bug Fixes
-
-- Restore egress 对本次新建的专用安全组直接整组删除，不再依赖网卡和安全组引用的查询权限；删除前仍核对人工修改，删除失败时保留组内规则和恢复记录
-
-### Improvements
-
-- 优化 Provisioning 与恢复列表的布局、状态和进度展示，执行日志统一显示时间与级别，减少重复提示
-- 清理结果不再显示数量为零的延迟删除任务
-
-## v2.32.1 <DateTag>2026-09-16</DateTag>
-
-### Bug Fixes
-
-- 修复 Configure egress 在 SOAR 执行成功、结果尚未返回时误报契约不匹配的问题；Configure、Restore 及重启后的状态核对会继续等待原执行结果
-- 等待超时后保留执行标识供核对，避免重复提交云端修改；剧本失败时展示实际错误
+- 修复 SOAR 明确的限流拒绝被误判为结果未知、阻塞同账号出站规则恢复的问题
+- 修复 Configure egress 在 SOAR 执行成功、结果尚未返回时误报契约不匹配的问题；等待超时后保留执行标识供核对，避免重复提交云端修改
+- 修复 Qoder GUI 已结束的段落仍显示闪动光标，以及 Codex GUI 切换模型被拒绝的问题
 
 ## v2.32.0 <DateTag>2026-09-16</DateTag>
 
@@ -215,54 +59,29 @@ export const DateTag = ({ children }) => (
 
 ### New Features
 
-- Clients 主机详情 tooltip 新增客户端版本，旧客户端未上报时显示 **Not reported**，无需增加列表列宽
-- Clients 新增 **Recent activity**，统一展示近期部署与 WebUI、REPL 发起的清理结果，区分等待回报、文件已清理、延迟删除、失败和未收到回报；客户端下线或刷新页面后仍可查看
-- 近期清理记录保留全服务端最近 20 条，按发起时的 Project 过滤，服务端重启后清空；结果绑定发起时的客户端连接，避免重连后误关联
+- 交互式 Shell 改走服务端主 TLS 端口（默认 TCP 443），不再需要额外放通随机端口；支持终端尺寸同步、Tab 补全、方向键和全屏终端程序
+- Clients 新增 **Recent activity**，统一展示近期部署与 WebUI、REPL 发起的清理结果，区分等待回报、文件已清理、延迟删除、失败和未收到回报；保留全服务端最近 20 条，按发起时的 Project 过滤，服务端重启后清空
+- Clients 主机详情 tooltip 新增客户端版本，旧客户端未上报时显示 **Not reported**
 
 ### Improvements
 
 - Clients 的 **Provisioning** 统一提供 **Allow access**、**Configure egress** 和 **Deploy SIREN**，页内输入 1–20 个目标，自动去重、逐项展示结果，并支持仅重试失败目标
-- 部署支持每行填写 Instance ID、可选公网 IP 和备注；出方向规则在执行前直接展示，结果未确认时提示先核对近期活动
+- 部署支持每行填写 Instance ID、可选公网 IP 和备注；不再用 Instance ID 自动填充空备注，部署结束后立即刷新 Clients 列表
+- Configure egress 执行前列出即将下发的出方向规则，规则来自服务端配置 `egress.rules`；默认 SIREN 回连规则收窄为 TCP 443，已有安全组中的宽泛规则不会自动移除
+- 部署因重试耗尽或客户端始终未回连而失败时，提示先为该实例 Configure egress 再重新部署
+- Clean 先停止当前任务和交互会话再删除文件，并向服务端回报清理结果
+- Clients 行菜单新增 Recon，打开调查页面并选中该客户端；客户端选择器在没有备注时显示 Instance ID
 - 插件安装限制输出并在取消时终止子进程；chkrootkit 保留完整输出，并正确报告工具执行失败
 - 升级先完成新程序的复制和权限设置，再替换现有程序，准备失败时保留原有文件
 
-### Bugfix
+### Bug Fixes
 
-- 修复窄屏主机详情内容可能超出卡片宽度的问题
-- 修复切换 Project 后旧文件操作结果和 AIR 会话列表影响新视图的问题
-- 修复 Clients 新增行时备注按钮抢焦点的问题
-- 修复端口转发连接结束后协程仍等待，以及读取同时返回数据和 EOF 时丢失末尾数据的问题
-- 修复采集与插件超时未保留错误类型、JSON 请求未拒绝尾随垃圾的问题
-
-## v2.30.5 <DateTag>2026-09-15</DateTag>
-
-### Improvements
-
-- 交互式 Shell 共用服务端主 TLS 端口（默认 TCP 443），无需额外放通随机端口；支持终端尺寸同步、Tab 补全、方向键及全屏终端程序，启动失败会返回具体错误，连接关闭时清理关联会话
-- Configure egress 的默认 SIREN 回连规则收窄为 TCP 443；已有安全组中的宽泛规则不会自动移除，自定义监听端口需同步调整规则
-- Clean 会先停止当前任务和交互会话再删除文件，并向服务端回报清理结果；Windows 延迟删除与已完成删除分别记录，本地清理会拒绝删除 PID 文件指向仍在运行的另一客户端
-- Clients 行菜单在 Files 后新增 Recon，打开调查页面并选中该客户端，不自动开始采集；Investigations 三个工具标签增加图标
-
-### Bugfix
-
-- 修复从 Clients 打开 Recon 或进程分析时，调查页面原有标签与目标标签反复切换的问题
+- 修复切换 Project 后旧的文件操作结果和 AIR 会话列表影响新视图的问题
+- 修复从 Clients 打开 Recon 或进程分析时调查页面标签反复切换的问题
+- 修复端口转发在读取同时返回数据和 EOF 时丢失末尾数据的问题
+- 修复窄屏主机详情超出卡片宽度、Clients 新增行时备注按钮抢焦点的问题
 
 **升级说明：** 本版 Shell 协议需要服务端与客户端一起升级，不兼容旧版 Shell 连接。端口转发仍保留；从外部访问其服务端监听端口时，需要单独放通该端口。
-
-## v2.30.2 <DateTag>2026-09-14</DateTag>
-
-### Bugfix
-
-- 部署时不再自动用 ECS Instance ID 填充空备注，避免与 Clients 列表的 Instance ID 列重复；显式填写的 Note 和已有备注保留原有处理规则
-- 客户端选择器在没有备注时显示 Instance ID，再回退到主机名，便于识别目标主机
-- 单机或批量部署结束后立即刷新 Clients 列表，及时显示连接结果
-
-## v2.30.1 <DateTag>2026-09-11</DateTag>
-
-### New Features
-
-- Configure egress 的确认窗口会列出即将下发的出方向规则，规则以服务端配置 `egress.rules` 为唯一来源，缺省时回退到内置规则
-- 单机部署因 playbook 重试耗尽或客户端在超时前始终未回连而失败时，失败信息与 Deploy 表单会提示先为该实例 Configure egress 再重新部署
 
 ## v2.30.0 <DateTag>2026-09-10</DateTag>
 
@@ -292,71 +111,23 @@ export const DateTag = ({ children }) => (
 - WebUI 每个页面都有独立的 URL 地址（如 `#/investigations/recon`、`#/artifacts/<路径>?project=<id>`），刷新、浏览器前进后退和分享链接都能回到同一位置；Investigations 记住当前工具、Agentic IR 记住当前会话、Artifacts 记住选中文件和 Project 范围，浏览器标签页标题随页面变化
 - 左侧导航按用途分组：Respond（Clients、Agentic IR）、Tools（Shells、Files、Investigations）、Evidence（Artifacts、Dossier）和 System（Logs）
 - Project 范围切换改为自绘菜单，并提供 **Manage projects** 入口进入 Projects 页面；Docs 入口移到左下角账号菜单
+- MCP `run` 在 Linux、macOS 和 Windows 客户端上支持合计 16 MiB 的双流输出，可分流回读、搜索，并报告捕获完整性与取消状态
+- `logging.output` 新增 `none`：不向终端输出日志，Logs 页面照常保留
 
-## v2.27.7 <DateTag>2026-09-08</DateTag>
+### Improvements
 
-### Bugfix
-
-- 插件更新改为验证新版本后切换，下载、安装或配置提交失败时保留旧安装；安装命令拒绝覆盖已有插件，管理命令失败时返回非零退出码
-- 插件变更与配置重载先校验 Recon Profile，并拒绝在客户端配置正被使用时修改；失败的重载保留当前配置
-- 修复 Recon 上传被拒绝后连接协议失步、客户端备注保存失败后显示未落盘内容的问题
-- 修复 AIR 主进程退出后仍等待后代进程输出管道，以及 HTTP 监听器关闭后排队连接未释放的问题
-- Dossier 静态服务拒绝根目录以下的符号链接和特殊文件，报告读取拒绝 FIFO 等非普通文件
-- 修复客户端列表刷新重叠、SOAR 流提前结束被当成完成，以及浏览器禁用存储时文件页无法打开的问题
-- 修复 Pi 安装影响父目录权限、插件构建失败仍返回成功，以及定时部署因准备耗时而延迟的问题
-
-### Improvement
-
+- 登录页改版；Clients 列表用系统图标显示 Linux、Windows 和 macOS；侧栏突出显示 Agentic IR 入口
+- AIR 的 Claude 命令菜单直接显示 CLI 自带的命令描述
+- 插件更新先验证新版本再切换，失败时保留旧安装；安装命令拒绝覆盖已有插件，管理命令失败时返回非零退出码
 - 大目录采集分批读取条目，保留采集预算、取消和 partial 状态
 
-## v2.27.6 <DateTag>2026-09-07</DateTag>
+### Bug Fixes
 
-### New Features
-
-- MCP `run` 在新版 Linux、macOS 和 Windows 客户端上支持合计 16 MiB 的双流输出，可分流回读、搜索，并明确报告捕获完整性与取消状态
-- WebUI 客户端列表使用系统图标显示 Linux、Windows 和 macOS，未知系统保留原文
-- 侧栏突出显示 Agentic IR 入口
-
-### Bugfix
-
-- 修复 Unix 复合进程查询可能匹配到 SIREN 自身命令包装器的问题
-- 修复命令结束但输出尚未读完时误报捕获完整，以及并发文件传输时命令完成回复丢失的问题
-- 文件传输按块限时，长文件不再受五秒整体发送期限限制
-
-## v2.27.4 <DateTag>2026-09-04</DateTag>
-
-### Bugfix
-
-- 修复 Claude Code 等只读取 MCP structured content 的客户端看不到 `run`、结果读取与搜索、Recon 和部署正文的问题
-
-## v2.27.3 <DateTag>2026-09-04</DateTag>
-
-### Bugfix
-
-- 修复 AIR History 中 Codex 会话预览显示 `# AGENTS.md instructions` 等注入前言而非操作者首条 prompt 的问题；带图片附件的提问只显示操作者的请求文本，只含注入内容、没有任何操作者输入的会话不再列出
-
-## v2.27.2 <DateTag>2026-09-04</DateTag>
-
-### Improvement
-
-- `logging.output` 新增 `none`：不向终端输出日志，Logs 页面缓冲照常保留
-
-### Bugfix
-
-- 修复 AIR Terminal 模式下 Claude Code 鼠标拖选复制失效的问题：终端在本地操作后短时间内接受程序的剪贴板写入，其余时间仍会拦截，避免 Agent 输出覆盖观看者剪贴板
-
-## v2.27.1 <DateTag>2026-09-03</DateTag>
-
-### Improvement
-
-- 登录页改版：左侧品牌区展示产品说明与音波动效，窄屏下自动堆叠
-- AIR 的 Claude 命令菜单改为只显示 CLI 自带的命令描述，不再由 SIREN 维护内置命令说明
-
-### Bugfix
-
-- 修复恢复 Codex 会话时每次都出现弃用警告的问题
-- 修复 AIR 启动 GUI 会话时偶发 `provider protocol closed` 的问题
-- 修复 Claude GUI 会话的本机审批桥不校验会话 token 的问题
+- 修复 Claude Code 等只读取 MCP structured content 的客户端看不到 `run`、结果回读、Recon 和部署正文的问题
+- 修复 AIR History 中 Codex 会话预览显示注入前言而非操作者首条 prompt 的问题
+- 修复 AIR Terminal 中 Claude Code 鼠标拖选复制失效、启动 GUI 会话偶发 `provider protocol closed`，以及恢复 Codex 会话时出现弃用警告的问题
+- 修复命令结束但输出尚未读完时误报捕获完整，以及长文件传输受五秒整体期限限制的问题
+- Dossier 静态服务拒绝根目录以下的符号链接和特殊文件
 
 ## v2.27.0 <DateTag>2026-09-02</DateTag>
 

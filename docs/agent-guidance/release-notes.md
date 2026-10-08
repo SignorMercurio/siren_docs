@@ -3,7 +3,12 @@
 - Base feature and release claims on the current SIREN implementation or
   verified live behavior.
 - Do not add an `Unreleased` section. Use an explicit released-version heading:
-  `## vX.Y.Z <DateTag>YYYY-MM-DD</DateTag>`.
+  `## vX.Y.0 <DateTag>YYYY-MM-DD</DateTag>`.
+- Only minor releases (`vX.Y.0`) get a section; patch versions never appear.
+  Changes released after `vX.Y.0` and before `vX.(Y+1).0` belong to the
+  `vX.(Y+1).0` section, written when that version ships. Recover pending patch
+  changes from SIREN commits since the last minor release.
+- List what users notice; leave out internal details.
 - Update only the active release section unless the task explicitly includes
   older entries.
 - Preserve historical release notes and changelog entries unless the task
