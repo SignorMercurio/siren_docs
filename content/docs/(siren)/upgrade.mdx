@@ -88,7 +88,7 @@ cd /opt/siren
 
 已接入的客户端会自动重连新服务端，但进程仍是旧版本，需要重启：
 
-- **一键部署的主机**：在 Clients 页的 **Provisioning** 中对这些实例再执行一次 [Deploy SIREN](/onboard/provisioning)，从 Global 视图或客户端所属的 Project 视图发起。安装脚本发现已有安装完好会跳过下载，停止旧客户端进程，用第 1 步替换好的程序重新启动。客户端身份不变，Client ID、Note 和 Project 归属保持原样。
+- **一键部署的主机**：在 Clients 页的 **Provisioning** 中对这些实例再执行一次 [Deploy SIREN](/onboard/provisioning)，从 Global 视图或客户端所属的 Project 视图发起。安装脚本发现已有安装完好会跳过下载，停止旧客户端进程，按当前 `siren_server_callback` 规则改写 `config.yaml` 中的 `server`、`port`，再用第 1 步替换好的程序重新启动。客户端身份不变，Client ID、Note 和 Project 归属保持原样。
 - **手动启动的客户端**：在主机上停止旧进程，用原来的命令重新运行 `siren client`。
 
 不要用 **Clean & terminate** 后重新部署代替升级。清理会删除客户端身份，重新部署得到的是新的 Client ID，原来的 Note 和 Project 归属不会沿用。
@@ -216,7 +216,7 @@ diff /opt/siren/server_config.yaml /tmp/server_config.new.yaml
 - 手动启动的客户端使用 `-s` 参数或 `config.yaml` 中的 `server`。
 - 一键部署的客户端使用部署时 `siren_server_callback` 规则中的地址和端口，安装时已写入其 `config.yaml`。
 
-公网 IP 变化后，已接入的客户端重连失败后会退出，需要在目标主机上改地址重新启动。同时要把 `egress.rules` 中 `siren_server_callback` 的 `destCidrIp` 改成新地址；已经执行过 **Configure egress** 的实例，其出站安全组仍只放行旧地址。新主机的入方向也要重新放行这些客户端的出口 IP。
+公网 IP 变化后，已接入的客户端重连失败后会退出。先把 `egress.rules` 中 `siren_server_callback` 的 `destCidrIp` 改成新地址，再处理客户端：一键部署的主机在新服务端上对这些实例再执行一次 [Deploy SIREN](/onboard/provisioning)，安装脚本会把新地址写入 `config.yaml` 并重启客户端，客户端身份不变；手动启动的客户端需要在目标主机上改地址重新启动。已经执行过 **Configure egress** 的实例，其出站安全组仍只放行旧地址。新主机的入方向也要重新放行这些客户端的出口 IP。
 
 </Step>
 <Step>
