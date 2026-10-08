@@ -2,6 +2,24 @@
 title: 前置条件与凭证
 description: 按功能列出 SIREN Server 依赖的证书、账号、凭证和外部服务
 icon: ListChecks
+verifiedAgainst: v2.33.11
+sources:
+  - config/server_config.yaml
+  - cmd/server/cli/root.go
+  - cmd/server/cli/user.go
+  - internal/server/server.go
+  - internal/server/mcp_auth.go
+  - internal/server/air_mcp_auth.go
+  - internal/server/air_mcp.go
+  - internal/server/egress.go
+  - internal/server/deployment_discovery.go
+  - internal/server/commander.go
+  - internal/server/webui/webui_dossier.go
+  - internal/server/air_runtime.go
+  - internal/server/shell.go
+  - pkg/utils/oss.go
+  - config/config_linux.yaml
+  - internal/plugin/marketplace.go
 ---
 
 import { Accordion, Accordions } from "fumadocs-ui/components/accordion";

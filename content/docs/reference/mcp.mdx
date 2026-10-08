@@ -2,6 +2,27 @@
 title: MCP
 description: SIREN MCP 的端点、鉴权、工具参数、结果回读、命令黑名单与审计
 icon: Plug
+verifiedAgainst: v2.33.11
+sources:
+  - internal/server/mcp.go
+  - internal/server/mcp_http.go
+  - internal/server/mcp_auth.go
+  - internal/server/mcp_audit.go
+  - internal/server/mcp_command_policy.go
+  - internal/server/mcp_run.go
+  - internal/server/mcp_run_batch.go
+  - internal/server/mcp_run_results.go
+  - internal/server/mcp_run_streams.go
+  - internal/server/mcp_recon.go
+  - internal/server/mcp_deploy.go
+  - internal/server/run_result_storage.go
+  - internal/server/air_mcp.go
+  - internal/server/air_mcp_auth.go
+  - internal/server/air_terminal_cmd.go
+  - internal/server/air_gui_qoder.go
+  - internal/server/air_codex_shared.go
+  - internal/client/run_v2.go
+  - config/server_config.yaml
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

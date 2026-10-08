@@ -2,6 +2,24 @@
 title: 日志与审计
 description: 在 Logs 页面查看服务端运行日志，按关键词、级别和组件过滤，并追查 Shell、MCP 命令和登录记录
 icon: ScrollText
+verifiedAgainst: v2.33.11
+sources:
+  - internal/server/webui/frontend/src/pages/LogsPage.tsx
+  - internal/server/webui/frontend/src/logs/logQuery.ts
+  - internal/server/webui/frontend/src/logs/useServerLogs.ts
+  - internal/server/webui/frontend/src/nav.ts
+  - internal/server/webui/webui_logs.go
+  - internal/logstore/logstore.go
+  - internal/server/logging.go
+  - cmd/server/cli/root.go
+  - config/server_config.yaml
+  - internal/server/webui/request_log.go
+  - internal/server/webui/auth.go
+  - internal/server/webui/webui_shell.go
+  - internal/server/mcp_audit.go
+  - internal/server/mcp_run_results.go
+  - internal/server/server.go
+  - internal/server/handler.go
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

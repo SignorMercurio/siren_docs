@@ -2,6 +2,20 @@
 title: 出站与入站放行
 description: 放行客户端访问服务端，并为出方向默认拒绝的 ECS 配置专用出站安全组
 icon: ArrowRightFromLine
+verifiedAgainst: v2.33.11
+sources:
+  - internal/server/webui/frontend/src/components/Provisioning.tsx
+  - internal/server/commander_cloud.go
+  - internal/server/egress.go
+  - internal/server/egress_manager.go
+  - internal/server/egress_cloud.go
+  - internal/server/egress_snapshot.go
+  - internal/server/egress_store.go
+  - internal/server/webui/webui_soar.go
+  - internal/server/help.go
+  - config/server_config.yaml
+  - cmd/client/cli/probe_egress.go
+  - internal/egressprobe/
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
@@ -61,5 +75,5 @@ Configure egress 的操作会在服务端保存恢复记录（含被降级的 Dr
 ```
 
 <Callout title="命令行等价" type="info">
-  出站配置与恢复只有 WebUI 和 MCP 入口，没有对应的服务端 REPL 命令。
+  出站配置与恢复只能在 WebUI 中操作，没有对应的服务端 REPL 命令或 MCP 工具。
 </Callout>

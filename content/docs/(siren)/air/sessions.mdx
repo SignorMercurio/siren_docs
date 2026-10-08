@@ -2,6 +2,27 @@
 title: 启动与管理会话
 description: 选择 Provider 和入口模式启动 AIR 会话，在 Running 中重新接入或停止，并从 History 继续以前的会话
 icon: Workflow
+verifiedAgainst: v2.33.11
+sources:
+  - internal/server/webui/frontend/src/pages/AIRPage.tsx
+  - internal/server/webui/frontend/src/pages/SettingsPage.tsx
+  - internal/server/webui/frontend/src/air/startGuard.ts
+  - internal/server/webui/frontend/src/air/airPreference.ts
+  - internal/server/webui/frontend/src/air/useAgentSessions.ts
+  - internal/server/webui/frontend/src/air/panelPersistence.ts
+  - internal/server/webui/frontend/src/reconnectBudget.ts
+  - internal/server/webui/frontend/src/router.ts
+  - internal/server/webui/frontend/src/components/AIRSessionListItem.tsx
+  - internal/server/webui/frontend/src/components/AIRGUIChatPanel.tsx
+  - internal/server/webui/frontend/src/components/ClientsTable.tsx
+  - internal/server/webui/types_air.go
+  - internal/server/air.go
+  - internal/server/air_runtime.go
+  - internal/server/air_history.go
+  - internal/server/agent_session_registry.go
+  - internal/server/agent_session_lifecycle.go
+  - internal/server/projects.go
+  - cmd/server/cli/root.go
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

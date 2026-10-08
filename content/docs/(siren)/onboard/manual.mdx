@@ -2,6 +2,15 @@
 title: 手动安装客户端
 description: 在能访问服务端的主机上安装并启动 SIREN 客户端
 icon: SquareTerminal
+verifiedAgainst: v2.33.11
+sources:
+  - scripts/get_siren.sh
+  - scripts/get_siren.ps1
+  - cmd/client/cli/client.go
+  - internal/client/client.go
+  - config/config_linux.yaml
+  - config/config_windows.yaml
+  - internal/server/webui/frontend/src/components/ClientsTable.tsx
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

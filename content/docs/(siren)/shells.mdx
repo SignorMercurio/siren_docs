@@ -2,6 +2,26 @@
 title: 浏览器 Shell
 description: 在 Shells 页面打开客户端的交互式终端：多标签、复制粘贴、尺寸，以及会话何时保持、何时结束
 icon: SquareTerminal
+verifiedAgainst: v2.33.11
+sources:
+  - internal/server/webui/frontend/src/pages/ShellsPage.tsx
+  - internal/server/webui/frontend/src/components/TerminalPanel.tsx
+  - internal/server/webui/frontend/src/components/SessionTabBar.tsx
+  - internal/server/webui/frontend/src/tabReorder.ts
+  - internal/server/webui/frontend/src/clipboard.ts
+  - internal/server/webui/frontend/src/components/ClientsTable.tsx
+  - internal/server/webui/frontend/src/components/Sidebar.tsx
+  - internal/server/webui/frontend/src/App.tsx
+  - internal/server/webui/webui_shell.go
+  - internal/server/shell.go
+  - internal/protocol/shell.go
+  - internal/client/shell.go
+  - internal/client/shell_unix.go
+  - internal/client/shell_windows.go
+  - pkg/utils/utils_unix.go
+  - pkg/utils/utils_windows.go
+  - cmd/server/cli/shell.go
+  - internal/server/commander.go
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

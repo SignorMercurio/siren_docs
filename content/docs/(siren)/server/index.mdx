@@ -2,6 +2,23 @@
 title: 安装服务端
 description: 在控制主机上安装、启动、升级 SIREN Server
 icon: ServerCog
+verifiedAgainst: v2.33.11
+sources:
+  - scripts/get_siren_server.sh
+  - config/server_config.yaml
+  - cmd/server/cli/root.go
+  - cmd/server/cli/user.go
+  - cmd/server/cli/upgrade.go
+  - internal/server/server.go
+  - internal/server/shared_tls.go
+  - internal/protocol/tls.go
+  - internal/protocol/shell.go
+  - internal/server/mcp_auth.go
+  - internal/server/air_mcp.go
+  - internal/server/commander.go
+  - internal/server/shell.go
+  - internal/server/webui/frontend/src/pages/LoginPage.tsx
+  - internal/server/webui/frontend/src/pages/SettingsPage.tsx
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

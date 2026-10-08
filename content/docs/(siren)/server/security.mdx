@@ -2,6 +2,25 @@
 title: 账号与安全边界
 description: SIREN Server 的访问控制模型、各入口的鉴权方式和公网暴露建议
 icon: ShieldCheck
+verifiedAgainst: v2.33.11
+sources:
+  - internal/auth/store.go
+  - cmd/server/cli/user.go
+  - cmd/server/cli/root.go
+  - internal/server/webui/auth.go
+  - internal/server/webui/webui.go
+  - internal/server/webui/webui_dossier.go
+  - internal/server/artifact_resolver.go
+  - internal/server/artifact_reports.go
+  - internal/server/mcp_auth.go
+  - internal/server/air_mcp_auth.go
+  - internal/server/mcp_command_policy.go
+  - internal/server/mcp.go
+  - internal/protocol/tls.go
+  - internal/server/client_registry.go
+  - internal/server/portforward.go
+  - internal/server/webui/frontend/src/pages/LoginPage.tsx
+  - internal/server/webui/frontend/src/pages/SettingsPage.tsx
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

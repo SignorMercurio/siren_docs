@@ -8,7 +8,8 @@
     "start": "next start",
     "types:check": "fumadocs-mdx && tsc --noEmit",
     "postinstall": "fumadocs-mdx",
-    "lint": "eslint"
+    "lint": "eslint",
+    "drift:check": "node scripts/check-drift.mjs"
   },
   "dependencies": {
     "@orama/stopwords": "^3.1.16",

@@ -2,6 +2,25 @@
 title: 准备 AIR Provider
 description: 在服务端安装并登录 Claude Code、Codex、Qoder 或 Pi，供 WebUI 启动 Agentic IR 会话
 icon: Bot
+verifiedAgainst: v2.33.11
+sources:
+  - config/server_config.yaml
+  - cmd/server/cli/root.go
+  - internal/server/air.go
+  - internal/server/air_runtime.go
+  - internal/server/air_gui_probe.go
+  - internal/server/air_gui_provider.go
+  - internal/server/air_pi_config.go
+  - internal/server/air_terminal_cmd.go
+  - internal/server/air_codex_shared.go
+  - internal/server/air_history.go
+  - internal/server/air_mcp.go
+  - scripts/install_pi_provider.sh
+  - scripts/merge_pi_provider_config.mjs
+  - config/pi-agent/
+  - internal/server/webui/frontend/src/pages/SettingsPage.tsx
+  - internal/server/webui/frontend/src/pages/AIRPage.tsx
+  - internal/server/webui/frontend/src/air/airPreference.ts
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

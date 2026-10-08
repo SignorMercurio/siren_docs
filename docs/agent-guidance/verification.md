@@ -5,6 +5,8 @@ Run the narrowest checks that cover the changed surface:
 - After MDX or TypeScript-facing documentation changes: `npm run types:check`.
 - After broader site changes: `npm run build` in addition to the typecheck.
 - Before finalizing documentation changes: `git diff --check`.
+- After changing page frontmatter `sources` or `verifiedAgainst`:
+  `npm run drift:check` (no page may appear under UNMAPPED or MISSING SOURCES).
 - If a change also touches the verified SIREN code checkout, validate that repository
   separately and report its result separately.
 

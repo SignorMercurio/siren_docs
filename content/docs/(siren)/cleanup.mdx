@@ -2,6 +2,22 @@
 title: 清理与结案
 description: 从受害主机移除 SIREN 客户端，并按清单收尾一次应急响应
 icon: ClipboardCheck
+verifiedAgainst: v2.33.11
+sources:
+  - internal/server/webui/frontend/src/components/ClientsTable.tsx
+  - internal/server/webui/frontend/src/pages/ClientsPage.tsx
+  - internal/server/webui/frontend/src/recentCleanups.ts
+  - internal/server/webui/frontend/src/components/EgressRecovery.tsx
+  - internal/server/cleanup_history.go
+  - internal/server/webui/webui_cleanups.go
+  - internal/server/handler.go
+  - internal/server/commander.go
+  - internal/client/cleanup.go
+  - internal/client/local_clean*.go
+  - internal/client/identity.go
+  - internal/clean/
+  - cmd/client/cli/clean.go
+  - internal/server/projects.go
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

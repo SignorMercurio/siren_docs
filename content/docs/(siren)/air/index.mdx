@@ -2,6 +2,18 @@
 title: Agentic 应急响应
 description: 在 WebUI 中让 Codex、Claude Code、Pi 或 Qoder 通过 SIREN 排查在线主机
 icon: Brain
+verifiedAgainst: v2.33.11
+sources:
+  - internal/server/webui/frontend/src/pages/AIRPage.tsx
+  - internal/server/webui/frontend/src/components/AIRRequests.tsx
+  - internal/server/webui/frontend/src/components/AIRToolResults.tsx
+  - internal/server/air.go
+  - internal/server/air_mcp.go
+  - internal/server/air_mcp_auth.go
+  - internal/server/agent_session_registry.go
+  - internal/server/mcp.go
+  - internal/server/mcp_deploy.go
+  - internal/server/mcp_command_policy.go
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

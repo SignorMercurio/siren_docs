@@ -2,6 +2,22 @@
 title: 一键部署
 description: 通过 WebUI Provisioning 向阿里云 ECS 批量安装并接入 SIREN 客户端
 icon: CloudUpload
+verifiedAgainst: v2.33.11
+sources:
+  - internal/server/webui/frontend/src/components/Provisioning.tsx
+  - internal/server/webui/frontend/src/provisioning.ts
+  - internal/server/webui/frontend/src/pages/ClientsPage.tsx
+  - internal/server/deploy_batch.go
+  - internal/server/deployment_manager.go
+  - internal/server/deployment_matching.go
+  - internal/server/deployment_discovery.go
+  - internal/server/deployment_history.go
+  - internal/server/webui/webui_soar.go
+  - internal/server/webui/types_soar.go
+  - internal/egressprobe/
+  - scripts/soar/assistant_deploy_siren.py
+  - scripts/get_siren.sh
+  - config/server_config.yaml
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

@@ -2,6 +2,27 @@
 title: 客户端文件
 description: 在 Files 页面浏览在线客户端的文件系统，预览、下载文件或目录，并向客户端上传文件
 icon: FolderOpen
+verifiedAgainst: v2.33.11
+sources:
+  - internal/server/webui/frontend/src/pages/ClientFilesPage.tsx
+  - internal/server/webui/frontend/src/components/FileBrowser.tsx
+  - internal/server/webui/frontend/src/components/FileTree.tsx
+  - internal/server/webui/frontend/src/components/fileTreeModel.ts
+  - internal/server/webui/frontend/src/components/FilePreview.tsx
+  - internal/server/webui/frontend/src/components/FileDropUpload.tsx
+  - internal/server/webui/frontend/src/components/ClientsTable.tsx
+  - internal/server/webui/webui_client_files.go
+  - internal/server/webui/types_files.go
+  - internal/server/webui_client_files_bridge.go
+  - internal/server/client_files.go
+  - internal/protocol/fs.go
+  - internal/client/files.go
+  - internal/server/handler.go
+  - internal/server/commander.go
+  - cmd/client/cli/upload.go
+  - pkg/utils/oss.go
+  - config/config_linux.yaml
+  - config/config_windows.yaml
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

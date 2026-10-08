@@ -2,6 +2,26 @@
 title: 自动化信息收集
 description: 用 Recon 在客户端上采集一份有范围、有上限的主机快照，保存到 Artifacts
 icon: ScanSearch
+verifiedAgainst: v2.33.11
+sources:
+  - internal/server/webui/frontend/src/pages/InvestigationsPage.tsx
+  - internal/server/webui/frontend/src/pages/InvestigationResults.tsx
+  - internal/server/webui/frontend/src/components/ClientsTable.tsx
+  - internal/server/webui/webui_investigations.go
+  - internal/server/recon_operation.go
+  - internal/server/recon_events.go
+  - internal/server/handler_recon.go
+  - internal/server/mcp_recon.go
+  - internal/server/commander.go
+  - internal/client/handler.go
+  - internal/recon
+  - internal/reconartifact/render.go
+  - internal/reconartifact/hunt_summary.go
+  - config/config_linux.yaml
+  - config/config_windows.yaml
+  - config/server_config.yaml
+  - cmd/client/cli/recon.go
+  - pkg/utils/oss.go
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
