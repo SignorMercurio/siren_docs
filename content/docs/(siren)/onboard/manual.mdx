@@ -1,0 +1,73 @@
+---
+title: 手动安装客户端
+description: 在能访问服务端的主机上安装并启动 SIREN 客户端
+icon: SquareTerminal
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Steps, Step } from "fumadocs-ui/components/steps";
+
+当目标主机不是阿里云 ECS、云助手不可用，或你更希望在主机上手动操作时，登录目标主机安装客户端并连接服务端。安装完成后客户端会出现在 Clients 页。
+
+## 前置条件
+
+目标主机能访问服务端的主 TLS 端口（默认 `443`），且服务端已允许该主机的来源 IP。服务端相关配置见 [前置条件与凭证](/server/prerequisites)。
+
+## 安装客户端
+
+登录目标主机，用对应系统的命令安装。Linux 需要 root，Windows 需要以管理员身份运行 PowerShell。
+
+```bash tab="Linux"
+curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sh
+```
+
+```powershell tab="Windows"
+iwr -Uri 'https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.ps1' -UseBasicParsing | iex
+```
+
+安装脚本做的事：按架构和系统版本选择安装包（Windows 旧系统自动选 `siren_windows_legacy.zip`），校验校验和后解压，把 `siren` 可执行文件和 `config.yaml` 装到专用目录。它不会自动启动客户端（除非是一键部署内部以 `--deploy` 调用）。
+
+安装目录：
+
+- Linux：`/opt/siren`
+- Windows：`C:\Windows\Temp\siren`
+
+<Callout title="重装会替换配置" type="warn">
+  再次运行安装脚本会用包内自带的 `config.yaml` 替换现有配置（旧文件先备份到临时目录，安装成功后删除）。手工改过的 `config.yaml` 会因此丢失，改动请在重装后重新应用。
+</Callout>
+
+## 启动客户端
+
+先确认服务端已允许目标主机的出口 IP：在 WebUI 用 [Allow access](/onboard/egress)，或自行在服务端防火墙放行。然后在目标主机启动客户端：
+
+```bash tab="Linux"
+cd /opt/siren
+./siren client -s <SIREN Server IP> -p 443
+```
+
+```powershell tab="Windows"
+Set-Location C:\Windows\Temp\siren
+.\siren.exe client -s <SIREN Server IP> -p 443
+```
+
+`-s` 默认 `127.0.0.1`，`-p` 默认 `443`；修改过服务端连接端口时把 `443` 换成实际端口。
+
+### 重连行为
+
+客户端断线后会自动重连。启动后的第一分钟内，首次连接失败每 2 秒重试一次（每次拨号仍保留 10 秒超时），减少放行后上线的等待；该窗口不是部署总超时。会话建立成功或该窗口结束后，重试间隔变为 8、16、30 秒，最多重试 10 次，之后客户端退出。
+
+## 确认已接入
+
+保持客户端进程运行。连接成功后，它会出现在 WebUI 的 [Clients](/clients) 页；主机卡片显示主机名、连接地址、内网 IP 列表和客户端版本。
+
+## 持续运行
+
+客户端是前台进程，应放到常驻环境中运行（如 systemd、nohup、Windows 计划任务或后台进程），确保断线后能继续重连。
+
+## 卸载
+
+手动安装的客户端通过 **Clean** 卸载：它删除客户端侧的 SIREN 文件并终止进程。见 [痕迹清除](/misc/clean)。
+
+<Callout title="本地模式" type="info">
+  目标主机无法连到服务端，或数据不允许离开主机时，安装后可直接在本机运行 `siren recon` 等命令，不接入服务端。见 [自动化信息收集](/recon)。
+</Callout>

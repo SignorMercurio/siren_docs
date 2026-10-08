@@ -1,0 +1,55 @@
+---
+title: 恢复出站规则
+description: 撤销 Configure egress 对云端安全组所做的改动
+icon: Undo2
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+**Restore egress** 撤销此前 [Configure egress](/onboard/egress) 在阿里云安全组上所做的改动：移除新增的放行规则、还原被降级的 Drop 优先级，并在专用安全组空闲时删除它。入口在 Clients 页内嵌的 **Provisioning** 面板的 **Restore egress** 标签。
+
+## 何时使用
+
+- 应急处置结束、不再需要目标主机回连服务端时。
+- 执行 [痕迹清除（Clean）](/misc/clean) 之后。恢复只撤销 SIREN 记录过的规则，不触碰原有配置和后续人工改动。
+
+<Callout title="先 Clean 再 Restore" type="warn">
+  恢复会撤销客户端回连所需的出方向放行，可能切断客户端。需要清理客户端时，先执行 Clean，再手动恢复出站规则。Clean 回报“文件已清理”或“已安排删除”后，面板会为匹配的恢复记录给出快捷入口（**N cleaned clients have egress changes to restore. Review**），但不会自动执行。恢复不依赖客户端在线。
+</Callout>
+
+## 操作步骤
+
+1. 在 Provisioning 面板选择 **Restore egress** 标签，面板列出服务端保存的恢复记录。
+2. 勾选要恢复的记录，每次最多 20 个实例。已处于 **Restored** 的记录不可勾选。
+3. 点击 **Restore N instances**。逐项执行，结果更新到对应行。可用 **Refresh** 重新拉取列表。
+
+## 记录状态
+
+每条记录会显示下列状态之一：
+
+| 状态标签 | 含义 |
+| --- | --- |
+| Configuring | 正在配置，尚未进入可恢复状态 |
+| Ready to restore | 已配置完成，可以恢复 |
+| Restoring | 正在恢复 |
+| Restored | 已恢复完成 |
+| Waiting for shared rules | 本实例已恢复，但共享的 Drop 规则在等其他实例 |
+| Needs attention | 存在冲突，需人工处理（记录保留并说明原因） |
+| Execution unresolved | 有尚未确认结果的云端执行，需要重新查询 |
+
+## 共享规则
+
+多个实例共用的 Drop 规则，要等最后一个依赖它的实例结束后才恢复。在此之前，先恢复的实例显示 **Waiting for shared rules**；待最后一个实例完成后，这些实例自动转为 Restored。
+
+## Recheck execution
+
+当记录包含尚未确认结果的 SOAR 执行 ID 时，该行显示 **Recheck execution**，用于重新查询当前记录的云端执行结果。它只重新核对执行结果，不检查网络连通性，也不重新提交修改。缺少执行 ID 时，面板会显示具体步骤并提示人工核对 SOAR 执行历史后再恢复。
+
+## 冲突与限流
+
+- **冲突**：原有配置或后续人工修改不会被整份覆盖；检测到规则在外部被改动时，保留记录并说明原因（Needs attention）。恢复依据不完整时保留相关资源并提示人工检查。
+- **限流**：明确被限流拒绝的提交是确定性失败，提示通过 Restore 处理此前已完成的变更；仅是超时或提及限流的错误不视为未提交。
+
+## 记录保留
+
+恢复记录保存在服务端，刷新页面或服务端重启后仍在：未解决的记录持续保留，已恢复（Restored）的记录保留最近 20 条。更早的、没有恢复记录的操作不支持自动还原。

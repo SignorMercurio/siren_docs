@@ -10,7 +10,7 @@ import { Callout } from "fumadocs-ui/components/callout";
   痕迹清除会删除客户端侧的 SIREN 文件并终止客户端进程。执行前请确认调查已完成，必要证据、报告和上传文件已经保存。
 </Callout>
 
-痕迹清除用于在应急响应结束后，从受害主机移除当前 SIREN 客户端。它可以在 [Web 控制台](/webui#clients)、服务端 REPL 或客户端本机执行。
+痕迹清除用于在应急响应结束后，从受害主机移除当前 SIREN 客户端。它可以在 [Web 控制台](/clients)、服务端 REPL 或客户端本机执行。
 
 ## 执行清理
 
@@ -34,7 +34,7 @@ WebUI 入口位于 Clients 页面目标客户端行的更多操作菜单，也�
 
 ## 恢复出站规则
 
-Clean 不自动修改云端安全组。若曾通过新版 Configure egress 配置出站访问，清理回报成功或已安排删除后，Clients 页面会提供 Restore egress 快捷入口。请手动恢复；客户端离线不影响服务端执行恢复。共享规则、人工修改冲突及历史记录限制见 [Web 控制台](/webui#clients)。
+Clean 不自动修改云端安全组。若曾通过新版 Configure egress 配置出站访问，清理回报成功或已安排删除后，Clients 页面会提供 Restore egress 快捷入口。请手动恢复；客户端离线不影响服务端执行恢复。共享规则、人工修改冲突及历史记录限制见 [Web 控制台](/clients)。
 
 ## 清理范围
 

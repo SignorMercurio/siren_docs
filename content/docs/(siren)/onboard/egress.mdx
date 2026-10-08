@@ -1,0 +1,65 @@
+---
+title: 出站与入站放行
+description: 放行客户端访问服务端，并为出方向默认拒绝的 ECS 配置专用出站安全组
+icon: ArrowRightFromLine
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+客户端要接入服务端，两个方向都要通：客户端能向服务端发起连接（出方向），服务端允许来自客户端出口 IP 的连接（入方向）。两项操作都在 Clients 页内嵌的 **Provisioning** 面板完成。
+
+## 前置条件
+
+**Allow access**、**Configure egress** 都依赖 SOAR 平台访问凭证；Configure egress 还要求服务端配置了 `egress.rules`。详见 [前置条件与凭证](/server/prerequisites)。
+
+## Allow access
+
+**Allow access** 放行一个客户端公网 IP 到服务端，供手动安装、或自行掌握出口 IP 的场景使用。
+
+1. 在 Provisioning 面板选择 **Allow access** 标签。
+2. 每行填写一个客户端公网 IPv4 地址，例如 `203.0.113.10`，每批 1–20 个。
+3. 点击 **Allow N IPs**。逐项执行，单项失败不影响其他项。
+
+放行通过 SOAR 剧本为该 IP 添加对服务端回连端口的入方向放行。一键部署会自动完成这一步（放行探测到的出口 IP），无需单独执行。
+
+<Callout title="结果仅保存在浏览器" type="info">
+  Allow access 的逐项结果只保留在当前页面，刷新后不再显示；它不产生服务端侧的恢复记录。
+</Callout>
+
+## Configure egress
+
+对出方向默认拒绝的阿里云 ECS，**Configure egress** 创建或复用一个专用的 SIREN 出站安全组，把客户端回连所需的出方向放行加到该实例上。
+
+1. 在 Provisioning 面板选择 **Configure egress** 标签。
+2. 填写 **Alibaba Cloud UID**，并每行填写一个 **Instance ID**，每批 1–20 个。
+3. 面板展示即将应用的出站规则（来自服务端配置，只读）。规则加载失败时无法执行。
+4. 点击 **Configure N instances**。逐项执行，结果给出安全组 ID 与地域。
+
+执行时的处理：
+
+- 创建或复用一个打了 `siren:managed` 等标签的专用安全组（命名为 `siren-egress-<instanceId>`），以 priority 1 应用配置中的出站规则，再把该安全组挂载到实例上，不移除已有安全组。
+- 实例已有安全组中与这些目的地冲突的 priority-1 Drop 规则，会被降到 priority 2，使放行规则生效。被降级的规则会记入恢复记录。
+- 同一账号下有未完成的操作时会先核对，再继续。
+
+<Callout title="规则是唯一事实源" type="info">
+  Configure egress 应用的出站规则完全来自服务端必填配置 `egress.rules`，确认框展示的就是将要授权的规则。默认包含三条：服务端回连（`siren_server_callback`，TCP 443）、客户端下载地址（`siren_client_download`，TCP 443）、阿里云基础服务（`alibaba_cloud_infrastructure`，全流量 `100.100.0.0/16`）。最多 20 条，字段与完整键见 [配置文件](/config#服务端配置)。使用自定义服务端监听端口时，应同步调整 `egress.rules` 中的回连端口。
+</Callout>
+
+出站发现依赖 `egress.discovery`（云防火墙日志库），用于一键部署自动识别回连 IP，键同样见 [配置文件](/config#服务端配置)。
+
+## 持久化与恢复
+
+Configure egress 的操作会在服务端保存恢复记录（含被降级的 Drop 规则），刷新页面或服务端重启后仍在。调查结束后用 **Restore egress** 撤销，详见 [恢复出站规则](/restore-egress)。
+
+## 客户端出站自检
+
+客户端自带隐藏命令 `siren probe-egress`，观察一次向服务端的出站 TCP SYN，输出目的 IP、目的端口、源端口和 TCP 序列号，供基于云防火墙日志的出口发现使用（一键部署会在目标主机上自动调用）。加 `--json` 输出结构化证据。仅支持 Linux 和 Windows，且需要 root 或管理员权限。
+
+```bash title="目标主机"
+./siren probe-egress
+./siren probe-egress --json
+```
+
+<Callout title="命令行等价" type="info">
+  出站配置与恢复只有 WebUI 和 MCP 入口，没有对应的服务端 REPL 命令。
+</Callout>

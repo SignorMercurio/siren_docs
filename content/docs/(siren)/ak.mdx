@@ -14,7 +14,7 @@ import { Card, Cards } from "fumadocs-ui/components/card";
 当发现泄露的云上 AccessKey 时，可以通过 SIREN 调用 SOAR 剧本查询该 AccessKey 的云上调用历史，用于判断影响范围、确认可疑来源，并为止血和复盘提供证据。
 
 <Callout title="前置条件" type="info">
-  需要在控制主机上[设置 SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)。内部环境通常已预置凭证，可以直接使用。
+  需要在控制主机上[设置 SOAR 平台访问凭证](/server/prerequisites#soar-凭证)。内部环境通常已预置凭证，可以直接使用。
 </Callout>
 
 ## 使用方式
@@ -73,7 +73,7 @@ AccessKey 调查不绑定在线客户端，也不跟随 Project 视图切换。�
   <Card title="Artifacts" href="/webui#artifacts">
     查看服务端工作目录中的 Markdown 调查报告
   </Card>
-  <Card title="凭证设置" href="/credential#设置-soar-平台访问凭证">
+  <Card title="凭证设置" href="/server/prerequisites#soar-凭证">
     配置 SOAR 平台访问凭证
   </Card>
 </Cards>

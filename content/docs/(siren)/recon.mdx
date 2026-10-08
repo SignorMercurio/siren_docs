@@ -13,7 +13,7 @@ import { Card, Cards } from "fumadocs-ui/components/card";
 Recon 不判断主机状态是否正常，也不执行白名单、黑名单、矿工、Webshell、Rootkit symbol 或不安全配置判定。原始环境变量、凭证、配置和历史记录会按采集范围写入快照；对已经读取的配置、凭据和供应链文本，Recon 还会在固定上限内记录可定位的内容形态事实，例如疑似访问密钥、令牌、密码赋值或 URL 用户信息。派生事实只保留模式 ID、行号、脱敏值和完整值的 SHA-256，不给出风险结论；是否存在风险仍由 [Agentic 应急响应](/air) 或其他分析流程结合上下文判断。
 
 <Callout title="前置条件" type="info">
-  目标主机需要具备足够权限运行 Recon：Linux 通常需要 root，Windows 需要管理员权限。快照可能包含凭证和其他敏感配置，应只在受控链路和目录中保存。本地模式会把 JSONL 与 Markdown 一起上传到 OSS，需要先[设置 OSS 访问凭证](/credential#设置-oss-访问凭证)；WebUI 和服务端 REPL 不需要 OSS。
+  目标主机需要具备足够权限运行 Recon：Linux 通常需要 root，Windows 需要管理员权限。快照可能包含凭证和其他敏感配置，应只在受控链路和目录中保存。本地模式会把 JSONL 与 Markdown 一起上传到 OSS，需要先[设置 OSS 访问凭证](/server/prerequisites#oss-凭证)；WebUI 和服务端 REPL 不需要 OSS。
 </Callout>
 
 ## 使用方式

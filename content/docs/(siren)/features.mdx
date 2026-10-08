@@ -12,12 +12,12 @@ SIREN 的功能可以按应急响应流程理解：接入目标主机，收集�
 ## 核心工作流
 
 <Cards>
-    <Card title="本地与远程模式" icon={<Radio />} href="/index#模式选择">本地模式适合离线单机排查；远程模式通过 SIREN Server 管理在线客户端</Card>
+    <Card title="本地与远程模式" icon={<Radio />} href="/onboard">本地模式适合离线单机排查；远程模式通过 SIREN Server 管理在线客户端</Card>
     <Card title="自动化信息收集" icon={<Info />} href="/recon">生成有明确范围和上限的 JSONL 主机快照与派生 Markdown</Card>
     <Card title="服务端 REPL" icon={<Terminal />} href="/remote">在控制主机终端管理客户端、执行命令和打开 Shell</Card>
     <Card title="Web 控制台" icon={<LayoutDashboard />} href="/webui">通过浏览器管理 Projects、Clients、Shells、Investigations、Files、Artifacts 和 Reports</Card>
-    <Card title="Projects 工作区" icon={<FolderKanban />} href="/webui#projects">按应急响应项目隔离客户端、操作目标、AIR 工作目录和取证目录</Card>
-    <Card title="部署与放行" icon={<Rocket />} href="/index#内部环境通过云助手一键部署">通过云助手部署客户端，或使用 `allow` 放行目标主机出口 IP</Card>
+    <Card title="Projects 工作区" icon={<FolderKanban />} href="/projects">按应急响应项目隔离客户端、操作目标、AIR 工作目录和取证目录</Card>
+    <Card title="部署与放行" icon={<Rocket />} href="/onboard/provisioning">通过云助手部署客户端，或使用 `allow` 放行目标主机出口 IP</Card>
 </Cards>
 
 ## 自动化信息收集
@@ -57,7 +57,7 @@ SIREN 把客户端文件系统、服务端取证目录和报告编辑分成不�
     <Card title="文件管理" icon={<FileText />} href="/analysis/upload">了解 Web 控制台文件管理能力，以及本地模式和服务端 REPL 的 upload 命令</Card>
     <Card title="Dossier 报告编辑" icon={<BookOpen />} href="/dossier">编辑 Markdown 应急报告、保存粘贴图片，并导出 PDF 或 HTML 报告</Card>
     <Card title="本地 Recon artifacts" icon={<FileText />} href="/recon#查看数据">本地模式生成权威 JSONL 与派生 Markdown，也可按配置上传到 OSS</Card>
-    <Card title="Project 取证目录" icon={<FolderKanban />} href="/webui#projects">Project 视图下的 Recon、AIR、Artifacts 和报告文件会落到对应项目目录</Card>
+    <Card title="Project 取证目录" icon={<FolderKanban />} href="/projects">Project 视图下的 Recon、AIR、Artifacts 和报告文件会落到对应项目目录</Card>
 </Cards>
 
 ## AI、MCP 与插件
@@ -79,7 +79,7 @@ SIREN 把客户端文件系统、服务端取证目录和报告编辑分成不�
 
 <Cards>
     <Card title="配置文件" icon={<FileEdit />} href="/config">配置 Recon Profile、OSS、通信端口、Web 控制台、MCP、AIR 和插件市场</Card>
-    <Card title="凭证设置" icon={<Lock />} href="/credential">设置 OSS、SOAR 和 Alibaba Cloud SDK 凭证，避免把密钥写进配置文件</Card>
-    <Card title="关联基础设施" icon={<Cloud />} href="/infra">确认 OSS、SOAR、Dossier、AI CLI、Web 控制台和 MCP 的依赖关系</Card>
+    <Card title="凭证设置" icon={<Lock />} href="/server/prerequisites">设置 OSS、SOAR 和 Alibaba Cloud SDK 凭证，避免把密钥写进配置文件</Card>
+    <Card title="关联基础设施" icon={<Cloud />} href="/server/prerequisites">确认 OSS、SOAR、Dossier、AI CLI、Web 控制台和 MCP 的依赖关系</Card>
     <Card title="通信协议" icon={<Radio />} href="/protocol">了解客户端和服务端之间的 TLS 主通道、文件传输、Shell、端口转发和插件消息</Card>
 </Cards>

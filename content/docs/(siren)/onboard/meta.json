@@ -1,0 +1,4 @@
+{
+  "title": "接入主机",
+  "pages": ["index", "provisioning", "egress", "manual"]
+}

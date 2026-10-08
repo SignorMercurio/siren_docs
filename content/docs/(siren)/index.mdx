@@ -1,201 +1,117 @@
 ---
 title: 快速开始
-description: 快速上手 SIREN
+description: 从部署服务端到完成第一次排查
 icon: Rocket
 ---
 
-import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
-import { Info, LayoutDashboard, Settings, Terminal } from 'lucide-react';
+import { Step, Steps } from "fumadocs-ui/components/steps";
+import { Brain, Cable, Server, Workflow } from 'lucide-react';
 
-按本页顺序操作，可以完成 SIREN Server 和客户端安装，并开始第一次排查。
+SIREN 由一台控制主机上的 SIREN Server 和装在目标主机上的客户端组成。日常操作都在浏览器里的 Web 控制台完成：接入主机、打开 Shell、运行 Recon、启动 Agentic IR、查看证据和编辑报告。
 
-## 模式选择
-
-SIREN 支持本地模式和远程模式。多数应急场景建议使用远程模式；只有目标主机网络隔离，或明确要求数据不离开目标主机时，才优先使用本地模式。
-
-| 模式 | 适合场景 | 你需要准备 |
-| --- | --- | --- |
-| 本地模式 | 单机、离线、无法连接控制主机，或数据不允许传出 | 登录目标主机并安装 SIREN |
-| 远程模式 | 多主机排查、统一管理客户端，或需要 Web 控制台、Shell、Files、Artifacts、AIR、Project | 一台控制主机，目标主机能够访问控制主机 |
-
-<Callout title="选择建议" type="info">
-  如果你不确定该选哪种模式，先使用远程模式。远程模式可以通过 SIREN Server 管理多个客户端，并同时使用服务端 REPL、Web 控制台和 MCP。
-</Callout>
-
-## 服务端部署（可选）
-
-仅远程模式需要部署服务端。本地模式可以跳过本节，直接进入“客户端部署”。
+按下面四步可以完成第一次排查。
 
 <Callout title="内部预部署环境" type="info">
-  内部环境通常已完成控制主机、SOAR 凭证和外部工具配置。已有可用控制主机时，可以直接从“客户端部署”开始；内部地址见 [内部文档](https://aliyuque.antfin.com/ykozrq/puiz2d/mktg38agsx5bfz9v)。
+  内部环境通常已完成控制主机、SOAR 凭证和外部工具配置。已有可用控制主机时，直接从第 2 步开始；内部地址见 [内部文档](https://aliyuque.antfin.com/ykozrq/puiz2d/mktg38agsx5bfz9v)。
 </Callout>
 
-<Accordions>
-  <Accordion title="服务端部署">
-    准备一台控制主机，并确认以下条件：
+<Steps>
+<Step>
 
-    - 目标主机和操作者都能够访问控制主机的主 TLS 端口，默认是 `443`
-    - 首次安装时控制主机需要提供 `openssl`，用于生成该主机独有的初始自签证书
-    - 如需在服务端 REPL 中使用交互式 Shell，控制主机需安装 tmux；只使用 Web 控制台的 Shell 时不需要 tmux
+### 部署服务端
 
-    使用 root 账号复制并运行下面的命令：
+在控制主机上用 root 运行安装脚本，创建 Web 控制台账号，并把两个不同的 MCP 凭证写入工作目录下的 `.env`：
 
-    ```bash title="控制主机"
-    curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren_server.sh | sh
-    ```
-
-    服务端安装包不包含 TLS 私钥。首次安装会在控制主机的 `/opt/siren/certs/` 生成仅覆盖 `localhost` 和 `127.0.0.1` 的初始自签证书；再次运行安装器升级时，已有 `server_config.yaml` 和证书均会保留。需要通过公开域名访问 WebUI 时，请在启动前换成覆盖该域名且受浏览器信任的证书，并更新 `server_config.yaml` 中的 `cert` / `key`。
-
-    首次启动前，创建 Web 控制台账号，并在服务端环境中设置两个不同的 MCP 凭证。默认配置启用了 MCP，缺少任一凭证或两者相同时，服务端会拒绝启动。随后启动服务端，并保持进程运行：
-
-    ```bash title="控制主机"
-    cd /opt/siren
-    ./siren_server user add admin
-    export SIREN_MCP_ADMIN_TOKEN='<随机字符串>'
-    export SIREN_MCP_RAVEN_TOKEN='<另一个随机字符串>'
-    ./siren_server
-    ```
-
-    凭证可以用 `openssl rand -hex 32` 生成。请保存在受保护的服务环境中，不要写入 `server_config.yaml` 或项目文件。不使用 MCP 和 AIR 时，也可以在 `server_config.yaml` 中设置 `mcp.enabled: false`，但 AIR 通过 MCP 调用 SIREN 工具，关闭后 AIR 会话无法操作客户端。
-
-    SIREN Server 默认在同一个 `443` TLS 端口接收客户端连接，并提供 [Web 控制台](/webui) 和 [MCP 服务](/mcp)。浏览器访问需要证书覆盖服务端域名；使用 WebUI AIR 时，还要将 `webui.publicURL` 设置为该域名的 HTTPS Origin，并在控制主机上把该域名解析到本机的非回环内网地址。详见 [配置文件](/config)。
-
-    <Callout title="按需配置" type="info">
-      需要在 Web 控制台中编辑报告时，部署 [Dossier](/dossier/deploy)；需要按事件隔离客户端和取证目录时，配置 `webui.projectsBaseDir` 并使用 [Projects](/webui#projects)。这些配置不影响客户端连接和 Recon。
-    </Callout>
-
-  </Accordion>
-</Accordions>
-
-
-## 客户端部署
-
-<Callout title="Windows 系统要求" type="info">
-  Windows 客户端最低支持 Windows 7 SP1 或 Windows Server 2008 R2 SP1，并需要 PowerShell 5.1。安装脚本会自动为旧系统选择兼容包，无需手工判断系统版本。
-</Callout>
-
-### 内部环境：通过云助手一键部署
-
-<Callout title="前置条件" type="info">
-  目标主机需要是阿里云 ECS，且云助手状态正常。控制主机还需要配置 [SOAR 平台访问凭证](/credential#设置-soar-平台访问凭证)；内部预部署环境通常已完成该配置。
-</Callout>
-
-在 SIREN Server 中运行：
-
-```bash title="SIREN Server"
->>> deploy <Alibaba Cloud UID> <ECS Instance ID> [Public IP]
+```bash title="控制主机"
+curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren_server.sh | sh
+cd /opt/siren
+./siren_server user add admin
+umask 077
+cat > .env <<EOF
+SIREN_MCP_ADMIN_TOKEN=$(openssl rand -hex 32)
+SIREN_MCP_RAVEN_TOKEN=$(openssl rand -hex 32)
+EOF
 ```
 
-如需部署多台 ECS，使用批量部署命令。单次支持 2-20 台：
+然后在 tmux 中启动服务端。服务端的终端一旦关闭，服务端也会退出，所以不能直接交给 systemd：
 
-```bash title="SIREN Server"
->>> deploy-batch <Alibaba Cloud UID> <instanceId[,publicIp[,note]]>...
+```bash title="控制主机"
+tmux new -s siren
+cd /opt/siren && ./siren_server
 ```
 
-目标格式为 `instanceId[,publicIp[,note]]`。只填写备注时，使用 `instanceId,,note`。
+默认配置启用了 MCP，缺少任一凭证或两者相同时服务端会拒绝启动。证书、`webui.publicURL`、`egress.rules` 和各项依赖见 [安装服务端](/server) 与 [前置条件与凭证](/server/prerequisites)。
 
-部署命令会完成以下操作：
+</Step>
+<Step>
 
-1. 从 SOAR 平台读取目标主机的地域、操作系统和出口 IP
-2. 放行目标主机访问 SIREN Server
-3. 校验并安装匹配系统架构的 SIREN 客户端；已有健康安装会直接复用
-4. 最多等待 30 秒，客户端连接成功后返回实际 Client ID
+### 登录 Web 控制台
 
-看到 `connected as client #<Client ID>` 才表示部署成功。安装失败、启动失败或等待超时都会返回明确错误。
+浏览器打开 `https://<SIREN Server 域名>`，用刚创建的账号登录。左侧导航按应急流程分组：**Clients** 和 **Agentic IR** 用于响应，**Shells**、**Files**、**Investigations** 用于手工排查，**Artifacts** 和 **Reports** 保存证据与报告。各页面的位置和通用操作见 [WebUI 导览](/webui)。
 
-<Callout title="共享出口 IP" type="info">
-  多个部署目标共享同一个出口 IP 时，SIREN 会使用安装后返回的客户端稳定身份精确关联每台主机，不会按 IP 猜测。稳定身份缺失、冲突或来源 IP 不一致时，目标会进入 `manual_required`；请在 Clients 列表中核对后手工设置 Project 和 Note，不要直接重复部署。
-</Callout>
+需要按事件隔离主机和取证文件时，先在侧栏顶部的范围菜单中创建并切换到一个 [Project](/projects)。之后接入的主机会自动归属到该 Project。
 
-<Callout title="出口 IP 获取失败时" type="info">
-  少数情况下 SOAR 无法返回目标主机的公网出口 IP。此时可在第三个参数手动传入出口 IP，SIREN 会跳过自动探测、直接使用该 IP 放行访问：
+</Step>
+<Step>
 
-  ```bash title="SIREN Server"
-  >>> deploy user123 i-1234567890abcdef0 203.0.113.10
-  ```
+### 接入第一台主机
 
-  目标主机出口 IP 可以在目标主机上通过 `curl ifconfig.co/ip` 获取。
-</Callout>
+打开 **Clients** 页面，在 **Provisioning** 区域选择接入方式：
 
-### 手动部署
+- **阿里云 ECS**：选择 **Deploy SIREN**，填写 Alibaba Cloud UID，每行一个 Instance ID。SIREN 通过云助手安装客户端、放行网络，并以客户端实际连上服务端为成功标准。详见 [一键部署](/onboard/provisioning)。
+- **其他主机**：先用 **Allow access** 放行目标主机的公网出口 IP，再登录目标主机运行安装脚本并启动客户端。详见 [手动安装客户端](/onboard/manual)。
 
-登录目标主机，复制并运行对应系统的安装命令。Linux 需要 root 权限，Windows 需要以管理员身份打开 PowerShell。手动安装不会自动启动客户端。
+客户端连接后会出现在 Clients 列表中。不同场景的选择建议见 [选择接入方式](/onboard)。
+
+</Step>
+<Step>
+
+### 开始排查
+
+在 Clients 列表中找到目标主机，可以：
+
+- 打开行菜单选择 **Recon**，在 Investigations 中选择 Profile 后点击 **Start Recon**，收集系统基线快照。详见 [Recon](/recon)。
+- 进入 **Agentic IR**，选择 Provider 和 **Event** 模式，填写 UID 与告警 ID 后启动，让 Agent 通过 SIREN 工具在主机上排查。详见 [Agentic 应急响应](/air)。
+- 进入 **Shells** 打开交互式终端，或在 **Files** 中浏览和下载可疑文件。
+
+结果保存在 **Artifacts** 中。排查结束后，按 [痕迹清除](/misc/clean) 和 [恢复出站规则](/restore-egress) 收尾。
+
+</Step>
+</Steps>
+
+## 本地模式
+
+目标主机无法连接控制主机，或要求数据不离开主机时，可以只在目标主机上安装客户端并直接运行 Recon，不需要服务端：
 
 ```bash tab="Linux"
 curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sh
+cd /opt/siren
+./siren recon
 ```
 
 ```powershell tab="Windows"
 iwr -Uri 'https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.ps1' -UseBasicParsing | iex
-```
-
-#### 本地模式
-
-安装完成后，在目标主机运行一次 Recon：
-
-```bash tab="Linux"
-cd /opt/siren
-./siren recon                 # default Profile
-./siren recon --profile quick # 跳过 file 模块
-```
-
-```powershell tab="Windows"
 Set-Location C:\Windows\Temp\siren
-.\siren.exe recon --profile quick
+.\siren.exe recon
 ```
 
-#### 远程模式
-
-先确保 SIREN Server 的客户端连接端口允许目标主机的出口 IP 访问。内部环境可以在 SIREN Server 中运行：
-
-```bash title="SIREN Server"
->>> allow <Victim IP>
-```
-
-目标主机出口 IP 可以通过 `curl ifconfig.co/ip` 获取。放行后，在目标主机启动客户端：
-
-```bash tab="Linux"
-cd /opt/siren
-./siren client -s <SIREN Server IP> -p 443
-```
-
-```powershell tab="Windows"
-Set-Location C:\Windows\Temp\siren
-.\siren.exe client -s <SIREN Server IP> -p 443
-```
-
-如果修改过客户端连接端口，请将 `443` 替换为实际端口。保持客户端进程运行，SIREN Server 出现 Client ID 后即可开始排查。
-
-## 开始第一次排查
-
-远程模式下，客户端连接后可以从 Web 控制台或服务端 REPL 开始排查。本地模式的 Recon 结果会直接显示在目标主机终端中。
-
-```text tab="Web 控制台"
-打开 https://<SIREN Server hostname>
-进入 Clients，选择客户端
-进入 Investigations，启动 Recon
-```
-
-```bash tab="服务端 REPL"
->>> ls
->>> recon <Client ID> [Profile]
-```
+本地模式只能使用 Recon、进程分析、上传和清理等客户端命令，没有 Web 控制台、Shell、Agentic IR 和 Project。详见 [Recon](/recon)。
 
 ## 下一步
 
 <Cards>
-  <Card title="自动化信息收集" href="/recon" icon={<Info />}>
-    查看 Recon 的 Web 控制台、服务端 REPL 和本地模式用法
+  <Card title="安装服务端" href="/server" icon={<Server />}>
+    证书、域名、常驻运行与升级
   </Card>
-  <Card title="Web 控制台" href="/webui" icon={<LayoutDashboard />}>
-    通过浏览器管理客户端、Shell、Files、Artifacts、AIR 和 Project
+  <Card title="选择接入方式" href="/onboard" icon={<Cable />}>
+    一键部署、手动安装和本地模式的区别
   </Card>
-  <Card title="服务端 REPL" href="/remote" icon={<Terminal />}>
-    使用命令行管理客户端并执行远程排查命令
+  <Card title="Agentic 应急响应" href="/air" icon={<Brain />}>
+    让 Claude Code、Codex、Qoder 或 Pi 协助排查
   </Card>
-  <Card title="配置文件" href="/config" icon={<Settings />}>
-    调整端口、Web 控制台、Dossier、Project 和 MCP 配置
+  <Card title="核心概念" href="/concepts" icon={<Workflow />}>
+    Client、Project、Artifacts、Reports 等概念的关系
   </Card>
 </Cards>

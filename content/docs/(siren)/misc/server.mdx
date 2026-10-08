@@ -19,7 +19,7 @@ SIREN Server REPL 用于管理在线客户端、下发远程操作，以及处�
 | --- | --- | --- | --- |
 | `ls` | `ls` | 列出所有已连接客户端 | [远程模式](/remote) |
 | `note` | `note <Client ID> [Note]` | 设置或清空客户端备注 | [远程模式](/remote) |
-| `allow` | `allow <IP>` | 放行受害主机出口 IP 访问 SIREN Server | [快速开始](/index#手动部署) |
+| `allow` | `allow <IP>` | 放行受害主机出口 IP 访问 SIREN Server | [出站与入站放行](/onboard/egress) |
 | `deploy` | `deploy <UID> <Instance ID> [Public IP]` | 通过云助手部署客户端 | [快速开始](/index) |
 | `deploy-batch` | `deploy-batch <UID> <instanceId[,publicIp[,note]]>...` | 批量部署 2-20 台客户端 | [快速开始](/index) |
 | `shell` | `shell <Client ID>` | 启动交互式远程 Shell | [远程模式](/remote#远程命令执行) |
@@ -63,7 +63,7 @@ total 8
 
 ## 设置环境变量
 
-使用 `env` 命令设置当前 SIREN Server 进程的环境变量，常用于临时配置[访问凭证](/credential)。变量值里可以包含 `=`。
+使用 `env` 命令设置当前 SIREN Server 进程的环境变量，常用于临时配置[访问凭证](/server/prerequisites)。变量值里可以包含 `=`。
 
 ```bash title="SIREN Server"
 >>> env SOAR_ACCESS_KEY_ID=<YOUR_ACCESS_KEY_ID>

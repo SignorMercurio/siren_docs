@@ -19,7 +19,7 @@ SIREN 客户端与服务端启动时都会读取 YAML 配置文件。找不到�
 部分命令行参数会覆盖对应配置项。客户端远程模式可用 `siren client -s/-p` 指定服务端地址和端口；服务端可用 `siren_server -l/-p --cert --key --webui-dossier-dir --webui-projects-base-dir` 覆盖常用启动项。
 
 <Callout title="敏感信息" type="warn">
-  不要把 AccessKey、API Key 等敏感凭证写入配置文件。OSS 与 SOAR 凭证均通过环境变量读取，详见[凭证设置](/credential)。
+  不要把 AccessKey、API Key 等敏感凭证写入配置文件。OSS 与 SOAR 凭证均通过环境变量读取，详见[凭证设置](/server/prerequisites)。
 </Callout>
 
 ## 客户端配置
@@ -166,7 +166,7 @@ air:
 | `mcp.enabled` | bool | `true` | 是否启用 [MCP 服务](/mcp)，独立于 `webui.enabled` |
 | `mcp.runOutputMode` | string | `auto` | MCP `run` 默认输出模式：`auto` 对超过 8 KiB 的结果返回可恢复首尾预览，`full` 在 50 KiB 内返回完整结果，超出时仍返回预览；单次调用可用 `output_mode` 覆盖 |
 | `mcp.cmdBlacklist` | list | 见 [MCP 集成](/mcp#命令黑名单) | MCP `run` 工具的命令黑名单，值为正则表达式列表 |
-| `air.provider` | string | `codex` | WebUI AIR 默认 Provider，可选 `codex`、`claude`、`qoder` 或 `pi`；页面中也可在每次启动会话时选择 |
+| `air.provider` | string | `codex` | 浏览器所选 Provider 不可用时回退使用的 Provider，可选 `codex`、`claude`、`qoder` 或 `pi`。浏览器默认沿用上次选择或 Settings 中固定的 Provider |
 | `air.maxSessions` | int | `20` | WebUI GUI 与 Terminal 合计最大并发会话数；适用于 Manual、Custom、Event 和 Resume，设为 `0` 或负数表示不限制 |
 | `air.replayBufferBytes` | int | `4194304` | 每个会话用于断线重连的回放预算；Terminal 按原始输出字节、GUI 按序列化事件字节计算，设为 `0` 或负数时使用默认的 4 MiB |
 | `air.prompt` | string | 见示例配置 | 告警事件模式下的 prompt 模板，依次填入 `%s` UID、`%s` 安全中心告警 ID、`%d` Client ID（告警 ID 即 WebUI Event 模式中的安全中心告警 ID，详见 [Agentic 应急响应](/air)） |

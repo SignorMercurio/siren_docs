@@ -1,178 +1,44 @@
 ---
-title: Web 控制台
-description: 通过浏览器管理 SIREN 远程模式
+title: WebUI 导览
+description: Web 控制台的导航、范围切换和各页面用途
 icon: LayoutDashboard
 ---
 
-import { Banner } from 'fumadocs-ui/components/banner';
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
-import { Step, Steps } from "fumadocs-ui/components/steps";
-import { Users, Terminal, Brain, Files, FolderKanban, FolderTree, Lock, Plug, Key, BookOpenText, ScrollText, Settings } from 'lucide-react';
+import { Brain, Plug, ServerCog, ShieldCheck } from 'lucide-react';
 
-<Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
+Web 控制台是 SIREN Server 的浏览器入口，也是日常使用 SIREN 的主要方式。它与客户端连接和 MCP 共用服务端的 TLS 端口，浏览器直接访问 `https://<SIREN Server 域名>`。安装、证书和端口见 [安装服务端](/server)，账号与鉴权见 [账号与安全边界](/server/security)。
 
-Web 控制台是 SIREN Server 的浏览器入口。它覆盖日常远程操作：Project 工作区、客户端列表、浏览器 Shell、Agentic IR、调查任务、文件管理、Artifacts、服务端日志、Dossier 和全局设置。需要在控制主机终端里直接操作时，可以改用 [服务端 REPL](/remote)。
+## 导航
 
-桌面侧栏默认显示图标，悬停或键盘聚焦时可查看名称。使用侧栏顶部的展开／折叠按钮切换导航宽度：折叠后悬停顶部的 SIREN 标志即可展开；也可以按 Cmd+B（macOS）或 Ctrl+B 切换，焦点在输入框或终端内时快捷键不生效。选择会保存在当前浏览器；移动端继续使用完整抽屉导航。
+左侧导航按应急流程分为四组：
 
-## 启动与访问
+| 分组 | 页面 | 用途 |
+| --- | --- | --- |
+| **Respond** | [Clients](/clients)、[Agentic IR](#agentic-ir) | 接入和管理主机，启动 AI 辅助排查 |
+| **Tools** | [Shells](#shells)、[Files](#files)、[Investigations](#investigations) | 手工排查：交互式终端、客户端文件、Recon / 进程分析 / AccessKey 调查 |
+| **Evidence** | [Artifacts](#artifacts)、[Reports](#reports) | 服务端取证目录和 Dossier 应急报告 |
+| **System** | [Logs](#logs) | 服务端运行日志 |
 
-启用 `webui.enabled` 时，Web 控制台会随 `siren_server` 启动，并与远程客户端和 MCP 共用主 TLS 监听端口（默认 `0.0.0.0:443`）：
+导航之外还有两个入口：
 
-```bash title="控制主机"
-./siren_server
-```
+- **范围菜单**：侧栏顶部的 **Project scope**，用于在 Global 视图和各 Project 视图之间切换，并通过 **Manage projects** 打开 Projects 页面。范围对各页面的影响见 [Project 范围](/projects)。
+- **账号菜单**：侧栏左下角，提供 [Settings](#settings)、Docs、Feedback、退出登录和当前版本号。
 
-启动后访问：
+桌面侧栏默认只显示图标，悬停或键盘聚焦时显示名称。点击侧栏顶部的按钮，或按 Cmd+B（macOS）/ Ctrl+B 可以展开或折叠；焦点在输入框或终端内时快捷键不生效。选择保存在当前浏览器，移动端使用抽屉导航。
 
-```
-https://<SIREN Server hostname>
-```
+每个页面都有自己的 URL，例如 `#/investigations/recon` 或 `#/artifacts/<路径>?project=<id>`。刷新、浏览器前进后退和分享链接都会回到同一页面、同一工具标签、同一 AIR 会话或同一选中文件，浏览器标签页标题也随页面变化。
 
-<Callout title="端口统一" type="info">
-  Web 控制台、WebSocket、[MCP 服务](/mcp)和远程客户端共用顶层 `listen` / `port`。浏览器访问根路径，MCP 客户端访问 `/mcp`。WebUI 与 MCP 的启停开关仍相互独立，分别是 `webui.enabled` 和 `mcp.enabled`。
-</Callout>
-
-## 账号鉴权
-
-Web 控制台使用 Session Cookie 鉴权。账号密码存储在 SQLite 数据库中，密码会先做 bcrypt 哈希，默认数据库路径是 `data/users.db`。
-
-<Callout title="安全注意" type="warn">
-  用户数据库不存在，或数据库里没有任何用户时，Web 控制台会关闭鉴权并允许匿名访问。部署到公网前必须先创建至少一个用户。
-</Callout>
-
-### 管理用户账号
-
-<Steps>
-<Step>
-
-#### 创建账号
-
-```bash title="控制主机"
-./siren_server user add <username>
-```
-
-执行后按提示输入两次密码。
-
-</Step>
-<Step>
-
-#### 列出账号
-
-```bash title="控制主机"
-./siren_server user list
-```
-
-</Step>
-<Step>
-
-#### 删除账号
-
-```bash title="控制主机"
-./siren_server user delete <username>
-```
-
-</Step>
-</Steps>
-
-<Callout title="数据库路径一致性" type="info">
-  `data/users.db` 默认相对当前工作目录解析。如果 `siren_server user add` 和 `siren_server` 在不同目录执行，可能会读写两份数据库。建议在 `server_config.yaml` 中配置绝对路径：
-
-  ```yaml
-  webui:
-    userDBPath: /opt/siren/data/users.db
-  ```
-
-  或者在 systemd unit 中设置 `WorkingDirectory`。
-</Callout>
-
-## 功能页面
-
-左侧导航按用途分为四组：**Respond**（Clients、Agentic IR）、**Tools**（Shells、Files、Investigations）、**Evidence**（Artifacts、Reports）和 **System**（Logs）。每个页面都有自己的 URL，例如 `#/investigations/recon` 或 `#/artifacts/<路径>?project=<id>`；刷新、浏览器前进后退和分享链接都会回到同一页面、同一工具标签、同一 AIR 会话或同一选中文件，浏览器标签页标题也随页面变化。
-
-<Cards>
-  <Card title="Projects" icon={<FolderKanban />}>按应急响应项目隔离客户端、Artifacts 和调查上下文</Card>
-  <Card title="Clients" icon={<Users />}>查看在线客户端，编辑备注，执行 SOAR 放行、出口配置、部署和清理</Card>
-  <Card title="Shells" icon={<Terminal />}>在浏览器中打开多标签交互式终端</Card>
-  <Card title="Agentic IR" icon={<Brain />}>启动 Codex / Claude / Pi / Qoder 辅助排查会话</Card>
-  <Card title="Investigations" icon={<Key />}>执行 AccessKey 调查、Recon 和进程分析</Card>
-  <Card title="Files" icon={<Files />}>浏览、预览、下载和上传客户端文件</Card>
-  <Card title="Artifacts" icon={<FolderTree />}>管理服务端取证文件和报告</Card>
-  <Card title="Logs" icon={<ScrollText />}>查看服务端运行日志，按级别、组件和关键词过滤</Card>
-  <Card title="Reports" icon={<BookOpenText />}>列出当前范围内的 Dossier 应急报告，并在 Dossier 中打开编辑</Card>
-  <Card title="Settings" icon={<Settings />}>调整浏览器偏好，查看服务端与 AIR Provider 状态</Card>
-</Cards>
-
-### Projects
-
-Project 是应急响应工作区，用于把客户端、Artifacts 目录和操作目标放到同一个上下文中。每个 Project 创建时会固定一个服务端目录，例如 `/opt/siren/my-project`。
-
-Projects 页面不在左侧导航里：点击侧边栏顶部的 **Project scope**，在弹出的范围菜单中选择 **Manage projects** 进入。同一个菜单用于在 Global 视图和各 Project 视图之间切换。
-
-Projects 页面支持：
-
-- 创建 Project，并可指定目录名；未指定时会从 Project 名称中的文字和数字自动生成。目录名只能是 basename，最终目录必须位于 `webui.projectsBaseDir` 下。每个 Project 会自动获得稳定的辨识颜色，并统一显示在 Projects、侧边栏范围和 Clients 归属标记中。
-- 复制 Project 目录路径，便于在控制主机上查看或归档。
-- 重命名 Project。重命名只修改显示名，不移动目录。
-- 删除 Project。删除只移除元数据并解除客户端归属，目录和文件会保留。
-- 在 Global 视图和 Project 视图之间切换。Project 视图只显示当前 Project 的客户端和取证目录。
-
-客户端最多归属到一个 Project。未归属客户端只在 Global 视图中出现；进入 Project 视图后，Clients、Shells、Agentic IR、Files 和 Investigations 都只允许选择当前 Project 的客户端。
-
-<Callout title="部署归属" type="info">
-  在 Project 视图下通过 Web 控制台单机或批量部署 SIREN 客户端时，SIREN 会同时核对活动部署目标、来源 IP 和客户端稳定身份；多台主机共享同一个出口 IP 时也能分别归属到当前 Project。无论从 Web 控制台、服务端 REPL 还是 MCP 发起部署，未填写 Note 时都不会自动用 ECS Instance ID 填充备注；批量部署显式填写 Note 时，会在自动关联成功且客户端尚无备注时保存该内容。已有备注始终保留，显式填写 Note 而客户端已有备注时会显示 warning。服务端 REPL 部署不带 Project 上下文，仍保持全局行为。
-</Callout>
+## 各页面
 
 ### Clients
 
-Clients 页面对应服务端 REPL 的 `ls`、`note`、`allow`、`deploy` 和 `clean`。每行展示一个在线客户端，支持：
+在线客户端列表，以及 **Provisioning** 中的部署、放行和出站恢复操作。见 [Clients 页](/clients) 和 [选择接入方式](/onboard)。
 
-- 查看 ID、系统、Instance ID、Private IP、Project 和备注列；悬停或聚焦 Instance ID 单元格会展开主机卡片，显示主机名、连接地址和完整内网 IP 列表，可直接从卡片中复制；同时展示客户端版本。客户端未上报版本时显示 **Not reported**。
-- 按 ID、Instance ID、IP、主机名、Project 或备注筛选，并按主要字段排序。
-- 多选客户端后批量分配 Project 或执行清理。
-- 编辑备注。备注绑定到客户端稳定身份，客户端重连后会自动恢复。
-- 客户端选择器优先显示备注；没有备注时显示 Instance ID，再回退到主机名。
-- 分配 Project。Global 视图中可以把客户端分配到某个 Project，或移回未归属状态。
-- 打开快捷入口。从客户端行可直接进入 Files 或 Process Analysis。
-- 没有在线客户端时，页面会显示三步引导：部署客户端、等待连接、从客户端行开始排查。
-- 在页内 **Provisioning** 中执行 **Allow access**、**Configure egress**、**Restore egress** 或 **Deploy SIREN**，每次输入 1–20 个目标。
-- 列表按设置的频率自动刷新，单机或批量部署结束后也会立即刷新一次。
-- 查看近期部署任务。页面刷新后仍可恢复当前进度和最近结果，进行中的任务每 2 秒更新一次。
-- 行操作菜单依次为 **Files → Recon → Process analysis → Clean & terminate**。Recon 会打开 Investigations 的 Recon 标签并选中该客户端，仍需选择 Profile 后手动执行。
-- 清理客户端。单个或批量清理都会要求输入确认短语后再执行 **Clean & Terminate**。下方 **Recent activity** 展示近期结果：等待回报、文件已清理、延迟删除、失败或未收到回报。记录在客户端下线后仍保留，刷新页面可恢复；最多保留全服务端最近 20 条，按发起时的 Project 过滤，服务端重启后清空。
+### Projects
 
-<Callout title="配置 SIREN 出方向" type="info">
-  对出方向默认拒绝的阿里云 ECS，可填写 UID 和 Instance ID 后点击 **Configure egress**。页内会展示即将应用的出方向规则，规则完全来自服务端必填配置 [`egress.rules`](/config#服务端配置)；示例配置包括：`47.111.170.208/32` TCP 443 用于连接 SIREN 服务端，`47.79.65.205/32` TCP 443 用于下载客户端，`100.100.0.0/16` 全流量用于访问阿里云基础服务。执行后会创建或复用独立的 SIREN 安全组并挂载到实例，不会移除已有安全组；页面会显示 SOAR 进度以及最终的安全组 ID 和地域。已有宽泛放行规则不会自动收回；使用自定义服务端监听端口时，应同步调整服务端的出方向规则配置。
-</Callout>
-
-<Callout title="恢复出站规则" type="info">
-  在 **Restore egress** 中选择服务端保存的记录，每次最多恢复 20 个实例。恢复会撤销本次新增的关联和规则，还原调整过的 Drop 优先级；本次创建的专用组仅在空闲且未被修改时删除。原有配置及后续人工修改不会被整份覆盖；检测到冲突会保留记录并说明原因。
-
-  多实例共用的 Drop 规则等最后一个依赖实例结束后才恢复。在此之前显示 **Waiting for shared rules**。恢复记录不依赖客户端在线，页面刷新或服务端重启后仍保留；未解决记录持续保留，已恢复记录保留最近 20 条。旧操作没有恢复记录时不支持自动还原。
-
-  恢复可能切断客户端回连，需要清理客户端时先执行 Clean，再手动恢复。Clean 回报文件已清理或已安排删除后，页面会为匹配的恢复记录提供快捷入口，不自动执行。仅当记录包含尚未确认结果的 SOAR 执行 ID 时，显示 **Recheck execution**，用于重新查询当前记录的执行结果，不检查网络连通性或重新提交修改。缺少执行 ID 时，页面会显示具体步骤并提示人工核对 SOAR 执行历史；明确被限流拒绝的提交会提示通过 Restore 处理此前已完成的变更。恢复前仍会核对同账号的未完成操作，遇到阻塞时显示对应实例和操作。恢复依据不完整时保留资源并提示人工检查。
-</Callout>
-
-<Callout title="Provisioning 输入与结果" type="info">
-  Allow access 每行填写一个客户端公网 IPv4 地址；Configure egress 和 Deploy SIREN 使用同一个 Alibaba Cloud UID，每行填写一个 Instance ID。部署可附带出口公网 IP 和备注，例如 `i-a`、`i-b,203.0.113.10`、`i-c,,web-1` 或 `i-d,203.0.113.11,db-1`。相同目标自动去重，同一实例的公网 IP 或备注冲突时需先修正。Allow access 和 Configure egress 逐项执行；部署默认并发 3 台，单个目标失败不会中断其他目标。
-</Callout>
-
-未填写出口 IP 时，部署先获取实例基本信息，再安装、启动客户端并执行一次最长 4 秒的连接探测。随后等待云防火墙日志，只有唯一确认公网出口后，才为该地址的 `/32` 和 SIREN 服务端口添加入方向规则。界面依次显示安装与探测、等待日志、放行和等待连接；日志一旦唯一匹配就立即放行，不等待固定窗口结束；日志迟迟未到时会超时失败。WebUI、REPL 和 MCP 使用同一流程。
-
-目标主机仍须能够下载客户端并向服务端发起连接。部署不会自动修改客户出方向策略。日志缺失、多个来源匹配、探测失败或身份校验失败时停止自动流程，失败信息会说明已经确认的安装状态。可填写经核对的出口 IPv4 重试，跳过自动发现。Windows 原生采集不可用的系统也应使用手填出口 IP，不需要安装第三方抓包驱动。
-
-<Callout title="动态出口" type="info">
-  单次探测只确认该次连接的出口。如果后续连接改用其他公网地址，客户端仍可能无法上线；SIREN 不会据此放行整个出口池。每次自动重试都会重新探测，不复用上次任务的证据。
-</Callout>
-
-操作结果逐项展示，重试只提交失败目标。部署成功以客户端实际连接为准；连接未确认或中途丢失部署结果时，先在 **Recent activity** 中核对，再决定是否重新部署。部署失败信息明确提示出口问题时，可以直接为相关目标 Configure egress。
-
-执行期间请保持浏览器页面打开。部署记录可在刷新页面后恢复；Allow access 的逐项结果仅保留在当前页面；Configure egress 和 Restore egress 的恢复记录保存于服务端，云端操作启动后不因浏览器断开而取消。Recent activity 合并展示近期部署和清理记录，进行中的记录优先排列；部署记录可展开查看日志。近期部署最多保留 20 次，终态记录最长保留 30 分钟，服务端重启后清空。
-
-<Callout title="需要手工确认客户端" type="warning">
-  客户端稳定身份缺失、冲突或与目标来源 IP 不一致时，SIREN 不会回退为按 IP 猜测，也不会写入无法确认的 Project 或 Note。部署会显示 `manual_required`，请在 Clients 列表中核对主机后手工设置；页面不会提供自动重试，以免重复部署。
-</Callout>
+按应急事件隔离客户端、AIR 工作目录和取证目录。见 [Project 范围](/projects)。
 
 ### Shells
 
@@ -236,6 +102,10 @@ Files 页面用于浏览在线客户端的本机文件系统。可以从左侧�
 ### Artifacts
 
 Artifacts 页面管理服务端取证目录。Global 视图使用 `siren_server` 工作目录；Project 视图使用当前 Project 创建时固定的目录。Recon 的权威 `*.recon.jsonl` 与派生 `*.md` 会同时出现；也可以管理 AIR、AccessKey 报告和从客户端拉取的取证文件。
+
+<Callout title="Global 根目录包含服务端文件" type="warn">
+  Global 视图的根目录就是服务端工作目录，除以点号开头的文件外都会列出，包括 `server_config.yaml`、`certs/` 中的私钥和 `data/` 中的账号库。任何已登录账号都能下载或删除这些文件，见 [账号的权限范围](/server/security#账号的权限范围)。
+</Callout>
 
 支持的操作：
 
@@ -311,48 +181,19 @@ Settings 不在左侧导航里，从左下角的账号入口打开。同一个�
   - Clients 列表刷新频率：5 秒到 1 分钟。标签页切到后台时轮询会自动暂停。
 - **Server**：只读信息，包括版本号、鉴权状态与当前用户、Dossier 目录，以及每个 Agentic IR Provider 实际可用的界面。Provider 不可用或只能用其中一种界面时，这里会直接给出原因，不用等到启动会话失败才发现。
 
-## 配置
-
-在 `server_config.yaml` 的 `webui` 段落配置：
-
-```yaml title="server_config.yaml"
-webui:
-  enabled: true                         # 是否启用 Web 控制台
-  publicURL: https://siren.example.com   # WebUI AIR 使用的 HTTPS Origin
-  userDBPath: /opt/siren/data/users.db  # 可选：用户数据库绝对路径
-  dossierDir: /opt/siren/dossier        # 可选：Dossier 编辑器文件目录
-  projectsBaseDir: /opt/siren/projects  # 可选：Project 目录创建基准路径
-
-mcp:
-  enabled: true                         # 是否启用 MCP 服务
-  runOutputMode: auto                  # run 长结果默认返回可恢复首尾预览
-```
-
-服务端顶层 `listen` / `port` 决定 Web 控制台、MCP 和远程客户端共用的 TLS 监听地址。`webui.publicURL` 只用于 WebUI AIR 注入 MCP 地址；它必须是证书覆盖的 HTTPS Origin，服务端本机应将该域名解析到本机的非 loopback 内网地址，不能指向 `127.0.0.1` 或 `::1`。完整配置项见 [配置文件](/config#服务端配置)。
-
-## 生产部署建议
-
-<Callout title="公网暴露场景" type="warn">
-  Web 控制台使用服务端主 TLS 端口。部署到公网时：
-
-  - 使用浏览器信任、且覆盖访问域名的证书
-  - 通过防火墙、安全组、VPN 或 ACL 限制主 TLS 端口的访问来源；`/mcp` 使用独立 Bearer 凭证，不使用 WebUI Session 鉴权
-  - 部署前必须创建至少一个用户账号，否则 Web 控制台不会启用鉴权
-</Callout>
-
 ## 相关内容
 
 <Cards>
-  <Card title="MCP 集成" icon={<Plug />} href="/mcp">
-    Web 控制台与 MCP 共享同一端口的架构说明
+  <Card title="安装服务端" icon={<ServerCog />} href="/server">
+    端口、证书、`webui.publicURL` 与升级
   </Card>
-  <Card title="配置文件" icon={<Lock />} href="/config#服务端配置">
-    完整的 Web 控制台配置项说明
-  </Card>
-  <Card title="Dossier" icon={<BookOpenText />} href="/dossier">
-    Dossier 部署、配置、语法和编辑流程
+  <Card title="账号与安全边界" icon={<ShieldCheck />} href="/server/security">
+    WebUI 账号、会话、登录锁定和公网暴露建议
   </Card>
   <Card title="Agentic 应急响应" icon={<Brain />} href="/air">
     了解 AIR 的完整工作流
+  </Card>
+  <Card title="MCP 集成" icon={<Plug />} href="/mcp">
+    外部 Agent 通过 MCP 调用 SIREN 工具
   </Card>
 </Cards>

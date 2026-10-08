@@ -52,7 +52,7 @@ GUI 固定提供以下常用命令：
 
 Claude 会补充其当前会话通过机器协议公布的命令，这些命令仅在空闲时执行。Qoder 的 Skills、插件、MCP prompts 和 workflows 可能触发模型推理，GUI 不把它们混入本地命令菜单；请在 Terminal 中使用。若 CLI 版本不支持某项 GUI 命令，只有该命令会失败，会话仍可继续。Terminal 仍是 Skills、更多 Provider 设置和其他高级斜杠命令的完整入口。
 
-GUI 输入框支持直接粘贴图片（如告警截图、拓扑图），每条消息最多 4 张、单张不超过 8 MiB，支持 png / jpeg / webp / gif。粘贴后以缩略图形式暂存，可单独移除，随消息一并发送给 Agent；会话时间线中以图片数量徽标呈现。Claude 与 Codex 支持图片，Qoder 以其 CLI 上报的能力为准；Pi 默认的 Qwen Aegis 不接受图片输入。
+GUI 输入框支持直接粘贴图片（如告警截图、拓扑图），每条消息最多 4 张、单张不超过 8 MiB，支持 png / jpeg / webp / gif。粘贴后以缩略图形式暂存，可单独移除，随消息一并发送给 Agent；会话时间线中以图片数量徽标呈现。Claude 与 Codex 支持图片，Qoder 以其 CLI 上报的能力为准，Pi 以当前模型声明的输入能力为准。
 
 需要集中查看长输出时，可点击侧栏分隔线上的箭头收起启动、Running 和 History 区域；再次点击即可恢复。刷新页面后侧栏总是展开，从 Clients 行内进入 Agentic IR 时也会自动展开。History 默认收起在侧栏底部，点击标题即可展开。
 

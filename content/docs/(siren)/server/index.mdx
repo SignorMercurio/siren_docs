@@ -1,0 +1,253 @@
+---
+title: 安装服务端
+description: 在控制主机上安装、启动、升级 SIREN Server
+icon: ServerCog
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Card, Cards } from "fumadocs-ui/components/card";
+import { Step, Steps } from "fumadocs-ui/components/steps";
+import { ListChecks, ShieldCheck, Settings } from 'lucide-react';
+
+SIREN Server（`siren_server`）运行在一台控制主机上，统一承载客户端连接、Web 控制台、MCP 和 Agentic IR。本页完成安装、首次启动和日常升级。只在单台主机上使用本地模式时不需要服务端，见 [选择接入方式](/onboard)。
+
+<Callout title="前置条件" type="info">
+  控制主机需要是 Linux x86_64，安装器写入 `/opt/siren`，默认监听特权端口 `443`，通常以 root 运行。首次安装需要 `openssl` 和 `curl`（或带 `timeout` 的 `wget`）。证书、账号、MCP 凭证、SOAR 凭证等各功能依赖的完整清单见 [前置条件与凭证](/server/prerequisites)。
+</Callout>
+
+<Callout title="内部预部署环境" type="info">
+  内部环境通常已完成控制主机、SOAR 凭证和外部工具配置，可以直接从 [选择接入方式](/onboard) 开始。内部地址见 [内部文档](https://aliyuque.antfin.com/ykozrq/puiz2d/mktg38agsx5bfz9v)。
+</Callout>
+
+## 安装与首次启动
+
+<Steps>
+<Step>
+
+### 运行安装脚本
+
+以 root 运行：
+
+```bash title="控制主机"
+curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren_server.sh | sh
+```
+
+安装脚本会下载 `siren_server.tar.gz`，校验 SHA-256 后安装到 `/opt/siren`：
+
+- `siren_server`：服务端二进制
+- `server_config.yaml`：配置文件，仅在不存在时写入
+- `certs/cert.pem`、`certs/key.pem`：仅在首次安装、且 `certs/` 和 `server_config.yaml` 都不存在时生成。这是本机独有的自签证书，只覆盖 `localhost` 和 `127.0.0.1`，有效期 10 年
+
+再次运行安装脚本只替换二进制，已有的配置和证书保持不变。
+
+</Step>
+<Step>
+
+### 修改配置
+
+编辑 `/opt/siren/server_config.yaml`，至少确认以下几项。完整配置项见 [配置文件](/config#服务端配置)。
+
+- `cert` / `key`：浏览器要通过域名访问时，换成覆盖该域名且受信任的证书，见下文 [更换证书](#更换证书)。
+- `webui.publicURL`：使用 Agentic IR 时必填，见下文 [webui.publicURL](#webuipublicurl)。
+- `egress.rules`：启用 WebUI 时必填。把 `siren_server_callback` 规则的 `destCidrIp` 和 `portRange` 改成本服务端的公网 IP（`/32`）和客户端连接端口，部署和出口发现都以这条规则为准。详见 [前置条件与凭证](/server/prerequisites#出站规则-egressrules)。
+
+</Step>
+<Step>
+
+### 创建 WebUI 账号
+
+```bash title="控制主机"
+cd /opt/siren
+./siren_server user add admin
+```
+
+按提示输入两次密码。命令会打印实际使用的数据库路径（默认 `/opt/siren/data/users.db`）。
+
+<Callout title="先建账号，再启动" type="warn">
+  服务端只在启动时检查用户库。启动时用户库不存在或没有任何用户，本次运行期间 Web 控制台都不鉴权，任何能访问端口的人都能直接操作。先创建账号再启动；如果已经以无账号状态启动，创建账号后必须重启服务端。详见 [账号与安全边界](/server/security#webui-账号)。
+</Callout>
+
+</Step>
+<Step>
+
+### 配置 MCP 凭证
+
+默认配置启用 MCP。服务端要求环境变量 `SIREN_MCP_ADMIN_TOKEN` 和 `SIREN_MCP_RAVEN_TOKEN` 均非空且互不相同，否则拒绝启动。Agentic IR 也依赖这两个凭证。最简单的做法是写入工作目录下的 `.env`：
+
+```bash title="控制主机"
+cd /opt/siren
+umask 077
+cat > .env <<EOF
+SIREN_MCP_ADMIN_TOKEN=$(openssl rand -hex 32)
+SIREN_MCP_RAVEN_TOKEN=$(openssl rand -hex 32)
+EOF
+```
+
+服务端启动时依次读取当前工作目录和二进制所在目录下的 `.env`，已在环境中存在的同名变量优先。不要把凭证写进 `server_config.yaml` 或 Project 目录。SOAR 凭证也可以放在同一个 `.env` 中，见 [SOAR 凭证](/server/prerequisites#soar-凭证)。
+
+</Step>
+<Step>
+
+### 在 tmux 中启动
+
+```bash title="控制主机"
+tmux new -s siren
+cd /opt/siren
+./siren_server
+```
+
+看到 `server listening` 后按 `Ctrl+B` 再按 `D` 分离会话，服务端继续运行。之后用 `tmux attach -t siren` 回到服务端终端。为什么必须保留终端，见 [保持服务端运行](#保持服务端运行)。
+
+</Step>
+<Step>
+
+### 打开 Web 控制台
+
+浏览器访问 `https://<控制主机域名或 IP>`，用刚才创建的账号登录。登录页提示 **Use the operator account issued for this server.**
+
+从左下角账号菜单打开 **Settings**，在 **Server** 一栏核对：
+
+- **Authentication** 显示 `Signed in as <用户名>`。如果显示 **Disabled (local access)**，说明本次启动没有启用鉴权，按上一步的提示处理。
+- **Dossier** 和 **AIR runtime** 显示可用状态。不可用时按提示处理，或参考 [部署 Dossier](/server/dossier)、[准备 AIR Provider](/server/air-providers)。
+
+接下来按 [选择接入方式](/onboard) 部署第一个客户端。
+
+</Step>
+</Steps>
+
+## 单一 TLS 端口
+
+服务端只监听一个 TLS 端口，由顶层 `listen` / `port` 决定，默认 `0.0.0.0:443`。所有入口共用这个端口，按 TLS 握手中的 ALPN 分流：
+
+| 连接方 | ALPN | 路径 |
+| --- | --- | --- |
+| 托管客户端 | `siren/1` | - |
+| 客户端为交互式 Shell（WebUI Shells、REPL `shell`）建立的连接 | `siren-shell/1` | - |
+| 浏览器（WebUI、WebSocket 终端） | `http/1.1` | `/`、`/api/...`、`/dossier/` |
+| MCP 客户端、AIR 会话 | `http/1.1` | `/mcp`、`/mcp/project/<id>` |
+
+未协商 ALPN 的连接按 HTTP 处理。`webui.enabled` 和 `mcp.enabled` 分别控制 WebUI 和 MCP，两者独立：关闭 WebUI 后 `/mcp` 仍在同一端口提供服务。
+
+因此只需对目标主机和操作者开放这一个端口。[端口转发](/portforward)是例外：`fwd` 会在服务端另开监听端口。
+
+<Callout title="不要在前面终止 TLS" type="warn">
+  客户端依赖服务端自己的 TLS 握手完成 ALPN 分流。如果在服务端前面放负载均衡或反向代理，只能做四层 TCP 透传；终止 TLS 后再转发 HTTP 会让客户端无法连接。
+</Callout>
+
+## 更换证书
+
+安装器生成的自签证书只覆盖 `localhost` 和 `127.0.0.1`，浏览器访问域名时会报证书错误。需要通过域名访问 WebUI 或使用 Agentic IR 时：
+
+1. 准备覆盖访问域名（以及 `webui.publicURL` 中域名）且受浏览器信任的证书和私钥。证书文件建议使用包含中间证书的完整链。
+2. 在 `server_config.yaml` 中把 `cert` / `key` 指向新文件，相对路径按服务端工作目录解析。
+3. 重启服务端。证书只在启动时加载。
+
+客户端不校验服务端证书链，所以更换证书不影响已部署的客户端；这一点带来的安全影响见 [账号与安全边界](/server/security#客户端与服务端之间)。
+
+## webui.publicURL
+
+Agentic IR 会话在控制主机本机启动 Provider CLI，并让它通过 `webui.publicURL` 访问 SIREN MCP。要求：
+
+- 值必须是绝对 HTTPS Origin，例如 `https://siren.example.com`，不能包含路径、query 或用户名密码。
+- 证书必须覆盖这个域名。
+- 在控制主机本机把该域名解析到本机的非回环内网地址，避免流量绕公网回流，也避免触发 MCP 的 localhost 保护。不能解析到 `127.0.0.1` 或 `::1`：
+
+```text title="控制主机 /etc/hosts"
+10.0.0.10  siren.example.com
+```
+
+其中 `10.0.0.10` 应替换为控制主机网卡上实际配置的内网地址。
+
+未设置或格式不对时，服务端照常启动，但启动 Agentic IR 会话会失败并提示 `webui.publicURL`。
+
+## 工作目录与数据
+
+服务端的相对路径都按启动时的当前工作目录解析。请始终在 `/opt/siren` 中启动 `siren_server` 和执行 `siren_server user` 命令，否则会读写另一份配置、用户库和状态文件。
+
+| 路径（相对工作目录） | 内容 |
+| --- | --- |
+| `server_config.yaml` | 服务端配置；也可用 `-c` 指定，或放在 `config/` 子目录 |
+| `certs/` | 默认 TLS 证书和私钥 |
+| `.env` | 启动时加载的环境变量，例如 MCP 和 SOAR 凭证 |
+| `data/users.db` | WebUI 账号库，可用 `webui.userDBPath` 改到其他位置 |
+| `data/projects.json` | Project 元数据 |
+| `data/client_ids.json` | 客户端稳定身份与 Client ID 的对应关系，使客户端重连后保持同一 ID |
+| `data/client_notes.json` | 客户端备注 |
+| `data/egress.json` | **Configure egress** 的恢复记录 |
+| `uploads/client-<ID>/` | 服务端 REPL `upload` 拉取的文件 |
+| 工作目录本身 | Global 视图的 Artifacts 根目录，Recon 报告、AccessKey 报告等默认写在这里 |
+| `webui.projectsBaseDir` 下的子目录 | 各 Project 的 Artifacts 目录；未设置时同样位于工作目录下 |
+
+备份或迁移服务端时，复制整个工作目录（包括 `.env`）和 Project 目录即可。
+
+以下状态只保存在内存里，服务端重启后清空：WebUI 登录会话、Logs 页面缓冲、MCP 会话凭证、运行中的 Agentic IR 会话、近期部署与清理记录、MCP `run` 结果缓存，以及所有端口转发。
+
+## 保持服务端运行
+
+服务端启动后始终在当前终端运行 [服务端 REPL](/remote)，即使只使用 Web 控制台也是如此。REPL 读到输入结束（EOF）、`Ctrl+C`、`Ctrl+D` 或执行 `exit` 时，服务端会立即关闭。
+
+所以不要把服务端放在没有终端输入的环境中运行：例如 systemd 默认把标准输入接到 `/dev/null`，服务端会在启动后马上退出。请在 tmux 中运行。服务端 REPL 的 `shell` 命令也通过 `tmux new-window` 打开远程 Shell，只有服务端运行在 tmux 中时才能使用。
+
+SIREN 不写日志文件。tmux 只保留有限的滚动历史，WebUI Logs 页面也只在内存中保留最近若干条。需要留存日志时，见 [日志输出](/config#日志输出)。
+
+## 命令行参数
+
+```bash title="控制主机"
+./siren_server [flags]
+./siren_server user add|list|delete
+./siren_server upgrade [-y]
+```
+
+| 参数 | 默认值 | 说明 |
+| --- | --- | --- |
+| `-c`, `--config` | 依次查找工作目录和 `config/` 下的 `server_config.yaml` | 配置文件路径，找不到时直接退出 |
+| `-l`, `--listen` | `0.0.0.0` | 共享 TLS 监听地址 |
+| `-p`, `--port` | `443` | 共享 TLS 监听端口 |
+| `--cert` | `certs/cert.pem` | TLS 证书 |
+| `--key` | `certs/key.pem` | TLS 私钥 |
+| `--webui-dossier-dir` | 空 | Dossier 静态目录，对应 `webui.dossierDir` |
+| `--webui-projects-base-dir` | 空（工作目录） | Project 目录基准路径，对应 `webui.projectsBaseDir` |
+| `-v`, `--version` | - | 打印版本 |
+
+显式传入的参数优先于配置文件。顶层的 `listen`、`port`、`cert`、`key` 还会被同名的大写环境变量（`LISTEN`、`PORT`、`CERT`、`KEY`）覆盖，并且优先于配置文件；服务环境或 `.env` 中恰好存在 `PORT` 时，服务端会监听该端口。
+
+| 子命令 | 说明 |
+| --- | --- |
+| `user add <username>` | 创建 WebUI 账号，交互输入密码 |
+| `user list` | 列出账号 ID、用户名和创建时间 |
+| `user delete <username>` | 删除账号 |
+| `upgrade [-y]` | 检查并升级服务端二进制，`-y` 跳过确认 |
+
+子命令同样读取 `server_config.yaml`，需要在工作目录中执行。账号管理的细节见 [账号与安全边界](/server/security#webui-账号)。
+
+## 升级
+
+服务端启动时会在后台检查新版本，有新版本时日志提示 `new version available; run './siren_server upgrade' to upgrade`。
+
+1. 在工作目录中执行升级。命令会对比远端版本，确认后下载安装包并原地替换 `siren_server` 二进制，不改动配置、证书和 `data/`：
+
+   ```bash title="控制主机"
+   cd /opt/siren
+   ./siren_server upgrade
+   ```
+
+   重新运行安装脚本也能升级，效果相同，并会额外校验安装包的 SHA-256。
+
+2. 回到 tmux 会话，按 `Ctrl+C` 停止旧进程，再执行 `./siren_server` 启动新版本。正在运行的进程不会自动切换到新二进制。
+3. 升级客户端。服务端和客户端必须使用相同版本，通信协议不做跨版本协商。
+
+重启会清空上文列出的内存状态，操作者需要重新登录。已连接的客户端会自动重连，并保留原 Client ID、备注和 Project 归属。客户端在连续约 4 分钟重连失败后会放弃并退出，届时需要在目标主机上重新启动客户端，因此请尽快完成重启。
+
+## 相关内容
+
+<Cards>
+  <Card title="前置条件与凭证" href="/server/prerequisites" icon={<ListChecks />}>
+    按功能列出证书、账号、MCP、SOAR、出站规则等依赖
+  </Card>
+  <Card title="账号与安全边界" href="/server/security" icon={<ShieldCheck />}>
+    WebUI 账号、MCP 鉴权和公网暴露建议
+  </Card>
+  <Card title="配置文件" href="/config#服务端配置" icon={<Settings />}>
+    `server_config.yaml` 完整配置项
+  </Card>
+</Cards>
