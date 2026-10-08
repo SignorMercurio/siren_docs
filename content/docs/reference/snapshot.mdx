@@ -2,7 +2,7 @@
 title: Recon 快照格式
 description: snapshot-jsonl-v2 的事件顺序、记录类型、稳定 ID、状态值和上限
 icon: FileJson
-verifiedAgainst: v2.33.11
+verifiedAgainst: v2.33.13
 sources:
   - internal/reconartifact/schema.go
   - internal/reconartifact/validate.go
@@ -359,8 +359,8 @@ snapshot_end
 
 Markdown 由服务端（本地模式下由客户端）在校验 JSONL 的同时生成，内容完全来自 JSONL，Dossier 也只编辑这份 Markdown，不修改快照。
 
-- **`default`、`quick` 及自定义 Profile**：按模块依次输出各 source 的 `rawText` 和插件文本。模块不是 `ok` 时，在该模块末尾追加 `> Collection status: <状态> — <原因>`；快照为 partial 时，在文末追加 `> Snapshot status: partial — <原因>`。
-- **`hunt`**：只输出索引，标题为 `# Hunt Snapshot Summary`，包含快照状态、权威 JSONL 的路径，以及 **Primary applications and middleware**、**Containers**、**Kernel-observed host listeners**、**Container port configuration**、**Coverage** 几节。表格行数超出时注明省略数量。配置、环境变量、日志正文、密码 hash 和凭据原文不会进入 Hunt Markdown，需要时读 JSONL。
+- **不含证据正文模块的 Profile**（如 `default`、`quick`）：按模块依次输出各 source 的 `rawText` 和插件文本。模块不是 `ok` 时，在该模块末尾追加 `> Collection status: <状态> — <原因>`；快照为 partial 时，在文末追加 `> Snapshot status: partial — <原因>`。
+- **`hunt`，以及任何包含 `topology`、`supplychain`、`config`、`activity` 或 `credential` 模块的 Profile**：这些模块会读取配置、凭据和日志原文，所以只输出索引，标题为 `# Hunt Snapshot Summary`，包含快照状态、权威 JSONL 的路径，以及 **Primary applications and middleware**、**Containers**、**Kernel-observed host listeners**、**Container port configuration**、**Coverage** 几节。表格行数超出时注明省略数量。配置、环境变量、日志正文、密码 hash 和凭据原文不会进入索引，需要时读 JSONL。
 
 ## 各模块写入的记录
 

@@ -2,7 +2,7 @@
 title: 自动化信息收集
 description: 用 Recon 在客户端上采集一份有范围、有上限的主机快照，保存到 Artifacts
 icon: ScanSearch
-verifiedAgainst: v2.33.11
+verifiedAgainst: v2.33.13
 sources:
   - internal/server/webui/frontend/src/pages/InvestigationsPage.tsx
   - internal/server/webui/frontend/src/pages/InvestigationResults.tsx
@@ -93,7 +93,7 @@ Recon 只采集事实，不判断主机是否被入侵，也不做白名单、�
 文件名中的客户端 ID 和请求序号用来避免同名主机或多次采集互相覆盖。
 
 - `default`、`quick` 的 Markdown 保留各模块的采集正文。
-- `hunt` 的 Markdown 只是索引：采集覆盖情况、主要应用与中间件、容器、内核观察到的监听、容器端口配置等摘要。配置、环境变量、日志正文、密码 hash 和凭据原文只在 JSONL 中。需要完整证据时读 JSONL。
+- `hunt`，以及任何包含 `topology`、`supplychain`、`config`、`activity` 或 `credential` 模块的 Profile，Markdown 只是索引：采集覆盖情况、主要应用与中间件、容器、内核观察到的监听、容器端口配置等摘要。配置、环境变量、日志正文、密码 hash 和凭据原文只在 JSONL 中。需要完整证据时读 JSONL。
 
 **保存位置**跟随客户端的 Project 归属，与发起时所在的视图无关：已归属 Project 的客户端写入该 Project 目录，未归属的写入 Global（服务端工作目录）。在 Global 中对已归属 Project 的客户端执行 Recon，结果仍写入该 Project，**Open Report** 会切换到对应 Project 打开。详见 [Project 范围](/projects#例外)。
 

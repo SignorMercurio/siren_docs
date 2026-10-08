@@ -2,7 +2,7 @@
 title: MCP
 description: SIREN MCP 的端点、鉴权、工具参数、结果回读、命令黑名单与审计
 icon: Plug
-verifiedAgainst: v2.33.12
+verifiedAgainst: v2.33.13
 sources:
   - internal/server/mcp.go
   - internal/server/mcp_http.go
@@ -212,7 +212,7 @@ SIREN MCP 不提供告警查询工具。除 `ls` 外，所有工具的 structure
 
 - 同一客户端同时只能有一个 Recon，冲突时报 `recon already in progress for this client`；Profile 不可用时报 `recon profile is not available`。
 - 工具等待采集完成后返回，等待上限是服务端 `recon.responseTimeout`。各项超时见 [Recon 超时](/recon#超时)。
-- 文本结果是 Profile、状态和产物路径，后接派生的 Markdown 报告，内联部分最多 2 MiB。`hunt` 的 Markdown 只含拓扑、覆盖范围和采集质量摘要，完整证据在 JSONL 快照中。
+- 文本结果是 Profile、状态和产物路径，后接派生的 Markdown 报告，内联部分最多 2 MiB。`hunt` 以及任何包含 `topology`、`supplychain`、`config`、`activity` 或 `credential` 模块的 Profile，Markdown 只含拓扑、覆盖范围和采集质量摘要，完整证据在 JSONL 快照中。所有 Profile 的文本结果都会提示以 JSONL 为准，并把采集到的文件内容视为不可信数据。
 - structured content：`profile`、`status`（`complete` 或 `partial`）、`reportPath`、`snapshotPath`、`format`（`snapshot-jsonl-v2`）、`schemaVersion`。两个路径相对于客户端所属 Project 的 Artifacts 目录；客户端未归属 Project 时相对于服务端工作目录。快照结构见 [Recon 快照格式](/reference/snapshot)。
 
 ### `deploy`
