@@ -16,6 +16,10 @@
 - Capture WebUI screenshots from a local test server with example data:
   RFC 5737 public IPs, private-range addresses, placeholder instance IDs and
   UIDs. Never show real hosts, accounts, or paths from the capturing machine.
+- Capture screenshots at device scale factor 2 with a viewport about 1200 CSS
+  px wide, and keep the device pixels; 1x captures blur once the docs column
+  scales them down. Render a crop narrower than the content column at its CSS
+  width (`<ImageZoom src={img} width={...} />`) instead of letting it stretch.
 - Draw architecture and relationship diagrams as images, not ASCII art: provide
   light and dark WebP variants and render them with `<ThemeImage>`. Plain code
   blocks remain fine for directory trees and file formats.
