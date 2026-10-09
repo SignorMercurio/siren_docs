@@ -20,6 +20,8 @@ import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { Step, Steps } from "fumadocs-ui/components/steps";
 import { FileSearch, FileText, PanelsTopLeft, Scale, SquareTerminal, Workflow } from 'lucide-react';
+import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
+import airStartEvent from '../../../img/air-start-event.png';
 
 Agentic 应急响应（Agentic IR，简称 AIR）让 Codex、Claude Code、Pi 或 Qoder 通过 SIREN MCP 在在线客户端上执行排查命令、触发 Recon，并协助整理 Markdown 报告。
 
@@ -58,7 +60,8 @@ AIR 只能在 WebUI 中使用，服务端 REPL 和本地模式没有对应入口
 
 点击 **Event**，选择告警所在主机对应的 **Client**，填写阿里云账号 **UID**，在 **Target** 中保持 **Event** 并填入告警 ID，然后点击 **Start Codex**（按钮名随 Provider 变化）。
 
-![Agentic IR 左栏的 Event 模式，已选择 Provider、Client 并填写 UID 和告警 ID](../../../img/air-start-event.png)
+{/* Captured at 2x; render at its CSS size so the narrow crop is not enlarged. */}
+<ImageZoom src={airStartEvent} width={546} alt="Agentic IR 左栏的 Event 模式，已选择 Provider、Client 并填写 UID 和告警 ID" />
 
 会话在右侧的新标签中打开。其他入口模式见 [启动与管理会话](/air/sessions#入口模式)。
 
