@@ -28,18 +28,16 @@ sources:
 import { Callout } from "fumadocs-ui/components/callout";
 import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
-**Agentic IR** 页面左栏从上到下是启动表单、**Running** 列表和 **History**；右侧以标签页显示已打开的会话。本页说明如何启动、接入、停止和继续会话。Provider 的服务端准备见 [准备 AIR Provider](/server/air-providers)。
+**Agentic IR** 页面左栏从上到下是启动表单、**Running** 列表和 **History**，右侧以标签页显示已打开的会话。Provider 的服务端准备见 [准备 AIR Provider](/server/air-providers)。
 
 ## 选择 Provider 和界面
 
 启动表单第一行是 Provider 按钮（Codex、Claude、Pi、Qoder）和一个终端图标按钮：
 
-- **Provider 按钮**：服务端不可用的 Provider 会置灰，原因见 [检查可用性](/server/air-providers#检查可用性)。
-- **终端图标**：未按下时使用 **GUI**，按下时使用 **Terminal**。当前 Provider 的 GUI 不可用时，按钮下方会显示原因；某种界面不可用时，页面会自动改用另一种。
+- **Provider 按钮**：服务端不可用的 Provider 置灰，原因见 [检查可用性](/server/air-providers#检查可用性)。
+- **终端图标**：未按下用 **GUI**，按下用 **Terminal**。当前 Provider 的 GUI 不可用时按钮下方显示原因；某种界面不可用时页面自动改用另一种。
 
-页面会在当前浏览器记住上次选择的 Provider 和界面。要固定默认值，打开 **Settings**，在 **Default AIR provider** 和 **Default AIR surface** 中选择具体项（默认为 **Remember last used**）。固定后在页面上临时切换不会覆盖“上次使用”的记录；改回 **Remember last used** 即恢复原来的选择。
-
-所选 Provider 不可用时，页面先回退到服务端配置的 `air.provider`，再回退到第一个可用的 Provider。
+页面在当前浏览器记住上次选择的 Provider 和界面。要固定默认值，在 **Settings** 的 **Default AIR provider** 和 **Default AIR surface** 中选择具体项（默认 **Remember last used**）；固定期间的临时切换不会覆盖“上次使用”的记录。所选 Provider 不可用时，依次回退到服务端配置的 `air.provider` 和第一个可用的 Provider。
 
 ## 入口模式
 
@@ -47,15 +45,15 @@ Provider 下方有三个入口模式，默认选中 **Custom**：
 
 | 模式 | 需要填写 | 会话开始时 |
 | --- | --- | --- |
-| **Manual** | 无 | 空白会话，不绑定客户端，没有开场提示词，由你从头指挥 Agent |
-| **Custom** | **Client**、**Prompt** | 把 Client ID 前缀和你的描述作为开场提示词发给 Agent |
-| **Event** | **Client**、**UID**、**Target** | 把账号 UID、事件目标和 Client ID 作为开场提示词，让 Agent 先查相关告警 |
+| **Manual** | 无 | 空白会话，不绑定客户端，没有开场提示词 |
+| **Custom** | **Client**、**Prompt** | 把 Client ID 前缀和你的描述作为开场提示词 |
+| **Event** | **Client**、**UID**、**Target** | 把账号 UID、事件目标和 Client ID 作为开场提示词，让 Agent 先查相关告警。SIREN 不代为查询，能否查到取决于 Provider 自身的工具或 Skill |
 
-三种模式都会注入当前范围的 SIREN MCP。开场提示词的模板由运维人员配置，见 [Prompt 模板](/server/air-providers#prompt-模板)。**Custom** 的 Prompt 框按 Cmd/Ctrl+Enter 即可启动。
+三种模式都注入当前范围的 SIREN MCP。开场提示词模板由运维人员配置，见 [Prompt 模板](/server/air-providers#prompt-模板)。**Custom** 的 Prompt 框按 Cmd/Ctrl+Enter 即可启动。
 
 ### Event 目标
 
-**Target** 下拉框选择一种目标，再填入对应 ID：
+**Target** 下拉框选择目标类型，再填入对应 ID：
 
 | 目标 | 输入框提示 | 含义 |
 | --- | --- | --- |
@@ -63,14 +61,10 @@ Provider 下方有三个入口模式，默认选中 **Custom**：
 | **ECS** | ECS instance ID (i-…) | 一台 ECS 实例的相关告警 |
 | **Asset** | Security Center asset UUID | 一个云安全中心资产的相关告警 |
 
-选择 **ECS** 或 **Asset** 时，可以展开 **Time range** 限定告警时间范围：**Default**（不限定，由 Agent 自行决定）、**3d**、**7d**、**30d** 或 **Custom**。**Custom** 必须填写 **From**；**To** 默认填入当前时间，清空则表示“至今”。时间按你输入的字面值写入提示词，不做时区换算。
+选择 **ECS** 或 **Asset** 时，可以展开 **Time range** 限定告警时间：**Default**（不限定，由 Agent 决定）、**3d**、**7d**、**30d** 或 **Custom**。**Custom** 必须填 **From**；**To** 默认为当前时间，清空表示“至今”。时间按字面值写入提示词，不做时区换算。
 
 <Callout title="告警 ID" type="info">
-  **Event** 目标的 ID 指阿里云安全中心告警详情页“基础信息”中的“告警 ID”，不是页面下方“关联安全事件”里的“事件 ID”。
-</Callout>
-
-<Callout title="SIREN 不查询告警" type="warn">
-  Event 模式只把 UID 和目标写入开场提示词。告警能否查到，取决于 Provider 自身具备的工具或 Skill。
+  **Event** 目标的 ID 指阿里云安全中心告警详情页“基础信息”中的“告警 ID”，不是“关联安全事件”里的“事件 ID”。
 </Callout>
 
 ### 启动按钮
@@ -79,11 +73,11 @@ Provider 下方有三个入口模式，默认选中 **Custom**：
 
 ### 从 Clients 页进入
 
-在 [Clients 页](/clients) 点击某一行的 AIR 图标，会跳到 Agentic IR，切换到 **Custom** 并选中该客户端，左栏若已收起也会自动展开。
+在 [Clients 页](/clients) 点击某一行的 AIR 图标，会跳到 Agentic IR，切换到 **Custom** 并选中该客户端。
 
 ## Project 范围
 
-会话启动时所在的范围决定它的工作目录和 MCP 端点，之后不随侧栏切换而改变：
+会话启动时的范围决定它的工作目录和 MCP 端点，之后不随侧栏切换而改变：
 
 | | Global | Project 视图 |
 | --- | --- | --- |
@@ -93,48 +87,45 @@ Provider 下方有三个入口模式，默认选中 **Custom**：
 | **Running** | 服务端上的全部会话 | 本 Project 的会话 |
 | **History** | 服务端工作目录下的历史会话 | 本 Project 目录下的历史会话 |
 
-切换范围时，右侧属于其他范围的会话标签会被关闭，但会话本身继续运行，回到原范围后可从 **Running** 重新打开。范围的完整规则见 [Project 范围](/projects)。
+切换范围时，属于其他范围的会话标签会被关闭，但会话继续运行，回到原范围后可从 **Running** 重新打开。完整规则见 [Project 范围](/projects)。
 
 ## 会话标签
 
-每个会话在右侧的一个标签中打开，标签可以拖动排序。关闭标签只关闭视图，不会停止会话。
-
-同一个浏览器标签页刷新后，已打开的会话标签和历史标签会自动恢复。地址栏中的 `#/air/<会话 ID>` 指向一个运行中的会话，`#/air/history/<provider>/<会话 ID>` 指向一个历史会话，可以直接分享或收藏。
+每个会话在右侧的一个标签中打开，标签可拖动排序。关闭标签只关闭视图，不停止会话。刷新浏览器标签页后，已打开的会话标签和历史标签自动恢复。地址栏中的 `#/air/<会话 ID>`（运行中会话）和 `#/air/history/<provider>/<会话 ID>`（历史会话）可以直接分享或收藏。
 
 ## Running
 
-**Running** 列出当前范围内正在运行的会话，每 4 秒刷新一次。每行显示：
+**Running** 列出当前范围内运行中的会话，每 4 秒刷新。每行显示：
 
-- Provider 图标和标题：Custom 显示任务描述，Event 显示 UID 和目标，Manual 的 GUI 会话显示首条输入，其余情况为 `Manual · <会话 ID 前 8 位>`；
-- 启动时间；
-- 状态与上下文：仅在启动中时标出状态，随后是客户端（`C<ID>` 和 Note）和入口模式；
+- Provider 图标和标题：Custom 为任务描述，Event 为 UID 和目标，Manual 的 GUI 会话为首条输入，其余为 `Manual · <会话 ID 前 8 位>`；
+- 启动时间、客户端（`C<ID>` 和 Note）和入口模式，启动中时另标出状态；
 - 待处理提示：**Approval required** 或 **Question waiting**。
 
-点击一行即可接入该会话；已经打开时直接切换到对应标签。标题旁的刷新按钮会同时重新检查 Provider 可用性、Running 和 History。列表刷新失败时会显示 `List may be stale: ...`，此时列表可能包含已不存在的会话。
+点击一行即接入或切换到该会话。标题旁的刷新按钮同时重新检查 Provider 可用性、Running 和 History。刷新失败时显示 `List may be stale: ...`，列表可能包含已不存在的会话。
 
 ### 待处理提示
 
-GUI 会话停下来等待审批或回答时，除了 Running 行内的提示，对应会话标签上会出现标记；只要浏览器停留在 Agentic IR 页面，浏览器标签页标题也会加上 `● Approval` 或 `● Question` 前缀（同时存在时显示 Approval），处理完毕后自动恢复。即使等待的不是当前显示的会话标签，也会提示。Terminal 会话的审批出现在 TUI 内，不触发这些提示。
+GUI 会话等待审批或回答时，除 Running 行内的提示外，对应会话标签上出现标记；浏览器停留在 Agentic IR 页面时，标签页标题还会加上 `● Approval` 或 `● Question` 前缀（同时存在时显示 Approval），处理后自动恢复。等待的不是当前显示的会话时同样提示。Terminal 会话的审批出现在 TUI 内，不触发这些提示。
 
 ## 重新接入与回放
 
-会话托管在服务端，刷新浏览器、切换页面、关闭会话标签或短暂断网都不会中断它。重新打开会话时，页面先回放服务端缓存的内容，再继续显示实时输出；多个浏览器可以同时查看同一个会话。
+会话托管在服务端，刷新浏览器、切换页面、关闭会话标签或短暂断网都不会中断它。重新打开时，页面先回放服务端缓存的内容，再继续显示实时输出；多个浏览器可以同时查看同一会话。
 
-连接中断后，页面会自动重连，最多连续尝试 5 次。仍未恢复时显示以下提示和 **Reconnect** 按钮，点击后重新接入并回放：
+连接中断后页面自动重连，最多连续 5 次。仍未恢复时显示以下提示和 **Reconnect** 按钮：
 
 - GUI：`Stream disconnected · the session may still be running on the server.`
 - Terminal：`Connection lost · the session may still be running on the server.`
 
-每个会话的回放缓存有容量上限（由运维人员通过 `air.replayBufferBytes` 设置，默认 4 MiB）。长会话重新接入时，如果更早的内容已被挤出缓存：
+回放缓存有容量上限（`air.replayBufferBytes`，默认 4 MiB）。更早的内容已被挤出缓存时：
 
-- GUI 时间线顶部显示 `Earlier activity is no longer in the replay buffer (N events dropped).`，点击 **Open full transcript** 会在新标签中以只读方式打开 Provider 保存的完整记录。
+- GUI 时间线顶部显示 `Earlier activity is no longer in the replay buffer (N events dropped).`，点击 **Open full transcript** 在新标签中只读打开 Provider 保存的完整记录。
 - Terminal 的表现见 [Terminal 界面](/air/terminal#重新连接)。
 
 ## 停止与结束
 
-要结束会话，点击 **Running** 行右侧的关闭按钮，在 **Stop session** 对话框中确认。Provider 进程会被终止，会话记录保留在磁盘上，之后可以从 **History** 继续。GUI 中只停止当前这一轮的操作见 [GUI 时间线](/air/gui)。
+点击 **Running** 行右侧的关闭按钮，在 **Stop session** 对话框中确认即可结束会话。Provider 进程被终止，会话记录保留在磁盘上，之后可从 **History** 继续。只停止 GUI 当前这一轮见 [GUI 时间线](/air/gui)。
 
-会话结束后会立即从 **Running** 中消失；已打开的标签保留内容供查看，顶部显示 **Session ended** 和原因：
+会话结束后立即从 **Running** 消失；已打开的标签保留内容，顶部显示 **Session ended** 和原因：
 
 | 原因 | 含义 |
 | --- | --- |
@@ -143,50 +134,48 @@ GUI 会话停下来等待审批或回答时，除了 Running 行内的提示，�
 | `session ended: server shut down` | SIREN 服务端正在关闭 |
 | `unknown agent session` | 服务端上已没有该会话，通常因为服务端重启过 |
 
-会话未能启动时：GUI 显示 **Session did not start**、原因和 **Retry** 按钮；Terminal 显示 **Session ended** 和错误原因。常见原因：
+会话未能启动时，GUI 显示 **Session did not start**、原因和 **Retry** 按钮，Terminal 显示 **Session ended** 和错误原因。常见原因：
 
 | 报错 | 处理 |
 | --- | --- |
-| `agent session limit reached (N)` | 全服务端同时运行的会话数已达上限，GUI 与 Terminal、所有 Project 合计计算。先在 Running 中停止不再使用的会话；上限由 `air.maxSessions` 设置，见 [配置项](/server/air-providers#配置项) |
+| `agent session limit reached (N)` | 全服务端同时运行的会话数（GUI、Terminal 和所有 Project 合计）已达上限。先在 Running 中停止不用的会话；上限见 [配置项](/server/air-providers#配置项) 中的 `air.maxSessions` |
 | `session <ID> is still running; stop it before resuming` | 要继续的历史会话仍在运行，见 [同一会话不能同时运行两份](/air/terminal#同一会话不能同时运行两份) |
 | `webui.publicURL is required for AIR MCP` 或 CLI 自身的登录错误 | 服务端准备不完整，见 [准备 AIR Provider](/server/air-providers#常见问题) |
 
 ### 服务端重启
 
-SIREN 服务端正常关闭时，会结束所有运行中的会话，并最多等待 5 秒让各 Provider 退出并保存会话记录。已打开的会话标签无法再接入，会显示 **Session ended**。
-
-服务恢复后，页面会自动重新读取 **History**，无需刷新整个页面；已由 Provider 保存的会话可以从 History 继续。强制结束进程、主机断电，或 Provider 还没来得及创建会话记录时，只能尽力恢复，不保证历史一定存在。
+SIREN 服务端正常关闭时结束所有运行中的会话，最多等待 5 秒让 Provider 退出并保存会话记录；已打开的会话标签显示 **Session ended**。服务恢复后页面自动重新读取 **History**，已保存的会话可从 History 继续。强制结束进程、主机断电，或 Provider 还没创建会话记录时，不保证历史一定存在。
 
 ## History
 
-**History** 默认收起在左栏底部，标题旁显示条数，点击标题展开。
+**History** 默认收起在左栏底部，标题旁显示条数，点击展开。
 
-- **范围**：只列出启动表单中当前选中 Provider 的会话，且只读取当前范围工作目录对应的记录，不会跨 Project 列出其他目录的会话。要看另一个 Provider 的历史，先切换 Provider 按钮。
-- **内容**：按更新时间倒序，最多 50 条；正在运行的会话和没有任何用户输入的会话不会列出。每行显示首个任务、最近一条可见对话（标明 Agent 或 You）、分支和更新时间。
-- **搜索**：搜索框（`Search <Provider> history`）按空格拆分关键词，要求全部命中，匹配范围包括会话 ID、时间、首条和最近输入、最近消息和分支。
+- **范围**：只列出当前选中 Provider、当前范围工作目录下的会话。要看另一个 Provider 的历史，先切换 Provider 按钮。
+- **内容**：按更新时间倒序，最多 50 条；运行中的会话和没有用户输入的会话不列出。每行显示首个任务、最近一条可见对话（标明 Agent 或 You）、分支和更新时间。
+- **搜索**：`Search <Provider> history` 按空格拆分关键词，要求全部命中，匹配会话 ID、时间、首条和最近输入、最近消息和分支。
 
 ### 继续历史会话
 
-1. 点击 History 中的一行。会话先以只读时间线在新标签中打开，标题为 `History · ...`，顶部显示 **Read-only transcript** 和 `The provider is not running`。较早的记录按需加载。
+1. 点击 History 中的一行。会话以只读时间线在新标签中打开，标题为 `History · ...`，顶部显示 **Read-only transcript** 和 `The provider is not running`，较早的记录按需加载。
 2. 点击 **Continue session** 用 GUI 继续，或在该 Provider 的 Terminal 可用时点击 **Continue in Terminal**。
 
-继续时会以原会话 ID 在另一个新标签中重新启动该历史条目所属的 Provider，工作目录和 MCP 范围取当前范围。只读标签保持不变；再次点击同一按钮会切换到已打开的恢复标签，不会重复启动。
+会话以原 ID 在另一个新标签中重新启动，工作目录和 MCP 范围取当前范围。再次点击同一按钮会切换到已打开的恢复标签，不会重复启动。
 
 ## 收起左栏
 
-需要更大空间查看输出时，点击会话标签栏最左侧的按钮（**Hide AIR sidebar**）收起左栏，再次点击（**Show AIR sidebar**）恢复。收起状态在切换页面后保持，但重新加载页面后左栏总是展开。
+点击会话标签栏最左侧的按钮（**Hide AIR sidebar** / **Show AIR sidebar**）收起或恢复左栏。收起状态在切换页面后保持，重新加载页面后左栏总是展开。
 
 <Accordions>
 
 <Accordion title="页面显示 Provider 可用，但会话一启动就失败">
 
-先看 **Session did not start** 或 **Session ended** 中的原因，对照上方 [停止与结束](#停止与结束) 的表格处理。Provider 未登录时，错误来自 CLI 本身，需要运维人员以服务端用户重新登录。
+对照 **Session did not start** 或 **Session ended** 中的原因和上方 [停止与结束](#停止与结束) 的表格处理。Provider 未登录时，错误来自 CLI 本身，需要运维人员以服务端用户重新登录。
 
 </Accordion>
 
 <Accordion title="在 Running 里找不到刚才的会话">
 
-确认当前范围：Project 视图只列出本 Project 的会话，切到 Global 可以看到服务端上的全部会话。已结束的会话不会出现在 Running，请到 History 中查找。
+Project 视图只列出本 Project 的会话，切到 Global 可以看到全部会话。已结束的会话请到 History 中查找。
 
 </Accordion>
 

@@ -12,15 +12,15 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-接入主机就是让目标主机上的 SIREN 客户端连到服务端，并出现在 WebUI 的 **Clients** 页。按目标主机的环境选择方式：
+接入主机即让目标主机上的 SIREN 客户端连上服务端并出现在 **Clients** 页。按环境选择方式：
 
 | 方式 | 适用场景 | 入口 |
 | --- | --- | --- |
 | 一键部署 | 阿里云 ECS，云助手状态正常，服务端已配置 SOAR 凭证 | Clients → Provisioning → **Deploy SIREN**，见 [一键部署](/onboard/provisioning) |
-| 手动安装 | 任何能访问服务端 TLS 端口的 Linux 或 Windows 主机 | 在目标主机运行安装脚本和 `siren client`，见 [手动安装客户端](/onboard/manual) |
+| 手动安装 | 能访问服务端 TLS 端口的 Linux 或 Windows 主机 | 运行安装脚本和 `siren client`，见 [手动安装客户端](/onboard/manual) |
 | 本地模式 | 目标主机网络隔离，或数据不允许离开目标主机 | 在目标主机直接运行 `siren recon` 等命令，见 [自动化信息收集](/recon) |
 
-一键部署和手动安装都要求目标主机能连到服务端。目标 ECS 的出方向默认拒绝时，先 [配置出站放行](/onboard/egress)。
+一键部署和手动安装都要求目标主机能连到服务端；ECS 出方向默认拒绝时先 [配置出站放行](/onboard/egress)。
 
 ## 客户端平台
 
@@ -32,8 +32,8 @@ import { Callout } from "fumadocs-ui/components/callout";
 | Windows x64 | `siren_windows.zip` | Windows 10、Windows Server 2016 及以上 |
 | Windows x64（兼容包） | `siren_windows_legacy.zip` | Windows 7 SP1、Windows Server 2008 R2 SP1 至 Windows 8.1、Windows Server 2012 R2 |
 
-安装脚本按架构和系统版本自动选择安装包。Windows 需要 PowerShell 5.1；不支持 32 位 Windows、Windows ARM 和 macOS。
+安装脚本按架构和系统版本自动选包。Windows 需要 PowerShell 5.1；不支持 32 位 Windows、Windows ARM 和 macOS。
 
 <Callout title="版本一致" type="warn">
-  客户端与服务端必须运行同一版本，SIREN 不会检查或提示版本不一致。升级步骤见 [升级与数据](/upgrade)。
+  客户端与服务端必须运行同一版本，SIREN 不会检查或提示不一致。升级见 [升级与数据](/upgrade)。
 </Callout>

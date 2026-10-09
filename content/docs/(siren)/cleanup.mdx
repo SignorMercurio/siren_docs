@@ -22,10 +22,10 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-调查结束后，用 **Clean & terminate** 让客户端删除自己在主机上留下的 SIREN 文件并退出，再按[结案清单](#结案清单)恢复出站规则、处理 Project 和备份证据。
+调查结束后，用 **Clean & terminate** 让客户端删除主机上的 SIREN 文件并退出，再按[结案清单](#结案清单)收尾。
 
 <Callout title="不可逆操作" type="error">
-  清理会终止客户端进程，并删除客户端本地的 Recon 文件、插件、配置和程序本身。执行前确认调查已经完成，需要从主机上取回的文件已经通过 [Files](/files) 下载或保存到 Artifacts。
+  清理会终止客户端，并删除本地 Recon 文件、插件、配置和程序本身。执行前确认调查已完成，需要的文件已通过 [Files](/files) 下载或保存到 Artifacts。
 </Callout>
 
 ## 在 WebUI 中清理
@@ -38,33 +38,31 @@ import { Callout } from "fumadocs-ui/components/callout";
 **批量清理**
 
 1. 勾选多个客户端，在批量操作栏点 **Clean N**。
-2. 对话框列出全部目标及其 Project，并提示其中有几个被当前筛选隐藏。输入选中的数量，点 **Send N requests**。
+2. 对话框列出全部目标及其 Project，并提示有几个被当前筛选隐藏。输入选中的数量，点 **Send N requests**。
 
-在 Project 视图中只能清理本 Project 的客户端。同一个客户端已有一条清理请求在等待结果时，再次发送会报 `cleanup already requested for client #<ID>`。
+Project 视图中只能清理本 Project 的客户端。同一客户端已有清理请求在等待结果时，再次发送会报 `cleanup already requested for client #<ID>`。
 
-提示 `Cleanup request sent` 只表示请求已发出。客户端收到后依次执行：
+`Cleanup request sent` 只表示请求已发出。客户端收到后：
 
 1. 停止正在执行的任务、Shell 和端口转发，最多等 10 秒。仍有任务没停下时不删除任何文件，直接回报错误。
-2. 删除下文列出的文件，并清除当前进程中的凭证环境变量。
-3. 把结果回报给服务端，然后退出，不再重连。
-
-即使清理失败，客户端也会退出。
+2. 删除 [清理范围](#清理范围) 中的文件，并清除进程中的凭证环境变量。
+3. 回报结果后退出，不再重连。清理失败也会退出。
 
 ### 查看结果
 
-结果显示在 Clients 页的 [Recent activity](/clients#recent-activity) 中，类型为 **Cleanup**：
+结果显示在 Clients 页 [Recent activity](/clients#recent-activity) 中，类型为 **Cleanup**：
 
 | 状态 | 含义 |
 | --- | --- |
 | **Awaiting result** | 请求已发出，等待客户端回报 |
 | **Files cleaned** | 客户端已删除全部目标，附带 `N targets cleared` |
-| **Deletion scheduled** | 立即删除的目标已删除，程序文件的延迟删除已安排，附带 `final deletion unverified`。Windows 客户端成功时总是这个状态 |
-| **Cleanup failed** | 客户端回报了错误，错误原文显示在行内；客户端仍已退出 |
+| **Deletion scheduled** | 立即删除的目标已删除，程序文件已安排延迟删除，附带 `final deletion unverified`。Windows 客户端成功时总是这个状态 |
+| **Cleanup failed** | 客户端回报了错误，原文显示在行内；客户端仍已退出 |
 | **No result received** | 客户端在回报前断开，或 30 秒内没有回报，附带 `deletion not confirmed`。不能据此认为删除成功 |
 
-清理记录只保存在服务端内存中：全服务端最多保留最近 20 条，刷新页面或客户端下线后仍在，服务端重启后清空。Global 显示全部记录，Project 视图只显示发起时客户端属于该 Project 的记录。服务端日志中也有对应的 `client.cleanup.result` 事件，可在 [Logs](/logs) 中查看。
+清理记录只在服务端内存中保留最近 20 条，刷新页面或客户端下线后仍在，服务端重启后清空。Global 显示全部记录，Project 视图只显示发起时客户端属于该 Project 的记录。[Logs](/logs) 中也有对应的 `client.cleanup.result` 事件。
 
-**Cleanup failed** 或 **No result received** 时，客户端多半已经退出，但部分文件可能还在。需要登录主机，按下表逐项核对并手动删除。
+**Cleanup failed** 或 **No result received** 时，客户端多半已退出，但部分文件可能还在，需要登录主机按下表核对并手动删除。
 
 ## 清理范围
 
@@ -78,20 +76,20 @@ import { Callout } from "fumadocs-ui/components/callout";
 | 程序文件 | 安装目录是 SIREN 专用目录时整个删除，包括其中的日志和 PID 文件；否则只删除客户端可执行文件 |
 | WinPTY 临时目录 | 仅 Windows：当前客户端进程释放的 WinPTY 目录 |
 
-专用目录指 `/opt/siren`、`C:\Windows\Temp\siren`，或含有安装脚本写入的 `.siren-install` 标记文件的目录。手动把客户端放在共享目录中运行时，只删除可执行文件，同目录的其他文件保留。
+专用目录指 `/opt/siren`、`C:\Windows\Temp\siren`，或含有安装脚本写入的 `.siren-install` 标记文件的目录；放在共享目录中的客户端只删除可执行文件。
 
-客户端身份删除后，同一台主机再次部署会得到新的 Client ID，原来的 Note 和 Project 归属不会沿用。
+客户端身份删除后，同一台主机再次部署会得到新的 Client ID，原 Note 和 Project 归属不会沿用。
 
 ### 平台差异
 
 - **Linux**：所有目标同步删除，然后客户端退出。
-- **Windows**：运行中的程序不能删除自身。配置、插件、身份和 Recon 文件立即删除；程序文件（或整个专用目录）和 WinPTY 目录交给系统临时目录中的一次性脚本 `siren-cleanup-*.cmd`，它等客户端进程退出后再删除，失败会重试，最后删除脚本自身。所以 **Deletion scheduled** 不代表文件已经删掉，需要时登录主机确认。
+- **Windows**：配置、插件、身份和 Recon 文件立即删除；程序文件（或整个专用目录）和 WinPTY 目录由系统临时目录中的一次性脚本 `siren-cleanup-*.cmd` 在客户端退出后删除，失败会重试，最后删除脚本自身。所以 **Deletion scheduled** 不代表文件已删掉，需要时登录主机确认。
 
 ### 不会清理的内容
 
-- `SOAR_ACCESS_KEY_*` 等其他环境变量，以及写进 Shell 配置、systemd、计划任务等位置的持久化凭证。环境变量只从客户端进程中清除。
+- `SOAR_ACCESS_KEY_*` 等其他环境变量，以及写进 Shell 配置、systemd、计划任务等位置的持久化凭证（环境变量只从客户端进程中清除）。
 - 服务端上的任何数据：Artifacts、Reports、Project 目录、AIR 会话记录、日志。
-- 云端改动：[Configure egress](/onboard/egress) 写入的安全组规则、[Allow access](/onboard/provisioning) 的放行规则，都不会随清理回滚。
+- 云端改动：[Configure egress](/onboard/egress) 写入的安全组规则和 [Allow access](/onboard/provisioning) 的放行规则。
 - 插件安装脚本自行写到 SIREN 目录之外的文件。
 
 ## 命令行
@@ -102,7 +100,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 >>> clean <Client ID>
 ```
 
-在服务端终端输入 `y` 确认后发送清理请求，效果与 WebUI 相同，结果同样出现在 Recent activity 中。见 [服务端 REPL](/reference/repl)。
+输入 `y` 确认后发送清理请求，效果与 WebUI 相同，结果同样出现在 Recent activity 中。见 [服务端 REPL](/reference/repl)。
 
 **本地模式**（在目标主机上执行）：
 
@@ -110,19 +108,14 @@ import { Callout } from "fumadocs-ui/components/callout";
 ./siren clean
 ```
 
-输入 `y` 确认后，在本机执行同样的清理。执行前会检查可执行文件所在目录的 `siren.pid`：它指向的进程仍在运行，或无法确认其状态时，拒绝清理并提示先停止该客户端或改用远程清理。没有 PID 文件时（例如手动启动的客户端）不做这项检查，需要自己确认没有其他客户端在运行。
+输入 `y` 确认后在本机执行同样的清理。可执行文件所在目录的 `siren.pid` 指向的进程仍在运行或无法确认状态时，拒绝清理并提示先停止该客户端或改用远程清理。没有 PID 文件时（例如手动启动的客户端）不做这项检查，需要自己确认没有其他客户端在运行。
 
 ## 结案清单
 
-按顺序完成以下步骤。
+按顺序完成：
 
-1. **完成报告并导出需要留存的材料**。在 [Reports](/reports) 中完成事件报告；需要保留 AIR 会话过程时，在 GUI 中[导出 Markdown](/air/gui#导出-markdown)。还需要从受害主机取回的文件，用 [Files](/files) 下载，清理后就无法再访问。
-2. **清理客户端**。按[上文](#在-webui-中清理)对本次事件的所有客户端执行 **Clean & terminate**，在 Recent activity 中确认每条都是 **Files cleaned** 或 **Deletion scheduled**；其余状态登录主机核对。
-3. **恢复出站规则**。如果用过 **Configure egress**，在 Provisioning 面板的 **Restore egress** 标签中恢复，见 [恢复出站规则](/restore-egress)。顺序必须在清理之后，因为恢复会切断客户端回连。清理成功后面板会提示 `N cleaned clients have egress changes to restore`，点 **Review** 即可选中对应记录；这个提示依赖内存中的清理记录，服务端重启后不再出现，但恢复记录本身仍在。**Allow access**（包括一键部署时自动执行的那一步）为客户端 IP 添加的入方向放行没有恢复记录，Restore egress 不会撤销，不再需要时到云端手动移除。
-4. **处理 Project**。可以保留 Project 以便日后查阅；也可以在 Projects 页点 **Delete project**，它只删除 Project 元数据并解除客户端归属，Project 目录和其中的文件都保留在服务端。见 [Project 范围](/projects#管理-project)。
-5. **按需备份**。证据和状态都在服务端磁盘上：
-   - 服务端工作目录：其中的 `data/`（账号库、Project 元数据、客户端身份映射、备注、出站恢复记录）、`.env`，以及 Global 范围的 Artifacts。
-   - 各 Project 目录（位于 `webui.projectsBaseDir` 下），包含该 Project 的 Recon 结果、AIR 产出和报告。
-   - AIR 会话历史，由各 Provider 保存在自己的目录中，位置见 [准备 AIR Provider](/server/air-providers)。
-
-   各路径的含义见 [服务端数据](/upgrade#服务端数据)。
+1. **完成报告并导出材料**。在 [Reports](/reports) 中完成事件报告；需要保留 AIR 会话过程时在 GUI 中[导出 Markdown](/air/gui#导出-markdown)。还要从受害主机取回的文件用 [Files](/files) 下载，清理后无法再访问。
+2. **清理客户端**。对本次事件的所有客户端执行 [Clean & terminate](#在-webui-中清理)，在 Recent activity 中确认每条都是 **Files cleaned** 或 **Deletion scheduled**，其余状态登录主机核对。
+3. **恢复出站规则**。用过 **Configure egress** 时，在 Provisioning 面板的 **Restore egress** 标签中恢复，见 [恢复出站规则](/restore-egress)。必须在清理之后，因为恢复会切断客户端回连。清理成功后面板提示 `N cleaned clients have egress changes to restore`，点 **Review** 选中对应记录；这个提示依赖内存中的清理记录，服务端重启后不再出现，但恢复记录仍在。**Allow access**（包括一键部署自动执行的那一步）添加的入方向放行没有恢复记录，Restore egress 不会撤销，不再需要时到云端手动移除。
+4. **处理 Project**。可以保留以便日后查阅，也可以在 Projects 页点 **Delete project**：只删除 Project 元数据并解除客户端归属，Project 目录和文件保留在服务端。见 [Project 范围](/projects#管理-project)。
+5. **按需备份**。证据和状态都在服务端：工作目录（`data/`、`.env`、Global 范围的 Artifacts）、`webui.projectsBaseDir` 下的各 Project 目录，以及各 Provider 目录中的 AIR 会话历史。见 [服务端数据](/upgrade#服务端数据) 和 [备份](/upgrade#备份)。

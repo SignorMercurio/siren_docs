@@ -20,38 +20,27 @@ import { Card, Cards } from "fumadocs-ui/components/card";
 
 <Banner changeLayout={false} variant="rainbow" rainbowColors={['#60a5fa']}>仅远程模式支持</Banner>
 
-当发现泄露的云上 AccessKey 时，可以通过 SIREN 调用 SOAR 剧本查询该 AccessKey 的云上调用历史，用于判断影响范围、确认可疑来源，并为止血和复盘提供证据。
+发现泄露的云上 AccessKey 时，可以通过 SIREN 调用 SOAR 剧本查询它的云上调用历史，用于判断影响范围、确认可疑来源，并为止血和复盘提供证据。
 
 <Callout title="前置条件" type="info">
-  需要在控制主机上[设置 SOAR 平台访问凭证](/server/prerequisites#soar-凭证)。内部环境通常已预置凭证，可以直接使用。
+  需要在控制主机上[设置 SOAR 平台访问凭证](/server/prerequisites#soar-凭证)。内部环境通常已预置。
 </Callout>
 
-## 使用方式
+## WebUI
 
-```text tab="WebUI"
-Investigations -> AccessKey -> 填写 UID / AccessKey ID / Region -> Run
-```
-
-```bash tab="服务端 REPL"
->>> ak <Alibaba Cloud UID> <AccessKey ID> [Region]
-```
-
-`Region` 可选，留空时默认使用 `cn-hangzhou`；需要指定时使用 `cn-hangzhou`、`cn-beijing` 这类区域 ID。
-
-## WebUI 流程
-
-1. 打开 [Web 控制台](/webui#investigations)，进入 **Investigations** 页面。
-2. 在 **AccessKey** 表单中填写 Alibaba Cloud UID、AccessKey ID 和可选 Region。
-3. 点击 **Run**，等待调查完成。
-4. 结果生成后，点击 **Open Report** 在 Artifacts 中查看完整 Markdown 报告。
-
-WebUI 只展示服务端已知的执行结果：调查完成后显示报告入口，失败时显示错误信息。
+1. 打开 [Web 控制台](/webui#investigations) 的 **Investigations** 页面。
+2. 在 **AccessKey** 表单中填写 Alibaba Cloud UID、AccessKey ID 和可选的 Region，点击 **Run**。
+3. 完成后点击 **Open Report** 在 Artifacts 中查看 Markdown 报告；失败时显示错误信息。
 
 ![Investigations 页的 AccessKey 标签，填写 UID、AccessKey ID 和可选 Region](../../img/ak-investigation.png)
 
 ## 服务端 REPL
 
-在 SIREN Server REPL 中执行 `ak` 命令。适合已在控制主机终端操作，或需要将结果文件留在服务端工作目录的场景。
+```bash
+>>> ak <Alibaba Cloud UID> <AccessKey ID> [Region]
+```
+
+`Region` 留空时默认 `cn-hangzhou`，需要时填 `cn-beijing` 这类区域 ID（WebUI 同理）。
 
 <Accordions>
   <Accordion title="示例输出">
@@ -67,20 +56,17 @@ WebUI 只展示服务端已知的执行结果：调查完成后显示报告入�
 
 ## 输出位置
 
-调查结果会保存为 Markdown 文件，文件名形如 `AK_<UID>_<AccessKey ID>_<YYYY-MM-DD_HH-MM-SS>.md`，时间中的冒号会替换为连字符。报告包含 SOAR 返回的调用历史，常见字段包括调用时间、操作类型和来源 IP，具体以 SOAR 返回结果为准。
+报告文件名形如 `AK_<UID>_<AccessKey ID>_<YYYY-MM-DD_HH-MM-SS>.md`，包含 SOAR 返回的调用历史，常见字段有调用时间、操作类型和来源 IP，以 SOAR 实际返回为准。
 
-AccessKey 调查不绑定在线客户端，也不跟随 Project 视图切换。报告始终写入 Global Artifacts，也就是 `siren_server` 当前工作目录。即使在 Project 视图中从 WebUI 发起调查，**Open Report** 也会打开 Global Artifacts 中的报告。
+AccessKey 调查不绑定客户端，也不跟随 Project 视图：报告始终写入 Global Artifacts（`siren_server` 当前工作目录），在 Project 视图中发起时 **Open Report** 也会打开 Global 中的报告。
 
 <Callout title="敏感信息" type="warn">
-  AccessKey 调查报告会包含 AccessKey ID 和调用历史。下载、转发或写入应急报告前，请先确认接收范围和脱敏要求。
+  报告包含 AccessKey ID 和调用历史。下载、转发或写入应急报告前，先确认接收范围和脱敏要求。
 </Callout>
 
 ## 相关内容
 
 <Cards>
-  <Card title="Web 控制台" href="/webui#investigations">
-    在浏览器中运行 AccessKey 调查并打开生成报告
-  </Card>
   <Card title="Artifacts" href="/artifacts">
     查看服务端工作目录中的 Markdown 调查报告
   </Card>

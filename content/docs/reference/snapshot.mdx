@@ -24,10 +24,10 @@ sources:
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 
-[Recon](/recon) 的结果是一份 `snapshot-jsonl-v2` 格式的 `*.recon.jsonl` 快照，以及由它渲染的同名 `*.md` 报告。本页说明 JSONL 的结构，供解析快照、编写分析脚本或审阅原始证据时查阅。发起采集、Profile 和保存位置见 [自动化信息收集](/recon)。
+[Recon](/recon) 的结果是 `snapshot-jsonl-v2` 格式的 `*.recon.jsonl` 快照，以及由它渲染的同名 `*.md` 报告。发起采集、Profile 和保存位置见 [自动化信息收集](/recon)。
 
 <Callout title="快照内容是不可信数据" type="warn">
-  快照中的文件内容、日志、命令输出和环境变量来自被调查主机，可能被攻击者控制。无论人工阅读还是交给 Agent 分析，都只能当作证据，不能当作指令执行。快照也会包含凭据原文，应只保存在受控目录中。
+  快照中的文件内容、日志、命令输出和环境变量来自被调查主机，可能受攻击者控制。人工阅读或交给 Agent 分析时都只能当作证据，不能当作指令。快照含凭据原文，应只保存在受控目录。
 </Callout>
 
 ## 文件
@@ -37,13 +37,13 @@ import { Card, Cards } from "fumadocs-ui/components/card";
 | `*.recon.jsonl` | 权威快照。UTF-8 JSON Lines，每行一个事件，最大 128 MiB |
 | `*.md` | 从 JSONL 确定性渲染的报告，只用于浏览，见 [派生 Markdown](#派生-markdown) |
 
-- 服务端只接受 `snapshot-jsonl-v2`（`schemaVersion` 为 `2`）。其他格式、版本，或任何一条事件不符合下文规则的快照，整份被拒绝，不生成报告。
-- 远程 Recon 时客户端只回传 JSONL，服务端校验后生成 Markdown；本地模式由客户端自己校验并生成。
-- 单行可能长达 16 MiB。用逐行读取的工具处理时，不要使用 64 KiB 之类的默认行缓冲上限。
+- 服务端只接受 `snapshot-jsonl-v2`（`schemaVersion` 为 `2`）。格式或版本不符，或任一事件违反下文规则，整份快照被拒绝，不生成报告。
+- 远程 Recon 时客户端只回传 JSONL，由服务端校验并生成 Markdown；本地模式由客户端完成。
+- 单行最长可达 16 MiB，逐行读取时不要沿用 64 KiB 之类的默认行缓冲上限。
 
 ## 事件顺序
 
-事件按以下顺序出现，`module_start` 到 `module_end` 之间按 source 分组：
+`module_start` 到 `module_end` 之间按 source 分组：
 
 ```text
 snapshot_start
@@ -60,13 +60,13 @@ module_end    (user)
 snapshot_end
 ```
 
-- 第一个模块总是 `basic`，之后的模块与 `snapshot_start.modules` 中声明的顺序一致：内置模块按固定顺序，`plugin:<name>` 按名称排序。
-- 同一个 source 的记录连续出现，紧跟一条 `source_result`；`source_result` 中的 `recordCount`、`byteCount` 与前面的记录一一对应。
-- 时间预算耗尽或快照接近大小上限时，剩余模块不再出现，它们列在 `snapshot_end.omittedModules` 中。
+- 第一个模块总是 `basic`，其余按 `snapshot_start.modules` 的顺序：内置模块顺序固定，`plugin:<name>` 按名称排序。
+- 同一 source 的记录连续出现，之后紧跟一条 `source_result`，其 `recordCount`、`byteCount` 与这些记录对应。
+- 时间预算耗尽或快照接近大小上限时，剩余模块不再出现，列在 `snapshot_end.omittedModules` 中。
 
 ## 事件字段
 
-每个事件都有以下字段：
+每个事件都有：
 
 | 字段 | 说明 |
 | --- | --- |
@@ -74,7 +74,7 @@ snapshot_end
 | `sequence` | 从 1 开始连续递增的序号 |
 | `observedAt` | RFC 3339 时间（UTC，含纳秒） |
 
-省略值为空的字段，例如 `truncated` 为 `false` 时不出现。
+值为空的字段省略，例如 `truncated` 为 `false` 时不出现。
 
 ### snapshot_start
 
@@ -132,7 +132,7 @@ snapshot_end
 
 ### module_end
 
-`module`、`status`、`recordCount`、`byteCount`、`truncated`、`durationMs` 和 `error`。模块内任一 source 不是 `ok`，模块状态就不会是 `ok`；`error` 汇总各 source 的原因。
+`module`、`status`、`recordCount`、`byteCount`、`truncated`、`durationMs` 和 `error`。任一 source 不是 `ok` 时模块也不是 `ok`，`error` 汇总各 source 的原因。
 
 ### snapshot_end
 
@@ -160,11 +160,11 @@ snapshot_end
 
 | 字段 | 说明 |
 | --- | --- |
-| `rawText` | 采集器给出的单行显示文本，例如命令输出的一行。证据文件和部分派生事实不带此字段，避免原文进入 Markdown |
-| `structural` | 为 `true` 时是报告排版用的标题或代码围栏行，不是证据，解析时可以跳过 |
-| `parsed` | 只出现在 `fact` 上。`true` 表示除 `rawText` 外还有可查询的结构化字段 |
+| `rawText` | 采集器给出的单行显示文本，例如一行命令输出。证据文件和部分派生事实不带此字段，避免原文进入 Markdown |
+| `structural` | `true` 表示报告排版用的标题或代码围栏行，不是证据，可跳过 |
+| `parsed` | 仅 `fact`。`true` 表示除 `rawText` 外还有可查询的结构化字段 |
 
-记录中不会出现 `risk`、`severity`、`verdict`、`weakPassword` 这类判定字段，带有这些字段的快照会被拒绝。
+记录不含 `risk`、`severity`、`verdict`、`weakPassword` 等判定字段，带有这类字段的快照会被拒绝。
 
 ### 实体
 
@@ -182,7 +182,7 @@ snapshot_end
 | `mount` | 容器挂载的 `path` |
 | `certificate` | 从 PEM 文件解析的证书：`subject`、`issuer`、`dnsNames`、`notBefore`、`notAfter`、`sha256` |
 
-容器端口的 `portExposure` 区分 `declared`（镜像声明）和 `published`（发布到宿主机）。只有发布端口与同一次 Socket 快照匹配时 `observed` 才为 `true`；声明或发布本身都不代表端口可从外部访问。
+容器端口的 `portExposure` 分为 `declared`（镜像声明）和 `published`（发布到宿主机）。仅当发布端口与同一次 Socket 快照匹配时 `observed` 才为 `true`；声明或发布都不代表端口可从外部访问。
 
 ### 关系
 
@@ -196,15 +196,15 @@ snapshot_end
 | `configured_by` | 组件等实体 → `evidence_file` | |
 | `includes` | `evidence_file` → 被引用的 `evidence_file`；PEM 文件 → `certificate` | |
 
-每条关系都带 `evidenceSource`，说明关系从哪里观察到，例如 `socket owning PID`、`container mount inventory`。
+每条关系都带 `evidenceSource`，说明观察来源，例如 `socket owning PID`、`container mount inventory`。
 
 ### 证据文件
 
-`config`、`credential` 和 `supplychain` 模块采集的文件写成 `evidence_file`，同一路径在一份快照中只有一条，后续模块引用同一个 `entityId`。
+`config`、`credential`、`supplychain` 模块采集的文件写成 `evidence_file`。同一路径每份快照只有一条，后续模块引用同一 `entityId`。
 
 | 字段 | 说明 |
 | --- | --- |
-| `entityType` | `config_file`、`credential_file` 或 `supplychain_file`。由路径和内容决定，与先发现它的模块无关 |
+| `entityType` | `config_file`、`credential_file` 或 `supplychain_file`。由路径和内容决定，与发现它的模块无关 |
 | `path`、`size`、`mode`、`mtime` | 文件元数据 |
 | `discoverySource`、`relatedEntityIds` | 文件是怎么找到的，以及关联的实体 |
 | `contentPolicy` | `full`：`content` 中有原文；`metadata_only`：只有元数据，`contentOmittedReason` 为 `binary_material` 或 `bounded_preview` |
@@ -229,15 +229,15 @@ snapshot_end
 
 其他 `fact` 是各 source 的输出行，`factType` 取自 source 类型，例如 `observation`、`topology_fact`。
 
-`content_pattern_match` 只描述“某个位置匹配了某种形态”，不判断凭据是否有效：
+`content_pattern_match` 只表示“某位置匹配了某种形态”，不判断凭据是否有效：
 
 - 字段：`path`、`line`、`patternId`、`fileEntityId`、`maskedValue`（保留至多 4 字节前缀，其余以 `*` 遮盖）、`valueLength`、`valueSha256`。
 - `patternId`：`aliyun_access_key_id`、`aws_access_key_id`、`tencent_secret_id`、`gcp_service_account_key`、`github_token`、`slack_token`、`jwt`、`pem_private_key`、`password_assignment`、`url_userinfo_credential`。
-- `valueSha256` 是完整匹配值的摘要，可以跨主机比对同一个凭据。原文仍在对应 `evidence_file` 中。
+- `valueSha256` 是完整匹配值的摘要，可跨主机比对同一凭据；原文仍在对应 `evidence_file` 中。
 
 ## 稳定 ID
 
-实体、关系和事实的 ID 由身份字段计算得到，同一输入总是得到同一 ID：
+实体、关系和事实的 ID 由身份字段确定性计算，同一输入总得到同一 ID：
 
 | 前缀 | 身份来源 |
 | --- | --- |
@@ -249,9 +249,9 @@ snapshot_end
 | `file:` | 规范化后的文件路径 |
 | `relation:` | 两端实体、关系类型，`connects_to` 还包括 Socket |
 
-- 引用关系用 ID 表达：`relation.fromEntityId` / `toEntityId`、`process.parentEntityId`、`connects_to.socketEntityId`、`fileEntityId`、`relatedEntityIds`。
-- 进程、Socket、服务、容器和证据文件实体在一份快照中只写一次，后续模块只引用 ID。其他实体在少数情况下可能重复出现，解析时按 `entityId` 合并即可。
-- 基于名称和路径的 ID 可用于对比同一主机的不同快照；进程和 Socket 的 ID 带运行态信息，跨快照通常不同。
+- 引用一律用 ID：`relation.fromEntityId` / `toEntityId`、`process.parentEntityId`、`connects_to.socketEntityId`、`fileEntityId`、`relatedEntityIds`。
+- 进程、Socket、服务、容器和证据文件实体每份快照只写一次，后续模块只引用 ID；其他实体偶尔重复出现，按 `entityId` 合并即可。
+- 基于名称和路径的 ID 可用于对比同一主机的不同快照；进程和 Socket 的 ID 含运行态信息，跨快照通常不同。
 
 ## 状态值
 
@@ -271,18 +271,18 @@ snapshot_end
 | `not_present` | 已检查，目标不存在，例如主机没有安装某种容器运行时 |
 | `not_collected` | 按设计不采集，例如 Windows 的 SAM/SECURITY/LSA，或超出摘要预算的全文件哈希 |
 
-这两种情况的 `status` 为 `ok`，`presence` 写在 `source_result` 的 `metadata.presence` 和 `coverage.presence` 中，不会让快照变成 partial。
+这两种情况 `status` 为 `ok`，`presence` 写在 `source_result` 的 `metadata.presence` 和 `coverage.presence`，不会让快照变成 partial。
 
 **快照**
 
 | status | 含义 |
 | --- | --- |
 | `complete` | 所有模块执行完毕且状态都是 `ok` |
-| `partial` | 至少一个模块不是 `ok`，或有模块未执行。已完成的部分仍然有效 |
+| `partial` | 至少一个模块不是 `ok`，或有模块未执行；已完成部分仍然有效 |
 
 **截断**
 
-达到上限时，`truncated` 为 `true`，状态至少为 `partial`。`metadata.limitType` / `coverage.limitType` 说明是哪个上限：
+达到上限时 `truncated` 为 `true`，状态至少为 `partial`，`metadata.limitType` / `coverage.limitType` 指明哪个上限：
 
 | limitType | 上限 |
 | --- | --- |
@@ -295,11 +295,11 @@ snapshot_end
 
 **错误码**
 
-`coverage.errorCode` 为 `not_present`、`not_collected`、`collection_limit`（截断）、`timeout`、`collector_unavailable`、`collection_failed` 或 `collection_partial`。按错误码统计比解析 `error` 文本更可靠。
+`coverage.errorCode` 为 `not_present`、`not_collected`、`collection_limit`（截断）、`timeout`、`collector_unavailable`、`collection_failed` 或 `collection_partial`。按错误码统计比解析 `error` 文本可靠。
 
 ### 解析程度
 
-`parseStatus` 描述一个 source 的记录有多少可以按字段查询：`entity`、`relation`、`evidence_file` 和 `parsed: true` 的 `fact` 计为 structured；其余 `fact` 和 `plugin_text` 计为 raw；`structural` 行单独计数。
+`parseStatus` 描述 source 的记录有多少可按字段查询：`entity`、`relation`、`evidence_file` 和 `parsed: true` 的 `fact` 计为 structured；其余 `fact` 和 `plugin_text` 计为 raw；`structural` 行单独计数。
 
 | parseStatus | 含义 |
 | --- | --- |
@@ -308,11 +308,11 @@ snapshot_end
 | `raw` | 只有原文行 |
 | `not_applicable` | 没有证据记录 |
 
-配置、脚本、日志、历史记录等内容保留为原文是正常结果，不会因为没有解析而把 source 标为 partial。
+配置、脚本、日志、历史记录等保留为原文是正常结果，不会因此把 source 标为 partial。
 
 ## 上限
 
-以下上限固定，不能通过配置修改。实际值同时写在 `snapshot_start.limits` 中。
+以下上限固定、不可配置，实际值写在 `snapshot_start.limits` 中。
 
 **通用**
 
@@ -353,18 +353,18 @@ snapshot_end
 | 日志正文合计 | 4 MiB | `activityContentBytes` |
 | 目录遍历 | 10,000 个条目 | `activityWalkEntries` |
 
-采集超时（`recon.commandTimeout`、`recon.collectionTimeout`、`recon.responseTimeout`）可以配置，见 [超时](/recon#超时)。全部上限的汇总见 [限制速查](/reference/limits)。
+采集超时（`recon.commandTimeout`、`recon.collectionTimeout`、`recon.responseTimeout`）可配置，见 [超时](/recon#超时)；全部上限汇总见 [限制速查](/reference/limits)。
 
 ## 派生 Markdown
 
-Markdown 由服务端（本地模式下由客户端）在校验 JSONL 的同时生成，内容完全来自 JSONL，Dossier 也只编辑这份 Markdown，不修改快照。
+Markdown 由服务端（本地模式下为客户端）在校验 JSONL 时生成，内容完全来自 JSONL；Dossier 只编辑这份 Markdown，不修改快照。
 
-- **不含证据正文模块的 Profile**（如 `default`、`quick`）：按模块依次输出各 source 的 `rawText` 和插件文本。模块不是 `ok` 时，在该模块末尾追加 `> Collection status: <状态> — <原因>`；快照为 partial 时，在文末追加 `> Snapshot status: partial — <原因>`。
-- **`hunt`，以及任何包含 `topology`、`supplychain`、`config`、`activity` 或 `credential` 模块的 Profile**：这些模块会读取配置、凭据和日志原文，所以只输出索引，标题为 `# Hunt Snapshot Summary`，包含快照状态、权威 JSONL 的路径，以及 **Primary applications and middleware**、**Containers**、**Kernel-observed host listeners**、**Container port configuration**、**Coverage** 几节。表格行数超出时注明省略数量。配置、环境变量、日志正文、密码 hash 和凭据原文不会进入索引，需要时读 JSONL。
+- **不含证据正文模块的 Profile**（如 `default`、`quick`）：按模块依次输出各 source 的 `rawText` 和插件文本。模块不是 `ok` 时在其末尾追加 `> Collection status: <状态> — <原因>`；快照为 partial 时，在文末追加 `> Snapshot status: partial — <原因>`。
+- **`hunt`，以及任何包含 `topology`、`supplychain`、`config`、`activity` 或 `credential` 模块的 Profile**：这些模块会读取配置、凭据和日志原文，因此只输出索引：标题为 `# Hunt Snapshot Summary`，含快照状态、权威 JSONL 路径，以及 **Primary applications and middleware**、**Containers**、**Kernel-observed host listeners**、**Container port configuration**、**Coverage** 几节，表格超出行数时注明省略数量。配置、环境变量、日志正文、密码 hash 和凭据原文不进入索引，需要时读 JSONL。
 
 ## 各模块写入的记录
 
-模块采集的内容见 [模块](/recon#模块)，下表只说明它们在快照中以什么形式出现。
+模块采集什么见 [模块](/recon#模块)，下表只列它们在快照中的记录形式。
 
 | 模块 | 主要记录 |
 | --- | --- |
@@ -375,7 +375,7 @@ Markdown 由服务端（本地模式下由客户端）在校验 JSONL 的同时�
 | `service`（Linux）、`schtask`（Windows） | `service` 实体；启动项和计划任务的 fact |
 | `application` | 应用配置的 fact；Linux 另有运行中的 `container` 实体 |
 | `ssh`、`cron`、`env`、`file`、`rootkit` | fact |
-| `topology` | `component`、`container_runtime`、`remote_endpoint`、`mount` 和容器端口 `socket` 实体，以及 `runs`、`listens`、`connects_to`、`mounts`、`uses_runtime` 关系。之前的模块没有写过的进程、Socket、服务和容器也在这里补写 |
+| `topology` | `component`、`container_runtime`、`remote_endpoint`、`mount` 和容器端口 `socket` 实体，以及 `runs`、`listens`、`connects_to`、`mounts`、`uses_runtime` 关系，并补写之前模块未写过的进程、Socket、服务和容器 |
 | `config`、`credential` | `evidence_file`、`evidence_preview`、`evidence_content`、`content_pattern_match`；`configured_by`、`includes` 关系；`certificate` 实体 |
 | `supplychain` | `executable_digest`、`container_image_reference`；依赖清单写为 `evidence_file` |
 | `activity` | `activity_log_excerpt` |
@@ -383,7 +383,7 @@ Markdown 由服务端（本地模式下由客户端）在校验 JSONL 的同时�
 
 ## 读取示例
 
-快照可能很大，建议用 `jq`、`rg` 等工具流式读取，按事件类型、`entityId` 和关系定位：
+快照可能很大，建议用 `jq`、`rg` 流式读取，按事件类型、`entityId` 和关系定位：
 
 ```bash
 # 未完整采集的 source 及原因
@@ -403,7 +403,7 @@ jq -c 'select(.kind == "fact" and .data.factType == "content_pattern_match")
   | .data | {path, line, patternId, maskedValue}' host.recon.jsonl
 ```
 
-AIR 会话通过 MCP `recon` 工具拿到 Project 相对路径 `snapshotPath` 后，用同样的方式读取，见 [MCP](/reference/mcp)。
+AIR 会话从 MCP `recon` 工具拿到 Project 相对路径 `snapshotPath` 后同样读取，见 [MCP](/reference/mcp)。
 
 ## 相关内容
 

@@ -24,61 +24,60 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-GUI 是 AIR 会话的默认界面：SIREN 通过 Provider 的机器协议接收事件，按轮次整理成调查时间线，操作员在同一处查看 Agent 的回复和操作、回答审批与提问、补充指令。启动、接入和恢复会话见 [启动与管理会话](/air/sessions)；各 Provider 的命令、审批选项和额度显示差异见 [Provider 差异](/air/providers)；需要原生 TUI 时改用 [Terminal 界面](/air/terminal)。
+GUI 是 AIR 会话的默认界面：SIREN 把 Provider 的事件按轮次整理成调查时间线，操作员在同一处查看回复和操作、回答审批与提问、补充指令。启动和恢复会话见 [启动与管理会话](/air/sessions)，各 Provider 的差异见 [Provider 差异](/air/providers)，原生 TUI 见 [Terminal 界面](/air/terminal)。
 
 ## 时间线结构
 
-每一轮（turn）从操作员发送的请求开始，按发生顺序交错展示以下内容：
+每一轮（turn）从操作员的请求开始，按发生顺序交错展示：
 
 | 元素 | 显示方式 |
 | --- | --- |
-| Agent 回复 | Markdown 原文；回复中的证据脚注见 [证据与报告](/air/evidence) |
-| 操作记录 | 每行显示图标、动作和对象（命令、文件、搜索词、MCP 工具等）。连续多个操作聚合为一行摘要，列出动作类型、条数和失败数，点击展开 |
+| Agent 回复 | Markdown 原文；证据脚注见 [证据与报告](/air/evidence) |
+| 操作记录 | 每行显示图标、动作和对象（命令、文件、搜索词、MCP 工具等）。连续操作聚合为一行摘要，列出动作类型、条数和失败数，点击展开 |
 | 计划 | **Plan** 块显示完成数和进度条，运行中的轮次默认展开 |
 | 审批与提问 | 在请求发生的位置显示卡片，见 [审批与提问](#审批与提问) |
-| Provider 通知 | 带时间戳的单行通知；带附加数据的通知可点击展开，warning 和 error 级通知保留醒目颜色 |
+| Provider 通知 | 带时间戳的单行通知，带附加数据的可点击展开；warning 和 error 级保留醒目颜色 |
 | 结构化结果 | 特定工具结果下方追加结果卡，见 [结构化结果卡](#结构化结果卡) |
 
-单条操作展开后可以看到 **Full command**、**Input** 和 **Output**，每块都有复制按钮。已完成的操作在行尾显示耗时，悬停可查看起止时间；失败的操作标记 `failed`。带文件路径的操作可直接点击路径，在该会话所属 Project 的 Artifacts 中打开。
+单条操作展开后显示 **Full command**、**Input** 和 **Output**，各带复制按钮。已完成的操作在行尾显示耗时（悬停查看起止时间），失败的标记 `failed`。点击操作中的文件路径，在该会话所属 Project 的 Artifacts 中打开。
 
-从 History 继续的会话里，没有对应请求的轮次显示为 **Resumed session activity**。会话有多轮时，时间线右侧出现轮次导航刻度：悬停预览该轮的请求和回复开头，点击跳转；有待处理请求的轮次会高亮。向上翻阅后自动跟随暂停，右下角出现向下箭头按钮（Jump to latest），点击回到最新内容并恢复跟随。
+从 History 继续的会话里，没有对应请求的轮次显示为 **Resumed session activity**。多轮会话的时间线右侧有轮次导航刻度：悬停预览该轮请求和回复开头，点击跳转，有待处理请求的轮次高亮。向上翻阅后自动跟随暂停，点击右下角的向下箭头（Jump to latest）回到最新内容并恢复跟随。
 
 ### 输出块
 
-命令输出等等宽内容默认自动换行。点击输出块右上角的换行按钮可切换为保留列对齐、块内横向滚动，适合 `ps aux`、`netstat` 这类依赖列对齐的输出；该设置只作用于当前输出块。输出超过 30 行时，标签旁会显示总行数。
+命令输出默认自动换行。点击输出块右上角的换行按钮可改为保留列对齐、块内横向滚动，适合 `ps aux`、`netstat` 等输出；该设置只作用于当前输出块。输出超过 30 行时，标签旁显示总行数。
 
 ## 发送请求与调整方向
 
-在底部输入框中按 Enter 发送，Shift+Enter 换行。
+在底部输入框按 Enter 发送，Shift+Enter 换行。
 
-- **空闲时**：发送的内容开启新的一轮。
-- **运行中**：输入框提示变为 "Adjust the current direction"，发送的内容作为方向调整交给当前轮次。发送后显示 "Applying your direction adjustment…"，生效前不能再发送；时间线中该消息带 **Steered** 标签。各 Provider 应用方向调整的方式不同，见 [Provider 差异](/air/providers#运行中调整方向)。
-- **停止当前轮次**：运行中输入框右侧出现停止按钮（Stop current turn），只停止当前这一轮，会话保持连接，可以继续发送新请求。Codex、Claude 和 Qoder 中等待处理的审批与提问会随之取消，记录为 `Cancelled`。结束整个会话见 [启动与管理会话](/air/sessions)。
+- **空闲时**：开启新的一轮。
+- **运行中**：输入框提示变为 "Adjust the current direction"，内容作为方向调整交给当前轮次。发送后显示 "Applying your direction adjustment…"，生效前不能再发送；该消息带 **Steered** 标签。各 Provider 的处理方式见 [Provider 差异](/air/providers#运行中调整方向)。
+- **停止当前轮次**：点击输入框右侧的停止按钮（Stop current turn），只停止这一轮，会话保持连接。Codex、Claude 和 Qoder 中等待处理的审批与提问随之取消，记录为 `Cancelled`。结束整个会话见 [启动与管理会话](/air/sessions)。
 
 <Callout title="调整方向不会撤销已完成的操作" type="warn">
-  方向调整和停止只影响 Agent 之后的行为。已经执行的命令、文件修改和对客户端的远程操作不会回滚，请在时间线中核对已完成的操作。
+  方向调整和停止只影响 Agent 之后的行为。已执行的命令、文件修改和对客户端的远程操作不会回滚，请在时间线中核对。
 </Callout>
 
 ## 审批与提问
 
-Provider 需要操作员决定时，Agent 会暂停并在时间线中插入卡片。输入框上方同时出现提示条（**Approval required** 或 **Agent question**），点击 **Show request** 跳到对应卡片；如果卡片被检索过滤隐藏，会先清除过滤。浏览器标签页和 **Running** 列表中的提示见 [启动与管理会话](/air/sessions)。
+Provider 需要操作员决定时，Agent 暂停并在时间线中插入卡片，输入框上方出现提示条（**Approval required** 或 **Agent question**）。点击 **Show request** 跳到对应卡片，必要时先清除检索过滤。其他位置的提示见 [启动与管理会话](/air/sessions)。
 
-**审批卡**（Approval required）显示请求摘要，以及 Provider 提供的路径、命令、写入内容和其他参数。写入内容超过 20 行时只显示前 20 行并注明剩余行数，点击复制按钮可得到全文。底部按钮就是 Provider 提供的选项，例如 **Allow once**、**Allow for session**、**Decline**；各 Provider 的选项和 “本会话允许” 的范围见 [Provider 差异](/air/providers#审批)。
+**审批卡**（Approval required）显示请求摘要，以及 Provider 提供的路径、命令、写入内容和其他参数。写入内容超过 20 行时只显示前 20 行，复制按钮可得到全文。底部按钮是 Provider 提供的选项，例如 **Allow once**、**Allow for session**、**Decline**，差异见 [Provider 差异](/air/providers#审批)。
 
-**提问卡**显示 Agent 的问题和编号选项。点击选项即作答；点击 **Answer in your own words** 可输入自由回答后点击 **Answer**。没有预设选项的问题直接显示输入框。
+**提问卡**显示问题和编号选项，点击选项即作答；点击 **Answer in your own words** 输入自由回答后点击 **Answer**。没有预设选项时直接显示输入框。
 
-焦点位于卡片内时，可以按数字键 1–9 选择对应选项。卡片不会自动抢占焦点，因此不会打断正在输入的内容。
+焦点位于卡片内时可按数字键 1–9 选择选项。卡片不会自动抢占焦点，不会打断正在输入的内容。
 
-处理后，卡片收起为一行决策记录：结果（`Allowed once`、`Allowed for session`、`Declined`、`Cancelled`、`Expired` 或 `Answered`）、时间和摘要，提问会显示所选或输入的答案。点击记录可展开原始请求和完整答案。这些记录属于会话事件流，刷新页面或在其他浏览器重新接入后随回放一起恢复。
+处理后，卡片收起为一行决策记录：结果（`Allowed once`、`Allowed for session`、`Declined`、`Cancelled`、`Expired` 或 `Answered`）、时间和摘要，提问显示所选或输入的答案，点击可展开原始请求和完整答案。这些记录随回放恢复，刷新或在其他浏览器接入后仍可见。
 
 ## 检索与过滤
 
-按 Cmd/Ctrl+F，或点击状态条中的搜索按钮，在时间线上方打开检索条。只读的历史时间线同样可用。
+按 Cmd/Ctrl+F 或点击状态条中的搜索按钮打开检索条，只读历史同样可用。
 
-- 输入关键词后，命中处高亮，计数器显示 “当前/总数”。按 Enter 跳到下一处，Shift+Enter 跳到上一处，也可以使用上下箭头按钮；按 Esc 关闭。
-- 当前命中位于折叠的操作行或聚合摘要中时，会临时展开该处。
-- 过滤 chip：**Failed**（失败的操作）、**Commands**（命令）、**Files**（文件修改）、**Requests**（审批与提问）。多个 chip 之间取并集，可与关键词同时使用，也可以不输入关键词单独使用。
-- 启用 chip 后，时间线只保留命中的条目，检索条显示 “Filtered: N matches”，点击 **Clear** 恢复完整时间线。运行中发送的方向调整始终保留，作为上下文。
+- 命中处高亮，计数器显示 “当前/总数”。Enter / Shift+Enter 或上下箭头按钮跳到下一处/上一处，Esc 关闭。命中位于折叠的操作行或摘要中时会临时展开。
+- 过滤 chip：**Failed**（失败的操作）、**Commands**（命令）、**Files**（文件修改）、**Requests**（审批与提问）。多个 chip 取并集，可单独使用或与关键词组合。
+- 启用 chip 后时间线只保留命中条目，检索条显示 “Filtered: N matches”，点击 **Clear** 恢复。运行中发送的方向调整始终保留作为上下文。
 
 ## 状态条
 
@@ -86,52 +85,37 @@ Provider 需要操作员决定时，Agent 会暂停并在时间线中插入卡�
 
 | 项 | 说明 |
 | --- | --- |
-| 连接状态 | 圆点表示与服务端的连接；未连接时附带状态文字。只读历史显示 **History · read only** |
-| **Model** | 当前模型和推理强度。支持切换的 Provider 在空闲时可点击打开模型选择器，见 [Provider 差异](/air/providers#模型与推理强度) |
-| **Ctx** | 上下文占用百分比，悬停查看已用和上限 token 数。Provider 未报告上下文上限时不显示 |
-| 额度窗口 | 如 `5h 80% (2h13m)`：窗口、剩余百分比和重置倒计时。剩余不超过 10% 时醒目显示；Provider 不提供可编程额度时显示原因或 **Usage** 外链，不做估算 |
+| 连接状态 | 圆点表示与服务端的连接，未连接时附带状态文字。只读历史显示 **History · read only** |
+| **Model** | 当前模型和推理强度。支持切换的 Provider 空闲时可点击打开模型选择器，见 [Provider 差异](/air/providers#模型与推理强度) |
+| **Ctx** | 上下文占用百分比，悬停查看已用和上限 token 数。Provider 未报告上限时不显示 |
+| 额度窗口 | 如 `5h 80% (2h13m)`：窗口、剩余百分比和重置倒计时，剩余不超过 10% 时醒目显示。Provider 不提供可编程额度时显示原因或 **Usage** 外链，不做估算 |
 | **Stale** | 额度数据被 Provider 标记为过期，或超过 10 分钟未更新 |
 | **Updated** | 额度数据的更新时间 |
 
-右侧动作区有三个按钮：检索（⌘F）、导出 Markdown、刷新额度。上下文占用和订阅额度分开显示，各 Provider 能显示哪些项见 [Provider 差异](/air/providers#额度与上下文)。
+右侧有三个按钮：检索（⌘F）、导出 Markdown、刷新额度。各 Provider 能显示哪些项见 [Provider 差异](/air/providers#额度与上下文)。
 
 ## 斜杠命令
 
-在输入框键入 `/` 打开命令菜单，菜单按命令名前缀和描述匹配。
+在输入框键入 `/` 打开命令菜单，按命令名前缀和描述匹配。↑ / ↓ 或悬停移动高亮，Enter 直接执行，Tab 或点击把命令补全到输入框（保留已输入的参数），Esc 关闭。
 
-| 操作 | 效果 |
-| --- | --- |
-| ↑ / ↓ 或鼠标悬停 | 移动高亮 |
-| Enter | 直接执行高亮的命令 |
-| Tab 或鼠标点击 | 把命令补全到输入框，保留已经输入的参数 |
-| Esc | 关闭菜单 |
+- 运行中，只能在空闲时执行的命令标记 `idle only` 且不能执行。
+- 已识别的命令不能附带图片，输入框中有待发送图片时执行会报错。
+- 命令结果显示在输入框上方的面板中。
 
-- 运行中，只能在空闲时执行的命令仍会列出，但标记 `idle only` 且不能执行。
-- 已识别的命令不能附带图片；输入框中有待发送的图片时执行命令会报错。
-- 命令结果显示在输入框上方的面板中，点击右上角关闭。
-
-所有 Provider 都提供 `/status`：在本地显示连接、Provider、模型、SIREN 会话 ID、Provider 会话 ID、当前轮次与状态、Project、上下文占用及已有的额度窗口。它随时可用，不发送给 Provider，也不写入 Provider 历史。其他命令由各 Provider 决定，见 [Provider 差异](/air/providers#gui-命令)。
+所有 Provider 都提供 `/status`：在本地显示连接、Provider、模型、SIREN 会话 ID、Provider 会话 ID、当前轮次与状态、Project、上下文占用及额度窗口。它随时可用，不发送给 Provider，也不写入 Provider 历史。其他命令见 [Provider 差异](/air/providers#gui-命令)。
 
 ## 粘贴图片
 
-在输入框中直接粘贴截图（如告警详情、网络拓扑），图片会以缩略图暂存在输入框内，可单独移除，随下一条消息一起发送。时间线中带图片的消息显示图片数量。
-
-| 限制 | 值 |
-| --- | --- |
-| 格式 | PNG、JPEG、WebP、GIF |
-| 每条消息 | 最多 4 张 |
-| 单张大小 | 不超过 8 MiB |
-
-当前会话不接受图片时，粘贴会提示 "This provider session does not accept pasted images"。各 Provider 的图片支持见 [Provider 差异](/air/providers#图片输入)，Terminal 中粘贴图片见 [Terminal 界面](/air/terminal)。
+在输入框中直接粘贴截图，图片以缩略图暂存（可单独移除），随下一条消息发送。支持 PNG、JPEG、WebP、GIF，每条消息最多 4 张，单张不超过 8 MiB。当前会话不接受图片时提示 "This provider session does not accept pasted images"。各 Provider 的支持见 [Provider 差异](/air/providers#图片输入)，Terminal 中粘贴见 [Terminal 界面](/air/terminal)。
 
 ## 结构化结果卡
 
-部分工具成功返回后，SIREN 会在操作行下方追加结果卡，方便直接查看和跳转：
+部分工具成功返回后，操作行下方追加结果卡：
 
 | 结果卡 | 来源 | 内容与操作 |
 | --- | --- | --- |
-| **Collected evidence** | SIREN MCP `recon` | Recon Profile、状态（`complete` 或 `partial`），以及报告和快照路径；点击路径在 Artifacts 中打开 |
-| **Command outcomes** | SIREN MCP `run_batch` | 每台主机的 Host、Outcome、Exit，最多列出 20 台，其余注明 “N more in the original result” |
+| **Collected evidence** | SIREN MCP `recon` | Recon Profile、状态（`complete` 或 `partial`），以及报告和快照路径，点击在 Artifacts 中打开 |
+| **Command outcomes** | SIREN MCP `run_batch` | 每台主机的 Host、Outcome、Exit，最多 20 台，其余注明 “N more in the original result” |
 | **Security Center alerts** | 阿里云安全中心告警查询结果 | 告警名称、等级、Event ID、主机和时间，最多 20 条。带进程 ID 的告警显示 **Inspect PID N**，跳到 [Investigations](/webui#investigations) 的进程分析；要求该会话所属工作区中恰好有一台匹配的在线 Linux 客户端 |
 | **Report** | Agent 交付的 Markdown 报告 | 见下文 |
 
@@ -139,20 +123,20 @@ Provider 需要操作员决定时，Agent 会暂停并在时间线中插入卡�
 
 ### Report 卡
 
-一轮结束后，如果 Agent 在该轮中成功写入或修改了 `.md` 文件，或在回复中用 Markdown 链接明确指向某个 `.md` 文件，该轮末尾会出现 **Report** 卡（每轮最多 10 张）。SIREN 会先确认文件存在于该会话的工作区中：
+一轮结束时，如果 Agent 在该轮成功写入或修改了 `.md` 文件，或在回复中用 Markdown 链接明确指向某个 `.md` 文件，且该文件存在于会话工作区中，该轮末尾出现 **Report** 卡（每轮最多 10 张）：
 
 - **Preview**：在 Artifacts 中打开报告。
-- **Edit in Dossier**：在新标签页用 Dossier 打开报告继续编辑。Dossier 未部署或暂不可用时按钮置灰，卡片上显示原因，部署方式见 [部署 Dossier](/server/dossier)。
+- **Edit in Dossier**：在新标签页用 Dossier 继续编辑。Dossier 未部署或不可用时按钮置灰并显示原因，见 [部署 Dossier](/server/dossier)。
 - 文件不在工作区或无法确认时，卡片显示原因和 **Retry**。
 
-报告保存位置和其中证据链接的解析规则见 [证据与报告](/air/evidence)。
+报告位置和证据链接的解析规则见 [证据与报告](/air/evidence)。
 
 ## 导出 Markdown
 
-点击状态条中的导出按钮，把当前时间线下载为 Markdown 文件，文件名形如 `air-codex-1a2b3c4d-20261008-143000.md`（Provider、会话 ID 前 8 位、导出时间）。运行中的会话和只读历史都可以导出。
+点击状态条中的导出按钮，把当前时间线下载为 Markdown 文件，文件名形如 `air-codex-1a2b3c4d-20261008-143000.md`（Provider、会话 ID 前 8 位、导出时间）。运行中的会话和只读历史都可导出。
 
-导出文件包含 Provider、会话 ID、模型、导出时间和轮次数，以及每轮的请求、回复、操作记录（命令原文和输出）、计划、审批与提问及其决策记录、通知。单个输出超过 200 行时只保留前 200 行，并注明省略的行数。回复中的脚注处理见 [证据与报告](/air/evidence#导出会话)。
+文件包含 Provider、会话 ID、模型、导出时间和轮次数，以及每轮的请求、回复、操作记录（命令原文和输出）、计划、审批与提问及决策记录、通知。单个输出超过 200 行时只保留前 200 行并注明省略行数。脚注处理见 [证据与报告](/air/evidence#导出会话)。
 
 <Callout title="导出内容以已加载的时间线为准" type="info">
-  只读历史初次打开时只加载最近 200 条事件，更早的内容需要点击时间线顶部的 **Load earlier activity** 加载后才会出现在导出文件中。运行中会话重新接入后，超出回放缓冲的早期内容同样不会出现在时间线和导出文件中，处理方式见 [启动与管理会话](/air/sessions)。
+  只读历史初次打开时只加载最近 200 条事件，更早的内容需点击顶部的 **Load earlier activity** 加载后才会导出。运行中会话重新接入后，超出回放缓存的早期内容同样不会导出，见 [启动与管理会话](/air/sessions)。
 </Callout>

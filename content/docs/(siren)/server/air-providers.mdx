@@ -28,12 +28,12 @@ import { Callout } from "fumadocs-ui/components/callout";
 import { Step, Steps } from "fumadocs-ui/components/steps";
 import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
-Agentic IR（AIR）会话运行在 SIREN 服务端上：服务端以 `siren_server` 进程的系统用户身份启动 Provider CLI，并把会话转发到浏览器。响应人员能在 **Agentic IR** 页面使用某个 Provider 之前，运维人员需要先在服务端完成本页的准备。会话的启动和使用方式见 [Agentic 应急响应](/air)。
+Agentic IR（AIR）会话运行在服务端上：`siren_server` 以自身系统用户启动 Provider CLI，并把会话转发到浏览器。响应人员使用 **Agentic IR** 页面前，运维人员需先完成本页准备；会话用法见 [Agentic 应急响应](/air)。
 
 ## 前置条件
 
-- 服务端运行在 Linux 上。SIREN 服务端只发布 `linux_amd64` 包；在 Windows 上运行的服务端，AIR 的 GUI 和 Terminal 两种界面都不可用。
-- 已启用 MCP，配置好 `SIREN_MCP_ADMIN_TOKEN`，并设置 `webui.publicURL`，详见 [前置条件与凭证](/server/prerequisites)。所有入口（包括 Manual）都会注入当前范围的 SIREN MCP。`webui.publicURL` 缺失或无效时，Provider 状态仍可能显示可用，但启动任何会话都会失败，并报 `webui.publicURL is required for AIR MCP` 或 `webui.publicURL must ...`。
+- 服务端运行在 Linux 上（只发布 `linux_amd64` 包）。Windows 上运行的服务端，AIR 的 GUI 和 Terminal 都不可用。
+- 已启用 MCP、配置 `SIREN_MCP_ADMIN_TOKEN` 并设置 `webui.publicURL`，见 [前置条件与凭证](/server/prerequisites)。所有入口（包括 Manual）都会注入当前范围的 SIREN MCP。`webui.publicURL` 缺失或无效时，Provider 状态仍可能显示可用，但任何会话都会启动失败，报 `webui.publicURL is required for AIR MCP` 或 `webui.publicURL must ...`。
 
 ## 支持的 Provider
 
@@ -44,7 +44,7 @@ Agentic IR（AIR）会话运行在 SIREN 服务端上：服务端以 `siren_serv
 | Qoder | `qoder` | `qodercli` | `qodercli --acp`（ACP v1） | QoderCLI 自身登录 | `~/.qoder/projects` |
 | Pi | `pi` | `pi` | Pi RPC | `<agentDir>/auth.json` 中的 Qwen Aegis 密钥 | `<agentDir>/sessions` |
 
-表中的 `~` 指 `siren_server` 进程用户的主目录。Terminal 界面运行各 CLI 的原生 TUI，GUI 界面只使用上表中的公开机器协议。
+`~` 指 `siren_server` 进程用户的主目录。Terminal 界面运行各 CLI 的原生 TUI。
 
 ## 操作步骤
 
@@ -53,23 +53,23 @@ Agentic IR（AIR）会话运行在 SIREN 服务端上：服务端以 `siren_serv
 
 ### 安装 CLI 并以服务端用户登录
 
-在服务端安装需要的 CLI，并以运行 `siren_server` 的同一个系统用户完成登录或认证。CLI 的登录状态、模型、权限、沙箱和已有 MCP 都从该用户的主目录读取。
+在服务端安装 CLI，并以运行 `siren_server` 的系统用户登录或认证；登录状态、模型、权限、沙箱和已有 MCP 都从该用户的主目录读取。
 
-`cliPath` 写命令名时，必须能在 `siren_server` 进程的 `PATH` 中找到；以 systemd 或其他进程管理器启动时，`PATH` 通常比交互式 Shell 短，可以改写为绝对路径。
+`cliPath` 写命令名时，必须能在 `siren_server` 进程的 `PATH` 中找到。systemd 等进程管理器的 `PATH` 通常比交互式 Shell 短，可改为绝对路径。
 
 </Step>
 <Step>
 
 ### 准备 Pi（可选）
 
-只使用 Codex、Claude Code 或 Qoder 时跳过这一步。Pi 需要额外的全局安装和 Qwen Aegis 认证，见下文 [Pi](#pi)。
+只用 Codex、Claude Code 或 Qoder 时跳过。Pi 见下文 [Pi](#pi)。
 
 </Step>
 <Step>
 
 ### 写入服务端配置
 
-在 `server_config.yaml` 的 `air` 段确认 Provider 路径和参数。只需要写与默认值不同的项：
+在 `server_config.yaml` 的 `air` 段只写与默认值不同的项：
 
 ```yaml title="server_config.yaml"
 air:
@@ -94,33 +94,31 @@ air:
       memoryDir: /root/.pi/agent/memory
 ```
 
-配置文件只在启动时读取，修改后需要重启 `siren_server`。
+配置只在启动时读取，修改后需重启 `siren_server`。
 
 </Step>
 <Step>
 
 ### 确认状态
 
-重启后打开 WebUI **Settings** 页，在 **Server** 区查看 **AIR runtime** 及其下的各 Provider 状态，见 [检查可用性](#检查可用性)。确认后，用目标 Provider 启动一次 Manual 会话，验证登录状态和 MCP 注入。
+重启后在 **Settings** 页 **Server** 区查看 **AIR runtime** 及各 Provider 状态（见 [检查可用性](#检查可用性)），再用目标 Provider 启动一次 Manual 会话，验证登录状态和 MCP 注入。
 
 </Step>
 </Steps>
 
 ## Pi
 
-Pi 复用服务端用户的全局 Pi 安装、插件、Skills、配置和 memory，新会话固定从 Qwen Aegis 模型开始。安装脚本和默认目录都按 root 用户设计。
+Pi 复用服务端用户的全局 Pi 安装、插件、Skills、配置和 memory，新会话固定从 Qwen Aegis 模型开始。安装脚本和默认目录都按 root 设计。
 
-1. 在 SIREN 源码仓库中以 root 运行安装脚本。服务端需要 Node.js 24；脚本会全局安装固定版本的 Pi CLI、qmd 和 Pi 插件，把 SIREN 的 Pi 配置合并进 Agent 目录，并安装 `siren-mcp.ts` 扩展：
+1. 在 SIREN 源码仓库中以 root 运行安装脚本（需要 Node.js 24）。脚本全局安装固定版本的 Pi CLI、qmd 和 Pi 插件，把 SIREN 的 Pi 配置合并进 Agent 目录，并安装 `siren-mcp.ts` 扩展：
 
    ```bash title="SIREN 源码仓库（root）"
    QWEN_AEGIS_API_KEY=<Qwen Aegis API Key> bash scripts/install_pi_provider.sh
    ```
 
-   Agent 目录默认为 `/root/.pi/agent`，可用 `SIREN_PI_AGENT_DIR` 指定。设置了 `QWEN_AEGIS_API_KEY` 时，脚本会写入 `auth.json`；未设置时只提示 Qwen Aegis 暂不可用。
+   Agent 目录默认 `/root/.pi/agent`，可用 `SIREN_PI_AGENT_DIR` 指定。设置了 `QWEN_AEGIS_API_KEY` 时脚本写入 `auth.json`，否则只提示 Qwen Aegis 暂不可用。
 
-2. 确认 `<agentDir>/auth.json` 满足以下条件，否则 Pi 的 GUI 和 Terminal 都显示不可用：
-   - 文件权限为 `0600`；
-   - 含有 `qwen-aegis` 条目，`type` 为 `api_key`，`key` 非空。
+2. 确认 `<agentDir>/auth.json` 权限为 `0600`，且含 `type` 为 `api_key`、`key` 非空的 `qwen-aegis` 条目，否则 Pi 的 GUI 和 Terminal 都不可用：
 
    ```json title="/root/.pi/agent/auth.json"
    {
@@ -128,37 +126,31 @@ Pi 复用服务端用户的全局 Pi 安装、插件、Skills、配置和 memory
    }
    ```
 
-3. 不要在 `<agentDir>/mcp.json` 中手工添加名为 `siren` 的 MCP Server。SIREN 会为每个 Pi 会话动态注册当前范围的 MCP 并注入会话凭证，静态条目会与之冲突。
+3. 不要在 `<agentDir>/mcp.json` 中手工添加名为 `siren` 的 MCP Server，它会与 SIREN 为每个会话动态注册的 MCP 冲突。
 
 <Callout title="不要只改 agentDir" type="warn">
-  安装脚本写入的 `models.json` 从固定路径 `/root/.pi/agent/auth.json` 读取 Qwen Aegis 密钥，而 SIREN 检查的是 `air.providers.pi.agentDir` 下的 `auth.json`。若把 Agent 目录改到别处，需同时调整 `models.json` 中的读取路径，否则状态检查通过、实际请求仍会认证失败。
+  安装脚本写入的 `models.json` 固定从 `/root/.pi/agent/auth.json` 读取密钥，而 SIREN 检查的是 `air.providers.pi.agentDir` 下的 `auth.json`。改了 Agent 目录却不同步 `models.json` 的读取路径，状态检查会通过，实际请求仍认证失败。
 </Callout>
 
-`agentDir`、`contextModeDir`、`memoryDir` 分别通过环境变量 `PI_CODING_AGENT_DIR`、`CONTEXT_MODE_DIR`、`PI_MEMORY_DIR` 传给 Pi 进程。Pi 的文件、Shell、MCP 和子 Agent 操作直接执行，不产生权限审批。
+`agentDir`、`contextModeDir`、`memoryDir` 分别通过 `PI_CODING_AGENT_DIR`、`CONTEXT_MODE_DIR`、`PI_MEMORY_DIR` 传给 Pi。Pi 的文件、Shell、MCP 和子 Agent 操作直接执行，不产生权限审批。
 
 ## 检查可用性
-
-SIREN 按以下规则判断每个 Provider 能使用哪种界面：
 
 | 界面 | 可用条件 |
 | --- | --- |
 | Terminal | 服务端不是 Windows；`cliPath` 可执行；Pi 还要求 `auth.json` 通过检查 |
 | GUI | 满足 Terminal 条件，且机器协议握手成功 |
 
-握手不会创建会话，也不会调用模型：Claude Code 检查 `--help` 是否支持双向 `stream-json`；Codex 和 Qoder 发送 `initialize` 请求，Qoder 还要求 ACP 协议版本为 1；Pi 通过 RPC 确认当前模型是 `qwen-aegis` 并能列出命令。握手超时为 6 秒，Pi 为 20 秒。
-
-握手成功的结果在服务端进程内一直有效；失败不缓存，下次检查会重试。因此升级或安装 CLI 后不需要重启 SIREN，重新检查即可；修改 `server_config.yaml` 则需要重启。
+握手不创建会话、不调用模型，超时 6 秒（Pi 20 秒）。成功结果在服务端进程内一直有效，失败不缓存，因此升级或安装 CLI 后重新检查即可，不需要重启 SIREN。
 
 <Callout title="状态不代表已登录" type="warn">
-  Claude Code、Codex 和 Qoder 的检查都不验证登录状态。状态显示可用但 CLI 未登录时，会话会在启动后由 CLI 自己报错。
+  Claude Code、Codex 和 Qoder 的检查不验证登录状态。CLI 未登录时，会话启动后由 CLI 自己报错。
 </Callout>
 
 ### 在 WebUI 中查看
 
-- **Settings** 页 **Server** 区：**AIR runtime** 行显示 `Default provider ...` 或 AIR 不可用的原因；其下逐个列出 Provider，状态为 **GUI + Terminal**、**GUI only**、**Terminal only** 或 **Unavailable**，GUI 不可用时附带原因。每次打开 Settings 页都会重新检查。
-- **Agentic IR** 页：不可用的 Provider 按钮置灰；选择 GUI 而当前 Provider 的 GUI 不可用时，Provider 按钮下方显示原因。点击 **Running** 标题旁的刷新按钮会重新检查。
-
-常见原因：
+- **Settings** 页 **Server** 区：**AIR runtime** 行显示 `Default provider ...` 或 AIR 不可用的原因；其下各 Provider 显示 **GUI + Terminal**、**GUI only**、**Terminal only** 或 **Unavailable**，GUI 不可用时附原因。每次打开 Settings 都会重新检查。
+- **Agentic IR** 页：不可用的 Provider 按钮置灰；选择 GUI 而当前 Provider 的 GUI 不可用时，按钮下方显示原因。点击 **Running** 旁的刷新按钮重新检查。
 
 | 显示内容 | 处理 |
 | --- | --- |
@@ -168,44 +160,37 @@ SIREN 按以下规则判断每个 Provider 能使用哪种界面：
 | `Pi authentication file ... has mode ...; expected 0600` | `chmod 600 /root/.pi/agent/auth.json` |
 | `Pi qwen-aegis model is not configured or authenticated` | 重新运行 Pi 安装脚本，确认 `models.json` 中有 `qwen-aegis` |
 | `Qoder ACP protocol version ... is incompatible; SIREN requires v1` | 升级 QoderCLI |
-| `Claude CLI does not advertise bidirectional stream-json` 或握手请求失败 | 升级对应 CLI；升级前可先使用 Terminal |
+| `Claude CLI does not advertise bidirectional stream-json` 或握手请求失败 | 升级对应 CLI；升级前可先用 Terminal |
 
 ## 配置项
 
-完整配置文件见 [配置文件](/reference/server-config)。
+各键的类型和默认值见 [配置文件](/reference/server-config#air)。以下是需要额外说明的行为：
 
-| 配置项 | 默认值 | 说明 |
-| --- | --- | --- |
-| `air.provider` | `codex` | 回退 Provider。浏览器默认选用上次使用的 Provider（首次为 Codex），可在 **Settings** 的 **Default AIR provider** 中固定；所选 Provider 不可用时，页面先回退到 `air.provider`，再回退到第一个可用的 Provider |
-| `air.maxSessions` | `20` | 全服务端同时运行的 AIR 会话上限，GUI 与 Terminal 合计，跨所有 Project 计算，Manual、Custom、Event 和继续会话都计入；超出时报 `agent session limit reached (N)`。`0` 或负数表示不限制 |
-| `air.replayBufferBytes` | `4194304` | 每个会话用于断线重连回放的字节预算，Terminal 按原始输出、GUI 按结构化事件计算。`0` 或负数时使用默认的 4 MiB，不会关闭回放 |
-| `air.providers.<name>.cliPath` | 见上方 Provider 表 | CLI 命令名或绝对路径 |
-| `air.providers.<name>.args` | `[]`（Codex 为 `[--no-alt-screen]`） | 附加 CLI 参数，GUI 和 Terminal 共用 |
-| `air.providers.pi.agentDir` | `/root/.pi/agent` | Pi 全局配置、插件、认证、Skills 与会话目录 |
-| `air.providers.pi.contextModeDir` | `/root/.pi/context-mode` | Pi 长上下文卸载与恢复目录 |
-| `air.providers.pi.memoryDir` | `/root/.pi/agent/memory` | Pi 跨会话长期记忆目录 |
+- **`air.provider`**：回退 Provider。浏览器默认选用上次使用的 Provider（首次为 Codex），可在 **Settings** 的 **Default AIR provider** 中固定；所选 Provider 不可用时先回退到 `air.provider`，再回退到第一个可用的 Provider。
+- **`air.maxSessions`**（默认 `20`）：全服务端 AIR 会话上限，GUI 与 Terminal、所有 Project、Manual/Custom/Event 和继续会话合计；超出时报 `agent session limit reached (N)`。`0` 或负数表示不限制。
+- **`air.replayBufferBytes`**（默认 4 MiB）：每个会话的断线重连回放预算，Terminal 按原始输出、GUI 按结构化事件计算。`0` 或负数时使用默认值，不会关闭回放。
 
 ### Provider 参数
 
-- **Codex**：默认的 `--no-alt-screen` 让 Terminal 以 inline 模式运行，保留浏览器终端的滚动历史；GUI 启动 `app-server` 时会自动去掉它。旧版 Codex 不识别该参数时，设为 `args: []`。SIREN 还会通过 `-c mcp_servers.siren.*` 注入名为 `siren` 的 MCP Server，覆盖 Codex 用户配置中的同名条目。
-- **Claude Code、Qoder**：SIREN MCP 配置、会话 ID 和 GUI 所需的传输参数由 SIREN 加入，不要写进 `args`。
+- **Codex**：默认的 `--no-alt-screen` 让 Terminal 以 inline 模式运行，保留浏览器终端的滚动历史；GUI 启动 `app-server` 时自动去掉。旧版 Codex 不识别该参数时设为 `args: []`。SIREN 通过 `-c mcp_servers.siren.*` 注入名为 `siren` 的 MCP Server，覆盖用户配置中的同名条目。
+- **Claude Code、Qoder**：SIREN MCP 配置、会话 ID 和 GUI 传输参数由 SIREN 加入，不要写进 `args`。
 - **Pi**：`args` 中的 `--session`、`--resume`、`--session-id`、`--provider`、`--model`、`--thinking`、`--mode` 会被丢弃，由 SIREN 决定。
 
-模型、推理强度、权限、沙箱、Shell 审批和工具限制不在 SIREN 中配置，请写进对应 CLI 的用户配置或 `args`。
+模型、推理强度、权限、沙箱、Shell 审批和工具限制写进对应 CLI 的用户配置或 `args`，SIREN 不配置。
 
 ### Prompt 模板
 
-Custom 和 Event 入口用以下模板生成种子 prompt：
+Custom 和 Event 入口用模板生成种子 prompt，默认值见 [配置文件](/reference/server-config#air)：
 
-| 配置项 | 用于 | 占位符 | 内置默认值 |
-| --- | --- | --- | --- |
-| `air.prompt` | Event：安全中心告警 ID | UID、告警 ID、Client ID | `启动安全应急响应，UID：%s，Event ID：%s，SIREN Client ID：%d` |
-| `air.instancePrompt` | Event：ECS 实例 ID | UID、实例 ID、Client ID | `启动安全应急响应，UID：%s，ECS 实例 ID：%s，SIREN Client ID：%d，请先获取该实例的相关告警` |
-| `air.assetPrompt` | Event：云安全中心资产 UUID | UID、资产 UUID、Client ID | `启动安全应急响应，UID：%s，云安全中心资产 UUID：%s，SIREN Client ID：%d，请先获取该资产的相关告警` |
-| `air.timeRangePrompt` | 实例或资产目标限定了时间范围时追加 | 时间范围 | `，告警时间范围：%s` |
-| `air.customPromptPrefix` | Custom：加在用户 prompt 之前 | Client ID | `在 SIREN Client %d 上启动安全应急响应。` |
+| 配置项 | 用于 | 占位符 |
+| --- | --- | --- |
+| `air.prompt` | Event：安全中心告警 ID | UID、告警 ID、Client ID |
+| `air.instancePrompt` | Event：ECS 实例 ID | UID、实例 ID、Client ID |
+| `air.assetPrompt` | Event：云安全中心资产 UUID | UID、资产 UUID、Client ID |
+| `air.timeRangePrompt` | 实例或资产目标限定时间范围时追加 | 时间范围 |
+| `air.customPromptPrefix` | Custom：加在用户 prompt 之前 | Client ID |
 
-占位符按表中顺序填入，`%s` 为文本，`%d` 为数字，修改模板时需保持数量和顺序不变。时间范围以 `最近 7 天`、`2026-10-01 08:00 至 2026-10-02 08:00` 或 `2026-10-01 08:00 至今` 的形式填入。
+占位符按表中顺序填入，`%s` 为文本、`%d` 为数字，修改时须保持数量和顺序。时间范围形如 `最近 7 天`、`2026-10-01 08:00 至 2026-10-02 08:00` 或 `2026-10-01 08:00 至今`。
 
 ## 边界
 
@@ -213,7 +198,7 @@ Custom 和 Event 入口用以下模板生成种子 prompt：
   - 用 `cliPath` 和 `args` 启动 CLI，为所有入口注入当前范围的 SIREN MCP 和会话凭证，并按入口加入种子 prompt 或要继续的会话 ID。
   - GUI 只展示 Provider 主动返回的审批和提问；“本会话允许”只在当前会话有效，不写入 CLI 的用户级配置。
   - 不修改 Claude Code、Codex、Qoder 的全局设置，也不替它们跳过权限确认。
-  - 会话凭证随会话结束失效，服务端重启后也会失效；长期的 MCP 管理凭证不会注入 Provider。
+  - 会话凭证随会话结束或服务端重启失效；长期 MCP 管理凭证不会注入 Provider。
 </Callout>
 
 ## 常见问题
@@ -222,23 +207,21 @@ Custom 和 Event 入口用以下模板生成种子 prompt：
 
 <Accordion title="Settings 显示可用，但会话一启动就失败">
 
-先看报错：
-
 - `webui.publicURL is required for AIR MCP`：未设置 `webui.publicURL`，见 [前置条件与凭证](/server/prerequisites)。
-- `agent session limit reached (N)`：运行中的会话达到 `air.maxSessions`，先在 **Running** 中停止不用的会话。
+- `agent session limit reached (N)`：已达 `air.maxSessions`，先在 **Running** 中停止不用的会话。
 - CLI 自身的登录或认证错误：用 `siren_server` 的系统用户重新登录该 CLI。
 
 </Accordion>
 
 <Accordion title='Pi 报 MCP server "siren" is already registered'>
 
-`<agentDir>/mcp.json`（默认 `/root/.pi/agent/mcp.json`）中有名为 `siren` 的静态条目。删除该条目即可，SIREN 会为每个会话动态注册。
+删除 `<agentDir>/mcp.json`（默认 `/root/.pi/agent/mcp.json`）中名为 `siren` 的静态条目，SIREN 会为每个会话动态注册。
 
 </Accordion>
 
 <Accordion title="GUI 不可用，但 Terminal 可用">
 
-CLI 版本过旧或协议握手失败。可以先切换到 Terminal 使用原生 TUI，升级 CLI 后打开 Settings 页或点击 **Running** 旁的刷新按钮重新检查，不需要重启 SIREN。运行中的会话不会自动切换界面。
+CLI 版本过旧或协议握手失败。可先用 Terminal 的原生 TUI；升级 CLI 后打开 Settings 页或点击 **Running** 旁的刷新按钮重新检查，不需要重启 SIREN。运行中的会话不会自动切换界面。
 
 </Accordion>
 

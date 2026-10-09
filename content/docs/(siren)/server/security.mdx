@@ -25,7 +25,7 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-SIREN Server 在一个 TLS 端口上同时提供 Web 控制台、MCP 和客户端接入，各入口的鉴权方式不同。部署到公网前，请逐条核对本页。
+SIREN Server 在一个 TLS 端口上同时提供 Web 控制台、MCP 和客户端接入，各入口的鉴权方式不同。部署到公网前请逐条核对。
 
 ## 各入口的鉴权方式
 
@@ -41,7 +41,7 @@ SIREN Server 在一个 TLS 端口上同时提供 Web 控制台、MCP 和客户�
 
 ## WebUI 账号
 
-账号保存在 SQLite 数据库中，密码以 bcrypt 哈希存储。默认路径是工作目录下的 `data/users.db`，可用 `webui.userDBPath` 指定绝对路径。
+账号保存在 SQLite 数据库中，密码以 bcrypt 哈希存储，默认路径为工作目录下的 `data/users.db`，可用 `webui.userDBPath` 指定绝对路径。
 
 ```bash title="控制主机"
 cd /opt/siren
@@ -50,7 +50,7 @@ cd /opt/siren
 ./siren_server user delete <username>
 ```
 
-`user` 命令同样读取 `server_config.yaml`，并打印实际使用的数据库路径。请在服务端工作目录中执行，确保与服务端读写同一个数据库。
+`user` 命令同样读取 `server_config.yaml` 并打印实际使用的数据库路径，请在服务端工作目录中执行。
 
 <Callout title="没有账号时不鉴权" type="error">
   服务端只在启动时检查账号库。账号库不存在或没有任何账号时，本次运行期间 Web 控制台和所有 `/api/*` 都不需要登录，日志提示 `WebUI auth disabled; run 'siren_server user add'`，Settings 的 **Authentication** 显示 **Disabled (local access)**。创建第一个账号后必须重启服务端才会启用鉴权。
@@ -59,68 +59,60 @@ cd /opt/siren
 启用鉴权后：
 
 - **添加账号**立即生效，无需重启。
-- **没有修改密码的命令**。需要改密码时，先 `user delete` 再 `user add`。
-- **删除账号不会让该账号已登录的会话失效**。会话保存在服务端内存中，有效期 30 天；要立即踢出被删除的账号，需要重启服务端。
-- **会话**：登录后下发 HttpOnly、SameSite=Lax 的 Cookie。点击账号菜单中的 **Sign out** 会立即作废该会话。服务端重启后所有会话失效，需要重新登录。
-- **登录锁定**：同一来源 IP 在 15 分钟内失败 5 次后被锁定，直到第一次失败满 15 分钟。锁定期间即使密码正确，登录页也显示 **Invalid username or password**。来源 IP 取自 TCP 连接，不读取 `X-Forwarded-For`。
+- **没有改密码命令**，先 `user delete` 再 `user add`。
+- **删除账号不会让其已登录的会话失效**。会话保存在服务端内存中，有效期 30 天；要立即踢出，需重启服务端。
+- **会话**：HttpOnly、SameSite=Lax 的 Cookie。账号菜单中的 **Sign out** 立即作废该会话；服务端重启后所有会话失效。
+- **登录锁定**：同一来源 IP 在 15 分钟内失败 5 次后锁定，直到第一次失败满 15 分钟；锁定期间即使密码正确也显示 **Invalid username or password**。来源 IP 取自 TCP 连接，不读取 `X-Forwarded-For`。
 
 ### 账号的权限范围
 
-所有账号权限相同，没有角色区分。Project 是工作区划分，不是权限边界，任何账号都可以切换到任意 Project 或 Global 视图。一个 WebUI 账号可以：
+所有账号权限相同，没有角色区分。Project 是工作区划分，不是权限边界，任何账号都能切换到任意 Project 或 Global 视图。一个 WebUI 账号可以：
 
 - 操作所有在线客户端：Shell、Files 上传覆盖、Recon、清理，以及部署和出站放行等云端写操作。
-- 在 Global 视图的 Artifacts 中浏览、下载、上传、重命名和删除服务端工作目录下的取证文件。服务端自身的文件不会出现，也不能被访问或修改：`data/` 状态目录、账号库、正在使用的配置文件、TLS 证书和私钥，以及 `siren_server` 二进制。包含这些文件的目录不能打包下载、重命名或删除。`.env` 等以点号开头的文件和目录同样不会列出。
-- 查看 Logs 页面中的全部服务端日志，见 [Logs 包含敏感信息](#logs-包含敏感信息)。
-- 启动 Agentic IR。Provider CLI 以服务端进程的身份运行在控制主机上，其自带的 Shell 和文件工具直接作用于控制主机；是否需要审批、是否启用沙箱由 Provider 自身配置决定。
+- 在 Global 视图的 Artifacts 中浏览、下载、上传、重命名和删除服务端工作目录下的取证文件。服务端自身的文件不会出现，也不能被访问或修改：`data/` 状态目录、账号库、正在使用的配置文件、TLS 证书和私钥、`siren_server` 二进制，以及 `.env` 等以点号开头的文件和目录；包含这些文件的目录不能打包下载、重命名或删除。
+- 查看全部服务端日志，见 [Logs 包含敏感信息](#logs-包含敏感信息)。
+- 启动 Agentic IR。Provider CLI 以服务端进程身份运行在控制主机上，其自带的 Shell 和文件工具直接作用于控制主机；审批和沙箱由 Provider 自身配置决定。
 
-因此 WebUI 账号应只发给可以完全信任、相当于控制主机管理员的操作员。
+因此 WebUI 账号只应发给可以完全信任、相当于控制主机管理员的操作员。
 
 ## MCP 鉴权
 
-所有 MCP 请求都必须携带 `Authorization: Bearer <token>`，WebUI 登录会话不能代替它。只有管理凭证 `SIREN_MCP_ADMIN_TOKEN` 能访问全局 `/mcp` 和任意 Project；AIR 使用的是限定到单个范围、随会话吊销的凭证，签发的凭证只在内存中，服务端重启后全部失效。各类凭证的范围和有效期见 [MCP 鉴权](/reference/mcp#鉴权)。
+所有 MCP 请求都必须携带 `Authorization: Bearer <token>`，WebUI 登录会话不能代替。只有管理凭证 `SIREN_MCP_ADMIN_TOKEN` 能访问全局 `/mcp` 和任意 Project；AIR 使用限定到单个范围、随会话吊销的凭证，服务端重启后全部失效。详见 [MCP 鉴权](/reference/mcp#鉴权)。
 
 Agentic IR 启动 Provider CLI 时：
 
 - 从子进程环境中剔除 `SIREN_MCP_ADMIN_TOKEN` 等长期 MCP 凭证，Agent 拿不到管理凭证。
-- 会话凭证通过会话期间存在的私有配置文件或环境变量传入，不出现在命令行参数和 Provider 的持久配置中。
-- 其他环境变量原样继承，包括 `SOAR_ACCESS_KEY_*` 和 `ALIBABA_CLOUD_ACCESS_KEY_*`。Agent 能在控制主机上执行命令时，就能读到这些凭证。
-
-外部 MCP 客户端的配置和工具列表见 [MCP](/reference/mcp)。
+- 会话凭证不出现在命令行参数和 Provider 的持久配置中。
+- 其他环境变量原样继承，包括 `SOAR_ACCESS_KEY_*` 和 `ALIBABA_CLOUD_ACCESS_KEY_*`。Agent 能在控制主机上执行命令，就能读到这些凭证。
 
 ### 命令黑名单只作用于 MCP
 
-`mcp.cmdBlacklist` 只检查 MCP 的 `run` 和 `run_batch` 工具。以下操作都不受黑名单约束：
+`mcp.cmdBlacklist` 只检查 MCP 的 `run` 和 `run_batch`。服务端 REPL 的 `run` 和 `shell`、Web 控制台的 Shells 和 Files、Agentic IR 中 Provider 自带的 Shell 工具（在控制主机上执行）都不受约束。
 
-- 服务端 REPL 的 `run` 和 `shell`
-- Web 控制台的 Shells 和 Files
-- Agentic IR 中 Provider 自带的 Shell 工具（在控制主机上执行）
-
-黑名单中无法编译的正则会被跳过，服务端照常启动，每个 MCP 请求都会记录一条 `mcp.blacklist_pattern.invalid` 警告日志。修改黑名单后请检查日志，确认没有规则被跳过。黑名单的匹配方式见 [命令黑名单](/reference/mcp#命令黑名单)。
+无法编译的正则会被跳过且服务端照常启动，每个 MCP 请求记录一条 `mcp.blacklist_pattern.invalid` 警告；修改后请检查日志。匹配方式见 [命令黑名单](/reference/mcp#命令黑名单)。
 
 ## `/dossier/` 不鉴权
 
-`webui.dossierDir` 目录通过 `/dossier/` 作为静态文件提供，不经过 WebUI 登录。点号开头的路径会被隐藏，也不提供目录列表，但知道路径的人都可以下载其中的文件。
+`webui.dossierDir` 通过 `/dossier/` 作为静态文件提供，不经过 WebUI 登录。点号开头的路径被隐藏、也不提供目录列表，但知道路径的人都能下载其中的文件。
 
-Reports 页面的 **Blank template** 以只读方式打开 `dossierDir/report.md`。模板本身不能保存，但在其中粘贴的图片仍会立即写入 `dossierDir/report.assets/pasted/`，从而可以不登录直接访问。请不要在 Blank template 中粘贴含敏感信息的截图，也不要在 Dossier 目录中存放 Dossier 运行文件以外的内容。
-
-从 Artifacts、Reports 或 AIR 报告卡片打开的实际报告不受影响：它们的图片保存在报告旁边的 `<报告名>.assets/pasted/`，读取时需要登录。
+Reports 页面的 **Blank template** 以只读方式打开 `dossierDir/report.md`，但在其中粘贴的图片会立即写入 `dossierDir/report.assets/pasted/`，无需登录即可访问。不要在 Blank template 中粘贴敏感截图，也不要在 Dossier 目录中存放运行文件以外的内容。从 Artifacts、Reports 或 AIR 报告卡片打开的实际报告不受影响，其图片保存在报告旁的 `<报告名>.assets/pasted/`，读取需要登录。
 
 ## 客户端与服务端之间
 
-- **客户端不校验服务端证书**。连接使用 TLS 1.2 及以上加密，但客户端接受任何证书。能够劫持客户端所连地址的一方可以冒充服务端，向客户端下发命令。请让客户端直接连接服务端的固定 IP 或可信的域名解析。
-- **客户端接入不需要凭证**。任何能访问主 TLS 端口的主机都可以作为客户端注册并出现在 Clients 列表中。客户端身份（AgentID）由客户端自行上报，备注和 Project 归属按这个身份恢复。是否允许某台主机连接，完全取决于端口的入方向放行，也就是 **Allow access** 和部署流程维护的放行规则。
+- **客户端不校验服务端证书**。连接使用 TLS 1.2 及以上加密，但客户端接受任何证书，能劫持客户端所连地址的一方可以冒充服务端下发命令。请让客户端直连服务端的固定 IP 或可信的域名解析。
+- **客户端接入不需要凭证**。任何能访问主 TLS 端口的主机都能注册为客户端并出现在 Clients 列表中。客户端身份（AgentID）由客户端自行上报，备注和 Project 归属按它恢复。能否连接完全取决于端口的入方向放行，即 **Allow access** 和部署流程维护的规则。
 
 ## Logs 包含敏感信息
 
-Logs 页面不区分账号，也不按 Project 过滤，任何已登录账号都能看到全部服务端日志，包括来访 IP、登录用户名、客户端地址，以及 MCP `run` 的完整命令。日志保存在内存中，条数由 `logging.bufferSize` 控制；设为 `0` 可完全关闭该页面。详见 [Web 控制台](/logs)。
+Logs 页面不区分账号、不按 Project 过滤，任何已登录账号都能看到全部服务端日志，包括来访 IP、登录用户名、客户端地址和 MCP `run` 的完整命令。日志保存在内存中，条数由 `logging.bufferSize` 控制，设为 `0` 可完全关闭该页面。详见 [Web 控制台](/logs)。
 
 ## 公网暴露建议
 
 <Callout title="上线前核对" type="warn">
   - 启动前用 `siren_server user add` 创建至少一个账号，启动后在 Settings 中确认 **Authentication** 显示已登录用户。
   - 使用覆盖访问域名、且受浏览器信任的证书，见 [更换证书](/server#更换证书)。
-  - 用安全组、防火墙或 VPN 把主 TLS 端口限制为操作者和已放行的目标主机；端口转发的监听端口同样只对需要的来源开放。
-  - 为 `SIREN_MCP_ADMIN_TOKEN` 使用高强度随机值，保存在权限为 `600` 的 `.env` 或服务环境中。
+  - 用安全组、防火墙或 VPN 把主 TLS 端口和端口转发的监听端口限制为必要来源（操作者和已放行的目标主机）。
+  - `SIREN_MCP_ADMIN_TOKEN` 使用高强度随机值，保存在权限为 `600` 的 `.env` 或服务环境中。
   - 只把 WebUI 账号发给可信操作员；人员变动时删除账号并重启服务端。
   - 不要在 Dossier 目录中放置其他文件，也不要在 Blank template 中粘贴敏感截图。
 </Callout>

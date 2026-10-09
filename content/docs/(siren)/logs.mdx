@@ -24,41 +24,37 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-**Logs** 页面（侧栏 **System** 分组，`#/logs`）显示服务端在内存中保留的最近若干条运行日志。通过浏览器操作时，不必登录控制主机翻终端，就能看到客户端接入失败、登录失败、Shell 会话、AIR 与 MCP 报错等事件。
+**Logs** 页面（侧栏 **System** 分组，`#/logs`）显示服务端内存中最近的运行日志，不必登录控制主机就能看到客户端接入失败、登录失败、Shell 会话、AIR 与 MCP 报错等事件。
 
-页面中的记录和服务端终端输出的日志是同一批，同样受 `logging.level` 过滤；即使 `logging.output` 设为 `none`、终端不再输出日志，页面仍照常保留。服务端 REPL 的命令回显（例如 `[*]` 开头的提示，以及 `run`、`info` 的输出）不是日志，不会出现在这里。
-
-Logs 不区分 Project，任何范围下都显示全部服务端日志。
+这些记录与服务端终端输出的日志相同，同样受 `logging.level` 过滤；`logging.output` 设为 `none` 时页面仍照常保留。服务端 REPL 的命令回显（如 `[*]` 开头的提示和 `run`、`info` 的输出）不是日志，不会出现在这里。Logs 不区分 Project，任何范围下都显示全部日志。
 
 ## 查看与过滤
 
 | 控件 | 作用 |
 | --- | --- |
-| 搜索框 | 不区分大小写的子串匹配，范围是日志正文和所有字段的值，例如 Client ID、IP、事件名或 `audit_id` 的值。不匹配字段名 |
-| **All** / **Debug** / **Info** / **Warning** / **Error** | 级别可以多选；**All** 表示不限级别，点击会清除已选级别。成功类记录（行首为 `✓`）属于 Info |
-| **All components** 下拉框 | 按组件过滤。选项来自缓冲区中实际出现过的组件，例如 `server`、`client`、`webui`、`mcp`、`air`、`recon`、`artifact`、`port_forward` |
-| **Live** / **Paused** | 显示当前状态。**Live** 时约每 3 秒拉取新日志；列表停在底部时自动跟随，向上翻阅时不会被拉回。点击切换为 **Paused** 后停止拉取，恢复 **Live** 时从暂停处继续 |
-| 复制、下载按钮 | 把当前列表中的记录复制为纯文本，或下载为 `siren-server-logs.log` |
+| 搜索框 | 不区分大小写的子串匹配，覆盖日志正文和所有字段值（如 Client ID、IP、事件名、`audit_id`），不匹配字段名 |
+| **All** / **Debug** / **Info** / **Warning** / **Error** | 级别可多选；**All** 表示不限级别，点击会清除已选级别。成功类记录（行首 `✓`）属于 Info |
+| **All components** 下拉框 | 按组件过滤，选项来自缓冲区中出现过的组件，如 `server`、`client`、`webui`、`mcp`、`air`、`recon`、`artifact`、`port_forward` |
+| **Live** / **Paused** | **Live** 时约每 3 秒拉取新日志，停在底部时自动跟随，向上翻阅时不会被拉回。切换为 **Paused** 停止拉取，恢复后从暂停处继续 |
+| 复制、下载按钮 | 把当前列表复制为纯文本，或下载为 `siren-server-logs.log` |
 
-点击任意一行，展开该条日志完整的 JSON 内容。行内字段值较长时会被截断，展开、复制和下载都保留完整值。
+点击一行可展开完整 JSON。行内过长的字段值会被截断，展开、复制和下载都保留完整值。
 
-修改过滤条件后，列表从符合条件的最新 500 条重新开始，之后随轮询追加；页面最多显示最近 2,000 条。页头显示当前条数，缓冲区中符合条件的记录更多时显示 `N matching in buffer`，暂停时显示 `paused`。
-
-浏览器标签页切到后台或离开 Logs 页面时暂停拉取。
+修改过滤条件后，列表从符合条件的最新 500 条重新开始并随轮询追加，最多显示最近 2,000 条。页头显示当前条数；缓冲区中符合条件的记录更多时显示 `N matching in buffer`，暂停时显示 `paused`。标签页切到后台或离开 Logs 页面时暂停拉取。
 
 ## 保留范围
 
-日志只保存在服务端内存中，由 `logging.bufferSize` 控制条数，默认 5000：
+日志只保存在服务端内存中，条数由 `logging.bufferSize` 控制（默认 5000）：
 
 - 服务重启后清空。
-- 写满后从最早的记录开始淘汰，页头显示 `N older dropped`，不会静默截断。
-- 设为 `0` 或负数则不保留，页面显示 `Server log retention is off`。修改后需要重启服务端。
+- 写满后淘汰最早的记录，页头显示 `N older dropped`。
+- 设为 `0` 或负数则不保留，页面显示 `Server log retention is off`。修改后需重启服务端。
 
-SIREN 不写日志文件；需要长期留存时见 [日志格式与留存](/reference/server-config#日志格式与留存)，`logging.*` 各键见 [服务端配置](/reference/server-config#logging)。
+SIREN 不写日志文件；长期留存见 [日志格式与留存](/reference/server-config#日志格式与留存)，`logging.*` 各键见 [服务端配置](/reference/server-config#logging)。
 
 ## 常用审计事件
 
-结构化日志带有稳定的 `event` 字段。直接在搜索框中输入事件名即可筛选：
+结构化日志带有稳定的 `event` 字段，在搜索框输入事件名即可筛选：
 
 | 要追查 | 事件 | 主要字段 |
 | --- | --- | --- |
@@ -69,16 +65,16 @@ SIREN 不写日志文件；需要长期留存时见 [日志格式与留存](/ref
 | REPL 拉取文件 | `artifact.upload.saved` | `client_id`、`path` |
 | WebUI 请求 | `webui.request.completed` 等 | `request_id`、`user`、`route` |
 
-Shell 会话只记录谁在何时对哪台客户端打开、持续多久，不记录 Shell 中的输入和输出。
+Shell 会话只记录谁在何时对哪台客户端打开、持续多久，不记录输入和输出。
 
-WebUI 只记录失败的请求、成功的修改类操作和慢请求，不记录查询参数和请求正文。排查某次 WebUI 报错时，用浏览器开发者工具查看响应头 `X-Request-ID`，再在 Logs 中搜索这个值。
+WebUI 只记录失败的请求、成功的修改类操作和慢请求，不记录查询参数和请求正文。排查某次 WebUI 报错时，在浏览器开发者工具中找到响应头 `X-Request-ID`，再在 Logs 中搜索它。
 
 ### MCP 命令审计
 
-AIR 或外部 MCP 客户端每调用一次 `run`，日志中会出现两条共享同一 `audit_id` 的记录：执行前的 `mcp.run.requested` 和结束时的 `mcp.run.finished`。`run_batch` 中每台主机各有一个 `audit_id`。被黑名单拦截、目标被拒绝、发送失败、取消、超时或远端执行失败的 `run` 也有完成记录，其 `outcome` 说明结果；`run_batch` 整批被黑名单拦截或目标解析失败时，只有一条 `mcp.tool.finished`，没有逐台主机的记录。
+每次 `run` 调用有两条共享同一 `audit_id` 的记录：执行前的 `mcp.run.requested` 和结束时的 `mcp.run.finished`；`run_batch` 中每台主机各有一个 `audit_id`。被黑名单拦截、目标被拒绝、发送失败、取消、超时或远端执行失败的 `run` 也有完成记录，由 `outcome` 说明结果；`run_batch` 整批被黑名单拦截或目标解析失败时，只有一条 `mcp.tool.finished`。
 
-在组件下拉框选择 `mcp`，再搜索命令片段、Client ID、outcome 或 `audit_id`。日志中有完整命令，但不包含命令输出；输出需要通过 MCP 的 `read_run_result` 按 `audit_id` 回读，且只保留 60 分钟。完成记录的字段含义见 [命令审计](/reference/mcp#审计日志)。
+选择 `mcp` 组件后搜索命令片段、Client ID、outcome 或 `audit_id`。日志含完整命令但不含输出；输出通过 MCP 的 `read_run_result` 按 `audit_id` 回读，只保留 60 分钟。字段含义见 [命令审计](/reference/mcp#审计日志)。
 
 <Callout title="日志包含敏感信息" type="warn">
-  任何已登录账号都能查看全部日志，其中包括来访 IP、登录用户名、客户端地址，以及 MCP `run` 的完整命令。需要缩小暴露面时，可以调低 `logging.bufferSize` 或设为 `0` 关闭该页面，见 [Logs 包含敏感信息](/server/security#logs-包含敏感信息)。
+  任何已登录账号都能查看全部日志，包括来访 IP、登录用户名、客户端地址和 MCP `run` 的完整命令。可调低 `logging.bufferSize` 或设为 `0` 关闭该页面，见 [Logs 包含敏感信息](/server/security#logs-包含敏感信息)。
 </Callout>

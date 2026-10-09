@@ -18,10 +18,10 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-客户端二进制 `siren` 既是常驻连接服务端的 Agent，也提供若干可直接在目标主机上运行的子命令。本页是完整的命令参考；[信息收集](/recon)、[进程分析](/process)、[文件管理](/files)、[痕迹清除](/cleanup)、[出站放行](/onboard/egress) 等指南页中的「命令行」小节都指向这里。
+客户端二进制 `siren` 既是常驻连接服务端的 Agent，也提供可在目标主机上直接运行的子命令。
 
 <Callout title="日常无需手动运行" type="info">
-  客户端通常由 [一键部署](/onboard/provisioning) 或 [手动安装](/onboard/manual) 拉起并以连接模式运行。下列子命令主要用于本地模式或排查场景。
+  客户端通常由 [一键部署](/onboard/provisioning) 或 [手动安装](/onboard/manual) 拉起并以连接模式运行，下列子命令主要用于本地模式或排查。
 </Callout>
 
 ## 全局参数
@@ -50,7 +50,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ### client
 
-连接服务端并进入常驻客户端模式。`-s` / `-p` 省略时使用配置文件中的 `server` / `port`，默认 `127.0.0.1:443`。
+`-s` / `-p` 省略时使用配置文件中的 `server` / `port`，默认 `127.0.0.1:443`。
 
 ```bash title="目标主机"
 siren client -s 203.0.113.10 -p 443
@@ -58,7 +58,7 @@ siren client -s 203.0.113.10 -p 443
 
 ### recon
 
-在本地执行一次信息收集。省略 `--profile` 时使用配置中的 `recon.defaultProfile`。生成的快照（`snapshot-jsonl-v2`，见 [快照格式](/reference/snapshot)）和报告都会上传到 OSS。
+省略 `--profile` 时使用配置中的 `recon.defaultProfile`。快照（`snapshot-jsonl-v2`，见 [快照格式](/reference/snapshot)）和报告都上传到 OSS。
 
 ```bash title="目标主机"
 siren recon --profile quick
@@ -66,7 +66,7 @@ siren recon --profile quick
 
 ### info
 
-查看进程详情，包含进程树、网络连接、容器与 systemd 信息等。可用 `-p` 按监听端口、`-n` 按进程名查找；按名字命中多个进程时打印候选列表。
+仅 Linux 可用。输出进程树、网络连接、容器与 systemd 信息等。`-p` 按监听端口、`-n` 按进程名查找，按名字命中多个进程时打印候选列表。
 
 ```bash title="目标主机"
 siren info 1234
@@ -74,13 +74,9 @@ siren info -p 8080
 siren info -n nginx
 ```
 
-<Callout title="仅 Linux" type="warn">
-  `info` 子命令只在 Linux 客户端上可用。
-</Callout>
-
 ### upload
 
-将本地文件上传到 OSS，用于把取证产物带回。
+把取证产物等本地文件上传到 OSS。
 
 ```bash title="目标主机"
 siren upload /var/log/auth.log
@@ -92,7 +88,7 @@ siren upload /var/log/auth.log
 
 ### probe-egress
 
-从客户端向服务端地址发出一次出站 SYN 并观测其五元组，供基于云防火墙的出口发现使用。读取配置中的 `server` / `port` 作为目标。`--json` 输出结构化证据。详见 [出站放行](/onboard/egress)。
+向配置中的 `server` / `port` 发出一次出站 SYN 并观测其五元组，供基于云防火墙的出口发现使用。`--json` 输出结构化证据。详见 [出站放行](/onboard/egress)。
 
 ```bash title="目标主机"
 siren probe-egress --json
@@ -100,4 +96,4 @@ siren probe-egress --json
 
 ## 本地模式
 
-当目标主机无法回连服务端时，可作为次要方案在该主机上直接运行 `recon`、`info`、`upload`、`clean`，无需连接服务端。`recon` 和 `upload` 会把结果写入 OSS，因此本地模式需要在客户端配置 [OSS 凭证](/server/prerequisites#oss-凭证)；拿到结果后再从 OSS 下载分析。
+目标主机无法回连服务端时，可作为次要方案在该主机上直接运行 `recon`、`info`、`upload`、`clean`，无需连接服务端。`recon` 和 `upload` 把结果写入 OSS，需在客户端配置 [OSS 凭证](/server/prerequisites#oss-凭证)，之后从 OSS 下载结果分析。

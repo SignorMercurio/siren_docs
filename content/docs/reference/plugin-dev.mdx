@@ -19,13 +19,11 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-插件是一个独立的可执行文件加一份 `manifest.json` 清单。SIREN 客户端按清单下载、启停和执行它，通过命令行参数传入输入，捕获 stdout 和 stderr 作为结果。任何语言都可以，只要产物是目标平台可直接执行的文件。插件的使用方式见[插件](/reference/plugins)。
-
-SIREN 仓库中的 `_plugins/chkrootkit`（recon 插件）和 `_plugins/jdump`（command 插件）是可直接参考的完整实现。
+插件是一个可执行文件加一份 `manifest.json` 清单。客户端按清单下载、启停和执行它，通过命令行参数传入输入，捕获 stdout 和 stderr 作为结果。任何语言都可以，只要产物能在目标平台直接执行。使用方式见[插件](/reference/plugins)；完整实现可参考 SIREN 仓库的 `_plugins/chkrootkit`（recon）和 `_plugins/jdump`（command）。
 
 ## 插件结构
 
-仓库内的源码目录：
+源码目录：
 
 ```text
 _plugins/
@@ -35,7 +33,7 @@ _plugins/
     └── setup.sh         # 可选；目录下所有 *.sh 都会被复制到构建产物
 ```
 
-安装到客户端后的目录：
+安装到客户端后：
 
 ```text
 <客户端工作目录>/plugins/myplugin/
@@ -44,7 +42,7 @@ _plugins/
 └── setup.sh             # 如果清单声明了 setup
 ```
 
-客户端启动时扫描 `plugins/` 下的每个子目录（跳过以 `.` 开头的目录），读取其中的 `manifest.json`。清单缺失、不是合法 JSON 或未通过校验的插件会被跳过并记录警告。
+客户端启动时扫描 `plugins/` 下的子目录（跳过以 `.` 开头的），读取 `manifest.json`；清单缺失、不是合法 JSON 或未通过校验的插件被跳过并记录警告。
 
 ## manifest.json
 
@@ -64,14 +62,14 @@ _plugins/
 
 | 字段 | 必填 | 说明 |
 | --- | --- | --- |
-| `name` | 是 | 插件名，匹配 `^[a-zA-Z0-9][a-zA-Z0-9_-]*$`，1–64 个字符。必须与市场目录名、安装时请求的名字一致。也是配置键 `plugins.<name>` 和 Profile 引用 `plugin:<name>` 中的名字 |
-| `type` | 是 | `recon` 或 `command`。其他值的插件可以安装，但既不会进入 Recon，也不会注册为命令 |
-| `platforms` | 是 | 支持的平台列表，格式 `<GOOS>_<GOARCH>`。不包含客户端当前平台时安装失败 |
-| `entrypoint` | 是 | 可执行文件名，所有平台共用。不能为空，不能包含 `..`、`/` 或 `\` |
-| `version` | 否 | 版本字符串，只用于在插件列表中展示，不参与比较 |
+| `name` | 是 | 匹配 `^[a-zA-Z0-9][a-zA-Z0-9_-]*$`，1–64 个字符。须与市场目录名、安装时请求的名字一致，也用于 `plugins.<name>` 和 `plugin:<name>` |
+| `type` | 是 | `recon` 或 `command`。其他值可以安装，但既不进入 Recon，也不注册为命令 |
+| `platforms` | 是 | 支持的平台，格式 `<GOOS>_<GOARCH>`；不含客户端平台时安装失败 |
+| `entrypoint` | 是 | 可执行文件名，所有平台共用。不能为空，不能含 `..`、`/` 或 `\` |
+| `version` | 否 | 只在插件列表中展示，不参与比较 |
 | `description` | 否 | 本地模式下 `./siren --help` 中的命令说明 |
-| `usage` | 否 | 显示在 REPL `plugins <Client ID>` 表格的 `Usage` 列，供操作者参考 |
-| `clientUsage` | 否 | 仅 command 插件。本地模式下的命令用法，第一个单词就是本地命令名，所以应以插件名开头；留空时命令名为 `name` |
+| `usage` | 否 | REPL `plugins <Client ID>` 表格的 `Usage` 列 |
+| `clientUsage` | 否 | 仅 command 插件。本地模式的命令用法，第一个单词即本地命令名，应以插件名开头；留空时命令名为 `name` |
 | `setup` | 否 | 安装和更新时执行的脚本文件名，限制同 `entrypoint` |
 
 ### 平台
@@ -82,14 +80,14 @@ _plugins/
 | `linux_arm64` | Linux AArch64 |
 | `windows_amd64` | Windows x86_64 |
 
-这是 SIREN 客户端发布的全部平台，插件只能面向这三个。`make build-plugins` 默认只构建两个 Linux 平台。面向 Windows 时注意：
+SIREN 客户端只发布这三个平台；`make build-plugins` 默认只构建两个 Linux 平台。面向 Windows 时：
 
-- `entrypoint` 所有平台共用，写不带扩展名的名字（如 `myplugin`）。Windows 客户端遇到没有扩展名的 `entrypoint` 时下载并执行 `<entrypoint>.exe`，与 Makefile 为 Windows 生成的文件名一致；`entrypoint` 已带扩展名时按原样使用。
-- setup 脚本固定用 `sh` 执行，Windows 主机通常没有 `sh`，不要为 Windows 插件声明 `setup`。
+- `entrypoint` 写不带扩展名的名字（如 `myplugin`），Windows 客户端会下载并执行 `<entrypoint>.exe`，与 Makefile 生成的文件名一致；已带扩展名时按原样使用。
+- setup 固定用 `sh` 执行，Windows 主机通常没有 `sh`，不要为 Windows 插件声明 `setup`。
 
 ### 服务端展示限制
 
-客户端上报插件列表时，服务端会限制字段。超出后插件仍然安装在客户端上，但远程使用会受影响：
+客户端上报插件列表时服务端有以下限制；超出后插件仍在客户端上，但远程使用受影响：
 
 | 项 | 上限 | 超出时 |
 | --- | --- | --- |
@@ -102,27 +100,27 @@ _plugins/
 | 项 | recon 插件 | command 插件 |
 | --- | --- | --- |
 | 参数 | 无 | 用户输入按空白切分后作为命令行参数，不支持引号 |
-| 输出 | stdout 和 stderr 合并后写入 Recon 快照，并按 Markdown 原样嵌入报告，标题为 `Plugin: <name>`。不会自动加代码块，需要等宽显示时由插件自己输出 Markdown 代码块围栏 | stdout 和 stderr 合并后返回给调用方 |
+| 输出 | stdout 和 stderr 合并写入 Recon 快照，按 Markdown 原样嵌入报告，标题为 `Plugin: <name>`；需要等宽显示时由插件自己输出代码块围栏 | stdout 和 stderr 合并返回调用方 |
 | 非零退出 | 该段落记为失败，已有输出保留，快照变为 partial | 本地模式打印输出后报错；远程调用只返回 `plugin error: ...`，插件输出丢弃 |
 
-两类插件的共同执行环境：
+共同执行环境：
 
-- **工作目录**：插件自己的安装目录 `plugins/<name>/`。插件写出的相对路径文件都落在这里，客户端被[清理](/cleanup)时随插件目录一起删除。
-- **权限与环境变量**：以客户端进程的用户运行（通常是 root 或管理员），继承客户端进程的环境变量。
-- **超时**：客户端 `recon.commandTimeout`，默认 30 秒。超时后插件及其子进程被终止。
+- **工作目录**：`plugins/<name>/`。相对路径写出的文件落在这里，客户端被[清理](/cleanup)时一起删除。
+- **用户与环境变量**：与客户端进程相同（通常是 root 或管理员）。
+- **超时**：客户端 `recon.commandTimeout`，默认 30 秒，超时后插件及其子进程被终止。
 - **输出上限**：16 MiB；在 Recon 中还受该模块剩余输出预算限制，超出时截断。
-- **启用检查**：执行前检查 `plugins.<name>`，未启用时直接报错，不会启动插件。
+- **启用检查**：`plugins.<name>` 未启用时直接报错，不启动插件。
 
-远程调用的 command 插件在客户端的有序任务队列中运行，执行期间会阻塞同一客户端的 Files、`upload` 等请求。耗时较长的工作应尽快返回，把结果写成文件，让操作者通过 Files 或 REPL `upload` 取回。
+远程调用的 command 插件在客户端的有序任务队列中运行，会阻塞同一客户端的 Files、`upload` 等请求。耗时工作应把结果写成文件后尽快返回，让操作者通过 Files 或 REPL `upload` 取回。
 
 ## setup 脚本
 
-- 安装和更新时以 `sh <setup>` 执行，工作目录是一个临时准备目录，不是最终安装路径。脚本中不要写死 `plugins/<name>/` 的绝对路径。
+- 安装和更新时以 `sh <setup>` 执行，工作目录是临时准备目录而非最终安装路径，不要写死 `plugins/<name>/` 的绝对路径。
 - 最长 5 分钟，输出上限 16 MiB。非零退出、超时或输出超限都会让安装或更新失败，插件目录和配置回到操作前的状态。
-- 脚本对插件目录以外的修改（安装系统包、写入 `/usr/local` 等）不会回滚，脚本应能重复执行。`_plugins/chkrootkit/setup.sh` 先检查目标文件是否已存在，是可参考的写法。
+- 对插件目录以外的修改（安装系统包、写入 `/usr/local` 等）不会回滚，脚本应可重复执行，可参考 `_plugins/chkrootkit/setup.sh` 先检查目标文件是否已存在的写法。
 
 <Callout title="路径限制" type="warn">
-  `entrypoint` 和 `setup` 不能包含 `..`、`/` 或 `\`。清单在加载、下载和执行前都会校验，用于阻止恶意市场借清单写入插件目录以外的位置。
+  `entrypoint` 和 `setup` 不能含 `..`、`/` 或 `\`。加载、下载和执行前都会校验，防止恶意市场借清单写到插件目录以外。
 </Callout>
 
 ## 构建
@@ -135,10 +133,10 @@ make build-plugins                                # 构建 _plugins/ 下所有�
 make build-plugins PLUGIN_PLATFORMS="linux_amd64 linux_arm64 windows_amd64"
 ```
 
-- 构建命令为 `CGO_ENABLED=0 go build -trimpath -ldflags "-s -w"`，输入只有 `_plugins/<name>/main.go` 一个文件；插件代码需要拆成多个文件时，改用自己的构建方式，产物目录保持一致即可。
-- `PLUGIN_DIR`（默认 `_plugins`）、`OUTPUT_DIR`（默认 `dist`）、`PLUGIN_PLATFORMS`（默认 `linux_amd64 linux_arm64`）都可以在命令行覆盖。
+- 构建命令为 `CGO_ENABLED=0 go build -trimpath -ldflags "-s -w"`，只编译 `_plugins/<name>/main.go`；代码拆成多个文件时改用自己的构建方式，保持相同的产物目录即可。
+- 可在命令行覆盖 `PLUGIN_DIR`（默认 `_plugins`）、`OUTPUT_DIR`（默认 `dist`）、`PLUGIN_PLATFORMS`（默认 `linux_amd64 linux_arm64`）。
 
-产物目录就是插件市场需要的结构：
+产物目录即插件市场所需的结构：
 
 ```text
 dist/plugins/myplugin/
@@ -152,9 +150,7 @@ dist/plugins/myplugin/
 
 ## 发布到插件市场
 
-把 `dist/plugins/<name>/` 整个上传到插件市场下的 `<name>/` 目录。`make release` 只上传客户端和服务端安装包，不包含插件。
-
-客户端安装或更新时按以下地址下载，`{marketplace}` 是客户端配置中的 `plugins.marketplace`：
+把 `dist/plugins/<name>/` 整个上传到插件市场的 `<name>/` 目录；`make release` 不上传插件。客户端按以下地址下载，`{marketplace}` 是客户端的 `plugins.marketplace`：
 
 | 文件 | 地址 |
 | --- | --- |
@@ -162,14 +158,12 @@ dist/plugins/myplugin/
 | 可执行文件 | `{marketplace}/{name}/{platform}/{entrypoint}`；Windows 上不带扩展名的 `entrypoint` 加 `.exe` |
 | setup 脚本 | `{marketplace}/{name}/{setup}` |
 
-默认市场为 `https://oss-siren.oss-cn-hongkong.aliyuncs.com/plugins`。上传后在测试客户端上执行 `plugins <Client ID> install <name>`，再用 `plugins <Client ID>` 确认安装结果。
+默认市场为 `https://oss-siren.oss-cn-hongkong.aliyuncs.com/plugins`。上传后在测试客户端上执行 `plugins <Client ID> install <name>`，再用 `plugins <Client ID>` 确认。
 
 ## 不经市场测试
 
-开发时可以跳过市场，直接在本地客户端上验证：
-
 1. 在客户端工作目录下创建 `plugins/<name>/`，放入 `manifest.json` 和对应平台的可执行文件（加可执行权限）。
-2. 在客户端 `config.yaml` 中设置 `plugins.<name>: true`。recon 插件还要写进一个 Profile。
-3. 本地执行 `./siren <name> [args]`（command 插件）或 `./siren recon --profile <profile>`（recon 插件）。
+2. 在客户端 `config.yaml` 中设置 `plugins.<name>: true`；recon 插件还要写进一个 Profile。
+3. 本地执行 `./siren <name> [args]`（command）或 `./siren recon --profile <profile>`（recon）。
 
-客户端只在启动时扫描插件目录，已在运行的客户端需要重启才能看到手动放入的插件。
+客户端只在启动时扫描插件目录，运行中的客户端须重启才能看到手动放入的插件。

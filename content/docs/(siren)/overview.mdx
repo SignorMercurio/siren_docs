@@ -24,64 +24,60 @@ import architectureDark from "../../img/architecture-dark.webp";
 import architectureLight from "../../img/architecture-light.webp";
 
 <Callout title="注意" type="warn">
-  SIREN 仅面向合法的应急响应和安全分析场景。运行信息收集、远程 Shell、文件操作、端口转发或痕迹清除前，请确认你有权调查目标系统。
+  SIREN 仅用于合法的应急响应和安全分析。运行信息收集、远程 Shell、文件操作、端口转发或痕迹清除前，请确认你有权调查目标系统。
 </Callout>
 
-SIREN（**S**wift **I**ncident **R**esponse **E**vidence **N**avigator）是面向主机应急响应的工具。它把接入目标主机、收集证据、远程排查、AI 辅助调查和报告整理放进同一个 Web 控制台，适合在事件处理中快速接入少量主机并留存证据。
+SIREN（**S**wift **I**ncident **R**esponse **E**vidence **N**avigator）是面向主机应急响应的工具，把接入主机、收集证据、远程排查、AI 辅助调查和报告整理放进同一个 Web 控制台，适合在事件中快速接入少量主机并留存证据。
 
 ## 工作方式
 
-- **一台服务端，多个客户端**：SIREN Server 运行在一台 Linux 控制主机上；每台被调查主机运行一个 SIREN 客户端，由客户端主动连接服务端。目标主机只需要能访问服务端的一个端口，不需要开放任何入站端口。
-- **一个 TLS 端口**：客户端接入、交互式 Shell、Web 控制台、MCP 和 Dossier 共用服务端的同一个 TLS 端口（默认 `443`），按 TLS 握手中的 ALPN 分流。分流规则见 [单一 TLS 端口](/server#单一-tls-端口)。
-- **浏览器即操作台**：日常操作都在 Web 控制台中完成，Agentic IR 也只能在 Web 控制台中使用。服务端终端里的 [服务端 REPL](/reference/repl) 用于少数 WebUI 没有的操作，例如端口转发和插件管理。
-
-WebUI 中反复出现的名词（Client ID、Global 与 Project、Artifacts 与 Reports 等）见 [核心概念](/concepts)。
+- **一台服务端，多个客户端**：SIREN Server 运行在一台 Linux 控制主机上，被调查主机上的客户端主动连接它。目标主机只需能访问服务端的一个端口，不用开放入站端口。
+- **一个 TLS 端口**：客户端接入、交互式 Shell、Web 控制台、MCP 和 Dossier 共用同一个 TLS 端口（默认 `443`），按 ALPN 分流，见 [单一 TLS 端口](/server#单一-tls-端口)。
+- **浏览器即操作台**：日常操作和 Agentic IR 都在 Web 控制台中完成；[服务端 REPL](/reference/repl) 只补充端口转发、插件管理等操作。
 
 ## 能力地图
 
-按一次应急响应的顺序分组，组名与 WebUI 侧栏相同。侧栏之外的入口：Provisioning 在 Clients 页内，Projects 在侧栏顶部的 **Project scope** 菜单中，MCP 和插件没有页面入口。
+组名与 WebUI 侧栏相同。Provisioning 在 Clients 页内，Projects 在侧栏顶部的 **Project scope** 菜单中，MCP 和插件没有页面入口。
 
 ### Respond：接入与响应
 
 | 能力 | 用途 |
 | --- | --- |
-| [Clients](/clients) | 在线客户端列表：编辑 Note、分配 Project，从客户端行打开 Shell、Files、Recon 等；结案时 [Clean & terminate](/cleanup) |
-| Provisioning | 通过 SOAR 操作阿里云 ECS：[Deploy SIREN](/onboard/provisioning) 一键部署客户端、**Allow access** 放行回连、[Configure egress](/onboard/egress) 放行出站，结案后 [Restore egress](/restore-egress) |
-| [Agentic IR](/air) | 在服务端运行 Codex、Claude Code、Pi 或 Qoder，通过 SIREN MCP 排查客户端；操作员审批、追问并控制过程 |
+| [Clients](/clients) | 在线客户端列表：编辑 Note、分配 Project，打开 Shell、Files、Recon；结案时 [Clean & terminate](/cleanup) |
+| Provisioning | 经 SOAR 操作阿里云 ECS：[Deploy SIREN](/onboard/provisioning)、**Allow access**、[Configure egress](/onboard/egress)，结案后 [Restore egress](/restore-egress) |
+| [Agentic IR](/air) | 在服务端运行 Codex、Claude Code、Pi 或 Qoder，经 SIREN MCP 排查客户端，操作员审批和控制 |
 
 ### Tools：手工排查
 
 | 能力 | 用途 |
 | --- | --- |
-| [Recon](/recon) | 按 Profile 采集有范围、有上限的主机快照，产出 `.recon.jsonl` 和 Markdown 报告；只记录事实，不下结论 |
-| [Process Analysis](/process) | 按 PID、监听端口或进程名查看 Linux 客户端的进程详情、进程链、容器和 systemd 线索 |
+| [Recon](/recon) | 按 Profile 采集有上限的主机快照，产出 `.recon.jsonl` 和 Markdown 报告；只记录事实，不下结论 |
+| [Process Analysis](/process) | 按 PID、监听端口或进程名查看 Linux 客户端的进程链、容器和 systemd 线索 |
 | [AccessKey](/ak) | 经 SOAR 查询泄露 AccessKey 的云上调用记录，生成 `AK_*.md` 报告 |
-| [Shells](/shells) | 浏览器中的多标签交互式终端，切换页面不断开 |
-| [Files](/files) | 浏览、预览、下载和上传在线客户端主机上的文件 |
+| [Shells](/shells) | 多标签交互式终端，切换页面不断开 |
+| [Files](/files) | 浏览、预览、下载和上传客户端主机上的文件 |
 
 ### Evidence：证据与报告
 
 | 能力 | 用途 |
 | --- | --- |
-| [Artifacts](/artifacts) | 服务端证据目录，按 Global 或 Project 划分；Recon、AccessKey、AIR 产出和手工上传的文件都在这里 |
-| [Reports](/reports) | 列出 Artifacts 中的 Dossier 报告，在 Dossier 编辑器中编写、校样并导出 PDF、HTML 或 Markdown；语法见 [报告语法](/reports/syntax) |
+| [Artifacts](/artifacts) | 服务端证据目录，按 Global 或 Project 划分，存放所有产出和上传的文件 |
+| [Reports](/reports) | Artifacts 中的 Dossier 报告，在 Dossier 中编写并导出 PDF、HTML 或 Markdown |
 
 ### System：工作区与集成
 
 | 能力 | 用途 |
 | --- | --- |
 | [Projects](/projects) | 按事件隔离客户端、AIR 会话和证据目录 |
-| [Logs](/logs) | 查看服务端内存中最近的运行日志，按关键词、级别和组件过滤 |
+| [Logs](/logs) | 服务端内存中最近的运行日志，可按关键词、级别和组件过滤 |
 | [Settings](/webui#settings) | 账号菜单中查看鉴权、Dossier 和 AIR runtime 等服务端状态 |
-| [MCP](/reference/mcp) | `/mcp` 与 `/mcp/project/<id>` 端点，让 AIR 和外部 MCP 客户端列出客户端、执行命令、运行 Recon |
-| [插件](/reference/plugins) | `command` 和 `recon` 两类客户端插件（如 `jdump`、`chkrootkit`），通过命令行安装和管理；开发见 [插件开发](/reference/plugin-dev) |
-| [服务端 REPL](/reference/repl) | 服务端终端中的命令行，提供 [端口转发](/reference/portforward) 等 WebUI 没有的操作 |
+| [MCP](/reference/mcp) | 供 AIR 和外部 MCP 客户端列出客户端、执行命令、运行 Recon |
+| [插件](/reference/plugins) | `command` 和 `recon` 两类客户端插件（如 `jdump`、`chkrootkit`），通过命令行管理 |
+| [服务端 REPL](/reference/repl) | 服务端终端中的命令行，提供 [端口转发](/reference/portforward) 等操作 |
 
 ## 架构
 
 ### 远程模式
-
-远程模式是 SIREN 的主要用法：
 
 <ThemeImage
   light={architectureLight}
@@ -89,20 +85,20 @@ WebUI 中反复出现的名词（Client ID、Global 与 Project、Artifacts 与 
   alt="SIREN 远程模式架构：操作员浏览器和外部 MCP 客户端通过 HTTPS 访问 SIREN Server；被调查主机上的 Client 主动以 TLS 连接服务端；服务端按需调用 SOAR 和模型服务"
 />
 
-- **服务端**保存所有产出：Recon 快照、AccessKey 报告、AIR 会话产出、手工上传的文件都写在服务端工作目录或 Project 目录中，不需要 OSS。AIR 的 Provider CLI 也在服务端本机运行，浏览器只负责显示和输入。安装与运行方式见 [安装服务端](/server)。
-- **客户端**是单个静态编译的可执行文件，支持 Linux 和 Windows（平台见 [客户端平台](/onboard#客户端平台)）。它与服务端保持长连接，断线后自动重连；Recon 只使用目标主机上已有的系统工具，不安装其他软件。接入方式见 [选择接入方式](/onboard)。
-- **外部依赖按功能启用**：只用客户端接入、Shell、Files、Recon 和 Artifacts 时，服务端不依赖外部服务；SOAR、Dossier、AIR Provider 等只影响各自的功能。完整清单见 [前置条件与凭证](/server/prerequisites)。
+- **服务端**把所有产出写在工作目录或 Project 目录中，不需要 OSS；AIR 的 Provider CLI 也在服务端运行，浏览器只负责显示和输入。见 [安装服务端](/server)。
+- **客户端**是单个静态编译的可执行文件，支持 Linux 和 Windows（见 [客户端平台](/onboard#客户端平台)），保持长连接并自动重连；Recon 只使用主机上已有的系统工具。
+- **外部依赖按功能启用**：只用客户端接入、Shell、Files、Recon 和 Artifacts 时不依赖外部服务；SOAR、Dossier、AIR Provider 只影响各自的功能。见 [前置条件与凭证](/server/prerequisites)。
 
 ### 本地模式
 
-目标主机网络隔离、或数据不允许离开主机时，可以不部署服务端，直接在目标主机上运行 `siren recon`、`siren info` 等子命令。结果写在目标主机本地，并上传到配置的 OSS。本地模式没有 Web 控制台、Agentic IR、MCP 和远程 Shell。命令与参数见 [客户端命令行](/reference/client-cli)。
+目标主机网络隔离、或数据不允许离开主机时，可以不部署服务端，直接在目标主机上运行 `siren recon`、`siren info` 等子命令，结果写在本地并上传到配置的 OSS。本地模式没有 Web 控制台、Agentic IR、MCP 和远程 Shell。见 [客户端命令行](/reference/client-cli)。
 
 ## 设计取舍
 
-- **客户端尽量轻**：目标主机上只需要一个可执行文件和一份配置，主动外连，用完通过 Clean & terminate 删除。依赖集中在控制主机一侧。
-- **证据优先**：Recon 只采集事实，工具缺失或输出截断会如实记入快照；判断留给操作员和 Agentic IR。所有产出集中在服务端，便于留存和写报告。
-- **人在回路**：Agentic IR 是交互式会话，不是无人值守的自动处置。Agent 需要审批或提问时会停下来等操作员回应，结论写入报告前需要人工核对。
-- **短期接入**：面向一次事件中的少量主机，不做长期驻留和大规模终端管理。和其他工具的定位差异见 [工具对比](/comparison)。
+- **客户端尽量轻**：目标主机上只需一个可执行文件和一份配置，用完通过 Clean & terminate 删除；依赖集中在控制主机。
+- **证据优先**：工具缺失或输出截断会如实记入快照，判断留给操作员和 Agentic IR。
+- **人在回路**：Agentic IR 是交互式会话，不是无人值守的自动处置；结论写入报告前需要人工核对。
+- **短期接入**：面向一次事件中的少量主机，不做长期驻留和大规模终端管理，见 [工具对比](/comparison)。
 
 ## 下一步
 

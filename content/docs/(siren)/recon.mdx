@@ -28,12 +28,12 @@ import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { Step, Steps } from "fumadocs-ui/components/steps";
 
-Recon 在目标主机上按 Profile 采集一份主机快照：账户、进程、网络、计划任务、启动项、环境变量、文件、应用配置等，`hunt` Profile 还会补充应用拓扑、配置原文、近期应用日志和凭据材料。结果是一份权威的 `*.recon.jsonl` 快照和一份由它渲染的 Markdown 报告，保存到服务端 Artifacts，供人工浏览和 [Agentic IR](/air) 分析。
+Recon 在目标主机上按 Profile 采集一份主机快照：账户、进程、网络、计划任务、启动项、环境变量、文件、应用配置等；`hunt` Profile 还采集应用拓扑、配置原文、近期应用日志和凭据材料。结果是权威的 `*.recon.jsonl` 快照和由它渲染的 Markdown 报告，保存到服务端 Artifacts，供人工浏览和 [Agentic IR](/air) 分析。
 
-Recon 只采集事实，不判断主机是否被入侵，也不做白名单、黑名单、矿工、Webshell、Rootkit 或漏洞判定。对已读取的配置、凭据和依赖文本，它会记录疑似密钥、令牌、密码赋值等内容形态，只保留模式、行号、脱敏值和 SHA-256，不给出风险结论。
+Recon 只采集事实，不判断主机是否被入侵，也不做白名单、黑名单、矿工、Webshell、Rootkit 或漏洞判定。配置、凭据和依赖文本中疑似密钥、令牌、密码赋值的内容，只记录模式、行号、脱敏值和 SHA-256。
 
 <Callout title="前置条件" type="info">
-  客户端必须以 root（Linux）或管理员（Windows）身份运行，否则采集在开始前失败，报 `user with root permission required` 一类错误。快照会包含环境变量、配置、历史记录和凭据原文，应只保存在受控的服务端目录中。
+  客户端必须以 root（Linux）或管理员（Windows）身份运行，否则采集在开始前失败，报 `user with root permission required` 一类错误。快照包含环境变量、配置、历史记录和凭据原文，只应保存在受控的服务端目录中。
 </Callout>
 
 ## 发起 Recon
@@ -42,21 +42,21 @@ Recon 只采集事实，不判断主机是否被入侵，也不做白名单、�
 <Step>
 ### 打开 Recon
 
-在侧栏打开 **Investigations**，切到 **Recon** 标签（`#/investigations/recon`）。也可以在 [Clients 页](/clients) 的目标行点 **More actions** → **Recon**，会跳到这里并预先选中该客户端。
+侧栏 **Investigations** → **Recon** 标签（`#/investigations/recon`）。也可以在 [Clients 页](/clients) 目标行点 **More actions** → **Recon**，跳到这里并预选该客户端。
 </Step>
 <Step>
 ### 选择客户端和 Profile
 
-**Client** 下拉框列出当前范围内的在线客户端；在 Project 视图中只能选本 Project 的客户端。**Profile** 下拉框只列出该客户端上报的 Profile，并默认选中它的 `recon.defaultProfile`。Profile 的区别见 [Profile](#profile)。
+**Client** 列出当前范围内的在线客户端（Project 视图中只有本 Project 的客户端）。**Profile** 只列出该客户端上报的 Profile，默认选中它的 `recon.defaultProfile`，区别见 [Profile](#profile)。
 </Step>
 <Step>
 ### 点击 **Start Recon**
 
-按钮变为 **Recon Running**，右侧开始显示阶段进度。采集期间表单锁定。
+按钮变为 **Recon Running**，右侧显示阶段进度，采集期间表单锁定。
 </Step>
 </Steps>
 
-除了手动发起，AIR 会话也会通过 MCP 工具 `recon` 按需触发采集，外部 Agent 同样可以调用，参数是 `client_id` 和可选的 `profile`，见 [MCP](/reference/mcp#工具)。三种入口（WebUI、MCP、服务端 REPL）共用同一套规则和保存位置。
+AIR 会话和外部 Agent 也可以调用 MCP 工具 `recon`（参数 `client_id` 和可选的 `profile`）触发采集，见 [MCP](/reference/mcp#工具)。WebUI、MCP 和服务端 REPL 共用同一套规则和保存位置。
 
 ![Investigations 页的 Recon 标签，已选择客户端和 hunt Profile](../../img/recon-start.png)
 
@@ -67,57 +67,57 @@ Recon 只采集事实，不判断主机是否被入侵，也不做白名单、�
 | 阶段 | 含义 |
 | --- | --- |
 | `Dispatch Recon` | 服务端已下发请求 |
-| `Recon.Basic` | 基础信息，每次都会采集 |
+| `Recon.Basic` | 基础信息，每次都采集 |
 | `Recon.User`、`Recon.Process`、`Recon.Network` … | Profile 中的各模块，按固定顺序执行 |
 | `Recon.Plugin.<name>` | Profile 引用的 recon 插件 |
 | `Save report to Artifacts` | 服务端接收快照、校验并生成 Markdown |
 
-采集完成后横幅变为 **Recon report ready**。如果有模块被截断、超时或缺少权限和工具，快照状态为 partial，横幅显示 **Recon report ready · partial snapshot**。partial 快照仍然有效，已完成部分照常保存，缺失和截断的位置记录在快照中。
+完成后横幅变为 **Recon report ready**。有模块被截断、超时或缺少权限和工具时，快照为 partial，横幅显示 **Recon report ready · partial snapshot**；已完成部分照常保存，缺失和截断位置记录在快照中。
 
-以下情况会直接结束当前操作并显示错误：
+以下情况会结束当前操作并显示错误：
 
-- **同一客户端已有 Recon 在运行**：报 `recon already running`。同一客户端同时只能运行一个 Recon，WebUI、REPL 和 MCP 共用这个限制；不同客户端可以并行。
-- **服务端等待超时**：超过 `recon.responseTimeout` 仍未收到结果，报 `recon timed out after ...`，服务端同时请求客户端取消。客户端还没停下时，紧接着再发起会收到 `recon already in progress on client`，稍后重试即可。
+- **同一客户端已有 Recon 在运行**：报 `recon already running`。每个客户端同时只能运行一个 Recon（WebUI、REPL 和 MCP 共用此限制），不同客户端可以并行。
+- **服务端等待超时**：超过 `recon.responseTimeout` 报 `recon timed out after ...`，服务端同时请求客户端取消。客户端还没停下时立即重发会收到 `recon already in progress on client`，稍后重试即可。
 - **客户端断开**：报 `Recon failed: context canceled`。
-- **客户端报错**：例如权限不足、Profile 不存在或引用了被禁用的插件，错误原文显示在结果区。
+- **客户端报错**：如权限不足、Profile 不存在或引用了被禁用的插件，错误原文显示在结果区。
 
 ## 查看结果
 
-点击 **Open Report** 跳到 [Artifacts](/artifacts)，并定位到本次生成的 Markdown 报告。同一目录下有两份文件：
+**Open Report** 跳到 [Artifacts](/artifacts) 并定位本次的 Markdown 报告。同一目录下有两份文件，文件名中的客户端 ID 和请求序号避免同名主机或多次采集互相覆盖：
 
 | 文件 | 用途 |
 | --- | --- |
-| `SIREN_<主机名>_<时间>_client-<ID>_req-<N>.recon.jsonl` | 权威快照。完整的结构化记录和采集到的文件原文都在这里 |
+| `SIREN_<主机名>_<时间>_client-<ID>_req-<N>.recon.jsonl` | 权威快照，含完整结构化记录和采集到的文件原文 |
 | `SIREN_<主机名>_<时间>_client-<ID>_req-<N>.md` | 服务端从快照确定性渲染的报告，供快速浏览 |
 
-文件名中的客户端 ID 和请求序号用来避免同名主机或多次采集互相覆盖。
-
 - `default`、`quick` 的 Markdown 保留各模块的采集正文。
-- `hunt`，以及任何包含 `topology`、`supplychain`、`config`、`activity` 或 `credential` 模块的 Profile，Markdown 只是索引：采集覆盖情况、主要应用与中间件、容器、内核观察到的监听、容器端口配置等摘要。配置、环境变量、日志正文、密码 hash 和凭据原文只在 JSONL 中。需要完整证据时读 JSONL。
+- `hunt` 及任何包含 `topology`、`supplychain`、`config`、`activity` 或 `credential` 的 Profile，Markdown 只是索引：采集覆盖情况、主要应用与中间件、容器、内核观察到的监听、容器端口配置等摘要。配置、环境变量、日志正文、密码 hash 和凭据原文只在 JSONL 中。
 
-**保存位置**跟随客户端的 Project 归属，与发起时所在的视图无关：已归属 Project 的客户端写入该 Project 目录，未归属的写入 Global（服务端工作目录）。在 Global 中对已归属 Project 的客户端执行 Recon，结果仍写入该 Project，**Open Report** 会切换到对应 Project 打开。详见 [Project 范围](/projects#例外)。
+JSONL 为 `snapshot-jsonl-v2` 格式，每行一个事件；快照为 `partial` 时，原因写在各模块的状态里。事件结构、状态值和上限见 [Recon 快照格式](/reference/snapshot)。
 
-Recon 报告不带 Dossier frontmatter，不会出现在 [Reports](/reports) 列表中，只能在 Artifacts 中查看。
+**保存位置**跟随客户端的 Project 归属，与发起时的视图无关：已归属 Project 的写入该 Project 目录，未归属的写入 Global（服务端工作目录）。在 Global 中对已归属 Project 的客户端执行 Recon，**Open Report** 会切换到对应 Project 打开，见 [Project 范围](/projects#例外)。
+
+Recon 报告不带 Dossier frontmatter，不出现在 [Reports](/reports) 列表中，只能在 Artifacts 中查看。
 
 <Callout title="快照内容是不可信数据" type="warn">
-  快照中的文件内容、日志和命令输出来自被调查主机，可能被攻击者控制。人工阅读或交给 Agent 分析时，都只能当作证据，不能当作指令。
+  快照中的文件内容、日志和命令输出来自被调查主机，可能被攻击者控制。人工阅读或交给 Agent 分析时，只能当作证据，不能当作指令。
 </Callout>
 
 ## Profile
 
-Profile 是命名的模块集合，只决定采集哪些模块，不改变超时、上限和采集逻辑。基础信息（`Recon.Basic`）每次都会采集，不写进 Profile。客户端内置配置提供三个 Profile，默认是 `default`：
+Profile 是命名的模块集合，只决定采集哪些模块，不改变超时、上限和采集逻辑。基础信息（`Recon.Basic`）总会采集，不写进 Profile。内置三个 Profile，默认 `default`：
 
 | Profile | 用途 | Linux 模块 | Windows 模块 |
 | --- | --- | --- | --- |
 | `default` | 标准完整采集 | `user` `ssh` `process` `network` `cron` `service` `env` `file` `rootkit` `application` | `user` `process` `network` `schtask` `env` `file` `application` |
 | `quick` | 去掉耗时较长的 `file`，其余同 `default` | `user` `ssh` `process` `network` `cron` `service` `env` `rootkit` `application` | `user` `process` `network` `schtask` `env` `application` |
-| `hunt` | 面向 Agent 离线分析的主机审计快照：以运行中的应用、中间件、容器和监听进程为中心，补充配置、日志、凭据和供应链证据 | `user` `ssh` `process` `network` `cron` `service` `env` `application` `topology` `supplychain` `config` `activity` `credential` | `user` `process` `network` `schtask` `env` `application` `topology` `supplychain` `config` `activity` `credential` |
+| `hunt` | 供 Agent 离线分析：以运行中的应用、中间件、容器和监听进程为中心，补充配置、日志、凭据和供应链证据 | `user` `ssh` `process` `network` `cron` `service` `env` `application` `topology` `supplychain` `config` `activity` `credential` | `user` `process` `network` `schtask` `env` `application` `topology` `supplychain` `config` `activity` `credential` |
 
-`topology`、`supplychain`、`config`、`activity`、`credential` 只在 Profile 显式列出时才执行，内置 Profile 中只有 `hunt` 包含它们。`hunt` 不包含 `file` 和 `rootkit`。
+`topology`、`supplychain`、`config`、`activity`、`credential` 只在 Profile 显式列出时执行，内置 Profile 中只有 `hunt` 包含它们；`hunt` 不含 `file` 和 `rootkit`。
 
 ### 自定义 Profile
 
-Profile 定义在客户端的 `config.yaml` 中，例如增加一个只看进程和网络的 Profile：
+在客户端 `config.yaml` 中定义，例如增加一个只看进程和网络的 Profile：
 
 ```yaml title="config.yaml（Linux 客户端）"
 recon:
@@ -130,22 +130,22 @@ recon:
 ```
 
 - Profile 名须匹配 `^[a-z][a-z0-9_-]{0,63}$`，每个 Profile 1 到 64 个不重复模块，模块名必须是本平台存在的模块。
-- recon 插件以 `plugin:<name>` 写入，例如 `[user, process, plugin:chkrootkit]`，并由 `plugins.<name>` 控制启停。安装插件不会自动加入任何 Profile；引用缺失或已禁用的插件时，配置校验失败。见 [插件](/reference/plugins)。
+- recon 插件写作 `plugin:<name>`（如 `[user, process, plugin:chkrootkit]`），由 `plugins.<name>` 控制启停。安装插件不会自动加入任何 Profile；引用缺失或已禁用的插件时配置校验失败。见 [插件](/reference/plugins)。
 - 列表顺序不影响执行顺序：内置模块按固定顺序执行，插件按名称排序。
-- 改完后在服务端 REPL 执行 `reload <Client ID>`。新配置无效时重载被拒绝，客户端保留上一份有效的 Profile；此时直接重启客户端会因配置无效而退出。重载成功后客户端会重新上报 Profile，WebUI 的下拉框随之更新。
+- 改完后在服务端 REPL 执行 `reload <Client ID>`。新配置无效时重载被拒绝，客户端保留上一份有效的 Profile，但此时重启客户端会因配置无效而退出。重载成功后 WebUI 的 Profile 下拉框随之更新。
 
-配置项的完整说明见 [客户端配置](/reference/client-config)。
+完整配置项见 [客户端配置](/reference/client-config)。
 
 ## 模块
 
-下表按模块列出采集内容。同名模块在 Linux 和 Windows 上的采集项不同。
+同名模块在 Linux 和 Windows 上的采集项不同。
 
 | 模块 | 平台 | 采集内容 |
 | --- | --- | --- |
 | 基础信息（始终采集） | 两者 | 时间、OS、主机标识、主 IP、网络接口、CPU、内存、磁盘与挂载 |
-| `user` | 两者 | 账户、组、当前会话、登录记录和登录与新增用户事件；Linux 另有 sudoers 和 `/etc/passwd` 元数据 |
+| `user` | 两者 | 账户、组、当前会话、登录记录、登录与新增用户事件；Linux 另有 sudoers 和 `/etc/passwd` 元数据 |
 | `ssh` | Linux | `sshd_config`、用户 SSH 配置与公钥、认证失败事件、PAM 与 inetd 配置 |
-| `process` | 两者 | 一次完整进程快照，包括父进程、路径和命令行 |
+| `process` | 两者 | 完整进程快照，含父进程、路径和命令行 |
 | `network` | 两者 | Socket 快照、hosts、DNS、路由；Linux 另有防火墙规则，Windows 另有网络共享 |
 | `cron` | Linux | 用户级和系统级 cron 任务、cron 日志 |
 | `schtask` | Windows | 计划任务、启动文件夹、系统启动项、注册表启动项和服务列表 |
@@ -160,21 +160,17 @@ recon:
 | `activity` | 两者 | 当前运行应用和容器直接关联的近期本地日志尾部；不读取 Windows 事件日志 |
 | `credential` | 两者 | Linux：密码 hash 与策略、SSH 私钥、云 CLI、Kubernetes、Docker、数据库等客户端凭据文件；Windows：密码策略、Credential Manager 元数据、AutoLogon、IIS 连接字符串等，不采集 SAM/SECURITY/LSA |
 
-Recon 只使用主机上已有的工具，不安装任何软件。工具缺失或权限不足时，对应 source 记为 unavailable，快照变为 partial。
+Recon 只使用主机上已有的工具，不安装软件。工具缺失或权限不足时，对应 source 记为 unavailable，快照变为 partial。
 
 ## 超时
 
 | 配置项 | 位置 | 默认 | 作用 |
 | --- | --- | --- | --- |
-| `recon.commandTimeout` | 客户端 `config.yaml` | `30` 秒 | 每条底层采集命令的超时。一条命令超时只影响它自己的 source。同一个值也用于插件和本地 OSS 上传；远程 `run` 取服务端与客户端同名键中较小的值，见 [执行时限](/reference/mcp#执行时限) |
-| `recon.collectionTimeout` | 客户端 `config.yaml` | `270` 秒 | 整个 Profile 的采集预算。用尽后停止，已完成的部分照常保存，未执行的模块记录在快照中，快照为 partial |
-| `recon.responseTimeout` | 服务端 `server_config.yaml` | `300` 秒 | WebUI、REPL 和 MCP 等待客户端结果的上限。服务端发请求时会把采集预算压到 `responseTimeout - 30` 秒，客户端取它与 `collectionTimeout` 中较小的值 |
+| `recon.commandTimeout` | 客户端 `config.yaml` | `30` 秒 | 每条底层采集命令的超时，超时只影响该命令的 source。也用于插件和本地 OSS 上传；远程 `run` 见 [执行时限](/reference/mcp#执行时限) |
+| `recon.collectionTimeout` | 客户端 `config.yaml` | `270` 秒 | 整个 Profile 的采集预算。用尽后停止，已完成部分照常保存，未执行的模块记录在快照中，快照为 partial |
+| `recon.responseTimeout` | 服务端 `server_config.yaml` | `300` 秒 | WebUI、REPL 和 MCP 等待客户端结果的上限。服务端下发的采集预算为 `responseTimeout - 30` 秒，客户端取它与 `collectionTimeout` 中较小的值 |
 
-默认配置下，远程 Recon 的实际采集预算是 270 秒，服务端最多等 300 秒。调大采集预算时，要同时调大服务端的 `recon.responseTimeout`，否则仍被压到 `responseTimeout - 30`。配置文件位置见 [配置文件](/reference/server-config)。
-
-## 快照格式
-
-Recon 的权威结果是 `snapshot-jsonl-v2` 格式的 JSONL，每行一个事件；同名 `.md` 由它派生，便于阅读。整份快照标记为 `partial` 时，说明有模块没采全，原因写在各模块的状态里。事件结构、状态值和上限见 [Recon 快照格式](/reference/snapshot)。
+默认配置下，远程 Recon 实际采集预算 270 秒，服务端最多等 300 秒。调大采集预算时要同时调大服务端的 `recon.responseTimeout`，否则仍被压到 `responseTimeout - 30`。配置文件位置见 [服务端配置](/reference/server-config)。
 
 ## 命令行
 
@@ -184,7 +180,7 @@ Recon 的权威结果是 `snapshot-jsonl-v2` 格式的 JSONL，每行一个事�
 >>> recon <Client ID> [Profile]
 ```
 
-省略 Profile 时使用客户端的默认 Profile。命令立即返回，完成后在终端打印报告路径；保存位置与 WebUI 相同。见 [服务端 REPL](/reference/repl)。
+省略 Profile 时使用客户端的默认 Profile。命令立即返回，完成后在终端打印报告路径，保存位置与 WebUI 相同。见 [服务端 REPL](/reference/repl)。
 
 **本地模式**（在目标主机上直接运行客户端，不连服务端）：
 
@@ -192,7 +188,7 @@ Recon 的权威结果是 `snapshot-jsonl-v2` 格式的 JSONL，每行一个事�
 ./siren recon [--profile quick]
 ```
 
-在当前目录生成 `SIREN_<主机名>_<时间>.recon.jsonl` 和同名 `.md`，然后把两者上传到 OSS 的 `<oss.bucketName>/<oss.docObjectPath>/<文件名>`。上传需要先在环境变量中设置 [OSS 凭证](/server/prerequisites#oss-凭证)；上传失败时命令报错退出，本地文件保留。WebUI 和 REPL 不使用 OSS。
+在当前目录生成 `SIREN_<主机名>_<时间>.recon.jsonl` 和同名 `.md`，再上传到 OSS 的 `<oss.bucketName>/<oss.docObjectPath>/<文件名>`。上传前需在环境变量中设置 [OSS 凭证](/server/prerequisites#oss-凭证)；上传失败时命令报错退出，本地文件保留。WebUI 和 REPL 不使用 OSS。
 
 ## 相关内容
 

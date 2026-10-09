@@ -23,57 +23,55 @@ sources:
 
 import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
-按使用流程分组。每条只给结论和排查方向，细节见链接的页面。
-
 ## 部署服务端
 
 <Accordions>
 
 <Accordion title="如何升级 SIREN？">
 
-服务端执行 `./siren_server upgrade -y`，客户端执行 `siren upgrade -y`，然后分别重启。两端必须运行同一版本。推荐的顺序和重启方式见 [升级与数据](/upgrade#升级)。
+服务端执行 `./siren_server upgrade -y`，客户端执行 `siren upgrade -y`，然后分别重启，两端必须同版本。顺序见 [升级与数据](/upgrade#升级)。
 
 </Accordion>
 
 <Accordion title='启动时报 Config File "server_config" Not Found'>
 
-服务端在当前工作目录和其下的 `config/` 中查找 `server_config.yaml`。请在 `/opt/siren` 中启动，或用 `-c` 指定配置文件。工作目录还决定账号库和状态文件的位置，见 [服务端数据](/upgrade#服务端数据)。
+服务端在当前工作目录及其 `config/` 中查找 `server_config.yaml`。在 `/opt/siren` 中启动，或用 `-c` 指定配置文件。工作目录还决定账号库和状态文件的位置，见 [服务端数据](/upgrade#服务端数据)。
 
 </Accordion>
 
 <Accordion title="启动时报 MCP requires SIREN_MCP_ADMIN_TOKEN">
 
-默认启用 MCP 时，环境变量 `SIREN_MCP_ADMIN_TOKEN` 必须非空。写入工作目录下的 `.env` 即可，见 [MCP 凭证](/server/prerequisites#mcp-凭证)。
+启用 MCP（默认）时 `SIREN_MCP_ADMIN_TOKEN` 必须非空，写入工作目录下的 `.env`，见 [MCP 凭证](/server/prerequisites#mcp-凭证)。
 
 </Accordion>
 
 <Accordion title="启动时报 egress.rules 相关错误">
 
-启用 WebUI 时 `egress.rules` 必填，需要 1–20 条有效规则。见 [出站规则](/server/prerequisites#出站规则-egressrules)。
+启用 WebUI 时 `egress.rules` 必须有 1–20 条有效规则，见 [出站规则](/server/prerequisites#出站规则-egressrules)。
 
 </Accordion>
 
 <Accordion title="服务端启动后马上退出">
 
-服务端在当前终端运行 REPL，读到输入结束（EOF）就会关闭。systemd 等没有终端输入的环境会让它启动即退出。请在 tmux 中运行，见 [保持服务端运行](/server#保持服务端运行)。
+服务端在当前终端运行 REPL，读到 EOF 就关闭，所以在 systemd 等没有终端输入的环境中会启动即退出。在 tmux 中运行，见 [保持服务端运行](/server#保持服务端运行)。
 
 </Accordion>
 
 <Accordion title="浏览器打不开 WebUI，或提示证书错误">
 
-确认使用 `https://` 访问服务端的 TLS 端口（默认 `443`），端口已对你的来源开放，且没有在服务端前面终止 TLS，见 [单一 TLS 端口](/server#单一-tls-端口)。安装器生成的自签证书只覆盖 `localhost` 和 `127.0.0.1`，通过域名访问需要 [更换证书](/server#更换证书)。
+确认用 `https://` 访问 TLS 端口（默认 `443`）、端口对你的来源开放、前面没有终止 TLS，见 [单一 TLS 端口](/server#单一-tls-端口)。安装器的自签证书只覆盖 `localhost` 和 `127.0.0.1`，用域名访问需要 [更换证书](/server#更换证书)。
 
 </Accordion>
 
 <Accordion title="WebUI 没有登录页，Settings 显示 Disabled (local access)">
 
-服务端启动时账号库不存在或没有账号，本次运行不鉴权。用 `siren_server user add` 创建账号后重启服务端，见 [WebUI 账号](/server/security#webui-账号)。
+启动时账号库不存在或没有账号，本次运行不鉴权。用 `siren_server user add` 创建账号后重启，见 [WebUI 账号](/server/security#webui-账号)。
 
 </Accordion>
 
 <Accordion title="忘记密码，或登录一直提示 Invalid username or password">
 
-没有改密命令，先 `user delete` 再 `user add`。同一来源 IP 15 分钟内失败 5 次会被锁定，锁定期间密码正确也显示这条提示。账号命令要在服务端工作目录中执行，确保操作的是同一个账号库。见 [WebUI 账号](/server/security#webui-账号)。
+没有改密命令，先 `user delete` 再 `user add`，并在服务端工作目录中执行，确保操作同一个账号库。同一来源 IP 15 分钟内失败 5 次会被锁定，锁定期间密码正确也显示这条提示。见 [WebUI 账号](/server/security#webui-账号)。
 
 </Accordion>
 
@@ -85,43 +83,43 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
 <Accordion title="一键部署失败或超时">
 
-最常见的原因是目标 ECS 出方向默认拒绝，先 [Configure egress](/onboard/egress#configure-egress) 再部署；面板识别到出站问题时会直接给出入口。出口 IP 无法自动发现时，在目标行手动填写。见 [一键部署](/onboard/provisioning#注意事项)。
+最常见的原因是目标 ECS 出方向默认拒绝，先 [Configure egress](/onboard/egress#configure-egress) 再部署，面板识别到出站问题时会给出入口。出口 IP 无法自动发现时在目标行手动填写。见 [一键部署](/onboard/provisioning#注意事项)。
 
 </Accordion>
 
 <Accordion title="手动安装的客户端连不上">
 
-依次确认：服务端已放行该主机的出口 IP（[Allow access](/onboard/egress#allow-access)）；主机能访问服务端 TLS 端口；`siren client` 的 `-s`、`-p` 或 `config.yaml` 中的 `server`、`port` 指向正确的服务端；两端版本一致。接入失败的记录可以在 [Logs](/logs#常用审计事件) 中搜索 `client.handshake_failed`。
+依次确认：服务端已放行该主机的出口 IP（[Allow access](/onboard/egress#allow-access)）；主机能访问服务端 TLS 端口；`-s`、`-p` 或 `config.yaml` 的 `server`、`port` 正确；两端版本一致。接入失败记录可在 [Logs](/logs#常用审计事件) 中搜索 `client.handshake_failed`。
 
 </Accordion>
 
 <Accordion title="客户端版本与服务端不同">
 
-SIREN 不检查两端版本，也不会提示不一致，但两端之间没有兼容层，版本不同时会出现连接或操作失败。新部署的客户端总是最新发布版本，服务端落后时就会不一致。升级方法见 [升级与数据](/upgrade#版本一致)。
+SIREN 不提示版本不一致，但两端没有兼容层，版本不同会导致连接或操作失败。新部署的客户端总是最新版本，服务端落后时就会不一致。见 [版本一致](/upgrade#版本一致)。
 
 </Accordion>
 
 <Accordion title="重新运行安装脚本能升级客户端吗？">
 
-不能。已有安装完好时，客户端安装脚本会跳过下载。用 `siren upgrade -y` 升级，见 [升级与数据](/upgrade#升级)。
+不能，已有安装完好时安装脚本会跳过下载。用 `siren upgrade -y`，见 [升级](/upgrade#升级)。
 
 </Accordion>
 
 <Accordion title="支持哪些系统？">
 
-服务端只支持 Linux x86_64；客户端支持 Linux x86_64、Linux ARM64 和 64 位 Windows，老旧内核和老版本 Windows 有兼容包，不支持 macOS。完整矩阵见 [支持的平台](/upgrade#支持的平台)。
+服务端只支持 Linux x86_64；客户端支持 Linux x86_64、Linux ARM64 和 64 位 Windows，老旧系统有兼容包，不支持 macOS。见 [支持的平台](/upgrade#支持的平台)。
 
 </Accordion>
 
 <Accordion title="客户端在运行，列表里却没有它">
 
-先确认当前范围和筛选：未归属的客户端只在 Global 显示。其余排查见 [Clients 常见问题](/clients#常见问题)。
+先确认当前范围和筛选，未归属的客户端只在 Global 显示。其余见 [Clients 常见问题](/clients#常见问题)。
 
 </Accordion>
 
 <Accordion title="重新部署后 Note 和 Project 没了">
 
-**Clean & terminate** 会删除客户端身份，之后重新部署的是新 Client ID。升级时不要用清理加重新部署的方式，见 [清理范围](/cleanup#清理范围)。
+**Clean & terminate** 会删除客户端身份，重新部署得到新 Client ID，所以升级不要用清理加重新部署，见 [清理范围](/cleanup#清理范围)。
 
 </Accordion>
 
@@ -133,31 +131,31 @@ SIREN 不检查两端版本，也不会提示不一致，但两端之间没有�
 
 <Accordion title="Provider 显示不可用，或只能用 Terminal">
 
-打开 **Settings**，**Server** 一栏的 **AIR runtime** 下列出每个 Provider 实际可用的界面和原因。常见原因和处理见 [准备 AIR Provider](/server/air-providers#常见问题)。
+**Settings** 中 **Server** 一栏的 **AIR runtime** 列出每个 Provider 可用的界面和原因，处理见 [准备 AIR Provider](/server/air-providers#常见问题)。
 
 </Accordion>
 
 <Accordion title="会话一启动就失败">
 
-GUI 会显示 **Session did not start** 和原因。`webui.publicURL` 未设置、会话数达到 `air.maxSessions`、CLI 未登录是最常见的三类，见 [停止与结束](/air/sessions#停止与结束)。
+GUI 显示 **Session did not start** 和原因，最常见的是 `webui.publicURL` 未设置、会话数达到 `air.maxSessions`、CLI 未登录，见 [停止与结束](/air/sessions#停止与结束)。
 
 </Accordion>
 
 <Accordion title="服务端重启后会话不见了">
 
-服务端关闭时会结束所有运行中的会话。Provider 已保存的会话可以从 **History** 继续，见 [服务端重启](/air/sessions#服务端重启)。
+服务端关闭时结束所有运行中的会话，Provider 已保存的会话可从 **History** 继续，见 [服务端重启](/air/sessions#服务端重启)。
 
 </Accordion>
 
 <Accordion title="Agent 执行命令时提示 command blocked by policy">
 
-命令命中了服务端配置 `mcp.cmdBlacklist`。确认命令安全后，只收窄命中的那条正则，然后重启服务端；不要为一次误报清空黑名单。黑名单只作用于 MCP 的 `run` 和 `run_batch`，见 [命令黑名单](/server/security#命令黑名单只作用于-mcp)。
+命令命中了 `mcp.cmdBlacklist`（只作用于 MCP 的 `run` 和 `run_batch`）。确认命令安全后只收窄命中的那条正则并重启服务端，不要为一次误报清空黑名单。见 [命令黑名单](/server/security#命令黑名单只作用于-mcp)。
 
 </Accordion>
 
 <Accordion title="外部 Agent 怎样通过 MCP 使用 SIREN？">
 
-使用 `SIREN_MCP_ADMIN_TOKEN` 作为 Bearer 凭证访问 `/mcp`。配置方法和工具列表见 [MCP](/reference/mcp)。
+用 `SIREN_MCP_ADMIN_TOKEN` 作为 Bearer 凭证访问 `/mcp`，见 [MCP](/reference/mcp)。
 
 </Accordion>
 
@@ -169,31 +167,31 @@ GUI 会显示 **Session did not start** 和原因。`webui.publicURL` 未设置�
 
 <Accordion title="进程分析是灰的，或下拉框里没有目标客户端">
 
-进程分析只支持在线的 Linux 客户端，并且只列出当前范围内的客户端。见 [进程分析常见问题](/process#常见问题)。
+进程分析只支持在线的 Linux 客户端，且只列出当前范围内的客户端，见 [进程分析常见问题](/process#常见问题)。
 
 </Accordion>
 
 <Accordion title="找不到刚生成的文件">
 
-刷新文件树，并确认范围：Recon 结果跟随客户端的 Project 归属，AccessKey 报告和 REPL `upload` 始终在 Global。见 [Artifacts 常见问题](/artifacts#常见问题)。
+刷新文件树并确认范围：Recon 结果跟随客户端的 Project 归属，AccessKey 报告和 REPL `upload` 始终在 Global，见 [Artifacts 常见问题](/artifacts#常见问题)。
 
 </Accordion>
 
 <Accordion title="报告没有出现在 Reports 页">
 
-检查文件扩展名、大小、frontmatter 和所在目录，然后点 **Rescan**。见 [Reports 常见问题](/reports#常见问题)。
+检查扩展名、大小、frontmatter 和所在目录，然后点 **Rescan**，见 [Reports 常见问题](/reports#常见问题)。
 
 </Accordion>
 
 <Accordion title="SIREN 能和云安全中心 Agent 同时运行吗？">
 
-可以。但 SIREN 的部分行为可能触发安全中心告警，例如交互式 Shell、批量执行系统命令或信息收集命令。是否拦截取决于安全中心策略和租户配置。确认告警来自本次 SIREN 操作后，再按内部流程标记误报或加入白名单。
+可以，但交互式 Shell、批量执行系统命令或信息收集命令可能触发安全中心告警，是否拦截取决于安全中心策略和租户配置。确认告警来自本次 SIREN 操作后，按内部流程标记误报或加白。
 
 </Accordion>
 
 <Accordion title="目标是容器环境怎么办？">
 
-宿主机上的客户端能看到容器进程、网络和运行时信息：[进程分析](/process) 会标出所属容器，`hunt` Profile 会采集容器、镜像引用和容器相关日志，见 [Profile](/recon#profile)。只存在于容器内部的内容，例如容器内的命令历史和计划任务，需要在 [Shell](/shells) 中进入容器查看，或在容器内运行客户端。
+宿主机上的客户端能看到容器进程、网络和运行时信息：[进程分析](/process) 标出所属容器，`hunt` Profile 采集容器、镜像引用和容器相关日志，见 [Profile](/recon#profile)。容器内的命令历史、计划任务等，需要在 [Shell](/shells) 中进入容器查看，或在容器内运行客户端。
 
 </Accordion>
 
@@ -205,19 +203,19 @@ GUI 会显示 **Session did not start** 和原因。`webui.publicURL` 未设置�
 
 <Accordion title="清理结果显示 No result received">
 
-客户端在回报前断开或 30 秒内没有回报，不能据此认为删除成功。登录主机按清理范围逐项核对，见 [查看结果](/cleanup#查看结果)。
+客户端在回报前断开或 30 秒内没有回报，不能认为删除成功。登录主机按清理范围逐项核对，见 [查看结果](/cleanup#查看结果)。
 
 </Accordion>
 
 <Accordion title="先清理客户端，还是先恢复出站规则？">
 
-先清理，再恢复。恢复出站会切断客户端回连。完整顺序见 [结案清单](/cleanup#结案清单)。
+先清理再恢复，恢复出站会切断客户端回连。见 [结案清单](/cleanup#结案清单)。
 
 </Accordion>
 
 <Accordion title="清理后服务端上的证据还在吗？">
 
-在。清理只作用于客户端主机，Artifacts、Reports、Project 目录、AIR 会话记录都保留在服务端，见 [不会清理的内容](/cleanup#不会清理的内容)。需要留存时按 [备份](/upgrade#备份) 处理。
+在。清理只作用于客户端主机，Artifacts、Reports、Project 目录、AIR 会话记录都留在服务端，见 [不会清理的内容](/cleanup#不会清理的内容)。留存见 [备份](/upgrade#备份)。
 
 </Accordion>
 
@@ -229,25 +227,25 @@ GUI 会显示 **Session did not start** 和原因。`webui.publicURL` 未设置�
 
 <Accordion title="服务端日志能保存多久？">
 
-Logs 页面只在内存中保留最近若干条（`logging.bufferSize`，默认 5000），服务端重启后清空。需要长期留存时采集服务端的输出流，见 [保留范围](/logs#保留范围)。
+Logs 页面只在内存中保留最近 `logging.bufferSize` 条（默认 5000），重启后清空。长期留存需采集服务端输出流，见 [保留范围](/logs#保留范围)。
 
 </Accordion>
 
 <Accordion title="如何备份服务端，或迁移到另一台主机？">
 
-停止服务端后打包工作目录和 Project 目录，迁移时解压到相同的绝对路径，并尽量保留原公网 IP。见 [备份](/upgrade#备份) 和 [迁移到另一台主机](/upgrade#迁移到另一台主机)。
+停止服务端后打包工作目录和 Project 目录；迁移时解压到相同的绝对路径，并尽量保留原公网 IP。见 [备份](/upgrade#备份) 和 [迁移到另一台主机](/upgrade#迁移到另一台主机)。
 
 </Accordion>
 
 <Accordion title="如何管理插件？">
 
-插件的安装、卸载、更新和启停只能在服务端 REPL 或客户端本地命令行中完成，WebUI 没有插件入口。见 [插件](/reference/plugins)。
+只能在服务端 REPL 或客户端本地命令行中安装、卸载、更新和启停，WebUI 没有插件入口，见 [插件](/reference/plugins)。
 
 </Accordion>
 
 <Accordion title="服务端终端里的命令和快捷键在哪里查？">
 
-服务端终端运行的是 REPL，命令和 readline 快捷键见 [服务端 REPL](/reference/repl)。日常操作建议在 WebUI 中完成。
+见 [服务端 REPL](/reference/repl)。日常操作建议在 WebUI 中完成。
 
 </Accordion>
 

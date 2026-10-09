@@ -18,23 +18,23 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-本页列出客户端 `siren` 读取的每个配置键。Profile 的用途和内置 Profile 的模块组成见 [Profile](/recon#profile)，客户端子命令见 [客户端命令行](/reference/client-cli)。
+Profile 的用途和内置 Profile 的模块组成见 [Profile](/recon#profile)，客户端子命令见 [客户端命令行](/reference/client-cli)。
 
 ## 加载规则
 
 ### 配置文件位置
 
-1. `-c` / `--config` 指定的文件。一键部署和安装脚本启动的客户端都使用 `-c`，路径为 Linux `/opt/siren/config.yaml`、Windows `C:\Windows\Temp\siren\config.yaml`。
-2. 未指定时，先在当前工作目录、再在 `config/` 子目录中查找 `config.yaml`（也接受 `.yml` 等同名的其他格式）。
+1. `-c` / `--config` 指定的文件。一键部署和安装脚本启动的客户端都用它，路径为 Linux `/opt/siren/config.yaml`、Windows `C:\Windows\Temp\siren\config.yaml`。
+2. 未指定时依次在当前工作目录和 `config/` 子目录中查找 `config.yaml`（也接受 `.yml` 等同名其他格式）。
 
-找不到配置文件或文件无法解析时，客户端直接退出。
+找不到或无法解析配置文件时，客户端直接退出。
 
 ### 优先级
 
 从高到低：
 
-1. 命令行中显式传入的参数：`siren client` 的 `-s` / `--server` 覆盖 `server`，`-p` / `--port` 覆盖 `port`。
-2. 与键名大写形式同名的环境变量，实际只影响顶层键：`SERVER`、`PORT`。
+1. 命令行显式传入的参数：`siren client` 的 `-s` / `--server` 覆盖 `server`，`-p` / `--port` 覆盖 `port`。
+2. 与键名大写同名的环境变量，实际只对顶层键生效：`SERVER`、`PORT`。
 3. 配置文件。
 4. 内置默认值。
 
@@ -47,11 +47,11 @@ import { Callout } from "fumadocs-ui/components/callout";
 | `server`、`port` | 只在 `siren client` 启动时读取，修改后重启客户端 |
 | `recon.*`、`plugins.*`、`oss.*` | 重启客户端，或在服务端 REPL 执行 `reload <Client ID>` 重新读取配置文件，见 [服务端 REPL](/reference/repl) |
 
-`reload` 先校验新配置中的 Profile，校验失败时保留当前配置和上一份有效的 Profile；客户端正在执行 Recon 或其他使用配置的操作时，`reload` 提示稍后重试。重载成功后客户端重新向服务端上报 Profile 列表，WebUI 的 Profile 下拉框随之更新。
+`reload` 先校验新配置中的 Profile，失败时保留当前配置和上一份有效 Profile；客户端正在执行 Recon 或其他用到配置的操作时，`reload` 提示稍后重试。重载成功后客户端重新上报 Profile 列表，WebUI 的 Profile 下拉框随之更新。
 
 ### 重装与配置
 
-安装包内带一份 `config.yaml`。安装完好时重新运行安装脚本（包括一键部署）会跳过下载，现有配置除 `server`、`port` 外不变（安装脚本带了服务端地址参数时会改写这两个键）；只有安装损坏时才会重新安装，并用包内的文件替换现有配置，手工修改会丢失。见 [手动安装客户端](/onboard/manual)。
+安装完好时重新运行安装脚本（包括一键部署）会跳过下载，现有配置保持不变，只有安装脚本带服务端地址参数时会改写 `server`、`port`。安装损坏时才会重装，并用安装包内的 `config.yaml` 替换现有配置，手工修改会丢失。见 [手动安装客户端](/onboard/manual)。
 
 ## 平台默认配置
 
@@ -104,7 +104,7 @@ oss:
 ```
 
 <Callout title="包内 server 指向官方服务端" type="info">
-  安装包内的 `server` 是官方 SIREN 服务端地址。一键部署时安装脚本会把它和 `port` 改写成服务端 `siren_server_callback` 规则中的地址和端口，见 [一键部署](/onboard/provisioning#前置条件)。手动安装时用安装脚本的 `--server` / `--port`（Windows 为 `-Server` / `-Port`）写入，或启动时用 `-s` / `-p` 指定，见 [手动安装客户端](/onboard/manual#启动客户端)。
+  安装包内的 `server` 是官方 SIREN 服务端地址。一键部署时安装脚本把它和 `port` 改写为服务端 `siren_server_callback` 规则中的地址和端口，见 [一键部署](/onboard/provisioning#前置条件)。手动安装时用安装脚本的 `--server` / `--port`（Windows 为 `-Server` / `-Port`）写入，或启动时用 `-s` / `-p` 指定，见 [手动安装客户端](/onboard/manual#启动客户端)。
 </Callout>
 
 ## 连接
@@ -118,20 +118,20 @@ oss:
 
 | 键 | 类型 | 内置默认值 | 说明 |
 | --- | --- | --- | --- |
-| `recon.commandTimeout` | int（秒） | `30` | 每条底层采集命令的超时，也用于服务端下发的远程命令（与服务端同名键取较小值）、插件执行和本地模式的 OSS 上传。`0` 或负数时使用默认值 |
-| `recon.collectionTimeout` | int（秒） | `270` | 整个 Profile 的采集预算。远程 Recon 时取它与服务端下发预算中的较小值。`0` 或负数时使用默认值。见 [超时](/recon#超时) |
+| `recon.commandTimeout` | int（秒） | `30` | 每条底层采集命令的超时，也用于服务端下发的远程命令（与服务端同名键取较小值）、插件执行和本地模式的 OSS 上传。`0` 或负数时用默认值 |
+| `recon.collectionTimeout` | int（秒） | `270` | 整个 Profile 的采集预算，远程 Recon 时与服务端下发的预算取较小值。`0` 或负数时用默认值。见 [超时](/recon#超时) |
 | `recon.defaultProfile` | string | 无（必填） | 未指定 Profile 时使用的名称，必须是 `recon.profiles` 中已定义的 Profile |
-| `recon.profiles.<name>` | list | 无（必填） | 命名的模块列表。见下方校验规则 |
+| `recon.profiles.<name>` | list | 无（必填） | 命名的模块列表，见下方校验规则 |
 
 ### Profile 校验规则
 
-客户端启动时（`probe-egress` 除外）、`reload` 时和插件变更前都会校验 Profile，任何一条不满足都会拒绝：
+客户端启动时（`probe-egress` 除外）、`reload` 时和插件变更前都会校验 Profile，任一条不满足即拒绝：
 
 - 必须定义 `recon.profiles`，且至少有一个 Profile；`recon.defaultProfile` 必须非空并指向其中之一。
 - Profile 名匹配 `^[a-z][a-z0-9_-]{0,63}$`。
-- 每个 Profile 包含 1 到 64 个不重复的模块，模块名必须是本平台存在的模块。可用模块见 [模块](/recon#模块)。
+- 每个 Profile 包含 1 到 64 个不重复的模块，且须是本平台存在的模块，见 [模块](/recon#模块)。
 - 基础信息每次都会采集，不写进 Profile。
-- recon 插件写作 `plugin:<name>`。插件未安装或 `plugins.<name>` 不为 `true` 时校验失败。
+- recon 插件写作 `plugin:<name>`，插件未安装或 `plugins.<name>` 不为 `true` 时校验失败。
 - 列表顺序不影响执行顺序。
 
 示例见 [自定义 Profile](/recon#自定义-profile)。
@@ -140,18 +140,18 @@ oss:
 
 | 键 | 类型 | 内置默认值 | 说明 |
 | --- | --- | --- | --- |
-| `plugins.marketplace` | string | 无 | 插件市场的 HTTP(S) 基础地址，安装和更新插件时使用；未设置时安装和更新报 `plugins.marketplace not configured` |
-| `plugins.<name>` | bool | `false` | 名为 `<name>` 的插件是否启用。command 与 recon 插件都受它控制；键不存在等同于 `false` |
+| `plugins.marketplace` | string | 无 | 插件市场的 HTTP(S) 基础地址，用于安装和更新插件；未设置时报 `plugins.marketplace not configured` |
+| `plugins.<name>` | bool | `false` | 名为 `<name>` 的插件是否启用，command 与 recon 插件都受它控制；键不存在等同于 `false` |
 
-`plugins.<name>` 中的 `<name>` 是具体插件的名字，每个插件各有一个键，例如 `plugins.chkrootkit: true` 只启用 `chkrootkit`。没有控制所有插件的全局开关。插件的安装、启停和卸载见 [插件](/reference/plugins)。
+每个插件各有一个键，例如 `plugins.chkrootkit: true` 只启用 `chkrootkit`，没有全局开关。安装、启停和卸载见 [插件](/reference/plugins)。
 
 <Callout title="插件变更会重写 config.yaml" type="warn">
-  安装、启停或卸载插件时，客户端把当前生效的整份配置写回 `config.yaml`：注释被删除，键名变为小写，命令行 `-s` / `-p` 或 `SERVER` / `PORT` 环境变量的值也会写入文件。安装时写入 `plugins.<name>: true`，卸载时写入 `false`。写回前会校验 Profile，变更会使某个 Profile 失效时整个操作被拒绝。
+  安装、启停或卸载插件时，客户端把当前生效的整份配置写回 `config.yaml`：注释被删除，键名变小写，命令行 `-s` / `-p` 或 `SERVER` / `PORT` 环境变量的值也写入文件。安装写入 `plugins.<name>: true`，卸载写入 `false`。写回前校验 Profile，会使某个 Profile 失效的变更整个被拒绝。
 </Callout>
 
 ## oss
 
-只用于本地模式：`siren recon` 上传 JSONL 快照和 Markdown 报告，`siren upload` 上传指定文件。远程模式不使用这些键。
+只用于本地模式：`siren recon` 上传 JSONL 快照和 Markdown 报告，`siren upload` 上传指定文件。
 
 | 键 | 类型 | 内置默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -160,6 +160,4 @@ oss:
 | `oss.objectPath` | string | 无 | `siren upload` 的对象前缀，对象名为 `<objectPath>/<文件名>` |
 | `oss.docObjectPath` | string | 无 | `siren recon` 上传快照和报告的对象前缀 |
 
-这四个键都没有内置默认值，安装包中的取值见 [平台默认配置](#平台默认配置)。上传超时为 `recon.commandTimeout`。
-
-凭证不写在配置中，而是从运行命令的终端环境读取 `OSS_ACCESS_KEY_ID` / `OSS_ACCESS_KEY_SECRET`，设置方法见 [OSS 凭证](/server/prerequisites#oss-凭证)。
+安装包中的取值见 [平台默认配置](#平台默认配置)，上传超时为 `recon.commandTimeout`。凭证不写在配置中，从运行命令的终端环境读取 `OSS_ACCESS_KEY_ID` / `OSS_ACCESS_KEY_SECRET`，见 [OSS 凭证](/server/prerequisites#oss-凭证)。

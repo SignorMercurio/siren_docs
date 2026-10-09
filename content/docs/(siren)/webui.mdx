@@ -19,7 +19,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { Brain, Plug, ServerCog, ShieldCheck } from 'lucide-react';
 
-Web 控制台是 SIREN Server 的浏览器入口，也是日常使用 SIREN 的主要方式。它与客户端连接和 MCP 共用服务端的 TLS 端口，浏览器直接访问 `https://<SIREN Server 域名>`。安装、证书和端口见 [安装服务端](/server)，账号与鉴权见 [账号与安全边界](/server/security)。
+Web 控制台是使用 SIREN 的主要方式，与客户端连接和 MCP 共用服务端 TLS 端口，浏览器直接访问 `https://<SIREN Server 域名>`。安装与端口见 [安装服务端](/server)，账号与鉴权见 [账号与安全边界](/server/security)。
 
 ![Web 控制台的 Clients 页：左侧为按应急流程分组的导航，右侧为客户端列表和 Provisioning 面板](../../img/webui-clients.png)
 
@@ -29,33 +29,21 @@ Web 控制台是 SIREN Server 的浏览器入口，也是日常使用 SIREN 的�
 
 | 分组 | 页面 | 用途 |
 | --- | --- | --- |
-| **Respond** | [Clients](/clients)、[Agentic IR](#agentic-ir) | 接入和管理主机，启动 AI 辅助排查 |
-| **Tools** | [Shells](/shells)、[Files](/files)、[Investigations](#investigations) | 手工排查：交互式终端、客户端文件、Recon / 进程分析 / AccessKey 调查 |
-| **Evidence** | [Artifacts](/artifacts)、[Reports](/reports) | 服务端取证目录和 Dossier 应急报告 |
-| **System** | [Logs](/logs) | 服务端运行日志 |
+| **Respond** | [Clients](/clients)、[Agentic IR](#agentic-ir) | 在线客户端列表与 **Provisioning**（部署、放行、出站恢复）；AI 辅助排查 |
+| **Tools** | [Shells](/shells)、[Files](/files)、[Investigations](#investigations) | 多标签交互式终端（切换页面保持运行）；客户端文件浏览、预览、上传下载；Recon / 进程分析 / AccessKey 调查 |
+| **Evidence** | [Artifacts](/artifacts)、[Reports](/reports) | 服务端取证目录（Recon、AIR、AccessKey 报告和拉取的文件）；当前范围内的 Dossier 应急报告 |
+| **System** | [Logs](/logs) | 服务端运行日志与 MCP 命令审计，支持搜索、过滤和实时跟随 |
 
 导航之外还有两个入口：
 
-- **范围菜单**：侧栏顶部的 **Project scope**，用于在 Global 视图和各 Project 视图之间切换，并通过 **Manage projects** 打开 Projects 页面。范围对各页面的影响见 [Project 范围](/projects)。
+- **范围菜单**：侧栏顶部的 **Project scope**，在 Global 和各 Project 视图之间切换，**Manage projects** 打开 [Projects](/projects) 页面。
 - **账号菜单**：侧栏左下角，提供 [Settings](#settings)、Docs、Feedback、退出登录和当前版本号。
 
-桌面侧栏默认只显示图标，悬停或键盘聚焦时显示名称。点击侧栏顶部的按钮，或按 Cmd+B（macOS）/ Ctrl+B 可以展开或折叠；焦点在输入框或终端内时快捷键不生效。选择保存在当前浏览器，移动端使用抽屉导航。
+桌面侧栏默认只显示图标，悬停或键盘聚焦时显示名称。点击侧栏顶部按钮或按 Cmd+B（macOS）/ Ctrl+B 展开或折叠（焦点在输入框或终端内时不生效），选择保存在当前浏览器。移动端使用抽屉导航。
 
-每个页面都有自己的 URL，例如 `#/investigations/recon` 或 `#/artifacts/<路径>?project=<id>`。刷新、浏览器前进后退和分享链接都会回到同一页面、同一工具标签、同一 AIR 会话或同一选中文件，浏览器标签页标题也随页面变化。
+每个页面都有自己的 URL，例如 `#/investigations/recon` 或 `#/artifacts/<路径>?project=<id>`。刷新、前进后退和分享链接都会回到同一页面、工具标签、AIR 会话或选中文件。
 
 ## 各页面
-
-### Clients
-
-在线客户端列表，以及 **Provisioning** 中的部署、放行和出站恢复操作。见 [Clients 页](/clients) 和 [选择接入方式](/onboard)。
-
-### Projects
-
-按应急事件隔离客户端、AIR 工作目录和取证目录。见 [Project 范围](/projects)。
-
-### Shells
-
-浏览器内的交互式终端，每个客户端可开多个标签，切换页面时保持运行。见 [浏览器 Shell](/shells)。
 
 ### Agentic IR
 
@@ -63,36 +51,18 @@ Web 控制台是 SIREN Server 的浏览器入口，也是日常使用 SIREN 的�
 
 ### Investigations
 
-需要等待结果的调查工具，分为三个标签：**AccessKey**、**Recon** 和 **Process Analysis**。切换标签不会丢失已有结果，每个标签都有自己的地址（如 `#/investigations/recon`）。见 [AccessKey 调查](/ak)、[自动化信息收集](/recon) 和 [进程分析](/process)。
-
-### Files
-
-浏览、预览、下载和上传在线客户端主机上的文件。见 [客户端文件](/files)。
-
-### Artifacts
-
-服务端取证目录，保存 Recon、AIR、AccessKey 报告和拉取的文件。见 [Artifacts](/artifacts)。
-
-### Logs
-
-服务端运行日志与 MCP 命令审计，支持搜索、过滤和实时跟随。见 [日志与审计](/logs)。
-
-### Reports
-
-列出当前范围内的 Dossier 应急报告，并在 Dossier 中打开编辑。见 [报告](/reports)。
+需要等待结果的调查工具，分为 **AccessKey**、**Recon** 和 **Process Analysis** 三个标签，各有自己的地址（如 `#/investigations/recon`），切换标签不丢失已有结果。见 [AccessKey 调查](/ak)、[自动化信息收集](/recon) 和 [进程分析](/process)。
 
 ### Settings
 
-Settings 不在左侧导航里，从左下角的账号入口打开。同一个菜单还提供 Docs、Feedback、退出登录和当前版本号。
+从左下角的账号菜单打开，分两部分：
 
-页面分两部分：
-
-- **Preferences**：偏好只保存在当前浏览器，不跟随账号，也不会同步到其他设备。
-  - 启动时的 Project 范围：沿用上次使用的范围，或每次都从 Global 开始。
-  - Agentic IR 默认 Provider：沿用上次使用的 Provider，或固定 Codex / Claude / Pi / Qoder。固定期间仍可为单次会话临时切换；所选 Provider 不可用时会自动使用可用的 Provider。
-  - Agentic IR 默认界面：沿用上次使用的界面，或固定 GUI / Terminal。固定期间上次使用的记录会被保留，改回"沿用上次使用"时恢复的仍是你真正用过的界面。当前 Provider 不支持所选界面时，仍会临时使用可用的那个。
-  - Clients 列表刷新频率：5 秒到 1 分钟。标签页切到后台时轮询会自动暂停。
-- **Server**：只读信息，包括版本号、鉴权状态与当前用户、Dossier 目录，以及每个 Agentic IR Provider 实际可用的界面。Provider 不可用或只能用其中一种界面时，这里会直接给出原因，不用等到启动会话失败才发现。
+- **Preferences**：只保存在当前浏览器，不跟随账号同步。
+  - 启动时的 Project 范围：沿用上次的范围，或每次从 Global 开始。
+  - Agentic IR 默认 Provider：沿用上次，或固定 Codex / Claude / Pi / Qoder。固定后仍可为单次会话临时切换；所选 Provider 不可用时自动改用可用的。
+  - Agentic IR 默认界面：沿用上次，或固定 GUI / Terminal。固定期间仍记录实际使用的界面，改回"沿用上次"时恢复的是它；当前 Provider 不支持所选界面时临时改用可用的。
+  - Clients 列表刷新频率：5 秒到 1 分钟，标签页在后台时自动暂停轮询。
+- **Server**：只读的版本号、鉴权状态与当前用户、Dossier 目录，以及每个 AIR Provider 实际可用的界面；Provider 不可用或只支持一种界面时直接显示原因。
 
 ## 相关内容
 

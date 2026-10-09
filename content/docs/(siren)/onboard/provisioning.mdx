@@ -23,26 +23,25 @@ sources:
 import { Callout } from "fumadocs-ui/components/callout";
 import { Steps, Step } from "fumadocs-ui/components/steps";
 
-**Deploy SIREN** 通过 SOAR 剧本和阿里云云助手，向阿里云 ECS 安装 SIREN 客户端、放行其回连 IP，并等待客户端实际连上服务端。入口在 Clients 页内嵌的 **Provisioning** 面板的 **Deploy SIREN** 标签。
+**Deploy SIREN** 通过 SOAR 剧本和阿里云云助手向 ECS 安装 SIREN 客户端、放行其回连 IP，并等待客户端实际连上服务端。入口是 Clients 页 **Provisioning** 面板的 **Deploy SIREN** 标签。
 
 ## 前置条件
 
-- 目标是阿里云 ECS，且云助手状态正常。
-- 服务端已配置 SOAR 平台访问凭证与 `egress.rules`，详见 [前置条件与凭证](/server/prerequisites)。
-- 已知目标实例所属账号的 Alibaba Cloud UID。
-- `egress.rules` 中 `siren_server_callback` 规则的 `destCidrIp` 是服务端的公网 IP，且只含这一个 IPv4 地址（`/32`）。部署时 SIREN 把这个地址和规则的端口写入目标主机客户端的 `config.yaml`，客户端据此回连，所以自建服务端也能一键部署。规则不是单个 IPv4 地址时部署直接失败，提示 `SIREN callback must configure exactly one server IP (destCidrIp ending in /32)`。
+- 目标是阿里云 ECS，云助手状态正常；已知其所属账号的 Alibaba Cloud UID。
+- 服务端已配置 SOAR 访问凭证与 `egress.rules`，见 [前置条件与凭证](/server/prerequisites)。
+- `egress.rules` 中 `siren_server_callback` 规则的 `destCidrIp` 是服务端公网 IP，且只含这一个 IPv4 地址（`/32`）。部署时 SIREN 把该地址和端口写入目标主机客户端的 `config.yaml` 供回连，因此自建服务端也能一键部署。不满足时部署直接失败：`SIREN callback must configure exactly one server IP (destCidrIp ending in /32)`。
 
 ## 操作步骤
 
 <Steps>
 <Step>
-进入 Clients 页，在 **Provisioning** 面板选择 **Deploy SIREN** 标签。
+在 Clients 页 **Provisioning** 面板选择 **Deploy SIREN** 标签。
 </Step>
 <Step>
-填写 **Alibaba Cloud UID**（纯数字），并在 **Instance IDs** 文本框中每行填写一个目标。
+填写 **Alibaba Cloud UID**（纯数字），在 **Instance IDs** 中每行填一个目标。
 </Step>
 <Step>
-点击 **Deploy to N instances**。每个目标逐行显示 SOAR 日志与状态；全部结束后面板给出汇总。
+点击 **Deploy to N instances**。每个目标逐行显示 SOAR 日志与状态，全部结束后给出汇总。
 </Step>
 </Steps>
 
@@ -50,7 +49,7 @@ import { Steps, Step } from "fumadocs-ui/components/steps";
 
 ### 目标格式
 
-每行一个目标，格式为 `instanceId[,publicIp[,note]]`：
+每行格式为 `instanceId[,publicIp[,note]]`：
 
 ```text title="Instance IDs"
 i-demo0001
@@ -59,49 +58,43 @@ i-demo0003,,web-1
 i-demo0004,203.0.113.11,db-1
 ```
 
-- `instanceId` 必填，须形如 `i-...`。
-- 公网 IP 可选，用于手动指定出口 IP（见下文“手动指定出口 IP”）。
-- 备注可选，最长 256 个字符；只填备注时用 `i-demo0003,,web-1`。
-- 每批 1–20 个目标。完全相同的行自动去重；同一实例出现不一致的公网 IP 或备注时报错，需先修正。
-
-部署默认并发 3 台，单个目标失败不会中断其他目标。
+- `instanceId` 必填，形如 `i-...`；公网 IP 可选，见 [手动指定出口 IP](#注意事项)；备注可选，最长 256 个字符。
+- 每批 1–20 个目标，并发 3 台，单个失败不影响其他目标。完全相同的行自动去重；同一实例的公网 IP 或备注不一致时报错。
 
 ## 部署流程
 
-未手动指定出口 IP 时，每个目标依次经过以下阶段，面板会实时显示：
+未手动指定出口 IP 时，每个目标依次经过：
 
-1. **安装与探测**：读取实例地域和操作系统，安装客户端，并执行一次探测（抓取一个出站 SYN，最长约 4 秒）。
-2. **等待日志**：等待云防火墙日志关联出该连接的公网出口 IP。日志一旦唯一匹配就进入下一步，不等待固定窗口；日志迟迟不到会超时失败。
-3. **放行**：为该出口 IP 的 `/32` 和服务端回连端口添加入方向放行规则。
+1. **安装与探测**：读取实例地域和操作系统，安装客户端，抓取一个出站 SYN（最长约 4 秒）。
+2. **等待日志**：等云防火墙日志唯一关联出该连接的公网出口 IP 后立即进入下一步；日志迟迟不到会超时失败。
+3. **放行**：为该出口 IP 的 `/32` 和服务端回连端口添加入方向放行。
 4. **等待连接**：等待客户端上线，最长 30 秒。
 
-看到客户端实际连接才算部署成功；面板对成功目标显示 `connected`。安装成功但客户端未按时连上，会以超时失败结束，并提示可能需要配置出站。
+客户端实际连上才算成功，面板显示 `connected`。安装成功但未按时连上则以超时失败结束，并提示可能需要配置出站。
 
-<Callout title="Project 自动归属" type="info">
-  从某个 Project 视图发起部署时，接入的客户端会自动归入当前 Project。若目标主机的稳定身份已归属另一个 Project，部署会被拒绝，需要先在 Clients 中手动处理归属，不会静默改写。Global 视图发起的部署不写入 Project 归属。
-</Callout>
+从 Project 视图发起的部署，客户端自动归入当前 Project；目标已归属另一个 Project 时部署被拒绝，见 [部署时自动归属](/projects#部署时自动归属)。
 
 <Callout title="需要手工确认客户端" type="warn">
-  客户端稳定身份缺失、与目标来源 IP 不一致，或多个目标共享同一出口 IP 导致无法安全区分时，SIREN 不会按 IP 猜测，也不会写入无法确认的 Project 或备注。该目标显示 `manual_required`，请在 Clients 列表中核对主机后手动设置 Project 和备注。面板不会为这类目标提供自动重试，以免重复部署。
+  客户端稳定身份缺失、与目标来源 IP 不一致，或多个目标共享出口 IP 而无法安全区分时，SIREN 不按 IP 猜测，也不写入无法确认的 Project 或备注。该目标显示 `manual_required`，需在 Clients 中核对主机后手动设置；面板不为它提供自动重试，以免重复部署。
 </Callout>
 
 ## 结果与记录
 
-- **汇总与重试**：结束后显示各状态计数。存在失败目标时，**Retry N failed** 只重新提交失败项，沿用原 UID 和 Project。可用 **Edit targets** 修改目标重新开始。
-- **Configure egress 快捷入口**：部署失败信息明确指向出站问题时，面板出现 **Configure egress for N target(s)**，一键带入这些实例切到 [配置出站](/onboard/egress)。
-- **Recent activity**：Provisioning 下方的 **Recent activity** 把部署（`/api/deployments`）和清理（`/api/cleanups`）记录合并展示，进行中的记录排在前面；部署行可展开查看日志。进行中每 2 秒刷新一次。近期部署最多保留 20 条，终态记录最长保留 30 分钟，服务端重启后清空。
-- **刷新页面**：执行期间请保持页面打开。部署记录可在刷新后从 Recent activity 继续查看；云端操作一旦启动，不因浏览器断开而取消。
+- **重试**：存在失败目标时，**Retry N failed** 只重新提交失败项，沿用原 UID 和 Project；**Edit targets** 修改目标后重新开始。
+- **出站问题**：失败明确指向出站时，面板出现 **Configure egress for N target(s)**，带入这些实例切到 [配置出站](/onboard/egress)。
+- **Recent activity**：Provisioning 下方合并显示部署和清理记录，部署行可展开查看日志。近期部署最多保留 20 条，终态记录最长保留 30 分钟，服务端重启后清空。
+- **刷新页面**：执行期间请保持页面打开；刷新后可从 Recent activity 继续查看，云端操作不因浏览器断开而取消。
 
 <Callout title="结果未知时先看 Recent activity" type="warn">
-  目标显示 **Needs verification**（结果未经验证，如部署事件流中断）时，服务端可能仍有一个在执行中的部署。此时不要直接重试，先在 Recent activity 中核对该次操作的最终结果，再决定是否重新部署。
+  目标显示 **Needs verification**（如部署事件流中断）时，服务端可能仍在执行。不要直接重试，先在 Recent activity 核对最终结果再决定。
 </Callout>
 
 ## 注意事项
 
-- **出站默认拒绝**：目标 ECS 出方向默认拒绝时，部署无法回连。先执行 [配置出站](/onboard/egress) 再部署。
-- **动态出口**：单次探测只确认该次连接的出口 IP。若后续连接改用其他公网地址，客户端仍可能连不上；SIREN 不会据此放行整个出口池。每次自动重试都会重新探测，不复用上次的证据。
-- **手动指定出口 IP**：SOAR 无法返回出口 IP，或系统不支持自动抓包（如需要第三方抓包驱动的 Windows 系统）时，在目标行第二列填入经核对的公网出口 IP，SIREN 会跳过自动发现直接放行。目标主机出口 IP 可在主机上用 `curl ifconfig.co/ip` 获取。
+- **出站默认拒绝**：目标 ECS 出方向默认拒绝时无法回连，先 [配置出站](/onboard/egress)。
+- **动态出口**：单次探测只确认该次连接的出口 IP，后续连接换了公网地址仍可能连不上；SIREN 不会放行整个出口池。每次重试都重新探测。
+- **手动指定出口 IP**：SOAR 无法返回出口 IP，或系统不支持自动抓包（如需要第三方抓包驱动的 Windows）时，在目标行第二列填入核对过的公网出口 IP（可在主机上用 `curl ifconfig.co/ip` 获取），SIREN 跳过自动发现直接放行。
 
 <Callout title="命令行等价" type="info">
-  服务端 REPL 的 `deploy-batch` 和 MCP 的 `deploy` 工具走的是同一套部署流程。REPL 用法见 [服务端 REPL](/reference/repl)；外部 Agent 通过 MCP 发起部署见 [MCP 集成](/reference/mcp)。
+  服务端 REPL 的 `deploy-batch` 和 MCP `deploy` 工具走同一套部署流程，见 [服务端 REPL](/reference/repl) 和 [MCP 集成](/reference/mcp)。
 </Callout>

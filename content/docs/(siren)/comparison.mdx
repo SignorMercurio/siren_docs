@@ -13,74 +13,64 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-本页说明 SIREN 和常见主机排查、DFIR 工具的定位差异。对比重点不是功能数量，而是使用场景：一次性排查、远程应急、持续终端取证、还是可编程系统情报查询。
-
 <Callout title="SIREN 的定位" type="info">
-  SIREN 更适合短期接入目标主机，在 Web 控制台中快速完成信息收集、远程排查、Agentic IR 和报告整理。如果你需要长期驻留、大规模终端取证、周期性 Hunt 或完整的企业级权限治理，Velociraptor、GRR 或配套平台会更合适。
+  SIREN 适合短期接入目标主机，在 Web 控制台中快速完成信息收集、远程排查、Agentic IR 和报告整理。需要长期驻留、大规模终端取证、周期性 Hunt 或企业级权限治理时，Velociraptor、GRR 或配套平台更合适。
 </Callout>
 
-下文说 SIREN「低依赖」「轻量」时，指的是目标主机上的客户端：一个静态编译的可执行文件，不需要运行时，Recon 只调用主机上已有的系统工具。远程模式还需要一台 Linux 控制主机运行 SIREN Server；Agentic IR 需要在控制主机上安装 AI Provider CLI，Dossier 报告需要部署 Dossier，一键部署和 AccessKey 调查需要 SOAR 凭证，见 [前置条件与凭证](/server/prerequisites)。
+下文说 SIREN「低依赖」「轻量」，指目标主机上的客户端：一个静态编译的可执行文件，不需要运行时，Recon 只调用主机上已有的系统工具。远程模式另需一台 Linux 控制主机运行 SIREN Server；Agentic IR、Dossier、一键部署和 AccessKey 调查各有额外依赖，见 [前置条件与凭证](/server/prerequisites)。
 
 ## 快速选型
 
 | 场景 | 更适合的工具 | 原因 |
 | --- | --- | --- |
-| 临时接入一台或少量主机，快速生成应急排查报告 | SIREN | 客户端单文件部署，在 Web 控制台中完成 Recon、Shell、文件、Artifacts、报告和 Agentic IR |
-| Linux 主机本地 checklist 扫描 | GScan / SIREN | GScan 覆盖项较多；SIREN 更偏跨平台、客户端低依赖和远程工作流 |
-| 用 SQL 查询主机状态，和现有检测/监控平台集成 | osquery | osquery 把操作系统状态暴露为 SQL 表，适合自定义查询和规模化编排 |
-| 多终端持续取证、Hunt 和集中证据采集 | Velociraptor | Artifact 与 VQL 生态更完整，适合长期运行和批量调查 |
-| 大规模远程 live forensics 平台 | GRR | 面向可扩展的远程调查，包含客户端、服务端基础设施和调查工作流 |
+| 临时接入少量主机，快速生成应急报告 | SIREN | 客户端单文件部署，在 Web 控制台中完成 Recon、Shell、文件、报告和 Agentic IR |
+| Linux 主机本地 checklist 扫描 | GScan / SIREN | GScan 覆盖项较多；SIREN 跨平台、客户端低依赖、支持远程工作流 |
+| 用 SQL 查询主机状态，集成现有检测/监控平台 | osquery | 把操作系统状态暴露为 SQL 表，适合自定义查询和规模化编排 |
+| 多终端持续取证、Hunt 和集中证据采集 | Velociraptor | Artifact 与 VQL 生态完整，适合长期运行和批量调查 |
+| 大规模远程 live forensics 平台 | GRR | 面向可扩展的远程调查，含客户端、服务端基础设施和调查工作流 |
 
 ## GScan
 
-[GScan](https://github.com/grayddq/GScan) 是面向 Linux 主机排查的开源 checklist 工具，目标是发现入侵痕迹并辅助梳理攻击路径。SIREN 早期设计受 GScan 启发，但后续重点放在跨平台客户端、客户端低依赖部署、以 Web 控制台为中心的远程工作流和 AI 辅助分析上。
-
-两者都能做主机侧信息收集，差异主要在部署方式和后续工作流。
+[GScan](https://github.com/grayddq/GScan) 是面向 Linux 主机排查的开源 checklist 工具，用于发现入侵痕迹、梳理攻击路径。SIREN 早期设计受它启发，后来转向跨平台低依赖客户端、Web 控制台远程工作流和 AI 辅助分析。
 
 |  | SIREN | GScan |
 | -------- | -------- | -------- |
 | 适用场景 | 快速应急响应、远程操作和报告整理 | Linux 主机本地 checklist 排查 |
-| 操作系统支持 | Linux、Windows 客户端 | Linux |
-| 软件依赖 | 客户端为静态编译二进制；远程模式另需一台 Linux 控制主机运行服务端 | 需要 Python 环境 |
+| 操作系统 | Linux、Windows 客户端 | Linux |
+| 软件依赖 | 客户端为静态编译二进制；远程模式另需 Linux 控制主机 | 需要 Python 环境 |
 | 信息收集 | 覆盖核心安全项，通过命名 Profile 组合固定模块 | checklist 项较多 |
-| 远程模式 | 客户端主动回连服务端，在 Web 控制台中操作；服务端 REPL 作为补充 | 以本地执行为主 |
+| 远程模式 | 客户端主动回连，在 Web 控制台中操作 | 以本地执行为主 |
 | 报告与后续分析 | JSONL 快照与 Markdown 报告、Artifacts、Dossier、Agentic IR | 本地日志和结果目录 |
 
 ## osquery
 
-[osquery](https://osquery.io) 把操作系统状态抽象成 SQL 表，适合用统一查询语言读取进程、网络连接、内核模块、文件哈希等信息。它面向已有查询库、Fleet 或其他管理平台的团队，也适合将主机状态查询纳入检测和监控体系。
-
-SIREN 面向应急响应的即时使用场景，内置固定 Recon 模块，不要求操作者先编写 SQL 查询。Recon 直接读取系统文件、调用主机上已有的系统命令收集证据，除 SIREN 客户端外不需要在目标主机上安装其他软件。
+[osquery](https://osquery.io) 把操作系统状态抽象成 SQL 表，用统一查询语言读取进程、网络连接、内核模块、文件哈希等，适合已有查询库或 Fleet 等管理平台、要把主机查询纳入检测监控体系的团队。SIREN 内置固定 Recon 模块，不需要先写 SQL，除客户端外也不在目标主机上安装其他软件。
 
 |  | SIREN | osquery |
 | -------- | -------- | -------- |
 | 核心能力 | 内置应急信息收集和远程响应工作流 | SQL 化的系统情报查询 |
-| 使用方式 | 在 Web 控制台中选择客户端和 Profile 运行 Recon，或由 Agentic IR 通过 MCP 执行命令 | 编写 SQL 查询，或通过平台编排查询 |
-| 覆盖范围 | 聚焦常见安全排查项 | 系统信息表很丰富，可按需查询 |
-| 自动化 | Recon 结果自动保存到 Artifacts，Agentic IR 辅助排查和整理报告 | 自动化能力取决于查询库和管理平台 |
+| 使用方式 | 在 Web 控制台中选客户端和 Profile 运行 Recon，或由 Agentic IR 通过 MCP 执行命令 | 编写 SQL，或通过平台编排查询 |
+| 覆盖范围 | 聚焦常见安全排查项 | 系统信息表丰富，按需查询 |
+| 自动化 | Recon 结果自动存入 Artifacts，Agentic IR 辅助排查和写报告 | 取决于查询库和管理平台 |
 | 适合团队 | 需要快速排查和报告的应急人员 | 有查询工程化能力的安全运营团队 |
 
 ## Velociraptor
 
-[Velociraptor](https://docs.velociraptor.app) 是开源的终端监控、数字取证和事件响应平台。它通过 Artifact 与 VQL 支持证据采集、Hunt、持续监控和批量调查，适合长期运行在多台终端上。
-
-SIREN 的客户端更轻，部署和使用路径更短，适合应急期间快速接入目标主机并生成可交付报告。两者并不互斥：Velociraptor 更像持续取证平台，SIREN 更像按需启用的应急响应工具。
+[Velociraptor](https://docs.velociraptor.app) 是开源的终端监控、数字取证和事件响应平台，通过 Artifact 与 VQL 支持证据采集、Hunt、持续监控和批量调查，适合长期运行在多台终端上。两者不互斥：Velociraptor 是持续取证平台，SIREN 是按需启用、部署路径更短的应急工具。
 
 |  | SIREN | Velociraptor |
 | -------- | -------- | -------- |
 | 核心定位 | 快速应急响应和报告整理 | 终端可见性、DFIR、Hunt 和持续监控 |
-| 运行方式 | 客户端按需部署，结案后清除；服务端在事件期间运行 | 适合持续运行和集中管理 |
-| 查询与扩展 | 内置 Recon 模块和插件系统 | Artifact 生态和 VQL 查询能力 |
-| 交互界面 | 以 Web 控制台为主；服务端 REPL 和客户端命令行为辅 | Web GUI |
+| 运行方式 | 客户端按需部署、结案清除；服务端在事件期间运行 | 持续运行和集中管理 |
+| 查询与扩展 | 内置 Recon 模块和插件系统 | Artifact 生态和 VQL |
+| 交互界面 | Web 控制台为主，服务端 REPL 和客户端命令行为辅 | Web GUI |
 | 文件能力 | 客户端 Files、服务端 Artifacts、Dossier 报告 | 基于 VFS 和 Artifact 的取证文件采集 |
 | AI 辅助 | 内置 MCP 与 Agentic IR 工作流 | 以取证和 Hunt 平台能力为主 |
-| 上手成本 | 服务端部署一次后，接入主机和排查都在浏览器中完成，适合临场排查 | 更适合有平台运维和 VQL 使用经验的团队 |
+| 上手成本 | 服务端部署一次，之后都在浏览器中完成 | 更适合有平台运维和 VQL 经验的团队 |
 
 ## GRR
 
-[GRR](https://github.com/google/grr) 是面向远程 live forensics 的 C/S 调查响应平台，由客户端和服务端基础设施组成，适合在大量终端上做文件收集、进程和网络枚举、内存分析、osquery 查询和可扩展调查。
-
-和 GRR 相比，SIREN 不追求建设长期运行的取证平台，而是把部署、排查、远程操作、报告和 AI 辅助集中到一个轻量级应急工具里。
+[GRR](https://github.com/google/grr) 是面向远程 live forensics 的 C/S 调查响应平台，适合在大量终端上做文件收集、进程和网络枚举、内存分析、osquery 查询等调查。SIREN 不建设长期运行的取证平台，而是把部署、排查、远程操作、报告和 AI 辅助集中到一个轻量工具里。
 
 |  | SIREN | GRR |
 | -------- | -------- | -------- |
@@ -88,5 +78,5 @@ SIREN 的客户端更轻，部署和使用路径更短，适合应急期间快�
 | 部署形态 | 单二进制客户端 + 单台 SIREN Server | 客户端 + 服务端基础设施 |
 | 适用规模 | 少量主机或项目化应急 | 大量终端和长期调查 |
 | 调查能力 | Recon、Shell、客户端文件、进程分析、AccessKey 调查、Artifacts | 文件收集、进程/网络枚举、内存分析、osquery 等 |
-| AI 辅助 | 内置 MCP 与 Agentic IR 工作流 | 未内置同类 SIREN AIR 工作流 |
+| AI 辅助 | 内置 MCP 与 Agentic IR 工作流 | 未内置同类工作流 |
 | 维护成本 | 低：单台服务端，客户端用完即清除 | 需要持续运维平台和客户端 |

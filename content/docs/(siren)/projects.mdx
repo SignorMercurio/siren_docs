@@ -23,11 +23,9 @@ sources:
 import { Callout } from "fumadocs-ui/components/callout";
 import { Step, Steps } from "fumadocs-ui/components/steps";
 
-Project 把一次事件涉及的客户端、AIR 会话和证据文件放进同一个范围，并在服务端为它固定一个目录。不选 Project 时处于 **Global** 范围。概念说明见 [核心概念](/concepts#global-与-project-范围)。
+Project 把一次事件涉及的客户端、AIR 会话和证据文件放进同一范围，并在服务端固定一个目录；不选 Project 时处于 **Global** 范围。概念见 [核心概念](/concepts#global-与-project-范围)。
 
-## 打开 Projects 页
-
-Projects 页不在侧栏导航里。点击侧栏顶部的 **Project scope**，在菜单末尾选择 **Manage projects**（`#/projects`）。同一个菜单也用来在 Global 和各 Project 之间切换。
+Projects 页（`#/projects`）不在侧栏导航里：点击侧栏顶部的 **Project scope**，在菜单末尾选 **Manage projects**。同一菜单也用来切换 Global 和各 Project。
 
 ## 新建 Project
 
@@ -39,12 +37,12 @@ Projects 页不在侧栏导航里。点击侧栏顶部的 **Project scope**，�
 </Step>
 <Step>
 
-填写 **Project name**（必填，最多 128 个字符）。**Directory name (optional)** 可以留空，由服务端按名称生成。
+填写 **Project name**（必填，最多 128 个字符）。**Directory name (optional)** 可留空，由服务端按名称生成。
 
 </Step>
 <Step>
 
-点击 **Create**。服务端在 Project 基准目录下创建该目录，WebUI 随即切换到新 Project。
+点击 **Create**。服务端在基准目录下创建该目录，WebUI 随即切换到新 Project。
 
 </Step>
 </Steps>
@@ -53,86 +51,69 @@ Projects 页不在侧栏导航里。点击侧栏顶部的 **Project scope**，�
 
 | | 手动填写 | 留空自动生成 |
 | --- | --- | --- |
-| 字符 | 只能是 ASCII | 名称转小写，保留各种文字的字母、数字、`_` 和 `.`，其他字符合并为一个 `-`，去掉首尾的 `-` 和 `.`；结果为空时用 `project` |
-| 形式 | 只能是一级目录名：不能含 `/` 或 `\`，不能是 `.`、`..`，不能以 `.` 开头 | 同左 |
-| 非 ASCII 名称 | 不允许，报错 `project directory must be ASCII` | 生成结果含非 ASCII 字符时，末尾追加 Project 编号，例如 `web-入侵-3` |
-| 重名 | 与已有 Project 或基准目录下已存在的目录同名时报错 `project directory already exists` | 自动追加 `-2`、`-3`…… 直到不冲突 |
+| 字符 | 只能是 ASCII | 转小写，保留各种文字的字母、数字、`_` 和 `.`，其他字符合并为一个 `-`，去掉首尾的 `-` 和 `.`；结果为空时用 `project` |
+| 形式 | 只能是一级目录名：不含 `/` 或 `\`，不能是 `.`、`..`，不能以 `.` 开头 | 同左 |
+| 非 ASCII | 报错 `project directory must be ASCII` | 结果含非 ASCII 字符时末尾追加 Project 编号，如 `web-入侵-3` |
+| 重名 | 与已有 Project 或基准目录下已有目录同名时报错 `project directory already exists` | 自动追加 `-2`、`-3`…… 直到不冲突 |
 
-例如名称 `ACME Breach` 生成 `acme-breach`。追加编号是为了让不同的非 ASCII 名称各自对应独立的 Provider 历史：Claude Code 和 Qoder 会把工作目录中的非 ASCII 字符折叠成 `-`。
+例如 `ACME Breach` 生成 `acme-breach`。追加编号是因为 Claude Code 和 Qoder 会把工作目录中的非 ASCII 字符折叠成 `-`，编号让不同名称各自对应独立的 Provider 历史。
 
 ### 基准目录
 
-Project 目录都建在 `webui.projectsBaseDir` 之下，也可以用启动参数 `--webui-projects-base-dir` 指定。默认值为空，表示服务端工作目录，此时 Project 目录也会出现在 Global 的 Artifacts 里。基准目录不存在时会自动创建，Project 目录解析符号链接后仍必须位于基准目录内。
+Project 目录都建在 `webui.projectsBaseDir`（或启动参数 `--webui-projects-base-dir`）之下。默认为空，即服务端工作目录，此时 Project 目录也会出现在 Global 的 Artifacts 里。基准目录不存在时自动创建；Project 目录解析符号链接后必须仍在基准目录内。
 
 <Callout title="创建 Project 后不要更换基准目录" type="warn">
-  每个 Project 记录的是创建时的绝对路径，服务端每次访问都会检查它是否仍在当前基准目录内。已有 Project 后改 `webui.projectsBaseDir`，旧 Project 的目录会落在新基准之外，访问时报 `project directory escapes project base`。
+  每个 Project 记录创建时的绝对路径，每次访问都检查它是否仍在当前基准目录内。已有 Project 后改 `webui.projectsBaseDir`，旧目录会落在新基准之外，访问时报 `project directory escapes project base`。
 </Callout>
-
-### 颜色
-
-颜色由服务端从 8 种颜色中随机分配，优先选尚未使用的颜色，不能手动修改。颜色显示在 Projects 页、侧栏范围选择器和 Clients 的 Project 列。
 
 ## 管理 Project
 
 ![Projects 页，列出 Project 名称、工作目录和行尾操作按钮](../../img/projects-list.png)
 
-Projects 页每行显示 **Project**（名称）和 **Workspace**（完整路径和 **Folder** 目录名），当前范围标有 **Current view**。点击名称即切换到该 Project。
+每行显示 **Project**（名称）和 **Workspace**（完整路径和 **Folder** 目录名），当前范围标有 **Current view**，点击名称即切换。颜色由服务端从 8 种中随机分配（优先未使用的），不能修改，也显示在侧栏范围选择器和 Clients 的 Project 列。行尾按钮：
 
-行尾三个按钮：
-
-- **Copy workspace path**：复制目录绝对路径，便于在控制主机上查看或归档。
+- **Copy workspace path**：复制目录绝对路径。
 - **Rename project**：只改显示名，目录不动。
-- **Delete project**：删除 Project 元数据并解除所有客户端的归属，目录和其中的文件保留。删除当前所在的 Project 后，WebUI 回到 Global。
-
-删除后目录仍在原处，因此不能再手动新建同名目录的 Project；留空自动生成时会改用 `-2` 这类后缀。
+- **Delete project**：删除 Project 元数据并解除所有客户端归属，目录和文件保留；删除当前 Project 后回到 Global。因目录仍在，不能再手动新建同名目录的 Project，自动生成时会改用 `-2` 这类后缀。
 
 ## 分配客户端
 
-- 每个客户端最多归属一个 Project。归属按客户端的稳定身份保存，客户端重连或服务端重启后自动恢复。
-- 只能在 **Global** 范围分配：在 [Clients 页](/clients) 的 **Project** 列下拉框中选择，或多选后用 **Assign project** 批量分配。选 **Unassigned** 移回未归属状态。
-- 未归属的客户端只出现在 Global。进入任何 Project 视图后都看不到它们。
-- **Clean & terminate** 会删除客户端身份。之后重新部署的客户端是新身份，需要重新分配。
+每个客户端最多归属一个 Project，归属按客户端稳定身份保存，重连或服务端重启后自动恢复。只能在 **Global** 范围分配：在 [Clients 页](/clients) 的 **Project** 列下拉框选择，或多选后用 **Assign project**；选 **Unassigned** 移回未归属。未归属的客户端只出现在 Global。**Clean & terminate** 会删除客户端身份，重新部署后需重新分配。
 
 ### 部署时自动归属
 
-- 在 Project 视图中用 **Deploy SIREN** 部署，客户端上线后自动归属当前 Project。
-- 部署不会把客户端从另一个 Project 迁走。服务端已记录某个实例属于其他 Project 时，整批部署在修改云资源前就被拒绝，报 `deployment target belongs to another project`；没有记录、上线后才发现客户端属于其他 Project 时，客户端保持原归属，该目标标记为需要人工核对（`Deployment project assignment refused; verify ownership manually`）。需要转移时，回到 Global 手动改归属。
-- 在 Global 中部署不会分配 Project，已有归属保持不变。
-- 服务端 REPL 的 `deploy` 不带 Project 上下文。通过 `/mcp/project/<id>` 调用 MCP `deploy` 时，客户端归属该 Project。
+- 在 Project 视图中用 **Deploy SIREN** 部署，客户端上线后自动归属当前 Project；在 Global 中部署不分配 Project，已有归属不变。
+- 部署不会把客户端从另一个 Project 迁走。服务端已记录实例属于其他 Project 时，整批部署在修改云资源前被拒绝，报 `deployment target belongs to another project`；上线后才发现属于其他 Project 时保持原归属，该目标标记为 `Deployment project assignment refused; verify ownership manually`。需要转移时回到 Global 手动改。
+- 服务端 REPL 的 `deploy` 不带 Project 上下文；通过 `/mcp/project/<id>` 调用 MCP `deploy` 时，客户端归属该 Project。
 
 ## Project 视图下各页的变化
 
 | 页面 | Project 视图中的行为 |
 | --- | --- |
-| Clients | 只列本 Project 的客户端，**Project** 列只读，没有批量 **Assign project**；**Recent activity** 只显示本 Project 的部署和清理记录 |
-| Shells | 只能对本 Project 的客户端开 Shell；切换范围时，其他范围打开的 Shell 标签会被关闭 |
-| Agentic IR | 新会话的工作目录是 Project 目录，注入的 MCP 端点是 `/mcp/project/<id>`；**Running** 和 **History** 只列本范围的会话。切换范围后其他范围的 AIR 标签从标签栏移除，会话仍在服务端运行，切回后可从 **Running** 重新接入 |
-| Files | 只能选择本 Project 的客户端 |
-| Investigations | Recon 和 Process Analysis 只能选择本 Project 的客户端；AccessKey 不受影响（见下文例外） |
-| Artifacts | 根目录是 Project 目录。链接形如 `#/artifacts/<路径>?project=<id>`，打开时自动切换到该 Project |
-| Reports | 只扫描 Project 目录。Global 下汇总服务端工作目录和所有 Project，并多出 **Project** 列 |
+| Clients | 只列本 Project 的客户端，**Project** 列只读，无批量 **Assign project**；**Recent activity** 只显示本 Project 的记录 |
+| Shells | 只能对本 Project 的客户端开 Shell；切换范围时关闭其他范围的 Shell 标签 |
+| Agentic IR | 新会话的工作目录是 Project 目录，MCP 端点是 `/mcp/project/<id>`；**Running** 和 **History** 只列本范围会话。切换范围后其他范围的 AIR 标签被移除，会话仍在运行，切回后可从 **Running** 重新接入 |
+| Files | 只能选本 Project 的客户端 |
+| Investigations | Recon 和 Process Analysis 只能选本 Project 的客户端；AccessKey 见下文例外 |
+| Artifacts | 根目录是 Project 目录，链接形如 `#/artifacts/<路径>?project=<id>`，打开时自动切换到该 Project |
+| Reports | 只扫描 Project 目录；Global 下汇总服务端工作目录和所有 Project，并多出 **Project** 列 |
 | Logs、Settings | 不受范围影响 |
 
-Project ID 的格式是 `project-<编号>`，可以在 Artifacts 链接的 `?project=` 参数中看到。
+Project ID 形如 `project-<编号>`，可在 Artifacts 链接的 `?project=` 参数中看到。
 
 ## 例外
 
-- **AccessKey 报告始终写入 Global**。在 Project 视图中点 **Open Report** 也会切回 Global 打开报告。
-- **Recon 结果跟随客户端的归属**，与当前视图无关。在 Global 中对已归属 Project 的客户端执行 Recon，结果写入该 Project 目录。
-- **服务端 REPL 的 `upload` 始终写入 Global**，路径是服务端工作目录下的 `uploads/client-<Client ID>/`，即使客户端已归属某个 Project。
+- **AccessKey 报告始终写入 Global**，在 Project 视图中点 **Open Report** 也会切回 Global。
+- **Recon 结果跟随客户端归属**，与当前视图无关：在 Global 中对已归属 Project 的客户端执行 Recon，结果写入该 Project 目录。
+- **服务端 REPL 的 `upload` 始终写入 Global**，即服务端工作目录下的 `uploads/client-<Client ID>/`。
 - **`/mcp` 端点不受 Project 限制**：使用 `SIREN_MCP_ADMIN_TOKEN` 的外部代理能看到所有客户端。
 
 ## 数据存放位置
 
-| 内容 | 位置 |
-| --- | --- |
-| Project 列表、客户端归属 | 服务端工作目录下的 `data/projects.json` |
-| Project 文件 | `<基准目录>/<目录名>/` |
-
-备份或迁移服务端时，这两处要一起保留。
+Project 列表和客户端归属存于服务端工作目录下的 `data/projects.json`，Project 文件在 `<基准目录>/<目录名>/`。备份或迁移服务端时两处要一起保留。
 
 ## 常见问题
 
-- **切到 Project 后客户端不见了**：客户端尚未归属该 Project。切回 Global，在 **Project** 列分配。
-- **启动后总是回到上次的 Project**：这是默认行为。在 **Settings** 的 **Startup project scope** 改为 **Always start on Global**。该设置只保存在当前浏览器。
+- **切到 Project 后客户端不见了**：客户端尚未归属该 Project，切回 Global 在 **Project** 列分配。
+- **启动后总是回到上次的 Project**：默认行为。在 **Settings** 的 **Startup project scope** 改为 **Always start on Global**（只存于当前浏览器）。
 - **改名后目录名没变**：符合预期，重命名只改显示名。
