@@ -22,9 +22,8 @@ sources:
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
-import { Card, Cards } from "fumadocs-ui/components/card";
 
-[Recon](/recon) 的结果是 `snapshot-jsonl-v2` 格式的 `*.recon.jsonl` 快照，以及由它渲染的同名 `*.md` 报告。发起采集、Profile 和保存位置见 [自动化信息收集](/recon)。
+[Recon](/recon) 的结果是 `snapshot-jsonl-v2` 格式的 `*.recon.jsonl` 快照，以及由它渲染的同名 `*.md` 报告。
 
 <Callout title="快照内容是不可信数据" type="warn">
   快照中的文件内容、日志、命令输出和环境变量来自被调查主机，可能受攻击者控制。人工阅读或交给 Agent 分析时都只能当作证据，不能当作指令。快照含凭据原文，应只保存在受控目录。
@@ -35,10 +34,9 @@ import { Card, Cards } from "fumadocs-ui/components/card";
 | 文件 | 说明 |
 | --- | --- |
 | `*.recon.jsonl` | 权威快照。UTF-8 JSON Lines，每行一个事件，最大 128 MiB |
-| `*.md` | 从 JSONL 确定性渲染的报告，只用于浏览，见 [派生 Markdown](#派生-markdown) |
+| `*.md` | 从 JSONL 确定性渲染的报告，只用于浏览；`hunt` 类 Profile 只渲染索引，见 [Recon 结果](/recon) |
 
 - 服务端只接受 `snapshot-jsonl-v2`（`schemaVersion` 为 `2`）。格式或版本不符，或任一事件违反下文规则，整份快照被拒绝，不生成报告。
-- 远程 Recon 时客户端只回传 JSONL，由服务端校验并生成 Markdown；本地模式由客户端完成。
 - 单行最长可达 16 MiB，逐行读取时不要沿用 64 KiB 之类的默认行缓冲上限。
 
 ## 事件顺序
@@ -128,7 +126,7 @@ snapshot_end
 | `errorCode` | 未完成或按设计跳过时出现，见 [状态值](#状态值) |
 | `timeWindow` | 有时间窗口的 source 才有，例如最近 24 小时 |
 
-部分 source 还会附加自己的计数，例如文件扫描的 selected、collected、failed 数量。
+部分 source 还会附加自己的计数字段。
 
 ### module_end
 
@@ -160,7 +158,7 @@ snapshot_end
 
 | 字段 | 说明 |
 | --- | --- |
-| `rawText` | 采集器给出的单行显示文本，例如一行命令输出。证据文件和部分派生事实不带此字段，避免原文进入 Markdown |
+| `rawText` | 采集器给出的单行显示文本，例如一行命令输出。证据文件和部分派生事实不带此字段 |
 | `structural` | `true` 表示报告排版用的标题或代码围栏行，不是证据，可跳过 |
 | `parsed` | 仅 `fact`。`true` 表示除 `rawText` 外还有可查询的结构化字段 |
 
@@ -174,7 +172,7 @@ snapshot_end
 | `account`、`group` | 账户或组的名称及属性 |
 | `process` | `pid`、`ppid`、`name`、`user`、`path`、`command`、`workingDirectory`、`startTime`；父进程在同一快照中时有 `parentEntityId`，`parentResolution` 为 `resolved` 或 `not_present` |
 | `socket` | `protocol`、`localAddress`、`remoteAddress`、`state`、`pid`、`socketKind`。内核观察到的 Socket 为 `kernel_socket`；容器端口配置为 `container_port`，另有 `portExposure`、`observed`、`observedSocketEntityIds` |
-| `service` | systemd unit 或 Windows 服务：`name`、`state`、`startMode`、`pid`、`path`、`configPath`。只作为启动方式的辅助证据，`topologyRole` 固定为 `supporting` |
+| `service` | systemd unit 或 Windows 服务：`name`、`state`、`startMode`、`pid`、`path`、`configPath`；`topologyRole` 固定为 `supporting` |
 | `component` | 按实例归并的应用或中间件：`name`、`componentClass`、`state`（`running` 或 `configured`）、`topologyRole`（`primary` 或 `supporting`，语言运行时为后者）、`primaryProcessId`、`processCount`，以及可用时的 `version`、`versionSource`、`artifactPath` |
 | `container` | `name`、`runtime`、`containerId`、`image`、`pid`、`environment` |
 | `container_runtime` | 容器运行时名称 |
@@ -182,7 +180,7 @@ snapshot_end
 | `mount` | 容器挂载的 `path` |
 | `certificate` | 从 PEM 文件解析的证书：`subject`、`issuer`、`dnsNames`、`notBefore`、`notAfter`、`sha256` |
 
-容器端口的 `portExposure` 分为 `declared`（镜像声明）和 `published`（发布到宿主机）。仅当发布端口与同一次 Socket 快照匹配时 `observed` 才为 `true`；声明或发布都不代表端口可从外部访问。
+容器端口的 `portExposure` 为 `declared`（镜像声明）或 `published`（发布到宿主机），仅当发布端口与同一次 Socket 快照匹配时 `observed` 才为 `true`。两者都不代表端口可从外部访问。
 
 ### 关系
 
@@ -295,7 +293,7 @@ snapshot_end
 
 **错误码**
 
-`coverage.errorCode` 为 `not_present`、`not_collected`、`collection_limit`（截断）、`timeout`、`collector_unavailable`、`collection_failed` 或 `collection_partial`。按错误码统计比解析 `error` 文本可靠。
+`coverage.errorCode` 为 `not_present`、`not_collected`、`collection_limit`（截断）、`timeout`、`collector_unavailable`、`collection_failed` 或 `collection_partial`。
 
 ### 解析程度
 
@@ -308,7 +306,7 @@ snapshot_end
 | `raw` | 只有原文行 |
 | `not_applicable` | 没有证据记录 |
 
-配置、脚本、日志、历史记录等保留为原文是正常结果，不会因此把 source 标为 partial。
+记录为原文不会使 source 变为 `partial`。
 
 ## 上限
 
@@ -353,18 +351,9 @@ snapshot_end
 | 日志正文合计 | 4 MiB | `activityContentBytes` |
 | 目录遍历 | 10,000 个条目 | `activityWalkEntries` |
 
-采集超时（`recon.commandTimeout`、`recon.collectionTimeout`、`recon.responseTimeout`）可配置，见 [超时](/recon#超时)；全部上限汇总见 [限制速查](/reference/limits)。
-
-## 派生 Markdown
-
-Markdown 由服务端（本地模式下为客户端）在校验 JSONL 时生成，内容完全来自 JSONL；Dossier 只编辑这份 Markdown，不修改快照。
-
-- **不含证据正文模块的 Profile**（如 `default`、`quick`）：按模块依次输出各 source 的 `rawText` 和插件文本。模块不是 `ok` 时在其末尾追加 `> Collection status: <状态> — <原因>`；快照为 partial 时，在文末追加 `> Snapshot status: partial — <原因>`。
-- **`hunt`，以及任何包含 `topology`、`supplychain`、`config`、`activity` 或 `credential` 模块的 Profile**：这些模块会读取配置、凭据和日志原文，因此只输出索引：标题为 `# Hunt Snapshot Summary`，含快照状态、权威 JSONL 路径，以及 **Primary applications and middleware**、**Containers**、**Kernel-observed host listeners**、**Container port configuration**、**Coverage** 几节，表格超出行数时注明省略数量。配置、环境变量、日志正文、密码 hash 和凭据原文不进入索引，需要时读 JSONL。
+采集超时可配置，见 [超时](/recon#超时)。
 
 ## 各模块写入的记录
-
-模块采集什么见 [模块](/recon#模块)，下表只列它们在快照中的记录形式。
 
 | 模块 | 主要记录 |
 | --- | --- |
@@ -383,7 +372,7 @@ Markdown 由服务端（本地模式下为客户端）在校验 JSONL 时生成�
 
 ## 读取示例
 
-快照可能很大，建议用 `jq`、`rg` 流式读取，按事件类型、`entityId` 和关系定位：
+用 `jq` 流式读取：
 
 ```bash
 # 未完整采集的 source 及原因
@@ -402,19 +391,3 @@ jq -c 'select(.kind == "relation" and .data.relationType == "connects_to")
 jq -c 'select(.kind == "fact" and .data.factType == "content_pattern_match")
   | .data | {path, line, patternId, maskedValue}' host.recon.jsonl
 ```
-
-AIR 会话从 MCP `recon` 工具拿到 Project 相对路径 `snapshotPath` 后同样读取，见 [MCP](/reference/mcp)。
-
-## 相关内容
-
-<Cards>
-  <Card title="自动化信息收集" href="/recon">
-    发起 Recon、选择 Profile、查看结果
-  </Card>
-  <Card title="限制速查" href="/reference/limits">
-    SIREN 全部大小、数量和超时上限
-  </Card>
-  <Card title="客户端配置" href="/reference/client-config#recon">
-    Profile 定义和采集超时
-  </Card>
-</Cards>

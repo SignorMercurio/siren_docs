@@ -29,28 +29,28 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ## 总览
 
-| 依赖 | 需要它的功能 | 配置位置 | 缺失时 |
-| --- | --- | --- | --- |
-| [TLS 证书和私钥](#tls-证书和私钥) | 所有连接 | `cert` / `key` | 服务端无法启动 |
-| [WebUI 用户库](#webui-用户库) | Web 控制台登录 | `siren_server user add`、`webui.userDBPath` | Web 控制台不鉴权，任何人可匿名操作 |
-| [MCP 凭证](#mcp-凭证) | MCP、Agentic IR | 环境变量 | 启用 MCP 时服务端拒绝启动；Agentic IR 无法启动会话 |
-| [出站规则 `egress.rules`](#出站规则-egressrules) | **Configure egress**、客户端部署 | `server_config.yaml` | 启用 WebUI 时服务端拒绝启动；未启用 WebUI 时部署失败 |
-| [出口发现 `egress.discovery`](#出口发现-egressdiscovery) | 部署时自动识别出口 IP | `server_config.yaml`、云防火墙日志 | 使用内置默认值；查询失败时需手动填写出口 IP |
-| [SOAR 凭证](#soar-凭证) | **Allow access**、**Configure egress**、**Restore egress**、**Deploy SIREN**、出口发现、AccessKey 调查 | 环境变量 | 这些操作报错 |
-| [`webui.publicURL`](#webuipublicurl) | Agentic IR | `server_config.yaml`、控制主机 DNS | Agentic IR 会话启动失败 |
-| [Dossier 目录](#dossier-目录) | Reports 页面、Dossier 报告编辑 | `webui.dossierDir` | Reports 显示错误并禁用打开按钮 |
-| [AIR Provider CLI](#air-provider-cli) | Agentic IR | `air.providers.<name>` | Settings 中对应 Provider 显示不可用 |
-| [tmux](#tmux) | 常驻运行服务端、REPL `shell` | 系统软件包 | REPL `shell` 无法打开 |
-| [OSS 凭证](#oss-凭证) | 本地模式上传 Recon 结果和文件 | 目标主机环境变量 | 上传失败 |
-| [插件市场](#插件市场) | 客户端插件安装与更新 | 客户端 `plugins.marketplace` | 无法下载或更新插件 |
+| 依赖 | 需要它的功能 | 缺失时 |
+| --- | --- | --- |
+| [TLS 证书和私钥](#tls-证书和私钥) | 所有连接 | 服务端无法启动 |
+| [WebUI 用户库](#webui-用户库) | Web 控制台登录 | Web 控制台不鉴权，任何人可匿名操作 |
+| [MCP 凭证](#mcp-凭证) | MCP、Agentic IR | 启用 MCP 时服务端拒绝启动 |
+| [出站规则 `egress.rules`](#出站规则-egressrules) | **Configure egress**、客户端部署 | 启用 WebUI 时服务端拒绝启动；未启用 WebUI 时部署失败 |
+| [出口发现 `egress.discovery`](#出口发现-egressdiscovery) | 部署时自动识别出口 IP | 查询失败时需手动填写出口 IP |
+| [SOAR 凭证](#soar-凭证) | **Allow access**、**Configure egress**、**Restore egress**、**Deploy SIREN**、出口发现、AccessKey 调查 | 这些操作报错 |
+| [`webui.publicURL`](#webuipublicurl) | Agentic IR | Agentic IR 会话启动失败 |
+| [Dossier 目录](#dossier-目录) | Reports 页面、Dossier 报告编辑 | 报告无法在 Dossier 中打开 |
+| [AIR Provider CLI](#air-provider-cli) | Agentic IR | 对应 Provider 不可用 |
+| [tmux](#tmux) | 常驻运行服务端、REPL `shell` | REPL `shell` 无法打开 |
+| [OSS 凭证](#oss-凭证) | 本地模式上传 Recon 结果和文件 | 上传失败 |
+| [插件市场](#插件市场) | 客户端插件安装与更新 | 无法下载或更新插件 |
 
 ## 设置服务端环境变量
 
 MCP 和 SOAR 凭证都从环境变量读取，不要写进 `server_config.yaml`、Project 目录或 Git 仓库：
 
-- **`.env` 文件（推荐）**：启动时依次读取当前工作目录和二进制所在目录下的 `.env`，环境中已有的同名变量优先。文件以点号开头，不会出现在 Artifacts 中；建议权限 `600`。
+- **`.env` 文件（推荐）**：启动时依次读取当前工作目录和二进制所在目录下的 `.env`，环境中已有的同名变量优先。建议权限 `600`。
 - **Shell 导出**：在启动 `siren_server` 的 tmux 窗口里 `export`。
-- **REPL `env KEY=VALUE`**：只修改当前进程，重启后失效，适合临时更换凭证。
+- **REPL `env KEY=VALUE`**：只修改当前进程，重启后失效。
 
 ```bash title="/opt/siren/.env"
 SIREN_MCP_ADMIN_TOKEN=<随机字符串>
@@ -64,23 +64,19 @@ SOAR_ACCESS_KEY_SECRET=<AccessKey Secret>
 
 ## TLS 证书和私钥
 
-- **用于**：客户端、交互式 Shell、Web 控制台、WebSocket 和 MCP，全部走同一个 TLS 端口。
-- **配置**：顶层 `cert` / `key`，默认 `certs/cert.pem` / `certs/key.pem`，相对工作目录解析。安装脚本首次安装时生成只覆盖 `localhost` 和 `127.0.0.1` 的自签证书。
-- **要求**：浏览器访问的域名和 `webui.publicURL` 中的域名都必须在证书中，且证书受浏览器信任。客户端不校验证书链。
+- **配置**：顶层 `cert` / `key`，默认 `certs/cert.pem` / `certs/key.pem`，相对工作目录解析。安装脚本生成的自签证书只覆盖 `localhost` 和 `127.0.0.1`。
+- **要求**：浏览器访问的域名和 `webui.publicURL` 中的域名都必须在证书中，且证书受浏览器信任。
 - **缺失时**：启动失败，提示 `configure server TLS`。更换方法见 [更换证书](/server#更换证书)。
 
 ## WebUI 用户库
 
 - **配置**：`siren_server user add <username>` 创建账号，存入 SQLite 账号库（默认 `data/users.db`，可用 `webui.userDBPath` 改为绝对路径）。
-- **缺失时**：启动时账号库不存在或没有账号，本次运行期间 Web 控制台完全不鉴权，日志提示 `WebUI auth disabled; run 'siren_server user add'`。创建第一个账号后需要重启。详见 [账号与安全边界](/server/security#webui-账号)。
+- **缺失时**：启动时账号库不存在或没有账号，本次运行期间 Web 控制台完全不鉴权，创建第一个账号后需要重启，见 [WebUI 账号](/server/security#webui-账号)。
 
 ## MCP 凭证
 
-- **用于**：`/mcp` 和 `/mcp/project/<id>` 的 Bearer 鉴权，以及 Agentic IR 会话访问 SIREN 工具。
-- **配置**：环境变量 `SIREN_MCP_ADMIN_TOKEN`，非空随机字符串，可用 `openssl rand -hex 32` 生成。运维用 MCP 客户端凭它访问全局 `/mcp` 或任意 Project。
-- **缺失时**：`mcp.enabled: true`（默认）时拒绝启动，提示 `MCP requires SIREN_MCP_ADMIN_TOKEN`。
-
-Agentic IR 会话自动获得只在会话期间有效的凭证，无需手工配置。设置 `mcp.enabled: false` 可不再要求该变量，但 Agentic IR 随之不可用。外部 MCP 客户端接入见 [MCP 集成](/reference/mcp#端点)。
+- **配置**：环境变量 `SIREN_MCP_ADMIN_TOKEN`，非空随机字符串，可用 `openssl rand -hex 32` 生成。外部 MCP 客户端凭它访问，见 [MCP 集成](/reference/mcp#端点)；Agentic IR 会话自动获得临时凭证，无需配置。
+- **缺失时**：`mcp.enabled: true`（默认）时拒绝启动，提示 `MCP requires SIREN_MCP_ADMIN_TOKEN`。设置 `mcp.enabled: false` 可不再要求该变量，但 Agentic IR 随之不可用。
 
 ## 出站规则 `egress.rules`
 
@@ -103,11 +99,11 @@ egress:
       portRange: 443/443
 ```
 
-这条规则决定：部署时为目标主机出口 IP 放行的服务端端口；出口发现时客户端探测的目标（不一致时提示 `probe destination differs from configured SIREN callback; no IP was allowed`）；一键部署写入客户端 `config.yaml` 的连接地址（见 [一键部署的前置条件](/onboard/provisioning#前置条件)）。安装包自带的 `47.111.170.208` 是官方服务端，自建服务端必须改成自己的公网 IP。另两条默认规则 `siren_client_download`、`alibaba_cloud_infrastructure` 用于下载客户端和访问阿里云基础服务。下发和恢复见 [出站放行](/onboard/egress)。
+安装包自带的 `47.111.170.208` 是官方服务端，自建服务端必须改成自己的公网 IP。这条规则同时决定部署时放行的服务端端口、出口发现的探测目标（不一致时提示 `probe destination differs from configured SIREN callback; no IP was allowed`）和一键部署写入客户端 `config.yaml` 的连接地址。另两条默认规则 `siren_client_download`、`alibaba_cloud_infrastructure` 用于下载客户端和访问阿里云基础服务。下发和恢复见 [出站放行](/onboard/egress)。
 
 ## 出口发现 `egress.discovery`
 
-部署时未手动填写出口 IP，SIREN 会在目标主机安装客户端并发出一次探测连接，再通过 SOAR 查询云防火墙日志找出它到达服务端时的来源 IP，只放行这个 IP。适用于 **Deploy SIREN**、REPL `deploy` / `deploy-batch` 和 MCP `deploy`。
+部署（**Deploy SIREN**、REPL `deploy` / `deploy-batch`、MCP `deploy`）时未手动填写出口 IP，SIREN 让目标主机发出一次探测连接，再通过 SOAR 查询云防火墙日志找出它的来源 IP，只放行这个 IP。
 
 ```yaml title="server_config.yaml"
 egress:
@@ -119,15 +115,15 @@ egress:
 ```
 
 - **要求**：服务端入方向流量经过阿里云云防火墙且日志投递到上述 Logstore；SOAR 凭证可执行 `sls_query` 剧本查询该 Logstore。
-- **缺失时**：未配置的字段使用指向内部环境的内置默认值。查询失败、120 秒内未查到日志、匹配到多个来源或探测失败时，部署停止并提示手动指定出口 IP。手动填写出口 IP 会跳过出口发现。
+- **缺失时**：未配置的字段使用指向内部环境的内置默认值。查询失败、120 秒内未查到日志、匹配到多个来源或探测失败时，部署停止并提示手动指定出口 IP。
 
 ## SOAR 凭证
 
-- **用于**：**Allow access**、**Configure egress**、**Restore egress**、**Deploy SIREN**（含 REPL `allow`、`deploy`、`deploy-batch` 和 MCP `deploy`）、出口发现，以及 [AccessKey 调查](/ak)。
+- **用于**：上表所列操作（含对应的 REPL `allow`、`deploy`、`deploy-batch` 和 MCP `deploy`）。
 - **配置**：环境变量 `SOAR_ACCESS_KEY_ID` / `SOAR_ACCESS_KEY_SECRET`，必须成对设置，只设一个会报错。都未设置时回退到 Alibaba Cloud SDK 默认凭证链，例如 `ALIBABA_CLOUD_ACCESS_KEY_ID` / `ALIBABA_CLOUD_ACCESS_KEY_SECRET`。
 - **缺失时**：服务端照常启动，上述操作执行时报错。
 
-SOAR 客户端首次使用时创建并缓存，之后改 `.env` 或 Shell 环境需要重启服务端。在 REPL 中用 `env` 设置上述任一变量会立即重置 SOAR 客户端，但只作用于当前进程：
+凭证在首次使用后缓存，之后改 `.env` 或 Shell 环境需要重启服务端。在 REPL 中用 `env` 设置上述任一变量会立即生效，但只作用于当前进程：
 
 ```bash title="SIREN Server"
 >>> env SOAR_ACCESS_KEY_ID=<AccessKey ID>
@@ -136,27 +132,23 @@ SOAR 客户端首次使用时创建并缓存，之后改 `.env` 或 Shell 环境
 
 ## webui.publicURL
 
-- **用于**：Agentic IR 会话通过它访问 SIREN MCP。
 - **配置**：证书覆盖的 HTTPS Origin，并在控制主机本机把该域名解析到本机的非回环内网地址，见 [安装服务端](/server#webuipublicurl)。
 - **缺失时**：服务端照常启动；启动 Agentic IR 会话时提示 `webui.publicURL is required for AIR MCP`。
 
 ## Dossier 目录
 
-- **用于**：Reports 页面，以及从 Artifacts、Reports 和 AIR 报告卡片打开 Dossier 编辑报告。
-- **配置**：`webui.dossierDir`（或 `--webui-dossier-dir`），安装包配置为 `/opt/siren/dossier`。需要单独部署 Dossier 静态文件和默认模板 `report.md`，见 [部署 Dossier](/server/dossier)。
-- **缺失时**：Reports 仍列出报告，但显示错误并禁用打开按钮；Settings 的 **Dossier** 一栏显示原因。
+- **配置**：`webui.dossierDir`，安装包配置为 `/opt/siren/dossier`。需要单独部署 Dossier 静态文件，见 [部署 Dossier](/server/dossier)。
+- **缺失时**：Reports 仍列出报告，但无法在 Dossier 中打开；Settings 的 **Dossier** 一栏显示原因。
 
 该目录通过 `/dossier/` 不鉴权对外提供，不要存放其他文件，见 [`/dossier/` 不鉴权](/server/security#dossier-不鉴权)。
 
 ## AIR Provider CLI
 
-- **用于**：Agentic IR 的 GUI 和 Terminal 会话。
-- **配置**：在控制主机上安装并登录 Codex、Claude Code、Qoder 或 Pi CLI，由 `air.providers.<name>` 指定路径和参数；还需要 [MCP 凭证](#mcp-凭证)和 [`webui.publicURL`](#webuipublicurl)。见 [准备 AIR Provider](/server/air-providers)。
-- **缺失时**：Settings 的 **AIR runtime** 下显示对应 Provider 不可用及原因。
+在控制主机上安装并登录 Codex、Claude Code、Qoder 或 Pi CLI，由 `air.providers.<name>` 指定路径和参数，见 [准备 AIR Provider](/server/air-providers)。缺失时 Settings 的 **AIR runtime** 下显示对应 Provider 不可用及原因。
 
 ## tmux
 
-服务端需要常驻终端，推荐在 tmux 中运行，见 [保持服务端运行](/server#保持服务端运行)。REPL 的 `shell` 命令通过 tmux 新窗口打开远程 Shell，没有 tmux 时无法使用；WebUI 的 Shells 和 Agentic IR 不依赖 tmux。
+服务端需要常驻终端，在 tmux 中运行，见 [保持服务端运行](/server#保持服务端运行)。REPL 的 `shell` 命令没有 tmux 时无法使用；WebUI 的 Shells 和 Agentic IR 不依赖 tmux。
 
 ## 网络
 
@@ -168,7 +160,7 @@ SOAR 客户端首次使用时创建并缓存，之后改 `.env` 或 Shell 环境
 
 ## OSS 凭证
 
-只用于本地模式：目标主机上的 `siren recon` 把 JSONL 和 Markdown 上传到 OSS，`siren upload` 上传指定文件。远程模式的 Recon、文件拉取、Artifacts 和 Projects 都保存在服务端本地，不需要 OSS。在运行本地命令的终端中设置（客户端不读取 `.env`）：
+只用于本地模式：目标主机上的 `siren recon` 把结果上传到 OSS，`siren upload` 上传指定文件；远程模式不需要 OSS。在运行本地命令的终端中设置（客户端不读取 `.env`）：
 
 ```bash tab="Linux"
 export HISTCONTROL=ignoreboth
@@ -181,7 +173,7 @@ $env:OSS_ACCESS_KEY_ID="<YOUR_ACCESS_KEY_ID>"
 $env:OSS_ACCESS_KEY_SECRET="<YOUR_ACCESS_KEY_SECRET>"
 ```
 
-Linux 中凭证命令前的空格配合 `HISTCONTROL=ignoreboth` 可避免写入 Bash 历史，`export HISTCONTROL=ignoreboth` 本身不加空格；Windows 不支持此特性。
+Linux 中凭证命令前的空格配合 `HISTCONTROL=ignoreboth` 可避免写入 Bash 历史。
 
 Bucket 和上传路径由客户端配置 `oss.region`、`oss.bucketName`、`oss.objectPath`、`oss.docObjectPath` 指定，见 [配置文件](/reference/client-config)。凭证缺失或无权限时，采集结果仍保存在本机，但 `siren recon` 以上传错误结束。
 
@@ -206,4 +198,4 @@ Bucket 和上传路径由客户端配置 `oss.region`、`oss.bucketName`、`oss.
 
 ## 插件市场
 
-客户端配置 `plugins.marketplace` 指定插件市场的 HTTP(S) 地址（例如 OSS Bucket 地址），只在安装或更新[插件](/reference/plugins)时需要。已安装的插件保存在客户端工作目录的 `plugins/` 下。
+客户端配置 `plugins.marketplace` 指定插件市场的 HTTP(S) 地址（例如 OSS Bucket 地址），只在安装或更新[插件](/reference/plugins)时需要。

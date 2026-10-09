@@ -39,7 +39,7 @@ import conceptsLight from "../../img/concepts-light.webp";
 
 | | Client ID | 稳定身份 |
 | --- | --- | --- |
-| 形式 | 数字，显示在 Clients 的 **ID** 列，REPL 和 MCP 用它指定目标 | 客户端首次启动时生成的随机 ID，保存在主机用户配置目录下的 `siren/agent_id` |
+| 形式 | 数字，显示在 Clients 的 **ID** 列，REPL 和 MCP 用它指定目标 | 客户端首次启动时生成并保存在主机上的随机 ID |
 | 生命周期 | 客户端重连、重启和服务端重启后都不变，也不会再分配给其他主机 | 身份文件存在期间不变 |
 | 绑定的数据 | 无 | Client ID、Note、Project 归属 |
 
@@ -51,16 +51,15 @@ import conceptsLight from "../../img/concepts-light.webp";
 
 **Project** 是按事件划分的工作区，有名称、颜色和服务端上的专用目录；每个客户端最多归属一个 Project。**Global** 是不选 Project 时的范围：能看到所有客户端，也是唯一能给客户端分配 Project 的地方。
 
-当前范围由侧栏顶部的 **Project scope** 选择器决定（菜单末尾的 **Manage projects** 进入 Projects 页）：
+当前范围由侧栏顶部的 **Project scope** 菜单切换：
 
 | 页面 | Global | Project 视图 |
 | --- | --- | --- |
 | Clients | 全部客户端，可分配 Project | 只列本 Project 的客户端 |
 | Shells、Files、Investigations 的 Recon 和 Process Analysis | 可选任意在线客户端 | 只能选本 Project 的客户端 |
-| Agentic IR | 工作目录是服务端工作目录，MCP 端点 `/mcp` | 工作目录是 Project 目录，MCP 端点 `/mcp/project/<id>` |
+| Agentic IR | 工作目录是服务端工作目录 | 工作目录是 Project 目录，只能操作本 Project 的客户端 |
 | Artifacts | 根目录是服务端工作目录 | 根目录是 Project 目录 |
 | Reports | 汇总服务端工作目录和所有 Project | 只扫描 Project 目录 |
-| Investigations 的 AccessKey | 报告写入 Global | 报告仍写入 Global |
 | Logs、Settings | 不受范围影响 | 不受范围影响 |
 
 完整规则和例外见 [Project 范围](/projects)。
@@ -71,13 +70,11 @@ import conceptsLight from "../../img/concepts-light.webp";
 
 - **界面**：**GUI** 是结构化时间线，**Terminal** 是 Provider 原生终端界面。
 - **入口模式**：
-  - **Manual**：空白会话，不绑定客户端，没有种子提示词。
+  - **Manual**：空白会话，不绑定客户端。
   - **Custom**：选一个客户端并描述要调查的内容。
-  - **Event**：选客户端、填写 UID，再选目标：告警 **Event**、**ECS** 实例或 Security Center **Asset**；后两种可用 **Time range** 限定告警时间范围。
+  - **Event**：选客户端、填写 UID，再选目标：告警 **Event**、**ECS** 实例或 Security Center **Asset**。
 
-继续以前的会话不是入口模式：在 AIR 侧栏展开 **History** 打开历史会话（先只读显示），再点 **Continue session** 或 **Continue in Terminal**。
-
-会话托管在服务端，刷新浏览器或切换页面不会中断，可以从 **Running** 重新接入。详见 [Agentic IR](/air)。
+会话托管在服务端，刷新浏览器或切换页面不会中断，可以从 **Running** 重新接入；结束的会话可从 **History** 继续。详见 [Agentic IR](/air)。
 
 ## 调查工具
 
@@ -85,17 +82,17 @@ import conceptsLight from "../../img/concepts-light.webp";
 
 | 工具 | 输入 | 产出 |
 | --- | --- | --- |
-| **Recon** | 客户端和 Profile（列表由客户端上报） | `.recon.jsonl` 快照和渲染后的 `.md` 报告，写入客户端所属 Project 的 Artifacts，未归属时写入 Global |
+| **Recon** | 客户端和 Profile | `.recon.jsonl` 快照和渲染后的 `.md` 报告，写入客户端所属 Project 的 Artifacts，未归属时写入 Global |
 | **Process Analysis** | Linux 客户端，按 PID、Port 或 Name 查询 | 只显示在页面上，不写文件 |
-| **AccessKey** | UID、AccessKey ID、可选 Region，经 SOAR 查询云 API 调用记录 | `AK_*.md` 报告，始终写入 Global Artifacts |
+| **AccessKey** | UID、AccessKey ID、可选 Region，经 SOAR 查询云 API 调用记录 | `AK_*.md` 报告，任何范围下都写入 Global Artifacts |
 
-AIR 能通过 MCP 的 `recon` 工具执行 Recon；Process Analysis 和 AccessKey 只能在 WebUI 中运行。详见 [Recon](/recon)、[进程分析](/process) 和 [AccessKey 调查](/ak)。
+AIR 能通过 MCP 执行 Recon；Process Analysis 和 AccessKey 只能在 WebUI 中运行。详见 [Recon](/recon)、[进程分析](/process) 和 [AccessKey 调查](/ak)。
 
 ## Artifacts 与 Reports
 
 **Artifacts** 是服务端上按范围划分的证据目录：Global 对应服务端工作目录，Project 对应 Project 目录。Recon 结果、AccessKey 报告、AIR 产出和手工上传的文件都在这里。
 
-**Reports** 不是另一个存储位置，而是 Artifacts 中 Dossier 格式报告的列表。`.md` 文件开头必须是 `---` frontmatter，且同时包含 `date`、`sir-seq`、`version` 和 `client` 四个字段，才会列在 Reports 页；Recon 生成的 `.md` 和普通笔记因此不会列出。在 Dossier 编辑器中打开报告需要服务端配置 `webui.dossierDir`。
+**Reports** 不是另一个存储位置，而是 Artifacts 中 Dossier 格式报告的列表。`.md` 文件开头必须是 `---` frontmatter，且同时包含 `date`、`sir-seq`、`version` 和 `client` 四个字段，才会列在 Reports 页。在 Dossier 编辑器中打开报告需要服务端配置 `webui.dossierDir`。
 
 详见 [Artifacts](/artifacts)、[Reports](/reports) 和 [Dossier 语法](/reports/syntax)。
 
@@ -111,7 +108,7 @@ AIR 能通过 MCP 的 `recon` 工具执行 Recon；Process Analysis 和 AccessKe
 
 SIREN 通过 MCP 把操作客户端的能力（`run`、`recon`、`deploy` 等工具）提供给 AI 代理。`/mcp` 对应 Global，`/mcp/project/<id>` 只能访问一个 Project 的客户端。
 
-- **AIR**：启动会话时自动注入 SIREN MCP 和绑定当前范围的会话凭证，无需在 Provider 配置里手动添加。
+- **AIR**：会话自动连接当前范围的 SIREN MCP，无需在 Provider 配置里手动添加。
 - **外部代理**：用 `SIREN_MCP_ADMIN_TOKEN` 访问，WebUI 登录状态不能代替。MCP 默认启用，缺少该凭证时服务端拒绝启动，见 [MCP 凭证](/server/prerequisites#mcp-凭证)。
 
 详见 [MCP](/reference/mcp) 和 [账号与安全边界](/server/security)。
@@ -119,12 +116,6 @@ SIREN 通过 MCP 把操作客户端的能力（`run`、`recon`、`deploy` 等工
 ## 下一步
 
 <Cards>
-  <Card title="Clients 页" href="/clients">
-    查看客户端、编辑 Note、批量分配和清理
-  </Card>
-  <Card title="Project 范围" href="/projects">
-    新建 Project、分配客户端、理解范围例外
-  </Card>
   <Card title="选择接入方式" href="/onboard">
     把第一台主机接入 SIREN
   </Card>

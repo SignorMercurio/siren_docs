@@ -24,36 +24,29 @@ Clients 页（`#/clients`）是 WebUI 的默认首页，列出当前范围内的
 
 ![Clients 页的客户端表格，含 Project 分配、Note 和行内操作按钮](../../img/clients-table.png)
 
-页面从上到下是：页头（在线数量、距上次刷新的时间，Project 视图下还有 Project 名称）、工具栏（筛选框和计数，勾选后变为批量操作栏）、客户端表格、[Provisioning](#provisioning) 面板和 [Recent activity](#recent-activity)。
-
 ## 表格列
 
 | 列 | 内容 |
 | --- | --- |
-| 勾选框 | 批量操作。表头勾选框只选当前筛选后可见的行 |
 | **ID** | Client ID，重连和服务端重启后不变，见 [核心概念](/concepts#siren-server-与-client) |
-| **OS** | 操作系统图标 |
 | **Instance ID** | 阿里云 ECS 实例 ID；未上报时显示主机名 |
 | **Private IP** | 第一个内网 IP，有多个时附 `+N` |
-| **Project** | 所属 Project 及颜色，未归属显示 **Unassigned**；仅 Global 范围下可编辑 |
+| **Project** | 所属 Project，未归属显示 **Unassigned**；仅 Global 范围下可编辑 |
 | **Note** | 客户端备注，点击编辑 |
-| 操作 | Shell 图标、AIR 图标和 **More actions** 菜单 |
 
-悬停或聚焦 **Instance ID** 单元格会弹出主机卡片，显示 **Hostname**、**Version**（未上报时为 **Not reported**）、**Address**（客户端连接地址）和全部 **Private IP**。
+悬停 **Instance ID** 单元格会弹出主机卡片，显示 **Hostname**、**Version**、**Address**（客户端连接地址）和全部 **Private IP**。
 
-## 筛选、排序与刷新
+## 筛选与刷新
 
-筛选框（"Filter by ID, instance, IP, hostname, project, or note…"）不区分大小写，按子串匹配 Client ID、OS、连接地址、Note、Project 名、主机名、Instance ID 和全部内网 IP；工具栏右侧显示 `N of M`。
+筛选框不区分大小写，按子串匹配 Client ID、OS、连接地址、Note、Project 名、主机名、Instance ID 和全部内网 IP。
 
-点击 **ID**、**OS**、**Instance ID**、**Private IP** 或 **Project** 列头排序，再点切换升降序；**Note** 列不能排序。默认按 ID 升序，空的 Instance ID 或 Private IP 始终排最后，内网 IP 按数值比较。窗口宽度不超过 768px 时改为卡片布局，用 **Sort** 下拉框排序、**Select visible (N)** 批量勾选。
-
-列表按 **Settings** → **Client list refresh** 轮询（5、10、30 或 60 秒，默认 10 秒，只存于当前浏览器）。标签页在后台时暂停，切回或部署结束后立即刷新。连续 3 次失败时表格上方显示 `Unable to reach server`。
+列表按 **Settings** → **Client list refresh** 轮询（默认 10 秒，只存于当前浏览器）。连续 3 次失败时表格上方显示 `Unable to reach server`。
 
 ## 编辑 Note
 
-点击 **Note** 单元格输入备注（最多 256 个字符，首尾空格会去掉），按 Enter 或失焦保存，Esc 放弃；清空后保存即删除。保存失败提示 "Couldn't save note. Press Enter to retry."，再按 Enter 重试。
+点击 **Note** 单元格输入备注（最多 256 个字符），按 Enter 或失焦保存，Esc 放弃；清空后保存即删除。保存失败提示 "Couldn't save note. Press Enter to retry."。
 
-Note 按客户端稳定身份保存，重连或服务端重启后仍在。各页面客户端选择器优先显示 Note（其次 Instance ID、主机名），Shell 和 AIR 标签名、MCP `ls` 输出（AIR 也能看到）也会用到它。
+Note 按客户端稳定身份保存，重连或服务端重启后仍在。客户端选择器、Shell 和 AIR 标签名、MCP `ls` 输出（AIR 也能看到）都会显示它。
 
 ## 行内操作
 
@@ -62,9 +55,9 @@ Note 按客户端稳定身份保存，重连或服务端重启后仍在。各页
 | Shell 图标 | 新开浏览器 Shell 标签并跳到 [Shells](/shells) |
 | AIR 图标 | 跳到 [Agentic IR](/air)，切到 **Custom** 模式并选中该客户端 |
 | **More actions** → **Files** | 跳到 [Files](/files) 并选中该客户端 |
-| **More actions** → **Recon** | 跳到 Investigations 的 Recon 标签并选中该客户端；选 Profile 后点 **Start Recon** 才执行，见 [Recon](/recon) |
-| **More actions** → **Process analysis** | 跳到 Investigations 的 Process Analysis 标签，见 [进程分析](/process)。非 Linux 客户端显示为不可用的 **Process analysis (Linux only)** |
-| **More actions** → **Clean & terminate** | 打开 **Clean & Terminate** 确认框，输入该客户端 ID 后点 **Send cleanup request** |
+| **More actions** → **Recon** | 跳到 Recon 标签并选中该客户端；选 Profile 后点 **Start Recon** 才执行，见 [Recon](/recon) |
+| **More actions** → **Process analysis** | 跳到 [进程分析](/process)，仅 Linux 客户端可用 |
+| **More actions** → **Clean & terminate** | 输入该客户端 ID 确认后点 **Send cleanup request** |
 
 **Clean & terminate** 让客户端删除 SIREN 管理的文件并退出，服务端无法确认最终删除结果，见 [痕迹清除](/cleanup)。
 
@@ -72,28 +65,18 @@ Note 按客户端稳定身份保存，重连或服务端重启后仍在。各页
 
 勾选客户端后，工具栏变为批量操作栏：
 
-- **N selected**：已选数量。部分已选项被筛选隐藏时追加 `· M hidden by filter`，并出现 **Clear hidden** 只取消这些隐藏项。
-- **Assign project**：仅 Global 范围显示，选 Project 或 **Unassigned** 后立即生效，不再确认。
-- **Clean N**：确认框列出全部目标及被隐藏的数量，输入选中数量后点 **Send N requests**。
-- **Clear all**：取消全部勾选。
+- **Assign project**：仅 Global 范围显示，选 Project 或 **Unassigned** 后立即生效，不再确认。规则见 [Project 范围](/projects)。
+- **Clean N**：输入选中数量后点 **Send N requests**。
 
-批量操作作用于全部已选客户端，包括被筛选隐藏的，执行前先确认。
-
-## 分配 Project
-
-在 Global 范围用 **Project** 列下拉框或批量 **Assign project** 分配。Project 视图中该列只读，未归属的客户端不显示。规则见 [Project 范围](/projects)。
-
-## 空状态
-
-没有在线客户端时显示 **No connected clients** 和三步引导：**Deploy a client**（用下方 **Deploy SIREN**，或在主机上运行 `./siren client -s <server> -p <port>`，见 [手动安装客户端](/onboard/manual)）、**Wait for it to connect**（列表自动刷新）、**Pick a client and start**。筛选无匹配时显示 **No clients match the filter**，清空筛选框即可。
+批量操作作用于全部已选客户端，包括被筛选隐藏的（计数旁显示 `· M hidden by filter`），执行前先确认。
 
 ## Provisioning
 
-表格下方的 **Provisioning** 面板通过 SOAR 操作阿里云 ECS，默认打开 **Deploy SIREN**，在 Project 视图中部署的客户端自动归属当前 Project。各标签用法：**Deploy SIREN** 见 [一键部署](/onboard/provisioning)，**Allow access** 和 **Configure egress** 见 [出站与入站放行](/onboard/egress)，**Restore egress** 见 [恢复出站规则](/restore-egress)。
+表格下方的 **Provisioning** 面板通过 SOAR 操作阿里云 ECS：**Deploy SIREN** 见 [一键部署](/onboard/provisioning)，**Allow access** 和 **Configure egress** 见 [出站与入站放行](/onboard/egress)，**Restore egress** 见 [恢复出站规则](/restore-egress)。
 
 ## Recent activity
 
-**Recent activity** 合并显示近期部署（Deploy）和清理（Cleanup）记录。Global 显示全部，Project 视图只显示本 Project 的；进行中的排最前，其余按时间倒序。默认显示 5 条，**Show all N** 展开；右侧按钮可折叠整个区域（状态存于当前浏览器）。部署记录可点开看逐步日志，刷新页面后进行中的部署仍可继续查看。
+**Recent activity** 合并显示近期部署（Deploy）和清理（Cleanup）记录，Project 视图只显示本 Project 的。部署记录可点开看逐步日志，刷新页面后进行中的部署仍可继续查看。
 
 部署结果不确定时先在这里核对再决定是否重试；清理状态含义见 [痕迹清除](/cleanup)。
 
@@ -101,10 +84,6 @@ Note 按客户端稳定身份保存，重连或服务端重启后仍在。各页
 
 **客户端在运行，列表里却没有它**：确认当前范围（未归属的只在 Global 显示，归属其他 Project 的不在当前视图），清空筛选框，并在 [Logs](/logs) 中查看接入失败记录。
 
-**重新部署后 Note 和 Project 没了**：**Clean & terminate** 会删除客户端稳定身份，重新部署的客户端是新身份、新 Client ID，需重新填写 Note 和分配 Project。
-
-**Process analysis 是灰的**：进程分析只支持 Linux 客户端。
-
 <Callout title="命令行等价" type="info">
-  服务端 REPL 的 `ls`、`note <Client ID> [Note]`、`clean <Client ID>` 对应列出、备注和清理。REPL 没有 Project 范围：`ls` 总是列出全部客户端，也不能分配 Project。见 [服务端 REPL](/reference/repl)。
+  服务端 REPL 的 `ls`、`note`、`clean` 对应列出、备注和清理。REPL 没有 Project 范围：`ls` 总是列出全部客户端，也不能分配 Project。见 [服务端 REPL](/reference/repl)。
 </Callout>

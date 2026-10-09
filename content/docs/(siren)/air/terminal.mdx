@@ -22,61 +22,44 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 Terminal 界面在服务端的伪终端（PTY）中运行 Codex、Claude Code、Pi 或 Qoder 的原生 TUI，并在浏览器中原样显示，Provider 自己的斜杠命令、Skills、插件、自定义 statusline 和交互菜单都照常可用。
 
-在启动表单中按下 Provider 按钮旁的终端图标后启动会话，或在只读历史会话中点击 **Continue in Terminal**，见 [启动与管理会话](/air/sessions)。会话运行期间不能在 GUI 和 Terminal 之间切换。
+在启动表单中按下 Provider 按钮旁的终端图标后启动会话，或在只读历史会话中点击 **Continue in Terminal**。会话运行期间不能在 GUI 和 Terminal 之间切换。
 
 ## 何时使用 Terminal
 
 | 用 Terminal | 用 GUI |
 | --- | --- |
-| 当前 Provider 的 GUI 不可用（CLI 版本过旧或协议握手失败） | 需要证据脚注、来源卡片和报告卡片 |
+| 当前 Provider 的 GUI 不可用（例如 CLI 版本过旧） | 需要证据脚注、来源卡片和报告卡片 |
 | 需要 GUI 不提供的斜杠命令、Skills、插件或 Provider 设置菜单 | 需要审批卡片和浏览器标签页标题上的待处理提示 |
 | 习惯 Provider 原生的操作方式 | 需要检索、过滤或导出会话记录 |
 
-GUI 支持的命令见 [Provider 差异](/air/providers)。
-
 ## Provider 在 Terminal 中的行为
 
-SIREN 启动 CLI 时只加入以下内容，其他一切按服务端用户的 CLI 配置和 `air.providers.<name>.args` 运行：
-
-- 当前范围的 SIREN MCP（名为 `siren`）及会话凭证；
-- Custom 和 Event 模式的开场提示词，作为 CLI 的初始提示词；
-- 会话 ID：Claude Code 和 Qoder 新会话由 SIREN 指定 ID，继续历史会话时传入原 ID。
-
-因此：
+SIREN 只注入当前范围的 SIREN MCP、会话凭证、开场提示词或要继续的会话 ID，其他一切按服务端用户的 CLI 配置和 `air.providers.<name>.args` 运行，见 [边界](/server/air-providers#边界)。因此：
 
 - 模型、推理强度、权限、沙箱和审批都由 CLI 决定。需要确认的操作以 TUI 自身的提示出现，不生成 GUI 审批卡片，也不触发 Running 列表或浏览器标签页标题上的待处理提示。
 - SIREN 不附加证据引用约定，脚注也不渲染成来源卡片。需要可追溯的结论时，在提示词中要求 Agent 标注来源，或改用 GUI，见 [证据与报告](/air/evidence)。
-- **Pi** 新会话固定从 Qwen Aegis 模型开始，继续历史会话时沿用原设置；SIREN 会忽略 `args` 中的部分参数，见 [Provider 参数](/server/air-providers#provider-参数)。
-- **Codex** 默认以 `--no-alt-screen` 的 inline 模式运行，浏览器终端可保留滚动历史，可在 [Provider 参数](/server/air-providers#provider-参数) 中修改。
 
 ## 复制与粘贴
 
-| 操作 | 方式 |
-| --- | --- |
-| 复制选中文本 | Cmd+C（macOS）或 Ctrl+C（其他系统）。没有选中内容时，Ctrl+C 照常发给 TUI |
-| 右键菜单 | 选中光标下的单词并弹出浏览器原生菜单，可复制或粘贴 |
-| 粘贴文本 | 浏览器原生粘贴，原样发给 TUI |
-| TUI 写入剪贴板 | 可通过 OSC 52 写入浏览器剪贴板，仅在你于终端面板内点击或按键后 2 秒内生效；读取剪贴板的请求一律忽略 |
+- **复制**：选中文本后按 Cmd+C（macOS）或 Ctrl+C（其他系统）。没有选中内容时，Ctrl+C 照常发给 TUI。
+- **粘贴文本**：浏览器原生粘贴，原样发给 TUI。
+- **TUI 写入剪贴板**：可通过 OSC 52 写入浏览器剪贴板，仅在你于终端面板内点击或按键后 2 秒内生效；读取剪贴板的请求一律忽略。
 
 ### 粘贴图片
 
-在终端面板中直接粘贴图片（PNG、JPEG、WebP 或 GIF），一次最多 4 张，单张不超过 8 MiB。SIREN 把每张图片保存为服务端上权限 `0600` 的临时文件，再把路径粘贴进 TUI；Provider 进程退出后临时文件被删除。模型能否识别图片由 Provider 和模型决定。
-
-超出限制或终端未连接时，终端中以红字提示原因，例如 `Pasted image exceeds 8 MiB` 或 `Image paste requires a connected terminal`。
+在终端面板中直接粘贴图片，数量和大小限制见 [限制](/reference/limits#air)。SIREN 把每张图片保存为服务端上权限 `0600` 的临时文件，再把路径粘贴进 TUI；Provider 进程退出后临时文件被删除。超出限制或终端未连接时，终端中提示原因，例如 `Pasted image exceeds 8 MiB` 或 `Image paste requires a connected terminal`。
 
 ## 尺寸与滚动
 
-终端行列数由服务端统一维护，调整窗口或面板大小后 PTY 随之调整；多个浏览器同时查看时以最后一次调整为准。
-
-面板比终端窄时，字号依次缩小到 13px、12px；仍放不下时出现 **Horizontal** 左右滚动按钮，也可以按住 Shift 滚动滚轮横向移动。终端保留最多 20,000 行滚动历史。
+终端行列数随窗口或面板大小调整；多个浏览器同时查看时以最后一次调整为准。面板放不下终端时，可以按住 Shift 滚动滚轮横向移动。
 
 ## 重新连接
 
-连接中断后，终端每隔约 1.2 秒自动重连，最多连续 5 次，期间显示 `Reconnecting to <Provider> session…`。仍未恢复时显示 `Connection lost · the session may still be running on the server.` 和 **Reconnect** 按钮。另见 [启动与管理会话](/air/sessions#重新接入与回放)。
+连接中断后终端自动重连，期间显示 `Reconnecting to <Provider> session…`。仍未恢复时显示 `Connection lost · the session may still be running on the server.` 和 **Reconnect** 按钮。
 
 重新接入时，服务端回放缓存的原始终端输出：
 
-- 更早的输出已超出回放缓存时，回放开头显示灰色的 `[scrollback truncated]`，SIREN 会短暂调整一次终端宽度促使 TUI 重绘当前界面。
+- 更早的输出已超出回放缓存时，回放开头显示 `[scrollback truncated]`。
 - 浏览器处理输出跟不上时，服务端断开这个查看者，页面自动重连并提示 `viewer fell behind; scrollback may be incomplete`。
 
 ## 同一会话不能同时运行两份
@@ -90,5 +73,5 @@ SIREN 启动 CLI 时只加入以下内容，其他一切按服务端用户的 CL
 3. 点击 **Continue session**（GUI）或 **Continue in Terminal**。
 
 <Callout title="Codex 新建的 Terminal 会话" type="warn">
-  Codex 不允许预先指定会话 ID，SIREN 无法识别新建的 Codex Terminal 会话对应哪条历史记录，因此它运行期间仍会出现在 History 中，也不会触发上述检查。请先在 Running 中停止它再从 History 继续，否则会有两个 Codex 进程写同一份会话记录。
+  SIREN 无法识别新建的 Codex Terminal 会话对应哪条历史记录，因此它运行期间仍会出现在 History 中，也不会触发上述检查。请先在 Running 中停止它再从 History 继续，否则会有两个 Codex 进程写同一份会话记录。
 </Callout>

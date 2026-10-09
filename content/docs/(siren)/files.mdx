@@ -27,41 +27,37 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-**Files** 页面（`#/files`）直接读写在线客户端主机的文件系统：浏览目录、预览文本、下载文件或目录、上传文件。服务端上的报告和取证文件在 [Artifacts](/artifacts) 中管理。
+**Files** 页面直接读写在线客户端主机的文件系统：浏览目录、预览文本、下载文件或目录、上传文件。服务端上的报告和取证文件在 [Artifacts](/artifacts) 中管理。
 
 ## 打开方式
 
-- 侧栏 **Files**，在左上角下拉框中选择客户端，默认选中第一台。
-- [Clients](/clients#行内操作) 页客户端行的 **More actions** → **Files**：跳到 Files 并选中这台客户端。
-
-下拉框只列出当前范围内的在线客户端。切换 Project 或 Global 范围后，页面清空选择并重新载入。
+- 侧栏 **Files**，在左上角下拉框中选择客户端。下拉框只列出当前范围内的在线客户端。
+- [Clients](/clients#行内操作) 页客户端行的 **More actions** → **Files**，预选这台客户端。
 
 ## 浏览目录
 
 左侧文件树从根目录开始：Linux 和 macOS 为 `/`，Windows 为 `C:\`。
 
 - **Path**：输入路径后按 Enter 或点 **Open**，文件树改从该路径开始。留空表示 `.`，即客户端进程的工作目录，相对路径也相对于它。
-- 点击目录展开，点击文件在右侧预览。
-- 搜索框（**Search...**）只在已载入的条目中按名称筛选，不搜索未展开的目录。刷新按钮重新读取文件树。
+- 搜索框（**Search...**）只在已载入的条目中按名称筛选，不搜索未展开的目录。
+- 隐藏文件照常显示。
 
-先列子目录、再列文件，各自按名称排序。隐藏文件照常显示，指向目录的符号链接按目录显示。
-
-每个目录最多列出 1,000 个条目。超出时根目录顶部显示 `Showing first 1000 entries`，子目录显示 `1000` 标记。截取按客户端读取顺序进行，省略的不一定是排序后的最后几项；完整内容请在 [Shell](/shells) 中用 `ls` 或 `find` 查看。
+每个目录最多列出 1,000 个条目，超出时显示 `Showing first 1000 entries`。截取按客户端读取顺序进行，省略的不一定是排序后的最后几项；完整内容请在 [Shell](/shells) 中用 `ls` 或 `find` 查看。
 
 ## 预览
 
 | 文件 | 预览方式 |
 | --- | --- |
-| 文本文件，不超过 5 MiB | 原样显示，带 BOM 的 UTF-16 文本自动解码 |
-| `.md`、`.markdown` | 渲染为 Markdown；有两个及以上标题时显示 **Contents** 目录 |
-| 二进制文件（按文件开头判断，含图片） | 显示 `Preview not supported for binary files`，请下载查看 |
+| 文本文件，不超过 5 MiB | 原样显示 |
+| `.md`、`.markdown` | 渲染为 Markdown |
+| 二进制文件（含图片） | 显示 `Preview not supported for binary files`，请下载查看 |
 | 超过 5 MiB 的文本 | 报错 `file too large for preview`，请下载查看 |
 
 ![Files 页：左侧为目标主机的目录树，右侧预览选中的脚本](../../img/files-preview.png)
 
 ## 下载
 
-- 文件：点预览区右上角的 **Download** 图标，或在文件树中右键选择 **Download**。
+- 文件：点预览区的 **Download**，或在文件树中右键选择 **Download**。
 - 目录：右键目录选择 **Download**，客户端打包为 `<目录名>.tar.gz`；根目录 `/` 为 `root.tar.gz`。
 
 单个文件上限 100 MiB；目录中普通文件合计和压缩包本身都不能超过 100 MiB，否则报错 `directory too large for download`。打包时隐藏文件照常包含，符号链接、设备文件等非普通文件和无权读取的文件被静默跳过。
@@ -72,21 +68,18 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ## 上传
 
-页面右上角的 **Target** 是上传目标：打开某个路径后为该路径；在文件树中展开某个目录后变为该目录，并在树中标出 **Target**。
+页面右上角的 **Target** 是上传目标：打开某个路径后为该路径；在文件树中展开某个目录后变为该目录。
 
 1. 确认客户端和 **Target**。
-2. 点击 **Upload** 选择一个或多个文件，或把文件拖到页面任意位置（拖入时显示目标目录）。
-3. 文件逐个上传，右上角显示 `Uploading N of M · <文件名>`。
-4. 遇到同名文件时弹出 **Overwrite client file?**，逐个选择 **Overwrite file** 或 **Skip file**。
-5. 完成后提示上传、跳过和失败的数量；有成功上传时文件树自动刷新。
+2. 点击 **Upload** 选择一个或多个文件，或把文件拖到页面任意位置。
+3. 遇到同名文件时弹出 **Overwrite client file?**，逐个选择 **Overwrite file** 或 **Skip file**。
 
 | 规则 | 说明 |
 | --- | --- |
 | 单文件上限 | 100 MiB，超出的计为失败，其余继续上传 |
 | 目录 | 不支持，拖入目录时提示 `Directory upload is not supported. Drop files only.` |
-| 文件名 | 不能包含 `/` 或 `\`；允许 `.bashrc` 这类点号开头的名称 |
+| 文件名 | 不能包含 `/` 或 `\` |
 | 新文件权限 | Linux 和 macOS 上为 `0644`；覆盖时保留原权限 |
-| 并发 | 同一时间只能进行一批上传 |
 
 <Callout title="直接修改客户端主机" type="warn">
   上传和覆盖会立即改写客户端主机上的文件，无法从 WebUI 撤销。操作前确认客户端、范围和 Target 目录。
@@ -94,7 +87,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ## Files 不能做的事
 
-Files 不提供删除、重命名、新建目录或修改权限，请在 [Shell](/shells) 中执行。服务端文件的这些操作在 [Artifacts](/artifacts) 中进行。
+Files 不提供删除、重命名、新建目录或修改权限，请在 [Shell](/shells) 中执行。
 
 ## 命令行
 

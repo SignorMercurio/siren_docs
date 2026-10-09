@@ -19,7 +19,7 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 import { Card, Cards } from "fumadocs-ui/components/card";
-import { Rocket, Lightbulb, ServerCog, LayoutDashboard } from 'lucide-react';
+import { Rocket, Lightbulb } from 'lucide-react';
 import architectureDark from "../../img/architecture-dark.webp";
 import architectureLight from "../../img/architecture-light.webp";
 
@@ -32,12 +32,12 @@ SIREN（**S**wift **I**ncident **R**esponse **E**vidence **N**avigator）是面�
 ## 工作方式
 
 - **一台服务端，多个客户端**：SIREN Server 运行在一台 Linux 控制主机上，被调查主机上的客户端主动连接它。目标主机只需能访问服务端的一个端口，不用开放入站端口。
-- **一个 TLS 端口**：客户端接入、交互式 Shell、Web 控制台、MCP 和 Dossier 共用同一个 TLS 端口（默认 `443`），按 ALPN 分流，见 [单一 TLS 端口](/server#单一-tls-端口)。
+- **一个 TLS 端口**：客户端接入、交互式 Shell、Web 控制台、MCP 和 Dossier 共用同一个 TLS 端口（默认 `443`），见 [单一 TLS 端口](/server#单一-tls-端口)。
 - **浏览器即操作台**：日常操作和 Agentic IR 都在 Web 控制台中完成；[服务端 REPL](/reference/repl) 只补充端口转发、插件管理等操作。
 
 ## 能力地图
 
-组名与 WebUI 侧栏相同。Provisioning 在 Clients 页内，Projects 在侧栏顶部的 **Project scope** 菜单中，MCP 和插件没有页面入口。
+分组与 WebUI 侧栏相同。Provisioning 在 Clients 页内，Projects 在侧栏顶部的 **Project scope** 菜单中，MCP 和插件没有页面入口。
 
 ### Respond：接入与响应
 
@@ -85,20 +85,18 @@ SIREN（**S**wift **I**ncident **R**esponse **E**vidence **N**avigator）是面�
   alt="SIREN 远程模式架构：操作员浏览器和外部 MCP 客户端通过 HTTPS 访问 SIREN Server；被调查主机上的 Client 主动以 TLS 连接服务端；服务端按需调用 SOAR 和模型服务"
 />
 
-- **服务端**把所有产出写在工作目录或 Project 目录中，不需要 OSS；AIR 的 Provider CLI 也在服务端运行，浏览器只负责显示和输入。见 [安装服务端](/server)。
-- **客户端**是单个静态编译的可执行文件，支持 Linux 和 Windows（见 [客户端平台](/onboard#客户端平台)），保持长连接并自动重连；Recon 只使用主机上已有的系统工具。
+- **服务端**把所有产出写在工作目录或 Project 目录中，不需要 OSS；AIR 的 Provider CLI 也在服务端运行。见 [安装服务端](/server)。
+- **客户端**是单个可执行文件，支持 Linux 和 Windows（见 [客户端平台](/onboard#客户端平台)），断线自动重连；Recon 只使用主机上已有的系统工具。
 - **外部依赖按功能启用**：只用客户端接入、Shell、Files、Recon 和 Artifacts 时不依赖外部服务；SOAR、Dossier、AIR Provider 只影响各自的功能。见 [前置条件与凭证](/server/prerequisites)。
 
 ### 本地模式
 
 目标主机网络隔离、或数据不允许离开主机时，可以不部署服务端，直接在目标主机上运行 `siren recon`、`siren info` 等子命令，结果写在本地并上传到配置的 OSS。本地模式没有 Web 控制台、Agentic IR、MCP 和远程 Shell。见 [客户端命令行](/reference/client-cli)。
 
-## 设计取舍
+## 适用边界
 
-- **客户端尽量轻**：目标主机上只需一个可执行文件和一份配置，用完通过 Clean & terminate 删除；依赖集中在控制主机。
-- **证据优先**：工具缺失或输出截断会如实记入快照，判断留给操作员和 Agentic IR。
 - **人在回路**：Agentic IR 是交互式会话，不是无人值守的自动处置；结论写入报告前需要人工核对。
-- **短期接入**：面向一次事件中的少量主机，不做长期驻留和大规模终端管理，见 [工具对比](/comparison)。
+- **短期接入**：面向一次事件中的少量主机，用完通过 Clean & terminate 删除客户端，不做长期驻留和大规模终端管理，见 [工具对比](/comparison)。
 
 ## 下一步
 
@@ -108,11 +106,5 @@ SIREN（**S**wift **I**ncident **R**esponse **E**vidence **N**avigator）是面�
   </Card>
   <Card title="核心概念" href="/concepts" icon={<Lightbulb />}>
     Client ID、Project 范围、Artifacts 与 Reports
-  </Card>
-  <Card title="安装服务端" href="/server" icon={<ServerCog />}>
-    在控制主机上部署 SIREN Server
-  </Card>
-  <Card title="WebUI 导览" href="/webui" icon={<LayoutDashboard />}>
-    Web 控制台的导航和各页面用途
   </Card>
 </Cards>

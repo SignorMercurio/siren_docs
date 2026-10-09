@@ -53,7 +53,7 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
 <Accordion title="服务端启动后马上退出">
 
-服务端在当前终端运行 REPL，读到 EOF 就关闭，所以在 systemd 等没有终端输入的环境中会启动即退出。在 tmux 中运行，见 [保持服务端运行](/server#保持服务端运行)。
+服务端在当前终端运行 REPL，读到 EOF 就关闭，所以在 systemd 等没有终端输入的环境中启动即退出。在 tmux 中运行，见 [保持服务端运行](/server#保持服务端运行)。
 
 </Accordion>
 
@@ -83,7 +83,7 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
 <Accordion title="一键部署失败或超时">
 
-最常见的原因是目标 ECS 出方向默认拒绝，先 [Configure egress](/onboard/egress#configure-egress) 再部署，面板识别到出站问题时会给出入口。出口 IP 无法自动发现时在目标行手动填写。见 [一键部署](/onboard/provisioning#注意事项)。
+最常见的原因是目标 ECS 出方向默认拒绝，先 [Configure egress](/onboard/egress#configure-egress) 再部署。出口 IP 无法自动发现时在目标行手动填写。见 [一键部署](/onboard/provisioning#注意事项)。
 
 </Accordion>
 
@@ -95,7 +95,7 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
 <Accordion title="客户端版本与服务端不同">
 
-SIREN 不提示版本不一致，但两端没有兼容层，版本不同会导致连接或操作失败。新部署的客户端总是最新版本，服务端落后时就会不一致。见 [版本一致](/upgrade#版本一致)。
+两端没有兼容层，版本不同会导致连接或操作失败，SIREN 也不提示。新部署的客户端总是最新版本，服务端落后时就会不一致，见 [版本一致](/upgrade#版本一致)。
 
 </Accordion>
 
@@ -240,12 +240,6 @@ Logs 页面只在内存中保留最近 `logging.bufferSize` 条（默认 5000）
 <Accordion title="如何管理插件？">
 
 只能在服务端 REPL 或客户端本地命令行中安装、卸载、更新和启停，WebUI 没有插件入口，见 [插件](/reference/plugins)。
-
-</Accordion>
-
-<Accordion title="服务端终端里的命令和快捷键在哪里查？">
-
-见 [服务端 REPL](/reference/repl)。日常操作建议在 WebUI 中完成。
 
 </Accordion>
 

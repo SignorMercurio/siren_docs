@@ -16,38 +16,26 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-**Restore egress** 撤销 [Configure egress](/onboard/egress) 对阿里云安全组的改动：移除新增的放行规则、还原被降级的 Drop 优先级，并在专用安全组空闲时删除它。它只撤销 SIREN 记录过的规则，不触碰原有配置和后续人工改动。入口是 Clients 页 **Provisioning** 面板的 **Restore egress** 标签，适合在应急处置结束、不再需要回连时使用。
+**Restore egress** 撤销 [Configure egress](/onboard/egress) 对阿里云安全组的改动：移除新增的放行规则、还原被降级的 Drop 优先级，并在专用安全组空闲时删除它。它只撤销 SIREN 记录过的规则，不触碰原有配置和后续人工改动。入口是 Clients 页 **Provisioning** 面板的 **Restore egress** 标签。
 
 <Callout title="先 Clean 再 Restore" type="warn">
-  恢复会撤销客户端回连所需的出方向放行，可能切断客户端。需要清理客户端时，先执行 [Clean](/cleanup)，再手动恢复（恢复不依赖客户端在线）。Clean 回报“文件已清理”或“已安排删除”后，面板会为匹配的记录给出快捷入口 **N cleaned clients have egress changes to restore. Review**，但不会自动执行。
+  恢复会撤销客户端回连所需的出方向放行，可能切断客户端。需要清理客户端时，先执行 [Clean](/cleanup)，再恢复（恢复不依赖客户端在线）。清理成功后面板会提示 **N cleaned clients have egress changes to restore. Review**，但不会自动执行。
 </Callout>
 
 ## 操作步骤
 
 1. 在 Provisioning 面板选择 **Restore egress** 标签，面板列出服务端保存的恢复记录。
-2. 勾选要恢复的记录，每次最多 20 个实例；**Restored** 状态的记录不可勾选。
-3. 点击 **Restore N instances**，逐项执行并更新到对应行。**Refresh** 重新拉取列表。
+2. 勾选要恢复的记录，每次最多 20 个实例。
+3. 点击 **Restore N instances**。
 
 ## 记录状态
 
 | 状态标签 | 含义 |
 | --- | --- |
 | Configuring | 正在配置，尚不可恢复 |
-| Ready to restore | 可以恢复 |
-| Restoring | 正在恢复 |
-| Restored | 已恢复 |
-| Waiting for shared rules | 本实例已恢复，共享的 Drop 规则在等其他实例 |
-| Needs attention | 存在冲突，需人工处理（记录保留并说明原因） |
-| Execution unresolved | 有尚未确认结果的云端执行，需要重新查询 |
-
-**共享规则**：多个实例共用的 Drop 规则要等最后一个依赖它的实例恢复后才还原，在此之前先恢复的实例显示 **Waiting for shared rules**，之后自动转为 Restored。
-
-**Recheck execution**：记录含尚未确认结果的 SOAR 执行 ID 时出现，只重新查询该执行结果，不检查连通性，也不重新提交修改。缺少执行 ID 时，面板显示具体步骤并提示人工核对 SOAR 执行历史后再恢复。
-
-## 冲突与限流
-
-- **冲突**：检测到规则在外部被改动时不整份覆盖，保留记录并说明原因（Needs attention）；恢复依据不完整时保留相关资源并提示人工检查。
-- **限流**：明确被限流拒绝的提交是确定性失败，提示通过 Restore 处理此前已完成的变更；仅是超时或提及限流的错误不视为未提交。
+| Waiting for shared rules | 本实例已恢复；多个实例共用的 Drop 规则要等最后一个依赖它的实例恢复后才还原，之后自动转为 Restored |
+| Needs attention | 检测到规则在外部被改动，或恢复依据不完整；SIREN 不覆盖，保留记录和相关资源并说明原因，需人工处理 |
+| Execution unresolved | 有尚未确认结果的 SOAR 执行。点 **Recheck execution** 只重新查询该执行结果，不重新提交修改；缺少执行 ID 时按面板提示人工核对 SOAR 执行历史后再恢复 |
 
 ## 记录保留
 

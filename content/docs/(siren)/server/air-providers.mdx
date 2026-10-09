@@ -28,23 +28,23 @@ import { Callout } from "fumadocs-ui/components/callout";
 import { Step, Steps } from "fumadocs-ui/components/steps";
 import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
-Agentic IR（AIR）会话运行在服务端上：`siren_server` 以自身系统用户启动 Provider CLI，并把会话转发到浏览器。响应人员使用 **Agentic IR** 页面前，运维人员需先完成本页准备；会话用法见 [Agentic 应急响应](/air)。
+Agentic IR（AIR）会话运行在服务端上：`siren_server` 以自身系统用户启动 Provider CLI。响应人员使用 **Agentic IR** 页面前，运维人员需先完成本页准备；会话用法见 [Agentic 应急响应](/air)。
 
 ## 前置条件
 
-- 服务端运行在 Linux 上（只发布 `linux_amd64` 包）。Windows 上运行的服务端，AIR 的 GUI 和 Terminal 都不可用。
-- 已启用 MCP、配置 `SIREN_MCP_ADMIN_TOKEN` 并设置 `webui.publicURL`，见 [前置条件与凭证](/server/prerequisites)。所有入口（包括 Manual）都会注入当前范围的 SIREN MCP。`webui.publicURL` 缺失或无效时，Provider 状态仍可能显示可用，但任何会话都会启动失败，报 `webui.publicURL is required for AIR MCP` 或 `webui.publicURL must ...`。
+- 服务端运行在 Linux 上。Windows 上运行的服务端，AIR 的 GUI 和 Terminal 都不可用。
+- 已启用 MCP、配置 `SIREN_MCP_ADMIN_TOKEN` 并设置 `webui.publicURL`，见 [前置条件与凭证](/server/prerequisites)。`webui.publicURL` 缺失或无效时，Provider 状态仍可能显示可用，但任何会话都会启动失败，报 `webui.publicURL is required for AIR MCP` 或 `webui.publicURL must ...`。
 
 ## 支持的 Provider
 
-| Provider | 配置名 | 默认 `cliPath` | GUI 使用的机器协议 | 认证 | 历史会话目录 |
-| --- | --- | --- | --- | --- | --- |
-| Codex | `codex` | `codex` | `codex app-server --stdio` | Codex CLI 自身登录 | `$CODEX_HOME/sessions`，未设置时为 `~/.codex/sessions` |
-| Claude Code | `claude` | `claude` | `stream-json` 输入输出 | Claude Code 自身登录 | `~/.claude/projects` |
-| Qoder | `qoder` | `qodercli` | `qodercli --acp`（ACP v1） | QoderCLI 自身登录 | `~/.qoder/projects` |
-| Pi | `pi` | `pi` | Pi RPC | `<agentDir>/auth.json` 中的 Qwen Aegis 密钥 | `<agentDir>/sessions` |
+| Provider | 配置名 | 默认 `cliPath` | 认证 | 历史会话目录 |
+| --- | --- | --- | --- | --- |
+| Codex | `codex` | `codex` | Codex CLI 自身登录 | `$CODEX_HOME/sessions`，未设置时为 `~/.codex/sessions` |
+| Claude Code | `claude` | `claude` | Claude Code 自身登录 | `~/.claude/projects` |
+| Qoder | `qoder` | `qodercli` | QoderCLI 自身登录 | `~/.qoder/projects` |
+| Pi | `pi` | `pi` | `<agentDir>/auth.json` 中的 Qwen Aegis 密钥 | `<agentDir>/sessions` |
 
-`~` 指 `siren_server` 进程用户的主目录。Terminal 界面运行各 CLI 的原生 TUI。
+`~` 指 `siren_server` 进程用户的主目录。
 
 ## 操作步骤
 
@@ -55,14 +55,7 @@ Agentic IR（AIR）会话运行在服务端上：`siren_server` 以自身系统�
 
 在服务端安装 CLI，并以运行 `siren_server` 的系统用户登录或认证；登录状态、模型、权限、沙箱和已有 MCP 都从该用户的主目录读取。
 
-`cliPath` 写命令名时，必须能在 `siren_server` 进程的 `PATH` 中找到。systemd 等进程管理器的 `PATH` 通常比交互式 Shell 短，可改为绝对路径。
-
-</Step>
-<Step>
-
-### 准备 Pi（可选）
-
-只用 Codex、Claude Code 或 Qoder 时跳过。Pi 见下文 [Pi](#pi)。
+`cliPath` 写命令名时，必须能在 `siren_server` 进程的 `PATH` 中找到，否则改为绝对路径。使用 Pi 时另按下文 [Pi](#pi) 准备。
 
 </Step>
 <Step>
@@ -101,7 +94,7 @@ air:
 
 ### 确认状态
 
-重启后在 **Settings** 页 **Server** 区查看 **AIR runtime** 及各 Provider 状态（见 [检查可用性](#检查可用性)），再用目标 Provider 启动一次 Manual 会话，验证登录状态和 MCP 注入。
+重启后按 [检查可用性](#检查可用性) 查看各 Provider 状态，再用目标 Provider 启动一次 Manual 会话，验证登录状态和 MCP 注入。
 
 </Step>
 </Steps>
@@ -110,7 +103,7 @@ air:
 
 Pi 复用服务端用户的全局 Pi 安装、插件、Skills、配置和 memory，新会话固定从 Qwen Aegis 模型开始。安装脚本和默认目录都按 root 设计。
 
-1. 在 SIREN 源码仓库中以 root 运行安装脚本（需要 Node.js 24）。脚本全局安装固定版本的 Pi CLI、qmd 和 Pi 插件，把 SIREN 的 Pi 配置合并进 Agent 目录，并安装 `siren-mcp.ts` 扩展：
+1. 在 SIREN 源码仓库中以 root 运行安装脚本（需要 Node.js 24）。脚本全局安装 Pi CLI 及其插件，并把 SIREN 的 Pi 配置合并进 Agent 目录：
 
    ```bash title="SIREN 源码仓库（root）"
    QWEN_AEGIS_API_KEY=<Qwen Aegis API Key> bash scripts/install_pi_provider.sh
@@ -132,25 +125,22 @@ Pi 复用服务端用户的全局 Pi 安装、插件、Skills、配置和 memory
   安装脚本写入的 `models.json` 固定从 `/root/.pi/agent/auth.json` 读取密钥，而 SIREN 检查的是 `air.providers.pi.agentDir` 下的 `auth.json`。改了 Agent 目录却不同步 `models.json` 的读取路径，状态检查会通过，实际请求仍认证失败。
 </Callout>
 
-`agentDir`、`contextModeDir`、`memoryDir` 分别通过 `PI_CODING_AGENT_DIR`、`CONTEXT_MODE_DIR`、`PI_MEMORY_DIR` 传给 Pi。Pi 的文件、Shell、MCP 和子 Agent 操作直接执行，不产生权限审批。
+Pi 的文件、Shell、MCP 和子 Agent 操作直接执行，不产生权限审批。
 
 ## 检查可用性
 
 | 界面 | 可用条件 |
 | --- | --- |
 | Terminal | 服务端不是 Windows；`cliPath` 可执行；Pi 还要求 `auth.json` 通过检查 |
-| GUI | 满足 Terminal 条件，且机器协议握手成功 |
+| GUI | 满足 Terminal 条件，且与 CLI 的协议握手成功 |
 
-握手不创建会话、不调用模型，超时 6 秒（Pi 20 秒）。成功结果在服务端进程内一直有效，失败不缓存，因此升级或安装 CLI 后重新检查即可，不需要重启 SIREN。
+升级或安装 CLI 后重新检查即可，不需要重启 SIREN。
 
 <Callout title="状态不代表已登录" type="warn">
   Claude Code、Codex 和 Qoder 的检查不验证登录状态。CLI 未登录时，会话启动后由 CLI 自己报错。
 </Callout>
 
-### 在 WebUI 中查看
-
-- **Settings** 页 **Server** 区：**AIR runtime** 行显示 `Default provider ...` 或 AIR 不可用的原因；其下各 Provider 显示 **GUI + Terminal**、**GUI only**、**Terminal only** 或 **Unavailable**，GUI 不可用时附原因。每次打开 Settings 都会重新检查。
-- **Agentic IR** 页：不可用的 Provider 按钮置灰；选择 GUI 而当前 Provider 的 GUI 不可用时，按钮下方显示原因。点击 **Running** 旁的刷新按钮重新检查。
+**Settings** 页 **Server** 区的 **AIR runtime** 显示 AIR 不可用的原因，并列出各 Provider 可用的界面和不可用原因；每次打开 Settings 都会重新检查。**Agentic IR** 页中也可点击 **Running** 旁的刷新按钮重新检查。
 
 | 显示内容 | 处理 |
 | --- | --- |
@@ -172,7 +162,7 @@ Pi 复用服务端用户的全局 Pi 安装、插件、Skills、配置和 memory
 
 ### Provider 参数
 
-- **Codex**：默认的 `--no-alt-screen` 让 Terminal 以 inline 模式运行，保留浏览器终端的滚动历史；GUI 启动 `app-server` 时自动去掉。旧版 Codex 不识别该参数时设为 `args: []`。SIREN 通过 `-c mcp_servers.siren.*` 注入名为 `siren` 的 MCP Server，覆盖用户配置中的同名条目。
+- **Codex**：默认的 `--no-alt-screen` 让 Terminal 保留浏览器终端的滚动历史；旧版 Codex 不识别该参数时设为 `args: []`。SIREN 注入的 `siren` MCP Server 会覆盖用户配置中的同名条目。
 - **Claude Code、Qoder**：SIREN MCP 配置、会话 ID 和 GUI 传输参数由 SIREN 加入，不要写进 `args`。
 - **Pi**：`args` 中的 `--session`、`--resume`、`--session-id`、`--provider`、`--model`、`--thinking`、`--mode` 会被丢弃，由 SIREN 决定。
 
@@ -195,8 +185,8 @@ Custom 和 Event 入口用模板生成种子 prompt，默认值见 [配置文件
 ## 边界
 
 <Callout title="SIREN 只做这些" type="info">
-  - 用 `cliPath` 和 `args` 启动 CLI，为所有入口注入当前范围的 SIREN MCP 和会话凭证，并按入口加入种子 prompt 或要继续的会话 ID。
-  - GUI 只展示 Provider 主动返回的审批和提问；“本会话允许”只在当前会话有效，不写入 CLI 的用户级配置。
+  - 用 `cliPath` 和 `args` 启动 CLI，为所有入口（包括 Manual）注入当前范围的 SIREN MCP 和会话凭证，并按入口加入种子 prompt 或要继续的会话 ID。
+  - GUI 只展示 Provider 主动返回的审批和提问；“本会话允许”不写入 CLI 的用户级配置。
   - 不修改 Claude Code、Codex、Qoder 的全局设置，也不替它们跳过权限确认。
   - 会话凭证随会话结束或服务端重启失效；长期 MCP 管理凭证不会注入 Provider。
 </Callout>
@@ -221,7 +211,7 @@ Custom 和 Event 入口用模板生成种子 prompt，默认值见 [配置文件
 
 <Accordion title="GUI 不可用，但 Terminal 可用">
 
-CLI 版本过旧或协议握手失败。可先用 Terminal 的原生 TUI；升级 CLI 后打开 Settings 页或点击 **Running** 旁的刷新按钮重新检查，不需要重启 SIREN。运行中的会话不会自动切换界面。
+CLI 版本过旧或协议握手失败。可先用 Terminal；升级 CLI 后重新检查即可，不需要重启 SIREN。
 
 </Accordion>
 

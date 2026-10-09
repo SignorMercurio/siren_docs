@@ -34,10 +34,10 @@ curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sh
 iwr -Uri 'https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.ps1' -UseBasicParsing | iex
 ```
 
-安装脚本按架构和系统版本选择安装包（Windows 旧系统自动选 `siren_windows_legacy.zip`），校验校验和后解压，把 `siren` 和 `config.yaml` 装到 `/opt/siren`（Linux）或 `C:\Windows\Temp\siren`（Windows）。它不会启动客户端（一键部署内部以 `--deploy` 调用时除外）。
+安装脚本把 `siren` 和 `config.yaml` 装到 `/opt/siren`（Linux）或 `C:\Windows\Temp\siren`（Windows），不会启动客户端。
 
 <Callout title="重装不会更新已有安装" type="warn">
-  安装完好（程序能运行且 `config.yaml` 非空）时，再次运行安装脚本会跳过下载，不升级程序也不改配置，只有传了 `--server`、`--port` 时改写这两个键。安装损坏时才重新安装，并用包内 `config.yaml` 替换现有配置，手工改动会丢失。升级见 [升级与数据](/upgrade)。
+  安装完好时再次运行安装脚本会跳过下载，不升级程序也不改配置（传了 `--server`、`--port` 时只改写这两个键）。安装损坏时才重新安装，并用包内 `config.yaml` 替换现有配置，手工改动会丢失。升级见 [升级与数据](/upgrade)。
 </Callout>
 
 ## 启动客户端
@@ -54,18 +54,14 @@ Set-Location C:\Windows\Temp\siren
 
 省略 `-s`、`-p` 时使用 `config.yaml` 中的 `server`、`port`。安装包预置的 `server` 是官方服务端 `47.111.170.208`，连接自建服务端必须传 `-s`；改过服务端连接端口时把 `443` 换成实际端口。
 
-也可以安装时写入地址，之后启动不必传参：Linux 运行 `curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sh -s -- --server <SIREN Server IP> --port 443`，Windows 安装脚本对应参数为 `-Server`、`-Port`。脚本只改写顶层的 `server`、`port`，跳过下载时同样会改写。
+也可以安装时写入地址，之后启动不必传参：Linux 运行 `curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sh -s -- --server <SIREN Server IP> --port 443`，Windows 安装脚本对应参数为 `-Server`、`-Port`。
 
-连接成功后客户端出现在 [Clients](/clients) 页。客户端是前台进程，应放到 systemd、nohup、Windows 计划任务等常驻环境中运行，确保断线后能继续重连。
+连接成功后客户端出现在 [Clients](/clients) 页。客户端是前台进程，应放到 systemd、nohup、Windows 计划任务等常驻环境中运行。
 
 ### 重连行为
 
-客户端断线后自动重连。启动后第一分钟内，首次连接失败每 2 秒重试一次（每次拨号仍有 10 秒超时），缩短放行后的上线等待；该窗口不是部署总超时。会话建立或该窗口结束后，重试间隔变为 8、16、30 秒，最多重试 10 次，之后客户端退出。
+客户端断线后自动重连，重试间隔为 8、16、30 秒，最多重试 10 次，之后客户端退出。启动后第一分钟内首次连接失败每 2 秒重试一次，便于放行后尽快上线。
 
 ## 卸载
 
 手动安装的客户端用 **Clean** 卸载，它删除客户端侧的 SIREN 文件并终止进程，见 [痕迹清除](/cleanup)。
-
-<Callout title="本地模式" type="info">
-  目标主机无法连到服务端，或数据不允许离开主机时，安装后可直接在本机运行 `siren recon` 等命令，不接入服务端。见 [自动化信息收集](/recon)。
-</Callout>

@@ -24,11 +24,9 @@ sources:
   - dossier:src/siren-adapter.js
 ---
 
-import { Callout } from "fumadocs-ui/components/callout";
 import { Step, Steps } from "fumadocs-ui/components/steps";
-import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
-Dossier 是纯静态的报告编辑器，不随 `siren_server` 打包。SIREN 从 `webui.dossierDir` 读取 Dossier 运行时并在 `/dossier/` 下提供。**Reports** 页的 **Blank template** 和 **Open in Dossier**、**Artifacts** 页打开 Markdown 报告，以及 AIR 报告卡片上的 **Edit in Dossier** 都依赖它。编辑器用法见 [报告工作流](/reports)和 [语法](/reports/syntax)。
+Dossier 是纯静态的报告编辑器，不随 `siren_server` 打包。SIREN 从 `webui.dossierDir` 读取 Dossier 运行时并在 `/dossier/` 下提供，WebUI 中所有在 Dossier 中打开报告的入口都依赖它。编辑器用法见 [报告工作流](/reports)和 [语法](/reports/syntax)。
 
 ## 前置条件
 
@@ -40,14 +38,14 @@ Dossier 是纯静态的报告编辑器，不随 `siren_server` 打包。SIREN �
 
 | 文件 | 作用 |
 | --- | --- |
-| `index.html` | 编辑器入口。SIREN 以它是否存在判断运行时是否可用 |
+| `index.html` | 编辑器入口，缺失时视为未部署 |
 | `editor.js`、`editor.css` | 构建产物 |
 | `report.md` | 默认报告模板，**Blank template** 打开的就是它 |
-| `assets/` | 字体和图片等本地资源，不含 `assets/examples/` |
+| `assets/` | 字体和图片等本地资源 |
 
 ## 使用 make deploy 发布
 
-适合从开发机远程发布，部署前验证新版本，失败时自动回滚。
+从构建机远程发布，失败时自动回滚。
 
 <Steps>
 <Step>
@@ -59,7 +57,7 @@ npm ci
 make deploy-dry-run
 ```
 
-预演会构建编辑器并检查目标，只列出将要同步的变化，不修改服务端。
+预演只列出将要同步的变化，不修改服务端。
 
 </Step>
 <Step>
@@ -89,9 +87,7 @@ DOSSIER_DEPLOY_DIR=siren-prod:/opt/siren/dossier make deploy-runtime
 </Step>
 </Steps>
 
-`DOSSIER_DEPLOY_DIR` 必须是 `host:/path` 形式的远程目标，最后一级目录名为 `dossier`；本地路径会被拒绝，同机部署请用 [手工复制](#手工复制)。目标必须是真实目录而非符号链接，且为空或是此前由 `make deploy` 发布过的目录（含 `.dossier-runtime` 标记文件）。
-
-发布最后才原子切换 `index.html`，已打开的编辑器页面仍能加载上一代资源。线上的 `assets/pasted/` 会保留，`assets/examples/` 从不发布。
+`DOSSIER_DEPLOY_DIR` 必须是 `host:/path` 形式的远程目标，最后一级目录名为 `dossier`；本地路径会被拒绝，同机部署请用 [手工复制](#手工复制)。目标必须是真实目录而非符号链接，且为空或是此前由 `make deploy` 发布过的目录（含 `.dossier-runtime` 标记文件）。发布会保留线上的 `assets/pasted/`。
 
 ## 手工复制
 
@@ -126,7 +122,7 @@ webui:
 - 修改了 `webui.dossierDir`；
 - 服务端启动时该目录下还没有 `index.html`。此时 `/dossier/` 会一直返回 “Dossier runtime is not deployed at ...” 直到重启，即使 **Settings** 已显示可用。
 
-`dossierDir` 本身可以是符号链接（例如指向某个版本目录，但 `make deploy` 的目标不能是）。目录内部的符号链接、以 `.` 开头的路径和特殊文件都不对外提供，也没有目录列表。`report.md` 必须是普通文件，解析符号链接后仍须位于该目录内。
+`dossierDir` 本身可以是符号链接，但 `make deploy` 的目标不能是。目录内部的符号链接和以 `.` 开头的路径不对外提供。`report.md` 必须是普通文件，解析符号链接后仍须位于该目录内。
 
 ## 验证
 
@@ -138,17 +134,13 @@ webui:
    | `Dossier runtime is not configured` | `webui.dossierDir` 为空 |
    | `Dossier runtime is not deployed at ...` | 目录中没有 `index.html`，或它不是普通文件 |
 
-3. **Reports** 页的 **Blank template** 应可点击，并在新标签页打开模板。运行时不可用时，页面顶部提示报告可以列出但无法在 Dossier 中打开；只缺 `report.md` 时 **Blank template** 不可点击，悬停可见 `Dossier default report is not deployed at ...`。
+3. **Reports** 页的 **Blank template** 应能打开模板。只缺 `report.md` 时它不可点击，原因为 `Dossier default report is not deployed at ...`。
 
 ## 注意事项
 
-<Callout title="不要复制到 WebUI dist" type="warn">
-  不要把 Dossier 文件放进 SIREN 源码的 `internal/server/webui/frontend/dist` 或 `frontend/public`，否则会被打包进 `siren_server` 二进制。Dossier 应作为外部目录部署。
-</Callout>
-
-- `/dossier/` 下的静态文件无需登录即可访问，读写报告的接口仍受 WebUI 鉴权保护，见 [账号与安全边界](/server/security#dossier-不鉴权)。
+- `/dossier/` 下的静态文件无需登录即可访问，读写报告仍需 WebUI 登录，见 [`/dossier/` 不鉴权](/server/security#dossier-不鉴权)。
 - **Blank template** 只读、不能保存。在其中粘贴的图片写入 `<dossierDir>/report.assets/pasted/`，不属于任何报告，下次 `make deploy` 时会被删除。正式报告请从 **Reports** 或 **Artifacts** 打开再编辑。
-- 在 SIREN 前面放代理时，按 [单一 TLS 端口](/server#单一-tls-端口) 只做四层透传，并转发整个端口。编辑器通过同源的 `/api/reports/source` 和 `/api/reports/assets` 读写报告和图片，只代理 `/dossier/` 会出现页面能打开、但读取或保存失败。
+- 在 SIREN 前面放代理时，按 [单一 TLS 端口](/server#单一-tls-端口) 只做四层透传，并转发整个端口。编辑器通过同源的 `/api/reports/*` 读写报告，只代理 `/dossier/` 会出现页面能打开、但读取或保存失败。
 
 ## 本地离线使用
 
@@ -166,4 +158,4 @@ python3 -m http.server --bind 127.0.0.1 8000
 make dist
 ```
 
-生成的 `dist/dossier-local-<时间戳>.zip` 包含运行时文件、空的 `assets/pasted/`、使用说明 `README.md`，以及双击启动用的 `start-mac.command` 和 `start-windows.bat`。端口被占用时可设置 `PORT` 环境变量。
+生成的 `dist/dossier-local-<时间戳>.zip` 包含运行时文件、使用说明和双击启动脚本 `start-mac.command`、`start-windows.bat`。端口被占用时可设置 `PORT` 环境变量。

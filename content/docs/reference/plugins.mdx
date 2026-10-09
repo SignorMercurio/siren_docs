@@ -18,28 +18,25 @@ sources:
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
-import { Card, Cards } from "fumadocs-ui/components/card";
 import { Step, Steps } from "fumadocs-ui/components/steps";
 
-插件是安装在客户端主机上的独立可执行文件，在 Recon 中追加采集项，或提供按需执行的命令。安装、启停和调用只能在服务端 REPL 或客户端本地命令行中完成，WebUI 和 MCP 没有插件入口，WebUI 只能使用插件的结果，见[在 WebUI 中使用](#在-webui-中使用)。
+插件是安装在客户端主机上的独立可执行文件，在 Recon 中追加采集项，或提供按需执行的命令。安装、启停和调用只能在服务端 REPL 或客户端本地命令行中完成，WebUI 和 MCP 没有插件入口，WebUI 只能使用插件的结果。开发插件见[插件开发](/reference/plugin-dev)。
 
 ## 插件类型
 
 | 类型 | 何时执行 | 输出去向 |
 | --- | --- | --- |
-| `recon` | 只在 Recon Profile 显式写入 `plugin:<name>` 时随该 Profile 执行。安装不会修改任何 Profile，内置的 `default`、`quick`、`hunt` 都不含插件 | 并入 Recon 快照和报告，段落标题为 `Plugin: <name>`；WebUI 进度中显示为 `Recon.Plugin.<name>` |
+| `recon` | 只在 Recon Profile 显式写入 `plugin:<name>` 时随该 Profile 执行。安装不会修改任何 Profile，内置的 `default`、`quick`、`hunt` 都不含插件 | 并入 Recon 快照和报告，段落标题为 `Plugin: <name>` |
 | `command` | 手动调用 | 远程调用打印在服务端 REPL 终端；本地调用打印在当前终端 |
 
 两类插件共用以下规则：
 
-- 安装在客户端工作目录下的 `plugins/<name>/`：一键部署的 Linux 客户端为 `/opt/siren/plugins/`，Windows 客户端为 `C:\Windows\Temp\siren\plugins\`。执行时工作目录就是这个目录，插件写出的相对路径文件都落在这里。
+- 安装在客户端工作目录下的 `plugins/<name>/`：一键部署的 Linux 客户端为 `/opt/siren/plugins/`，Windows 客户端为 `C:\Windows\Temp\siren\plugins\`。插件以相对路径写出的文件也落在这里。
 - 由客户端 `config.yaml` 中的 `plugins.<name>`（布尔值）启停；recon 插件还须写进 Profile 才会执行。
-- 每次执行的超时见[超时与输出](#超时与输出)。
-- 插件名为 1–64 个字符，以字母或数字开头，只含字母、数字、`-` 和 `_`。
 
 ## 内置插件
 
-SIREN 仓库 `_plugins/` 维护以下两个插件，默认插件市场提供下载；市场上的实际插件以 `plugins.marketplace` 指向的地址为准。
+默认插件市场提供以下两个插件；实际可用的插件以客户端 `plugins.marketplace` 指向的市场为准。
 
 | 插件 | 类型 | 用途 |
 | --- | --- | --- |
@@ -62,7 +59,7 @@ SIREN 仓库 `_plugins/` 维护以下两个插件，默认插件市场提供下�
 >>> plugins <Client ID> install chkrootkit
 ```
 
-安装成功后插件默认启用。REPL 不等待结果，稍后用 `plugins <Client ID>` 确认插件已出现且 `Enabled` 为 `true`。
+安装后插件默认启用。REPL 不等待结果，稍后用 `plugins <Client ID>` 确认插件已出现且 `Enabled` 为 `true`。
 </Step>
 <Step>
 ### 把插件写进 Profile
@@ -89,12 +86,12 @@ plugins:
 >>> reload <Client ID>
 ```
 
-WebUI 没有重载入口。成功后客户端重新上报 Profile 列表；新配置无效时客户端保留上一份有效配置，错误只写在客户端本地日志中。
+新配置无效时客户端保留上一份有效配置，错误只写在客户端本地日志中。
 </Step>
 <Step>
 ### 在 WebUI 中运行
 
-打开 **Investigations** → **Recon**，在 **Profile** 下拉框中选择 `with-chkrootkit`，点击 **Start Recon**。下拉框中没有新 Profile 说明重载没有成功。报告位置见 [Recon](/recon#查看结果)。
+打开 **Investigations** → **Recon**，在 **Profile** 中选择 `with-chkrootkit`，点击 **Start Recon**。没有新 Profile 说明重载没有成功。
 </Step>
 </Steps>
 
@@ -105,7 +102,7 @@ WebUI 没有重载入口。成功后客户端重新上报 Profile 列表；新�
 ## 管理命令
 
 ```bash tab="服务端 REPL"
->>> plugins <Client ID>                          # 列出插件：Name / Version / Type / Enabled / Usage
+>>> plugins <Client ID>                          # 列出插件
 >>> plugins <Client ID> install <name>
 >>> plugins <Client ID> update <name>
 >>> plugins <Client ID> uninstall <name>
@@ -113,7 +110,7 @@ WebUI 没有重载入口。成功后客户端重新上报 Profile 列表；新�
 ```
 
 ```bash tab="本地模式"
-./siren plugins                  # 列出插件：NAME / VERSION / TYPE / ENABLED
+./siren plugins                  # 列出插件
 ./siren plugins install <name>
 ./siren plugins update <name>
 ./siren plugins uninstall <name>
@@ -122,26 +119,24 @@ WebUI 没有重载入口。成功后客户端重新上报 Profile 列表；新�
 
 | 子命令 | 行为 |
 | --- | --- |
-| `install` | 从插件市场下载清单和当前平台的可执行文件，有 setup 脚本时执行，安装后设为启用。插件已存在时拒绝，改用 `update` |
+| `install` | 从插件市场下载并执行 setup 脚本（如有），安装后设为启用。插件已存在时拒绝，改用 `update` |
 | `update` | 重新下载并替换，保留启用状态；任何一步失败都保留旧安装 |
 | `uninstall` | 删除插件目录，并把 `plugins.<name>` 设为 `false` |
 | `toggle` | 切换启用与禁用 |
 
-REPL `ls` 的 `Plugins` 列也列出每台客户端已安装的插件名；WebUI 的 Clients 页不显示插件。
-
 ### 远程管理的行为
 
-- **发出即返回**：REPL 不等待结果。成功时客户端重新上报插件列表；失败时（下载或 setup 失败、Profile 校验不通过、客户端配置正被 Recon 等操作占用）错误只写在客户端本地日志中，REPL 和 WebUI 都看不到。操作后用 `plugins <Client ID>` 确认。
+- **发出即返回**：REPL 不等待结果。失败时（下载或 setup 失败、Profile 校验不通过、客户端配置正被 Recon 等操作占用）错误只写在客户端本地日志中。操作后用 `plugins <Client ID>` 确认。
 - **改写 `config.yaml`**：四个子命令都会把 `plugins.<name>` 写回客户端配置，整份配置重新序列化，文件中的注释不保留。
 - **拒绝让 Profile 失效的变更**：卸载或禁用仍被 Profile 引用的插件会失败。先从 Profile 删掉 `plugin:<name>` 并 `reload`，再变更插件。
-- **setup 脚本**：安装和更新时用 `sh` 执行，最长 5 分钟。失败时整个操作失败，插件目录回到操作前的状态，但插件目录以外的修改（例如安装的系统软件包）不会撤销。
-- **市场校验**：清单中的 `name` 须与请求的插件名一致，`platforms` 须包含客户端平台（如 `linux_amd64`），否则安装失败。市场地址取自客户端的 `plugins.marketplace`，目录结构见[插件开发](/reference/plugin-dev#发布到插件市场)。
+- **setup 脚本**：失败时整个操作失败，插件目录回到操作前的状态，但插件目录以外的修改（例如安装的系统软件包）不会撤销。
+- **平台**：插件不支持客户端平台（如 `linux_amd64`）时安装失败。
 
 ### 容易踩的坑
 
-- **本地命令不影响运行中的客户端**：`./siren plugins ...` 在独立进程中执行，运行中的客户端感知不到新装或卸载的插件，`reload` 也不重新扫描插件目录，须重启客户端。在线客户端优先用 REPL 远程管理。
+- **本地命令不影响运行中的客户端**：运行中的客户端感知不到 `./siren plugins ...` 新装或卸载的插件，`reload` 也不重新扫描插件目录，须重启客户端。在线客户端优先用 REPL 远程管理。
 - **不要手改 `plugins.<name>`**：手改后 `reload`，客户端按新值执行，但服务端记录的启用状态不刷新，REPL 可能找不到或误判 command 插件。启停用 `toggle`。
-- **重新部署会替换配置**：重新运行客户端安装脚本会用安装包的 `config.yaml` 替换现有配置，插件目录保留，但 `plugins.<name>` 开关和自定义 Profile 丢失。插件此时处于禁用状态，用 `toggle` 重新启用（`install` 会因插件已存在而拒绝）。见[客户端配置](/reference/client-config)。
+- **重新部署会替换配置**：重新运行客户端安装脚本会替换 `config.yaml`，插件目录保留，但 `plugins.<name>` 开关和自定义 Profile 丢失。用 `toggle` 重新启用插件（`install` 会因插件已存在而拒绝）。
 
 ## 调用 command 插件
 
@@ -153,14 +148,12 @@ REPL `ls` 的 `Plugins` 列也列出每台客户端已安装的插件名；WebUI
 ./siren <plugin name> [args...]
 ```
 
-- REPL 把不是内置命令的首个单词当作插件名，在该客户端上报的**已启用 command 插件**中匹配。匹配不到（插件名写错、未启用、Client ID 无效）时只打印帮助，不报具体错误。
+- REPL 在该客户端的**已启用 command 插件**中匹配插件名。匹配不到（插件名写错、未启用、Client ID 无效）时只打印帮助，不报具体错误。
 - 远程调用的输出只打印在服务端 REPL 终端，不进入 WebUI、[Logs](/logs) 或 Artifacts。插件非零退出时 REPL 只显示 `plugin error: ...`，不返回插件自身的输出。
 - 参数按空白切分后原样传入，不支持引号，参数中不能含空格。
-- 调用在客户端的有序任务队列中执行，运行期间同一客户端上排在后面的 Files 浏览与下载、`upload`、`reload`、插件管理等请求都要等它结束。
+- 远程调用运行期间，同一客户端上的 Files 浏览与下载、`upload`、`reload`、插件管理等请求都要等它结束。
 
 ## 在 WebUI 中使用
-
-WebUI 不能安装、启停或调用插件，但可以使用插件的结果：
 
 | 需求 | WebUI 中的做法 | 仍需 REPL 的步骤 |
 | --- | --- | --- |
@@ -174,7 +167,7 @@ Files 单个文件最多下载 100 MiB。更大的文件（例如堆转储）用
 
 | 项 | 值 |
 | --- | --- |
-| 单次执行超时 | 客户端 `recon.commandTimeout`，默认 30 秒。超时后插件及其子进程被终止 |
+| 单次执行超时 | 客户端 `recon.commandTimeout`，默认 30 秒，超时后插件及其子进程被终止 |
 | 输出 | stdout 和 stderr 合并；单次最多 16 MiB，在 Recon 中还受该模块剩余输出预算限制 |
 | setup 脚本 | 最长 5 分钟，输出上限 16 MiB |
 
@@ -188,8 +181,6 @@ Files 单个文件最多下载 100 MiB。更大的文件（例如堆转储）用
 | 平台 | `linux_amd64`、`linux_arm64` |
 | 安装依赖 | gcc、make、tar，以及 curl 或 wget；需能访问 `oss-siren.oss-cn-hongkong.aliyuncs.com` 下载 chkrootkit 源码 |
 | 运行时 | 依次查找 `PATH` 中的 `chkrootkit` 和 `/usr/local/chkrootkit/chkrootkit`，都找不到时报 `chkrootkit not found, please reinstall the plugin` |
-
-调用 [chkrootkit](http://www.chkrootkit.org/) 检查 Rootkit 特征，输出原样写入 Recon 报告，不做过滤。它不会自动加入任何内置 Profile，启用步骤见[启用 recon 插件](#启用-recon-插件)。
 
 setup 脚本的执行顺序：
 
@@ -230,20 +221,3 @@ setup 脚本的执行顺序：
 - [清理](/cleanup)客户端会删除整个 `plugins/` 目录，包括其中的堆转储，清理前先取回。
 
 取回后可用 [Eclipse MAT](https://eclipse.dev/mat/) 或 [VisualVM](https://visualvm.github.io/) 分析。
-
-## 相关内容
-
-<Cards>
-  <Card title="插件开发" href="/reference/plugin-dev">
-    manifest 字段、构建与发布
-  </Card>
-  <Card title="Recon" href="/recon">
-    Profile、模块和超时
-  </Card>
-  <Card title="服务端 REPL" href="/reference/repl">
-    `plugins`、`reload` 和 `upload` 命令
-  </Card>
-  <Card title="客户端配置" href="/reference/client-config">
-    `plugins.marketplace` 与 `plugins.<name>`
-  </Card>
-</Cards>

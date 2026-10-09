@@ -29,7 +29,7 @@ import { Steps, Step } from "fumadocs-ui/components/steps";
 
 - 目标是阿里云 ECS，云助手状态正常；已知其所属账号的 Alibaba Cloud UID。
 - 服务端已配置 SOAR 访问凭证与 `egress.rules`，见 [前置条件与凭证](/server/prerequisites)。
-- `egress.rules` 中 `siren_server_callback` 规则的 `destCidrIp` 是服务端公网 IP，且只含这一个 IPv4 地址（`/32`）。部署时 SIREN 把该地址和端口写入目标主机客户端的 `config.yaml` 供回连，因此自建服务端也能一键部署。不满足时部署直接失败：`SIREN callback must configure exactly one server IP (destCidrIp ending in /32)`。
+- `egress.rules` 中 `siren_server_callback` 规则的 `destCidrIp` 是服务端公网 IP，且只含这一个 IPv4 地址（`/32`），目标主机客户端按它回连。不满足时部署直接失败：`SIREN callback must configure exactly one server IP (destCidrIp ending in /32)`。
 
 ## 操作步骤
 
@@ -41,7 +41,7 @@ import { Steps, Step } from "fumadocs-ui/components/steps";
 填写 **Alibaba Cloud UID**（纯数字），在 **Instance IDs** 中每行填一个目标。
 </Step>
 <Step>
-点击 **Deploy to N instances**。每个目标逐行显示 SOAR 日志与状态，全部结束后给出汇总。
+点击 **Deploy to N instances**，等待每个目标给出结果。
 </Step>
 </Steps>
 
@@ -59,31 +59,25 @@ i-demo0004,203.0.113.11,db-1
 ```
 
 - `instanceId` 必填，形如 `i-...`；公网 IP 可选，见 [手动指定出口 IP](#注意事项)；备注可选，最长 256 个字符。
-- 每批 1–20 个目标，并发 3 台，单个失败不影响其他目标。完全相同的行自动去重；同一实例的公网 IP 或备注不一致时报错。
+- 每批 1–20 个目标，单个失败不影响其他目标。同一实例的公网 IP 或备注不一致时报错。
 
 ## 部署流程
 
-未手动指定出口 IP 时，每个目标依次经过：
-
-1. **安装与探测**：读取实例地域和操作系统，安装客户端，抓取一个出站 SYN（最长约 4 秒）。
-2. **等待日志**：等云防火墙日志唯一关联出该连接的公网出口 IP 后立即进入下一步；日志迟迟不到会超时失败。
-3. **放行**：为该出口 IP 的 `/32` 和服务端回连端口添加入方向放行。
-4. **等待连接**：等待客户端上线，最长 30 秒。
+未手动指定出口 IP 时，SIREN 在目标主机安装客户端并探测一次出站连接，等云防火墙日志关联出该连接的公网出口 IP（日志迟迟不到会超时失败），为该 IP 的 `/32` 放行服务端回连端口，再等待客户端上线（最长 30 秒）。
 
 客户端实际连上才算成功，面板显示 `connected`。安装成功但未按时连上则以超时失败结束，并提示可能需要配置出站。
 
 从 Project 视图发起的部署，客户端自动归入当前 Project；目标已归属另一个 Project 时部署被拒绝，见 [部署时自动归属](/projects#部署时自动归属)。
 
 <Callout title="需要手工确认客户端" type="warn">
-  客户端稳定身份缺失、与目标来源 IP 不一致，或多个目标共享出口 IP 而无法安全区分时，SIREN 不按 IP 猜测，也不写入无法确认的 Project 或备注。该目标显示 `manual_required`，需在 Clients 中核对主机后手动设置；面板不为它提供自动重试，以免重复部署。
+  SIREN 无法确认新上线的客户端就是该目标时（如多个目标共享出口 IP），不按 IP 猜测，也不写入 Project 或备注。该目标显示 `manual_required`，需在 Clients 中核对主机后手动设置；面板不为它提供重试，以免重复部署。
 </Callout>
 
 ## 结果与记录
 
 - **重试**：存在失败目标时，**Retry N failed** 只重新提交失败项，沿用原 UID 和 Project；**Edit targets** 修改目标后重新开始。
 - **出站问题**：失败明确指向出站时，面板出现 **Configure egress for N target(s)**，带入这些实例切到 [配置出站](/onboard/egress)。
-- **Recent activity**：Provisioning 下方合并显示部署和清理记录，部署行可展开查看日志。近期部署最多保留 20 条，终态记录最长保留 30 分钟，服务端重启后清空。
-- **刷新页面**：执行期间请保持页面打开；刷新后可从 Recent activity 继续查看，云端操作不因浏览器断开而取消。
+- **Recent activity**：部署记录可在 Clients 页 [Recent activity](/clients#recent-activity) 展开查看日志，服务端重启后清空。刷新页面或关闭浏览器不会取消云端操作。
 
 <Callout title="结果未知时先看 Recent activity" type="warn">
   目标显示 **Needs verification**（如部署事件流中断）时，服务端可能仍在执行。不要直接重试，先在 Recent activity 核对最终结果再决定。

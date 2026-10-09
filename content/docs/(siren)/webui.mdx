@@ -15,11 +15,7 @@ sources:
   - internal/server/webui/frontend/src/pages/AIRPage.tsx
 ---
 
-import { Callout } from "fumadocs-ui/components/callout";
-import { Card, Cards } from "fumadocs-ui/components/card";
-import { Brain, Plug, ServerCog, ShieldCheck } from 'lucide-react';
-
-Web 控制台是使用 SIREN 的主要方式，与客户端连接和 MCP 共用服务端 TLS 端口，浏览器直接访问 `https://<SIREN Server 域名>`。安装与端口见 [安装服务端](/server)，账号与鉴权见 [账号与安全边界](/server/security)。
+Web 控制台是使用 SIREN 的主要方式，浏览器直接访问 `https://<SIREN Server 域名>`。安装与端口见 [安装服务端](/server)，账号与鉴权见 [账号与安全边界](/server/security)。
 
 ![Web 控制台的 Clients 页：左侧为按应急流程分组的导航，右侧为客户端列表和 Provisioning 面板](../../img/webui-clients.png)
 
@@ -29,54 +25,29 @@ Web 控制台是使用 SIREN 的主要方式，与客户端连接和 MCP 共用�
 
 | 分组 | 页面 | 用途 |
 | --- | --- | --- |
-| **Respond** | [Clients](/clients)、[Agentic IR](#agentic-ir) | 在线客户端列表与 **Provisioning**（部署、放行、出站恢复）；AI 辅助排查 |
-| **Tools** | [Shells](/shells)、[Files](/files)、[Investigations](#investigations) | 多标签交互式终端（切换页面保持运行）；客户端文件浏览、预览、上传下载；Recon / 进程分析 / AccessKey 调查 |
-| **Evidence** | [Artifacts](/artifacts)、[Reports](/reports) | 服务端取证目录（Recon、AIR、AccessKey 报告和拉取的文件）；当前范围内的 Dossier 应急报告 |
-| **System** | [Logs](/logs) | 服务端运行日志与 MCP 命令审计，支持搜索、过滤和实时跟随 |
+| **Respond** | [Clients](/clients)、[Agentic IR](/air) | 在线客户端列表与 **Provisioning**（部署、放行、出站恢复）；AI 辅助排查 |
+| **Tools** | [Shells](/shells)、[Files](/files)、[Investigations](#investigations) | 交互式终端；客户端文件浏览和上传下载；Recon / 进程分析 / AccessKey 调查 |
+| **Evidence** | [Artifacts](/artifacts)、[Reports](/reports) | 服务端证据目录；当前范围内的 Dossier 应急报告 |
+| **System** | [Logs](/logs) | 服务端运行日志与 MCP 命令审计 |
 
 导航之外还有两个入口：
 
 - **范围菜单**：侧栏顶部的 **Project scope**，在 Global 和各 Project 视图之间切换，**Manage projects** 打开 [Projects](/projects) 页面。
-- **账号菜单**：侧栏左下角，提供 [Settings](#settings)、Docs、Feedback、退出登录和当前版本号。
+- **账号菜单**：侧栏左下角，提供 [Settings](#settings) 和退出登录。
 
-桌面侧栏默认只显示图标，悬停或键盘聚焦时显示名称。点击侧栏顶部按钮或按 Cmd+B（macOS）/ Ctrl+B 展开或折叠（焦点在输入框或终端内时不生效），选择保存在当前浏览器。移动端使用抽屉导航。
+每个页面、工具标签、AIR 会话和选中文件都有自己的 URL，可以刷新或分享。
 
-每个页面都有自己的 URL，例如 `#/investigations/recon` 或 `#/artifacts/<路径>?project=<id>`。刷新、前进后退和分享链接都会回到同一页面、工具标签、AIR 会话或选中文件。
+## Investigations
 
-## 各页面
+需要等待结果的调查工具，分为 **AccessKey**、**Recon** 和 **Process Analysis** 三个标签，切换标签不丢失已有结果。见 [AccessKey 调查](/ak)、[自动化信息收集](/recon) 和 [进程分析](/process)。
 
-### Agentic IR
-
-通过 Claude Code、Codex、Qoder 或 Pi 辅助排查。左栏启动新会话、查看 **Running** 和 **History**，右侧以标签页展示 GUI 时间线或 Terminal。见 [Agentic 应急响应](/air)。
-
-### Investigations
-
-需要等待结果的调查工具，分为 **AccessKey**、**Recon** 和 **Process Analysis** 三个标签，各有自己的地址（如 `#/investigations/recon`），切换标签不丢失已有结果。见 [AccessKey 调查](/ak)、[自动化信息收集](/recon) 和 [进程分析](/process)。
-
-### Settings
+## Settings
 
 从左下角的账号菜单打开，分两部分：
 
 - **Preferences**：只保存在当前浏览器，不跟随账号同步。
   - 启动时的 Project 范围：沿用上次的范围，或每次从 Global 开始。
-  - Agentic IR 默认 Provider：沿用上次，或固定 Codex / Claude / Pi / Qoder。固定后仍可为单次会话临时切换；所选 Provider 不可用时自动改用可用的。
-  - Agentic IR 默认界面：沿用上次，或固定 GUI / Terminal。固定期间仍记录实际使用的界面，改回"沿用上次"时恢复的是它；当前 Provider 不支持所选界面时临时改用可用的。
-  - Clients 列表刷新频率：5 秒到 1 分钟，标签页在后台时自动暂停轮询。
-- **Server**：只读的版本号、鉴权状态与当前用户、Dossier 目录，以及每个 AIR Provider 实际可用的界面；Provider 不可用或只支持一种界面时直接显示原因。
-
-## 相关内容
-
-<Cards>
-  <Card title="安装服务端" icon={<ServerCog />} href="/server">
-    端口、证书、`webui.publicURL` 与升级
-  </Card>
-  <Card title="账号与安全边界" icon={<ShieldCheck />} href="/server/security">
-    WebUI 账号、会话、登录锁定和公网暴露建议
-  </Card>
-  <Card title="Agentic 应急响应" icon={<Brain />} href="/air">
-    了解 AIR 的完整工作流
-  </Card>
-  <Card title="MCP 集成" icon={<Plug />} href="/reference/mcp">
-    外部 Agent 通过 MCP 调用 SIREN 工具
-  </Card>
-</Cards>
+  - Agentic IR 默认 Provider：沿用上次，或固定 Codex / Claude / Pi / Qoder，单次会话仍可临时切换。
+  - Agentic IR 默认界面：沿用上次，或固定 GUI / Terminal。
+  - Clients 列表刷新频率。
+- **Server**：只读的版本号、鉴权状态与当前用户、Dossier 目录，以及每个 AIR Provider 实际可用的界面；Provider 不可用时显示原因。

@@ -26,31 +26,22 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-**Shells** 页面（`#/shells`）在浏览器中提供客户端主机的交互式终端，可以运行 `vim`、`top` 等需要完整终端的程序，同一台客户端可同时打开多个 Shell 标签。
+**Shells** 页面在浏览器中提供客户端主机的交互式终端，可以运行 `vim`、`top` 等需要完整终端的程序，同一台客户端可同时打开多个 Shell 标签。
 
 ## 打开 Shell
 
-在 [Clients](/clients#行内操作) 页点击目标客户端行内的 Shell 图标，WebUI 会新开一个标签并跳到 Shells 页面。终端先显示 `Connecting…`，就绪后显示 `Connected to client <ID> (<OS>)`。
+Shells 页面没有新建按钮：在 [Clients](/clients#行内操作) 页点击目标客户端行内的 Shell 图标，WebUI 会新开一个标签并跳到 Shells 页面。
 
-Shells 页面没有新建按钮；没有打开的 Shell 时，页面提示从 Clients 页打开。侧栏 **Shells** 旁的数字是当前打开的标签数。标签名为 `C<Client ID> <OS>`，客户端有 Note 时追加 ` · <Note>`。
-
-## 管理标签
-
-- 点击标签切换；点击 × 立即关闭并结束该 Shell，不需要确认。
-- 拖动标签调整顺序，或在标签获得焦点时按 Shift+← / Shift+→ 移动；← / → 在标签之间切换。
+Shell 走服务端主 TLS 端口（见 [单一 TLS 端口](/server#单一-tls-端口)），不需要额外开放端口，服务端也不需要 tmux。每个 Shell 是独立终端，不与其他浏览器共享。
 
 ## 客户端上运行的 Shell
 
 | 客户端系统 | 启动的 Shell |
 | --- | --- |
-| Linux、macOS | 依次使用第一个存在的 `/bin/zsh`、`/bin/bash`、`/bin/sh`。设置 `TERM=xterm-256color` 和 `HISTFILE=/dev/null`，命令不会写入主机的历史文件 |
-| Windows | 优先 PowerShell（`-NoProfile`，输出编码 UTF-8），否则 `cmd.exe`（代码页 65001） |
+| Linux、macOS | 依次使用第一个存在的 `/bin/zsh`、`/bin/bash`、`/bin/sh`。设置 `HISTFILE=/dev/null`，命令不会写入主机的历史文件 |
+| Windows | 优先 PowerShell（`-NoProfile`），否则 `cmd.exe` |
 
 Shell 以客户端进程的用户身份运行，继承其环境变量和工作目录。
-
-## 连接方式
-
-每个 Shell 由客户端另建一条 TLS 连接承载，走服务端主 TLS 端口（默认 TCP 443，见 [单一 TLS 端口](/server#单一-tls-端口)），不需要额外开放端口，服务端也不需要 tmux。客户端须在 15 秒内建立连接，否则终端显示错误。每个 Shell 是独立终端，不与其他浏览器共享。
 
 ## 会话何时保持、何时结束
 
@@ -60,11 +51,9 @@ Shell 以客户端进程的用户身份运行，继承其环境变量和工作�
 | 在 Global 与 Project、或不同 Project 之间切换 | 关闭在其他范围打开的 Shell，只保留新范围中的 |
 | 刷新页面、关闭浏览器标签页或退出登录 | 全部 Shell 关闭，无法恢复 |
 | 网络中断或客户端断开 | 该 Shell 结束，显示 `--- session ended ---`；不会自动重连，需从 Clients 页重新打开 |
-| 关闭标签 | 结束该 Shell |
+| 关闭 Shell 标签 | 立即结束该 Shell，不需要确认 |
 
-Shell 没有空闲超时；服务端每 15 秒向浏览器发送心跳，45 秒无响应才判定断开。
-
-Shell 结束时，客户端会强制结束它及其前台任务。需要断开后继续运行的命令，请用 `nohup`、`setsid` 或 tmux 自行脱离。
+Shell 没有空闲超时。Shell 结束时，客户端会强制结束它及其前台任务。需要断开后继续运行的命令，请用 `nohup`、`setsid` 或 tmux 自行脱离。
 
 <Callout title="Project 范围" type="info">
   Project 视图下只能对当前 Project 的客户端打开 Shell。Project 不是权限边界，任何账号都可以切到其他范围操作任意客户端，见 [账号的权限范围](/server/security#账号的权限范围)。
@@ -75,13 +64,10 @@ Shell 结束时，客户端会强制结束它及其前台任务。需要断开�
 | 操作 | 方式 |
 | --- | --- |
 | 复制选中文本 | Cmd+C（macOS）或 Ctrl+C（其他系统）。没有选中内容时，Ctrl+C 照常发给 Shell 中断命令 |
-| 右键菜单 | 选中光标下的单词并弹出浏览器原生菜单，可复制或粘贴 |
-| 粘贴文本 | 浏览器原生粘贴，内容原样发给 Shell；不支持粘贴图片 |
+| 粘贴文本 | 浏览器原生粘贴，内容原样发给 Shell |
 | 程序写入剪贴板（OSC 52） | 一律忽略，不允许被调查主机的输出改写你的剪贴板 |
 
-## 尺寸与滚动
-
-终端跟随面板大小调整，并把行列数同步给客户端，范围为 30–500 列、8–200 行。终端保留约 1,000 行滚动历史；需要完整留存的输出，请重定向到文件后用 [Files](/files) 下载。
+终端保留约 1,000 行滚动历史；需要完整留存的输出，请重定向到文件后用 [Files](/files) 下载。
 
 ## 命令行
 
@@ -92,5 +78,5 @@ Shell 结束时，客户端会强制结束它及其前台任务。需要断开�
 >>> run <Client ID> <Command>
 ```
 
-- `shell` 通过 `tmux new-window` 新开窗口接入客户端 Shell，要求服务端运行在 tmux 中，见 [保持服务端运行](/server#保持服务端运行)。
+- `shell` 在新的 tmux 窗口中接入客户端 Shell，要求服务端运行在 tmux 中，见 [保持服务端运行](/server#保持服务端运行)。
 - `run` 执行一条命令并返回结果，不需要 tmux，适合非交互命令。

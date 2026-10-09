@@ -26,15 +26,12 @@ sources:
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
-import { Card, Cards } from "fumadocs-ui/components/card";
 
 SIREN Server 内置 [MCP](https://modelcontextprotocol.io/) 服务，提供 7 个工具：列出客户端、执行命令、回读长输出、触发 Recon 和部署 SIREN。[Agentic IR](/air) 自动接入它；本页供外部 MCP 客户端接入和排查时查阅。
 
-服务使用无状态的 Streamable HTTP 传输、JSON 响应，协议版本最高 `2026-07-28`，也能与更早版本的客户端协商。
-
 ## 端点
 
-MCP 由 `server_config.yaml` 中的 `mcp.enabled` 控制（默认 `true`），不受 `webui.enabled` 影响。它与 WebUI、客户端连接共用顶层 `listen` / `port` 的 TLS 端口（默认 `0.0.0.0:443`），只能通过 HTTPS 访问。
+MCP 由 [`server_config.yaml`](/reference/server-config) 中的 `mcp.enabled` 控制（默认 `true`），不受 `webui.enabled` 影响。它与 WebUI、客户端连接共用顶层 `listen` / `port` 的 TLS 端口（默认 `0.0.0.0:443`），只能通过 HTTPS 访问。
 
 | 路径 | 范围 |
 | --- | --- |
@@ -66,23 +63,14 @@ MCP 由 `server_config.yaml` 中的 `mcp.enabled` 控制（默认 `true`），�
 | AIR 会话凭证 | 每个 AIR 会话启动时签发 | Project 会话只能访问本 Project 的路径，Global 会话只能访问 `/mcp` | 会话结束时吊销 |
 
 - `mcp.enabled` 为 `true` 时 `SIREN_MCP_ADMIN_TOKEN` 必须非空，否则服务端启动即退出，报 `MCP requires SIREN_MCP_ADMIN_TOKEN`。不用 MCP 和 AIR 时可设 `mcp.enabled: false`。
-- 签发的凭证只存在服务端内存中，重启后全部失效；同时有效的签发凭证最多 10,000 个，用满后签发失败。
+- 签发的凭证只存在服务端内存中，重启后全部失效。
 - 凭证放在受保护的服务环境文件中，不要写进 `server_config.yaml`、Project 目录、URL 或聊天消息。设置方法见 [MCP 凭证](/server/prerequisites#mcp-凭证)，安全含义见 [MCP 鉴权](/server/security#mcp-鉴权)。
 
 ### AIR 会话的凭证
 
 AIR 会话（GUI 或 Terminal）的 MCP 地址由 `webui.publicURL` 加 `/mcp` 或 `/mcp/project/<id>` 拼成。`webui.publicURL` 为空或不是纯 HTTPS Origin 时会话无法启动，分别报 `webui.publicURL is required for AIR MCP`、`webui.publicURL must be an absolute https URL` 或 `webui.publicURL must contain only an https origin`。
 
-启动 Provider 进程前，服务端从继承的环境中删除 `SIREN_MCP_ADMIN_TOKEN` 等长期 MCP 凭证和已有的 `SIREN_AIR_MCP_TOKEN`，再把本会话凭证写入 `SIREN_AIR_MCP_TOKEN`。各 Provider 的注入方式：
-
-| Provider | 注入方式 |
-| --- | --- |
-| Claude Code | `--mcp-config` 指向系统临时目录中带 `Authorization` 头的私有配置文件 `siren-air-mcp-*.json`，会话结束时删除 |
-| Qoder | Terminal 同 Claude Code；GUI 在会话初始化时直接传入带 `Authorization` 头的 MCP 配置 |
-| Codex | 命令行参数 `-c mcp_servers.siren.url=…`、`mcp_servers.siren.required=true`、`mcp_servers.siren.bearer_token_env_var="SIREN_AIR_MCP_TOKEN"` |
-| Pi | 环境变量 `SIREN_AIR_MCP_URL` 和 `SIREN_AIR_MCP_TOKEN` |
-
-凭证不会出现在命令行参数或 Provider 的持久配置中。SIREN 不预先放行任何 MCP 工具，调用前是否确认由 Provider 自身配置决定，见 [审批](/air/providers#审批)。
+Provider 进程不会继承 `SIREN_MCP_ADMIN_TOKEN` 等长期 MCP 凭证，只拿到本会话凭证，且该凭证不会出现在命令行参数或 Provider 的持久配置中。SIREN 不预先放行任何 MCP 工具，调用前是否确认由 Provider 自身配置决定，见 [审批](/air/providers#审批)。
 
 ## 接入外部 MCP 客户端
 
@@ -120,7 +108,7 @@ bearer_token_env_var = "SIREN_MCP_ADMIN_TOKEN"
 | `recon` | **`client_id`**、`profile` | 触发一次 Recon 并等待结果 |
 | `deploy` | **`uid`**、**`instance_id`**、`public_ip` | 通过 SOAR 向一台阿里云 ECS 部署 SIREN，等待客户端连接 |
 
-SIREN MCP 不提供告警查询工具。除 `ls` 外，所有工具的 structured content 都带 `text` 字段，内容与文本结果相同，供只读结构化结果的客户端使用。
+SIREN MCP 不提供告警查询工具。
 
 ### 指定客户端
 
@@ -128,7 +116,7 @@ SIREN MCP 不提供告警查询工具。除 `ls` 外，所有工具的 structure
 
 ### `ls`
 
-返回一张表，列为 `Client ID`、`Client OS`、`Instance ID`、`Private IP`、`Hostname`、`Client Address`、`Note`、`Plugins`、`Recon Profiles`，空值显示 `-`。`Note` 是 [Clients 页](/clients) 中填写的备注。
+返回的客户端表含 [Clients 页](/clients) 中填写的备注（`Note`）和客户端支持的 Recon Profile（`Recon Profiles`）。
 
 ### `run`
 
@@ -138,7 +126,7 @@ SIREN MCP 不提供告警查询工具。除 `ls` 外，所有工具的 structure
 | `command` | 要执行的命令，最长 50 KiB |
 | `output_mode` | `auto` 或 `full`，省略时取服务端 `mcp.runOutputMode`（默认 `auto`），见 [长结果回读](#长结果回读) |
 
-调用依次检查 [命令黑名单](#命令黑名单)、解析目标客户端、下发执行；每次调用都写 [审计日志](#审计日志) 并返回 `audit_id`。标准输出和错误输出分开捕获，合计最多保留 16 MiB，超出部分丢弃并标记捕获不完整。时限见 [执行时限](#执行时限)。
+命令先经 [命令黑名单](#命令黑名单) 检查；每次调用都写 [审计日志](#审计日志) 并返回 `audit_id`。标准输出和错误输出合计最多保留 16 MiB，超出部分丢弃并标记捕获不完整。时限见 [执行时限](#执行时限)。
 
 `outcome` 的常见取值如下，非 `success` 的结果都以工具错误返回：
 
@@ -168,7 +156,7 @@ SIREN MCP 不提供告警查询工具。除 `ls` 外，所有工具的 structure
 - 过滤后没有客户端时报 `no connected clients match the request`；超过 64 台时报错，要求用 `client_ids` 缩小范围。
 - 黑名单对整条命令检查一次，命中则整批拒绝。
 - 每台主机的执行与单次 `run` 相同，各有独立的 `audit_id` 供回读和搜索。
-- 返回按 Client ID 排序的逐台汇总：`outcome`、退出码、错误和最多 1 KiB 的输出预览；所有预览合计最多内联 50 KiB，超出后每台只保留标题行。structured content 含 `batch_id`、`project`、`total`、`succeeded`、`failed` 和 `results` 数组。
+- 返回逐台汇总：`outcome`、退出码、错误和最多 1 KiB 的输出预览；所有预览合计最多内联 50 KiB，超出后每台只保留标题行。
 - 只有全部主机都失败时才以工具错误返回。
 
 ### `read_run_result`
@@ -180,7 +168,7 @@ SIREN MCP 不提供告警查询工具。除 `ls` 外，所有工具的 structure
 | `offset` | 起始字节位置，默认 0，超过结果长度时报错 |
 | `limit` | 最多返回的字节数，默认 8 KiB，最大 16 KiB |
 
-文本流的读取范围对齐到 UTF-8 字符边界。structured content 返回实际范围、`next_offset`、`total_bytes` 和 `complete`（是否已读到已保存数据的末尾）。读取 `raw_stdout` / `raw_stderr` 时，原始字节以 Base64 放在 `content_base64` 中，并附整路输出的 `sha256`。
+结果中的 `next_offset` 是下一次读取的起点，`complete` 表示已读到已保存数据的末尾。
 
 ### `search_run_result`
 
@@ -193,7 +181,7 @@ SIREN MCP 不提供告警查询工具。除 `ls` 外，所有工具的 structure
 | `context_lines` | 每个匹配前后附带的行数，默认 2，范围 0–10 |
 | `max_matches` | 最多返回的匹配数，默认 20，范围 1–20 |
 
-每个匹配返回字节范围、行号和上下文范围。正文最多 8 KiB，放不下时截断上下文并停止，`truncated` 为 `true`；`total_matches` 为全部匹配数。
+每个匹配返回字节范围和行号。正文最多 8 KiB，放不下时截断并标记 `truncated`；`total_matches` 为全部匹配数。
 
 ### `recon`
 
@@ -204,8 +192,8 @@ SIREN MCP 不提供告警查询工具。除 `ls` 外，所有工具的 structure
 
 - 同一客户端同时只能有一个 Recon，冲突时报 `recon already in progress for this client`；Profile 不可用时报 `recon profile is not available`。
 - 工具等采集完成后才返回，等待上限为服务端 `recon.responseTimeout`，各项超时见 [Recon 超时](/recon#超时)。
-- 文本结果为 Profile、状态和产物路径，后接派生的 Markdown 报告，内联最多 2 MiB。`hunt` 及任何含 `topology`、`supplychain`、`config`、`activity` 或 `credential` 模块的 Profile，Markdown 只含拓扑、覆盖范围和采集质量摘要，完整证据在 JSONL 快照中。所有文本结果都提示以 JSONL 为准，并把采集到的文件内容视为不可信数据。
-- structured content：`profile`、`status`（`complete` 或 `partial`）、`reportPath`、`snapshotPath`、`format`（`snapshot-jsonl-v2`）、`schemaVersion`。两个路径相对于客户端所属 Project 的 Artifacts 目录，客户端未归属 Project 时相对于服务端工作目录。快照结构见 [Recon 快照格式](/reference/snapshot)。
+- 文本结果为 Profile、状态和产物路径，后接派生的 Markdown 报告，内联最多 2 MiB。`hunt` 及任何含 `topology`、`supplychain`、`config`、`activity` 或 `credential` 模块的 Profile，Markdown 只含拓扑、覆盖范围和采集质量摘要，完整证据在 JSONL 快照中。结果提示 Agent 以 JSONL 为准，并把采集到的文件内容视为不可信数据。
+- `status` 为 `complete` 或 `partial`。`reportPath` 和 `snapshotPath` 相对于客户端所属 Project 的 Artifacts 目录，客户端未归属 Project 时相对于服务端工作目录。快照结构见 [Recon 快照格式](/reference/snapshot)。
 
 ### `deploy`
 
@@ -218,12 +206,12 @@ SIREN MCP 不提供告警查询工具。除 `ls` 外，所有工具的 structure
 `deploy` 与 WebUI 中 **Deploy SIREN** 的单目标部署流程相同：修改安全组放行、通过 SOAR 安装客户端，等客户端连接后才返回。前置条件见 [一键部署](/onboard/provisioning)。
 
 - 在 Project 端点上调用时，新连接的客户端归入该 Project；在 `/mcp` 上调用时不归属任何 Project。
-- 已知该实例的客户端属于其他 Project 时，提交前即拒绝（`deployment target belongs to another project`）；客户端连接后绑定时再次检查，冲突时保留原归属，需人工处理。
+- 已知该实例的客户端属于其他 Project 时拒绝（`deployment target belongs to another project`），见 [Projects](/projects)。
 - 同一 UID 和实例已有部署在进行时拒绝（`deployment already active for instance …`）。
-- 返回 `operation_id`、`outcome`、`state`、`client_id`、`warnings` 和 `error`。只有 `state` 为 `connected` 才算成功；`manual_required` 表示部署完成但无法安全匹配客户端，需到 Clients 页确认。
+- 只有返回的 `state` 为 `connected` 才算成功；`manual_required` 表示部署完成但无法安全匹配客户端，需到 Clients 页确认。
 
 <Callout title="deploy 会写云端" type="warn">
-  `deploy` 会修改目标账号的安全组并在实例上安装软件。工具说明要求 Agent 只在用户明确要求部署到该实例时调用，不得把调查或诊断请求当作授权。这只约束模型，不是 SIREN 的开关；调用前是否确认由 MCP 客户端或 Provider 的配置决定。
+  `deploy` 会修改目标账号的安全组并在实例上安装软件。工具说明要求 Agent 只在用户明确要求时调用，但这只约束模型，不是 SIREN 的开关；调用前是否确认由 MCP 客户端或 Provider 的配置决定。
 </Callout>
 
 ## 长结果回读
@@ -243,26 +231,18 @@ SIREN MCP 不提供告警查询工具。除 `ls` 外，所有工具的 structure
 | --- | --- |
 | `audit_id` | 本次执行的 ID，也是审计日志的关联键 |
 | `outcome` | 执行结果，见 [`run`](#run) |
-| `original_bytes` / `returned_bytes` | 原始长度 / 本次返回的长度 |
-| `preview_strategy` | `full`（完整返回）或 `head_tail`（首尾预览） |
-| `shown_ranges` / `omitted_ranges` | 已展示 / 已省略的字节范围 |
 | `preview_complete` / `capture_complete` | 预览是否完整展示了原始输出 / 服务端是否完整收到了输出 |
 | `complete` | 以上两项都为真时才为真 |
 | `cancel_confirmed` | 超时或取消后，客户端是否确认命令已结束；为 `false` 或缺失时不能断定远端命令已终止 |
-| `execution` | 退出码、PowerShell 错误记录、各路输出的字节数与 SHA-256 等执行证据 |
-| `expires_at` | 结果的过期时间 |
 | `storage_error` | 结果未能保存的原因，如 `storage_full` |
-
-退出码和 PowerShell 错误记录分开报告：退出码非 0 的命令，输出也可能完整捕获。
 
 ### 输出流
 
 | `stream` | 内容 |
 | --- | --- |
 | `text` | 默认。标准输出后接 `[stderr]` 分隔行和错误输出；只有一路有内容时就是那一路 |
-| `stdout` / `raw_stdout` | 标准输出；`raw_` 版本以 Base64 返回精确字节 |
-| `stderr` | 错误输出，能解析的 PowerShell CLIXML 会转换为可读文本 |
-| `raw_stderr` | 未经转换的错误输出原始字节 |
+| `stdout` / `stderr` | 标准输出 / 错误输出；PowerShell CLIXML 错误输出会转换为可读文本 |
+| `raw_stdout` / `raw_stderr` | 未经转换的原始字节，以 Base64 返回 |
 
 命令被黑名单拦截或目标被拒绝时没有执行输出，只能读 `text`。
 
@@ -284,7 +264,7 @@ SIREN MCP 不提供告警查询工具。除 `ls` 外，所有工具的 structure
 
 只调大客户端的值不会让 MCP 命令运行超过 30 秒，需同时在服务端配置中添加同名键并重启服务端。客户端的这个值也是 Recon 单条采集命令的时限，见 [客户端配置](/reference/client-config)。
 
-服务端在时限外再多等 10 秒。超时或 MCP 请求被取消时，服务端向客户端发送取消，最多再等 2 秒确认，确认与否见 `cancel_confirmed`。
+服务端在时限外再多等 10 秒。超时或 MCP 请求被取消时，服务端通知客户端取消命令，客户端是否确认见 `cancel_confirmed`。
 
 ## 同一客户端的并发
 
@@ -297,7 +277,7 @@ SIREN MCP 不提供告警查询工具。除 `ls` 外，所有工具的 structure
 
 `run_batch` 中 busy 的主机单独记为失败，其他主机照常执行；等前一条命令结束后重试即可。Recon 有自己的并发限制，不受此影响。
 
-客户端在命令结束后排队发送完成回复，30 秒内仍无法送出时断开连接，进行中的文件传输也会中断；已收到的输出仍按捕获状态保存，可以回读。
+客户端 30 秒内送不出命令完成回复时会断开连接，进行中的文件传输随之中断；已收到的输出仍可回读。
 
 ## 命令黑名单
 
@@ -342,10 +322,10 @@ MCP 日志写入服务端日志，组件为 `mcp`，可在 [Logs](/logs) 页按�
 | `mcp.tool.started` | Debug | `tool`、`project` |
 | `mcp.tool.finished` | 成功为 Info（`ls` 为 Debug），`send_error` / `deploy_error` 为 Error，其他为 Warning | `tool`、`project`、`outcome`、`duration_ms`、`client_id` |
 | `mcp.run.requested` | Info | `audit_id`、`command`、`requested_client_id`、`project`、`tool`（`run` 或 `run_batch`）、`batch_id` |
-| `mcp.run.finished` | 成功为 Info，`send_error` 为 Error，其他为 Warning | 同上，另有 `outcome`、`duration_ms`、`client_id`、`matched_pattern`、`error`、`execution`、`result_bytes`、`cache_expires_at`、`storage_error`、`result_retention_seconds` |
+| `mcp.run.finished` | 成功为 Info，`send_error` 为 Error，其他为 Warning | 同上，另有 `outcome`、`duration_ms`、`client_id`、`matched_pattern`、`error` |
 
 - `project` 为 Project ID，Global 端点记为 `global`。
-- `run` 在参数校验通过后、黑名单检查前写 `mcp.run.requested`，结束时写同一 `audit_id` 的 `mcp.run.finished`；被拦截、目标被拒绝、发送失败、取消和超时的调用都有完成记录。
+- 每次 `run` 写同一 `audit_id` 的一对 `mcp.run.requested` / `mcp.run.finished`，被拦截、目标被拒绝、取消和超时的调用也不例外。
 - `run_batch` 每台主机各有一对记录，以 `batch_id` 关联；整批被黑名单拦截或目标解析失败时只有 `mcp.tool.finished`。
 - 日志含完整命令，不含命令输出；输出需在 60 分钟内用 `read_run_result` 回读。
 - Debug 级记录只在 `logging.level` 为 `debug` 时保留。
@@ -353,14 +333,3 @@ MCP 日志写入服务端日志，组件为 `mcp`，可在 [Logs](/logs) 页按�
 <Callout title="日志含敏感信息" type="warn">
   审计记录保留完整命令和错误说明，可能含主机路径、进程参数或凭据，且所有已登录的 WebUI 账号都能查看全部日志，见 [Logs 包含敏感信息](/server/security#logs-包含敏感信息)。需要长期留存时，由 systemd 或容器运行时采集服务端输出。
 </Callout>
-
-## 相关内容
-
-<Cards>
-  <Card title="Agentic IR" href="/air">
-    在 WebUI 中让 Agent 通过这些工具开展调查
-  </Card>
-  <Card title="服务端配置" href="/reference/server-config">
-    `mcp.*`、`webui.publicURL` 与监听端口
-  </Card>
-</Cards>

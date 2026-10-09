@@ -17,9 +17,7 @@ sources:
   - config/config_linux.yaml
 ---
 
-import { Callout } from "fumadocs-ui/components/callout";
-
-插件是一个可执行文件加一份 `manifest.json` 清单。客户端按清单下载、启停和执行它，通过命令行参数传入输入，捕获 stdout 和 stderr 作为结果。任何语言都可以，只要产物能在目标平台直接执行。使用方式见[插件](/reference/plugins)；完整实现可参考 SIREN 仓库的 `_plugins/chkrootkit`（recon）和 `_plugins/jdump`（command）。
+插件是一个可执行文件加一份 `manifest.json` 清单，任何语言都可以，只要产物能在目标平台直接执行。使用方式见[插件](/reference/plugins)；完整实现可参考 SIREN 仓库的 `_plugins/chkrootkit`（recon）和 `_plugins/jdump`（command）。
 
 ## 插件结构
 
@@ -42,7 +40,7 @@ _plugins/
 └── setup.sh             # 如果清单声明了 setup
 ```
 
-客户端启动时扫描 `plugins/` 下的子目录（跳过以 `.` 开头的），读取 `manifest.json`；清单缺失、不是合法 JSON 或未通过校验的插件被跳过并记录警告。
+客户端只在启动时扫描 `plugins/` 下的子目录；清单缺失、不是合法 JSON 或未通过校验的插件被跳过并在客户端日志中记录警告。
 
 ## manifest.json
 
@@ -63,7 +61,7 @@ _plugins/
 | 字段 | 必填 | 说明 |
 | --- | --- | --- |
 | `name` | 是 | 匹配 `^[a-zA-Z0-9][a-zA-Z0-9_-]*$`，1–64 个字符。须与市场目录名、安装时请求的名字一致，也用于 `plugins.<name>` 和 `plugin:<name>` |
-| `type` | 是 | `recon` 或 `command`。其他值可以安装，但既不进入 Recon，也不注册为命令 |
+| `type` | 是 | `recon` 或 `command` |
 | `platforms` | 是 | 支持的平台，格式 `<GOOS>_<GOARCH>`；不含客户端平台时安装失败 |
 | `entrypoint` | 是 | 可执行文件名，所有平台共用。不能为空，不能含 `..`、`/` 或 `\` |
 | `version` | 否 | 只在插件列表中展示，不参与比较 |
@@ -85,15 +83,9 @@ SIREN 客户端只发布这三个平台；`make build-plugins` 默认只构建�
 - `entrypoint` 写不带扩展名的名字（如 `myplugin`），Windows 客户端会下载并执行 `<entrypoint>.exe`，与 Makefile 生成的文件名一致；已带扩展名时按原样使用。
 - setup 固定用 `sh` 执行，Windows 主机通常没有 `sh`，不要为 Windows 插件声明 `setup`。
 
-### 服务端展示限制
+### 服务端限制
 
-客户端上报插件列表时服务端有以下限制；超出后插件仍在客户端上，但远程使用受影响：
-
-| 项 | 上限 | 超出时 |
-| --- | --- | --- |
-| 单台客户端的插件数 | 64 | 服务端拒绝该客户端的连接握手 |
-| `version` | 64 字节 | 被截断 |
-| `usage` | 256 字节 | 被截断 |
+单台客户端最多 64 个插件，超出时服务端拒绝该客户端连接。上报给服务端的 `version` 超过 64 字节、`usage` 超过 256 字节时被截断。
 
 ## 程序约定
 
@@ -109,19 +101,14 @@ SIREN 客户端只发布这三个平台；`make build-plugins` 默认只构建�
 - **用户与环境变量**：与客户端进程相同（通常是 root 或管理员）。
 - **超时**：客户端 `recon.commandTimeout`，默认 30 秒，超时后插件及其子进程被终止。
 - **输出上限**：16 MiB；在 Recon 中还受该模块剩余输出预算限制，超出时截断。
-- **启用检查**：`plugins.<name>` 未启用时直接报错，不启动插件。
 
-远程调用的 command 插件在客户端的有序任务队列中运行，会阻塞同一客户端的 Files、`upload` 等请求。耗时工作应把结果写成文件后尽快返回，让操作者通过 Files 或 REPL `upload` 取回。
+远程调用的 command 插件会阻塞同一客户端的 Files、`upload` 等请求。耗时工作应把结果写成文件后尽快返回，让操作者通过 Files 或 REPL `upload` 取回。
 
 ## setup 脚本
 
 - 安装和更新时以 `sh <setup>` 执行，工作目录是临时准备目录而非最终安装路径，不要写死 `plugins/<name>/` 的绝对路径。
 - 最长 5 分钟，输出上限 16 MiB。非零退出、超时或输出超限都会让安装或更新失败，插件目录和配置回到操作前的状态。
-- 对插件目录以外的修改（安装系统包、写入 `/usr/local` 等）不会回滚，脚本应可重复执行，可参考 `_plugins/chkrootkit/setup.sh` 先检查目标文件是否已存在的写法。
-
-<Callout title="路径限制" type="warn">
-  `entrypoint` 和 `setup` 不能含 `..`、`/` 或 `\`。加载、下载和执行前都会校验，防止恶意市场借清单写到插件目录以外。
-</Callout>
+- 对插件目录以外的修改（安装系统包、写入 `/usr/local` 等）不会回滚，脚本应可重复执行，例如先检查目标文件是否已存在。
 
 ## 构建
 
@@ -133,7 +120,7 @@ make build-plugins                                # 构建 _plugins/ 下所有�
 make build-plugins PLUGIN_PLATFORMS="linux_amd64 linux_arm64 windows_amd64"
 ```
 
-- 构建命令为 `CGO_ENABLED=0 go build -trimpath -ldflags "-s -w"`，只编译 `_plugins/<name>/main.go`；代码拆成多个文件时改用自己的构建方式，保持相同的产物目录即可。
+- 只编译 `_plugins/<name>/main.go`（`CGO_ENABLED=0`）；代码拆成多个文件时改用自己的构建方式，保持相同的产物目录即可。
 - 可在命令行覆盖 `PLUGIN_DIR`（默认 `_plugins`）、`OUTPUT_DIR`（默认 `dist`）、`PLUGIN_PLATFORMS`（默认 `linux_amd64 linux_arm64`）。
 
 产物目录即插件市场所需的结构：

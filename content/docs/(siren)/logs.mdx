@@ -24,30 +24,28 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-**Logs** 页面（侧栏 **System** 分组，`#/logs`）显示服务端内存中最近的运行日志，不必登录控制主机就能看到客户端接入失败、登录失败、Shell 会话、AIR 与 MCP 报错等事件。
+**Logs** 页面显示服务端内存中最近的运行日志，不必登录控制主机就能看到客户端接入失败、登录失败、Shell 会话、AIR 与 MCP 报错等事件。
 
-这些记录与服务端终端输出的日志相同，同样受 `logging.level` 过滤；`logging.output` 设为 `none` 时页面仍照常保留。服务端 REPL 的命令回显（如 `[*]` 开头的提示和 `run`、`info` 的输出）不是日志，不会出现在这里。Logs 不区分 Project，任何范围下都显示全部日志。
+这些记录与服务端终端输出的日志相同，同样受 `logging.level` 过滤；`logging.output` 设为 `none` 时页面仍照常保留。服务端 REPL 的命令回显（如 `run`、`info` 的输出）不是日志，不会出现在这里。Logs 不区分 Project，任何范围下都显示全部日志。
 
 ## 查看与过滤
 
 | 控件 | 作用 |
 | --- | --- |
 | 搜索框 | 不区分大小写的子串匹配，覆盖日志正文和所有字段值（如 Client ID、IP、事件名、`audit_id`），不匹配字段名 |
-| **All** / **Debug** / **Info** / **Warning** / **Error** | 级别可多选；**All** 表示不限级别，点击会清除已选级别。成功类记录（行首 `✓`）属于 Info |
-| **All components** 下拉框 | 按组件过滤，选项来自缓冲区中出现过的组件，如 `server`、`client`、`webui`、`mcp`、`air`、`recon`、`artifact`、`port_forward` |
-| **Live** / **Paused** | **Live** 时约每 3 秒拉取新日志，停在底部时自动跟随，向上翻阅时不会被拉回。切换为 **Paused** 停止拉取，恢复后从暂停处继续 |
-| 复制、下载按钮 | 把当前列表复制为纯文本，或下载为 `siren-server-logs.log` |
+| **All** / **Debug** / **Info** / **Warning** / **Error** | 级别可多选；**All** 表示不限级别 |
+| **All components** 下拉框 | 按组件过滤，如 `server`、`client`、`webui`、`mcp`、`air`、`recon`、`artifact`、`port_forward` |
+| **Live** / **Paused** | **Live** 持续拉取新日志，**Paused** 停止拉取 |
+| 复制、下载按钮 | 把当前列表复制为纯文本或下载为文件 |
 
-点击一行可展开完整 JSON。行内过长的字段值会被截断，展开、复制和下载都保留完整值。
-
-修改过滤条件后，列表从符合条件的最新 500 条重新开始并随轮询追加，最多显示最近 2,000 条。页头显示当前条数；缓冲区中符合条件的记录更多时显示 `N matching in buffer`，暂停时显示 `paused`。标签页切到后台或离开 Logs 页面时暂停拉取。
+点击一行可展开完整 JSON；行内截断的字段值在展开、复制和下载中保持完整。列表最多显示最近 2,000 条。
 
 ## 保留范围
 
 日志只保存在服务端内存中，条数由 `logging.bufferSize` 控制（默认 5000）：
 
 - 服务重启后清空。
-- 写满后淘汰最早的记录，页头显示 `N older dropped`。
+- 写满后淘汰最早的记录。
 - 设为 `0` 或负数则不保留，页面显示 `Server log retention is off`。修改后需重启服务端。
 
 SIREN 不写日志文件；长期留存见 [日志格式与留存](/reference/server-config#日志格式与留存)，`logging.*` 各键见 [服务端配置](/reference/server-config#logging)。
@@ -71,7 +69,7 @@ WebUI 只记录失败的请求、成功的修改类操作和慢请求，不记�
 
 ### MCP 命令审计
 
-每次 `run` 调用有两条共享同一 `audit_id` 的记录：执行前的 `mcp.run.requested` 和结束时的 `mcp.run.finished`；`run_batch` 中每台主机各有一个 `audit_id`。被黑名单拦截、目标被拒绝、发送失败、取消、超时或远端执行失败的 `run` 也有完成记录，由 `outcome` 说明结果；`run_batch` 整批被黑名单拦截或目标解析失败时，只有一条 `mcp.tool.finished`。
+每次 `run` 调用有两条共享同一 `audit_id` 的记录：执行前的 `mcp.run.requested` 和结束时的 `mcp.run.finished`，被拦截、超时或执行失败的调用也有完成记录，由 `outcome` 说明结果；`run_batch` 中每台主机各有一个 `audit_id`。
 
 选择 `mcp` 组件后搜索命令片段、Client ID、outcome 或 `audit_id`。日志含完整命令但不含输出；输出通过 MCP 的 `read_run_result` 按 `audit_id` 回读，只保留 60 分钟。字段含义见 [命令审计](/reference/mcp#审计日志)。
 

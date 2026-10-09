@@ -18,69 +18,56 @@ sources:
   - cmd/client/cli/info.go
 ---
 
-import { Callout } from "fumadocs-ui/components/callout";
-
-进程分析无需打开 Shell，即可查看 Linux 客户端上某个进程的父进程链、资源占用、命令行、可执行文件、网络连接、容器和 systemd 服务线索，并标出常见可疑特征。入口是 **Investigations** 页的 **Process Analysis** 标签（`#/investigations/process`）。仅支持 Linux 客户端；结果只显示在当前浏览器页面，不写入 Artifacts。
+进程分析无需打开 Shell，即可查看 Linux 客户端上某个进程的父进程链、资源占用、命令行、可执行文件、网络连接、容器和 systemd 服务线索，并标出常见可疑特征。仅支持 Linux 客户端；结果只显示在当前浏览器页面，不写入 Artifacts。
 
 ## 打开方式
 
-- 侧栏 **Investigations** → **Process Analysis**，再选择客户端。
-- [Clients](/clients#行内操作) 页客户端行的 **More actions** → **Process analysis**：跳到该标签并选中这台客户端。非 Linux 客户端显示为不可用的 **Process analysis (Linux only)**。
-- AIR 会话的 **Security Center alerts** 结果卡：带进程 ID 的告警显示 **Inspect PID N**，点击后切换到会话所在范围，选中告警主机对应的客户端并预填 **PID**，仍需点击 **Analyze**，见 [GUI 时间线](/air/gui#结构化结果卡)。该范围内必须恰好有一台匹配的在线 Linux 客户端，否则提示 `Process evidence needs one connected Linux client in the source workspace.`
+- 侧栏 **Investigations** → **Process Analysis**。
+- [Clients](/clients#行内操作) 页客户端行的 **More actions** → **Process analysis**，预选这台客户端。
+- AIR 会话中带进程 ID 的 **Security Center alerts** 结果卡上点 **Inspect PID N**，预选告警主机对应的客户端并预填 **PID**，见 [GUI 时间线](/air/gui#结构化结果卡)。会话所在范围内必须恰好有一台匹配的在线 Linux 客户端，否则提示 `Process evidence needs one connected Linux client in the source workspace.`
 
 ## 查询步骤
 
 1. 在 **Client** 中选择客户端。只列出当前范围内的 Linux 客户端；没有时提示 `No Linux clients are currently connected; process analysis needs a Linux client.`
 2. 在 **Query type** 中选择 **PID**、**Port** 或 **Name**。
-3. 填写查询值，点击 **Analyze**。格式不对时按钮不可用并提示应填内容。
+3. 填写查询值，点击 **Analyze**。
 
-| 查询类型 | 填写 | 客户端如何定位进程 |
+| 查询类型 | 填写 | 说明 |
 | --- | --- | --- |
-| **PID** | 正整数 | 直接读取该 PID |
-| **Port** | 1–65535 | 只查 TCP `LISTEN` 端口：先用 `ss -tlnp`，查不到再用 `lsof`，取第一个 PID。UDP 端口和已建立的外联连接无法反查 |
-| **Name** | 进程名或其中一段 | 用 `pgrep` 匹配进程名（支持正则，不匹配命令行参数）。唯一匹配时直接显示详情，多个时先列出候选，最多 50 个 |
+| **PID** | 正整数 | |
+| **Port** | 1–65535 | 只查 TCP `LISTEN` 端口，取第一个匹配的进程。UDP 端口和已建立的外联连接无法反查 |
+| **Name** | 进程名或其中一段 | 支持正则，不匹配命令行参数。多个匹配时先列出候选（最多 50 个），点击候选查看详情 |
 
 Linux 进程名最长 15 个字符，按名称查询以此为准。要按命令行参数查找，先在 [Shell](/shells) 中用 `pgrep -af` 或 `ps` 找到 PID 再查询。
 
-每次查询最多等待客户端 30 秒；超时或出错时，错误显示在结果区上方，已有结果保留。
+每次查询最多等待客户端 30 秒。页面保留最近 10 条结果，可在 **History** 中切换；刷新浏览器或切换 Project / Global 范围后清空。
 
 ![Investigations 页的 Process Analysis 标签，按进程名查询](../../img/process-analysis.png)
 
-## 结果视图
-
-左侧是 **Candidates** 和 **History**，右侧是选中进程的详情。
-
-- **Candidates**：名称匹配到多个进程时，列出每个候选的 PID 和完整命令行；超过 50 个时提示 `Showing first 50 matches.`，请换更精确的名称。点击候选按 PID 发起新查询，不改动表单。
-- **History**：已查看的进程，最新在上，点击切换详情；有红色风险标记的进程前有红点。
-- 每条结果可单独删除，**Clear** 清空全部。
-
-最多保留最近 10 条结果，重复查询会刷新原条目。切换到其他 WebUI 页面再回来结果仍在；刷新浏览器或切换 Project / Global 范围后清空。
-
-### 进程详情
+## 进程详情
 
 | 区块 | 内容 |
 | --- | --- |
-| 标题 | 进程名、PID、客户端、查询条件、查询时间和风险标记 |
-| **Parent Chain** | 从最上层祖先到当前进程的父进程链，当前进程标为 `selected` |
-| 概要 | **User**、**State**、**CPU**、**Memory**、**Start**。CPU 和内存超过 50% 显示琥珀色，超过 80% 显示红色 |
+| **Parent Chain** | 从最上层祖先到当前进程的父进程链 |
+| 概要 | **User**、**State**、**CPU**、**Memory**、**Start** |
 | 路径 | **CWD**（工作目录）、**Command**（完整命令行）、**Executable**（可执行文件路径） |
-| **Network** | TCP / UDP 连接，按状态（如 `LISTEN`、`ESTAB`）分组，显示本地和远端地址；无远端地址时显示 `local only` |
-| **Container** | 从 cgroup 识别的 Docker、containerd 或 podman 容器类型和 ID，Docker 另显示名称。客户端本身运行在无法识别的容器中时，类型为 `container`，ID 为 `unknown` |
+| **Network** | TCP / UDP 连接，按状态（如 `LISTEN`、`ESTAB`）分组，显示本地和远端地址 |
+| **Container** | 从 cgroup 识别的 Docker、containerd 或 podman 容器类型和 ID，Docker 另显示名称 |
 | **Startup Source** | PID 1 是 systemd 且进程属于某个服务时，显示服务名、状态、描述和 Unit 文件路径 |
 
-没有信息的区块不显示。CPU 和内存取自 `ps`，CPU 是进程整个生命周期的平均值，不是瞬时值。
+CPU 和内存取自 `ps`，CPU 是进程整个生命周期的平均值，不是瞬时值。
 
 ### 风险标记
 
-| 标记 | 条件 | 颜色 |
-| --- | --- | --- |
-| `deleted executable` | 可执行文件路径以 ` (deleted)` 结尾，即程序文件已从磁盘删除 | 红 |
-| `zombie` | 进程状态为 `Z` | 红 |
-| `root` | 以 root 运行 | 琥珀 |
-| `high CPU` | CPU 超过 50% | 琥珀 |
-| `high memory` | 内存超过 50% | 琥珀 |
+| 标记 | 条件 |
+| --- | --- |
+| `deleted executable` | 可执行文件路径以 ` (deleted)` 结尾，即程序文件已从磁盘删除 |
+| `zombie` | 进程状态为 `Z` |
+| `root` | 以 root 运行 |
+| `high CPU` | CPU 超过 50% |
+| `high memory` | 内存超过 50% |
 
-有红色标记时，详情标题区也以红色强调。这些只是排查线索，不代表进程一定恶意。
+这些只是排查线索，不代表进程一定恶意。
 
 ## 常见问题
 
@@ -98,7 +85,7 @@ Linux 进程名最长 15 个字符，按名称查询以此为准。要按命令�
 
 ## 命令行
 
-服务端 REPL 和本地模式提供同样的查询，以彩色文本打印，root 用户、超过 50% 的 CPU / 内存、已删除的可执行文件和僵尸进程标红。
+服务端 REPL 和本地模式提供同样的查询，以文本打印。
 
 ```bash tab="服务端 REPL"
 >>> info <Client ID> <PID>

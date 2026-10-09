@@ -25,13 +25,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 REPL 必须在 tmux 中运行：服务端读到 EOF、`Ctrl+C`、`Ctrl+D` 或执行 `exit` 时会立即关闭，`shell` 命令也依赖 tmux。见 [保持服务端运行](/server#保持服务端运行)。
 
-<Callout title="日常操作用 Web 控制台" type="info">
-  除标注 **仅 REPL** 的命令外，下表命令在 [Web 控制台](/webui) 都有更易用的等价入口。本页只是语法参考，操作流程见各功能指南。
-</Callout>
-
 ## 命令速查
-
-`help` 查看分类帮助，`help <命令>` 查看单个命令用法。
 
 | 命令 | 用法 | 说明 | WebUI 等价 |
 | --- | --- | --- | --- |
@@ -60,17 +54,11 @@ REPL 必须在 tmux 中运行：服务端读到 EOF、`Ctrl+C`、`Ctrl+D` 或执
 
 未识别的首个单词会按客户端 [插件命令](/reference/plugins)（`<插件名> <Client ID> [args...]`）匹配，匹配不到时打印帮助。
 
-## 命令输出去向
-
-大多数命令的输出直接打印在 REPL 终端（`allow`、`deploy`、`deploy-batch` 打印分步进度），`run` 最多显示前 50 KiB。例外：
-
-- `recon`：快照与报告写入服务端 Artifacts（Project 取证目录），完成后在 REPL 打印路径，见 [信息收集](/recon)。
-- `upload`：文件保存到服务端 Artifacts，可在 [Files / Artifacts](/files) 中查看。
-- `ak`：SOAR 调查结果，见 [AccessKey 调查](/ak)。
+命令输出打印在 REPL 终端，例外是 `recon` 和 `upload`：结果写入服务端 Artifacts，`recon` 完成后打印路径。
 
 ## 客户端管理
 
-首次连接时，服务端按客户端稳定身份分配一个数字 `Client ID` 并持久保存，REPL 命令都用它指定目标。`Client ID` 在重连和服务端重启后不变，也不会分配给其他主机；只有同一身份出现第二个在线连接（如克隆镜像）时，新连接才临时获得一个不保存的编号。`ls` 同时显示客户端上报的主机名、内网 IP 和阿里云 ECS Instance ID，执行操作前先用它确认目标。
+REPL 命令用数字 `Client ID` 指定目标，它在重连和服务端重启后不变，见 [核心概念](/concepts#siren-server-与-client)。执行操作前先用 `ls` 按主机名、内网 IP 和 Instance ID 确认目标。
 
 ```bash title="siren_server"
 >>> ls
@@ -98,40 +86,38 @@ REPL 必须在 tmux 中运行：服务端读到 EOF、`Ctrl+C`、`Ctrl+D` 或执
 >>> note 0
 ```
 
-备注支持多个单词（`note 0 db primary` 完整保留），和 WebUI Project 归属一样按稳定身份保存，重连或服务端重启后恢复。交互式 Shell、端口转发和正在执行的命令属于当前连接，服务端重启后需要重新打开。
+备注可含空格（`note 0 db primary` 完整保留），重连或服务端重启后仍在；交互式 Shell、端口转发和正在执行的命令则需要重新打开。
 
 ## 远程命令执行
 
 ### 交互式 Shell
 
-`shell` 用 `tmux new-window` 打开名为 `shell-c<Client ID>` 的窗口并接入目标客户端的交互式 Shell，适合连续排查或运行 `vim`、`top` 等需要完整终端的程序。
+`shell` 在新的 tmux 窗口 `shell-c<Client ID>` 中接入目标客户端的交互式 Shell，适合运行 `vim`、`top` 等需要完整终端的程序。
 
 ```bash title="siren_server"
 >>> shell 0
 ```
 
-客户端经服务端主 TLS 端口（默认 TCP 443）回连，不额外开放端口；服务端必须安装 `tmux` 并运行在 tmux 中。`exit` 或 `Ctrl+D` 退出后返回 REPL。不想依赖 tmux 时改用 [Shells 页](/shells)。
+Shell 走服务端主 TLS 端口，不额外开放端口。`exit` 或 `Ctrl+D` 退出后返回 REPL。不想依赖 tmux 时改用 [Shells 页](/shells)。
 
 ### 单条命令执行
 
-`run` 执行一次性命令并把输出返回 REPL。命令在后台执行，期间 REPL 仍可输入其他命令；需要持续交互时用 `shell`。
+`run` 执行一次性命令并把输出返回 REPL，执行期间 REPL 仍可输入其他命令。
 
 ```bash title="siren_server"
 >>> run 0 whoami
 ```
 
-- 默认超时 30 秒，由客户端配置 `recon.commandTimeout` 决定（见 [客户端配置](/reference/client-config)），服务端取它与剩余上下文的较小者。
-- REPL 最多显示前 50 KiB，超出部分截断并提示；客户端单次最多捕获 16 MiB。长输出可写入文件后用 [Files](/files) 下载，或用 `upload` 保存到 Artifacts。
+- 默认超时 30 秒，由客户端配置 `recon.commandTimeout` 决定，见 [客户端配置](/reference/client-config)。
+- REPL 最多显示前 50 KiB，超出部分截断。长输出可写入文件后用 [Files](/files) 下载，或用 `upload` 保存到 Artifacts。
 
-<Callout title="一次只能跑一条命令（busy 语义）" type="warn">
-  同一客户端已有一条 `run` 在执行时（REPL、WebUI、MCP 共用同一执行槽），新的 `run` 立即以 `busy`（`another run is active`）失败；客户端正在 `reload` 时则以 `busy`（`client configuration change is in progress`）失败。交互式 `shell` 不受此限制。
+<Callout title="一次只能跑一条命令" type="warn">
+  同一客户端已有一条 `run` 在执行时（REPL、WebUI、MCP 共用），新的 `run` 立即以 `busy`（`another run is active`）失败；客户端正在 `reload` 时则以 `busy`（`client configuration change is in progress`）失败。交互式 `shell` 不受此限制。
 </Callout>
 
 ## 服务端维护
 
-这些命令作用于服务端自身，没有 WebUI 等价入口。
-
-`reload` 让在线客户端重新读取配置文件并刷新 Recon Profile 能力，无需重连。无效 Profile 配置会被拒绝并保留上一个有效快照；修改**服务端**配置仍需重启服务端。
+`reload` 让在线客户端重新读取配置文件，无需重连；无效 Profile 配置会被拒绝并保留原配置。修改**服务端**配置仍需重启服务端。
 
 ```bash title="siren_server"
 >>> reload 0
@@ -143,28 +129,15 @@ REPL 必须在 tmux 中运行：服务端读到 EOF、`Ctrl+C`、`Ctrl+D` 或执
 >>> ! ls -la certs/
 ```
 
-`env` 设置当前服务端进程的环境变量（值可含 `=`），常用于临时配置[访问凭证](/server/prerequisites)。
+`env` 设置当前服务端进程的环境变量，常用于临时配置[访问凭证](/server/prerequisites)，设置后后续 SOAR 调用立即使用新凭证。
 
 ```bash title="siren_server"
 >>> env SOAR_ACCESS_KEY_ID=<YOUR_ACCESS_KEY_ID>
 >>> env SOAR_ACCESS_KEY_SECRET=<YOUR_ACCESS_KEY_SECRET>
 ```
 
-设置 `SOAR_ACCESS_KEY_ID` / `SOAR_ACCESS_KEY_SECRET`（或兼容的 `ALIBABA_CLOUD_ACCESS_KEY_ID` / `ALIBABA_CLOUD_ACCESS_KEY_SECRET`）后，后续 SOAR 调用立即使用新凭证。
-
 <Callout title="进程级配置" type="warn">
   `env` 只影响当前服务端进程，重启后失效。持久化请在 Shell、systemd、cron 或 `.env` 等启动环境中配置，见 [服务端配置](/reference/server-config)。
 </Callout>
-
-## 快捷键
-
-| 按键 | 作用 |
-| --- | --- |
-| `Tab` | 补全命令名（`help ` 后还可补全子命令） |
-| `↑` / `↓` | 浏览历史命令 |
-| `Ctrl+A` / `Ctrl+E` | 跳到行首 / 行尾 |
-| `Ctrl+U` / `Ctrl+K` | 删除到行首 / 行尾 |
-| `Ctrl+W` | 删除前一个单词 |
-| `Ctrl+C` / `Ctrl+D` | 关闭 REPL 并停止服务端 |
 
 服务端二进制的启动参数和 `user`、`upgrade` 子命令见 [安装服务端](/server#命令行参数)，参数与配置键的对应见 [服务端配置](/reference/server-config#命令行参数)。

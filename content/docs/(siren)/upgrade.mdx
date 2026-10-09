@@ -28,7 +28,7 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 
 ## 版本一致
 
-服务端和客户端必须运行同一版本。两端没有兼容层，SIREN 也不提示版本差异；版本不同时客户端可能连不上或部分操作失败。
+服务端和客户端必须运行同一版本。两端没有兼容层，SIREN 也不提示版本差异，版本不同时客户端可能连不上或部分操作失败。
 
 查看版本：
 
@@ -36,11 +36,11 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 - **客户端**：[Clients](/clients#表格列) 页悬停 **Instance ID** 单元格，主机卡片中的 **Version**。
 - **命令行**：`siren --version`、`siren_server --version`。
 
-安装脚本、`upgrade` 子命令和一键部署都只取发布地址上的**最新**版本，不能指定版本或降级。因此新版本发布后，新接入的客户端就是新版本，服务端没跟上就会不一致。服务端启动时会检查新版本，有新版本时日志提示 `new version available; run './siren_server upgrade' to upgrade`，看到后尽快把两端一起升级。
+安装脚本、`upgrade` 子命令和一键部署都只取发布地址上的**最新**版本，不能指定版本或降级，所以新版本发布后新接入的客户端就会与旧服务端不一致。服务端启动时检查新版本，有新版本时日志提示 `new version available; run './siren_server upgrade' to upgrade`，看到后尽快把两端一起升级。
 
 ## 升级
 
-`upgrade` 子命令比较本机与发布版本，有新版本时询问是否升级（`-y` 跳过确认），然后只替换可执行文件，配置、证书、`data/` 和客户端身份不变。运行中的进程不会切换到新文件，必须重启。
+`upgrade` 子命令有新版本时询问是否升级（`-y` 跳过确认），只替换可执行文件，配置、证书、`data/` 和客户端身份不变。运行中的进程不会切换到新文件，必须重启。
 
 按以下顺序升级，让客户端在服务端重启前就拿到新程序：
 
@@ -59,10 +59,10 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 C:\Windows\Temp\siren\siren.exe upgrade -y
 ```
 
-这一步只替换磁盘上的程序，Shell 不会断开。客户端按系统 DNS 解析发布地址 `oss-siren.oss-cn-hongkong.aliyuncs.com`，无法解析或访问时下载失败。兼容包（`legacy`）升级后仍是兼容包。
+这一步只替换磁盘上的程序，Shell 不会断开。客户端需要能解析并访问发布地址 `oss-siren.oss-cn-hongkong.aliyuncs.com`，否则下载失败。
 
 <Callout title="重新运行安装脚本不会升级客户端" type="warn">
-  客户端安装脚本发现已有安装完好（程序和 `config.yaml` 都在，且程序能运行）时会跳过下载。已安装的主机用 `upgrade` 升级。
+  客户端安装脚本发现已有安装完好时会跳过下载。已安装的主机用 `upgrade` 升级。
 </Callout>
 
 </Step>
@@ -77,7 +77,7 @@ cd /opt/siren
 
 然后 `tmux attach -t siren`，按 `Ctrl+C` 停止旧进程，再执行 `./siren_server`。重启的影响见 [下文](#重启的影响)。
 
-重新运行服务端安装脚本效果相同，还会校验安装包的 SHA-256，并保留已有的 `server_config.yaml` 和证书。
+也可以重新运行服务端安装脚本，它保留已有的 `server_config.yaml` 和证书。
 
 </Step>
 <Step>
@@ -86,7 +86,7 @@ cd /opt/siren
 
 已接入的客户端会自动重连新服务端，但进程仍是旧版本，需要重启：
 
-- **一键部署的主机**：在 Global 或所属 Project 视图的 **Provisioning** 中对这些实例再执行一次 [Deploy SIREN](/onboard/provisioning)。安装脚本跳过下载，停止旧进程，按当前 `siren_server_callback` 规则改写 `config.yaml` 的 `server`、`port`，再用第 1 步的新程序启动。Client ID、Note 和 Project 归属不变。
+- **一键部署的主机**：在 **Provisioning** 中对这些实例再执行一次 [Deploy SIREN](/onboard/provisioning)。安装脚本跳过下载，停止旧进程，按当前 `siren_server_callback` 规则改写 `config.yaml` 的 `server`、`port`，再用第 1 步的新程序启动；Client ID、Note 和 Project 归属不变。
 - **手动启动的客户端**：在主机上停止旧进程，用原命令重新运行 `siren client`。
 
 不要用 **Clean & terminate** 后重新部署代替升级：清理会删除客户端身份，重新部署得到新的 Client ID，原 Note 和 Project 归属不会沿用。
@@ -176,7 +176,7 @@ Agentic IR 的会话记录由各 Provider CLI 保存在服务端用户自己的�
 
 ### 准备新主机
 
-新主机同样需要 Linux x86_64 和 tmux。工作目录中的 `siren_server` 随数据一起复制，版本不变，不需要运行安装脚本。
+新主机同样需要 Linux x86_64 和 tmux。`siren_server` 随工作目录一起复制，不需要运行安装脚本。
 
 </Step>
 <Step>
@@ -203,7 +203,7 @@ Agentic IR 的会话记录由各 Provider CLI 保存在服务端用户自己的�
 
 ### 处理网络地址
 
-尽量保留原公网 IP，例如把弹性公网 IP 转绑到新主机。客户端连接的地址在启动时已确定：手动启动的取 `-s` 参数或 `config.yaml` 中的 `server`；一键部署的取部署时 `siren_server_callback` 规则中的地址和端口，已写入其 `config.yaml`。
+尽量保留原公网 IP，例如把弹性公网 IP 转绑到新主机。客户端连接的地址在启动时已确定：手动启动的取 `-s` 参数或 `config.yaml` 中的 `server`；一键部署的取部署时 `siren_server_callback` 规则中的地址，已写入其 `config.yaml`。
 
 公网 IP 变化后，已接入的客户端重连失败会退出。先把 `egress.rules` 中 `siren_server_callback` 的 `destCidrIp` 改成新地址，再对一键部署的主机在新服务端上重新执行 [Deploy SIREN](/onboard/provisioning)（写入新地址并重启客户端，身份不变），手动启动的客户端在主机上改地址重启。已执行过 **Configure egress** 的实例，出站安全组仍只放行旧地址；新主机的入方向也要重新放行这些客户端的出口 IP。
 
