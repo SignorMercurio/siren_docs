@@ -2,7 +2,7 @@
 title: Recon 快照格式
 description: snapshot-jsonl-v2 的事件顺序、记录类型、稳定 ID、状态值和上限
 icon: FileJson
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - internal/reconartifact/schema.go
   - internal/reconartifact/validate.go
@@ -87,6 +87,7 @@ snapshot_end
 | `startedAt` | 采集开始时间 |
 | `modules` | 计划执行的模块列表，首项为 `basic` |
 | `limits` | 本次采集生效的上限，键名见 [上限](#上限)；带有时间预算时还有 `collectionSeconds` |
+| `evidenceContent` | 计划执行的模块中有会把配置、凭证、载荷或日志内容写入记录的（`topology`、`supplychain`、`config`、`activity`、`credential`）时为 `true`，否则省略；为 `true` 时 Markdown 报告只生成紧凑摘要 |
 
 ### record
 

@@ -2,7 +2,7 @@
 title: 客户端配置
 description: 客户端 config.yaml 的全部配置项、平台默认值、Profile 校验与插件开关
 icon: FileSliders
-verifiedAgainst: v2.33.12
+verifiedAgainst: v2.34.0
 sources:
   - config/config_linux.yaml
   - config/config_windows.yaml
@@ -43,9 +43,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 | 键 | 生效方式 |
 | --- | --- |
 | `server`、`port` | 只在 `siren client` 启动时读取，修改后重启客户端 |
-| `recon.*`、`plugins.*`、`oss.*` | 重启客户端，或在服务端 REPL 执行 `reload <Client ID>` 重新读取配置文件，见 [服务端 REPL](/reference/repl) |
-
-`reload` 先校验新配置中的 Profile，失败时保留当前配置；客户端正在执行 Recon 等用到配置的操作时，提示稍后重试。成功后 WebUI 的 Profile 列表随之更新。
+| `recon.*`、`plugins.*`、`oss.*` | 重启客户端后读取新配置 |
 
 ### 重装与配置
 
@@ -123,7 +121,7 @@ oss:
 
 ### Profile 校验规则
 
-客户端启动、`reload` 时和插件变更前都会校验 Profile，任一条不满足即拒绝：
+客户端启动和本地插件变更前都会校验 Profile，任一条不满足即拒绝：
 
 - 必须定义 `recon.profiles`，且至少有一个 Profile；`recon.defaultProfile` 必须非空并指向其中之一。
 - Profile 名匹配 `^[a-z][a-z0-9_-]{0,63}$`。

@@ -11,6 +11,43 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.34.0 <DateTag>2026-10-09</DateTag>
+
+### Breaking Change
+
+- 移除服务端 REPL 和端口转发。客户端管理、Shell、文件、Recon 和清理都在 WebUI 或 MCP 中完成；插件改在客户端本地用 `./siren plugins` 安装和启停，修改插件或 Profile 后重启客户端生效
+- 服务端不再读取终端输入，改为推荐以 systemd 服务运行，日志写入 journald，见 [用 systemd 启动](/server#用-systemd-启动)
+- 客户端和服务端必须同时升级；`egress.rules` 改为必填，`mcp.reconTimeout` 由 `recon.responseTimeout` 取代，旧版本的磁盘状态不再自动迁移
+
+### New Features
+
+- AIR Terminal 中的 Manual 会话发出首条提问后，Running 列表以该提问作为标题（新开的 Codex Terminal 会话除外）
+- Claude Code GUI 会话可在状态栏切换模型和推理强度；Codex、Claude、Pi 切换前先校验所选项，切换期间暂缓发送
+- Reports 每行新增 **Open in Artifacts**，切换到报告所属 Project 并在 Artifacts 中定位源文件
+- 一键部署的客户端连接 `siren_server_callback` 规则中配置的服务端地址
+- Raven 群会话 MCP 凭证 `SIREN_MCP_RAVEN_TOKEN` 改为可选
+- 侧栏可用 `Cmd+B` / `Ctrl+B` 展开或折叠
+
+### Improvements
+
+- 数据页面在宽屏上使用全部可用宽度，Settings 保持阅读宽度
+- AIR Running 会话卡片样式更新；时间线不再自动展开条目，折叠只作用于所在轮次
+- Codex 调用 SIREN MCP 工具是否需要确认改由操作者的 Codex 配置决定，GUI 中显示审批卡片
+- Logs 页面的组件列收窄，消息列更宽
+
+### Bug Fixes
+
+- 修复 AIR Terminal 重新连接后，Claude Code 等全屏 Provider 无法向上滚动的问题
+- 修复 AIR GUI 中 Provider 日志显示 ANSI 颜色码的问题
+- 服务端用户库、证书、配置文件和二进制不再出现在 Global Artifacts 中，也不能被下载、改名、删除或覆盖
+- 渲染的 Markdown 不再包含表单和按钮，WebUI 与 MCP 拒绝跨源修改请求，客户端 Shell 忽略剪贴板写入序列
+- 服务端拒绝客户端未经请求或超出大小限制的消息
+- Artifacts 上传目标跟随当前 Project，上传按钮标明目标根目录；从链接打开文件时在目录树中展开并选中
+- 包含 `topology`、`supplychain`、`config`、`activity` 或 `credential` 模块的自定义 Profile 也生成紧凑 Markdown 摘要，不再把记录原文写入报告
+- Reports 不再列出 Dossier 运行时模板
+- 未配置 `air.customPromptPrefix` 时 Custom 会话使用内置前缀
+- 修复 Pi 会话重复启动时丢失 SIREN MCP 注册，以及 Windows 插件入口解析问题
+
 ## v2.33.0 <DateTag>2026-09-23</DateTag>
 
 ### New Features

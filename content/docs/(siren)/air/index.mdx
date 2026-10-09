@@ -2,7 +2,7 @@
 title: Agentic 应急响应
 description: 在 WebUI 中让 Codex、Claude Code、Pi 或 Qoder 通过 SIREN 排查在线主机
 icon: Brain
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - internal/server/webui/frontend/src/pages/AIRPage.tsx
   - internal/server/webui/frontend/src/components/AIRRequests.tsx
@@ -33,7 +33,7 @@ AIR 是交互式会话，不是无人值守的自动处置：操作员需要盯�
 - **SIREN MCP 按范围注入**：每个会话都注入名为 `siren` 的 MCP Server。Global 视图可访问全部客户端，Project 视图只能访问本 Project 的客户端，工作目录也随范围切换，见 [启动与管理会话](/air/sessions#project-范围)。
 - **两种界面**：**GUI** 是按轮次组织的结构化时间线，**Terminal** 运行 Provider 原生的 TUI。启动前选择，运行期间不能切换。
 
-AIR 只能在 WebUI 中使用，服务端 REPL 和本地模式没有对应入口。
+AIR 在 WebUI 中使用。
 
 ## 前置条件
 

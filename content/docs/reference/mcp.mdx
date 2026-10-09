@@ -268,7 +268,7 @@ SIREN MCP 不提供告警查询工具。
 
 ## 同一客户端的并发
 
-每台客户端同一时刻只执行一条远程命令，MCP 的 `run`、`run_batch` 中的每台主机和服务端 REPL 的 `run` 共用此限制。冲突时不排队，立即以 `outcome: busy` 返回：
+每台客户端同一时刻只执行一条远程命令，MCP 的 `run` 与 `run_batch` 中的每台主机共用此限制。冲突时不排队，立即以 `outcome: busy` 返回：
 
 | 错误信息 | 原因 |
 | --- | --- |
@@ -284,7 +284,7 @@ SIREN MCP 不提供告警查询工具。
 `run` 和 `run_batch` 下发前，用 `server_config.yaml` 中 `mcp.cmdBlacklist` 的正则（Go 语法）逐条检查命令，命中则不下发，返回 `command blocked by policy (matched: <规则>)`。
 
 <Callout title="只作用于 MCP" type="info">
-  服务端 REPL 的 `run` 和 `shell`、WebUI 的 Shells 和 Files、Recon、插件以及 AIR 中 Provider 自带的 Shell 工具都不经过黑名单，见 [命令黑名单只作用于 MCP](/server/security#命令黑名单只作用于-mcp)。
+  WebUI 的 Shells 和 Files、Recon、插件以及 AIR 中 Provider 自带的 Shell 工具都不经过黑名单，见 [命令黑名单只作用于 MCP](/server/security#命令黑名单只作用于-mcp)。
 </Callout>
 
 默认规则阻断破坏性变更，放行 `cat`、`grep`、`journalctl`、`systemctl status`、`iptables -L` 等常用只读命令：

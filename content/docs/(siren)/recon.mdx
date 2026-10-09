@@ -2,7 +2,7 @@
 title: 自动化信息收集
 description: 用 Recon 在客户端上采集一份有范围、有上限的主机快照，保存到 Artifacts
 icon: ScanSearch
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - internal/server/webui/frontend/src/pages/InvestigationsPage.tsx
   - internal/server/webui/frontend/src/pages/InvestigationResults.tsx
@@ -12,7 +12,6 @@ sources:
   - internal/server/recon_events.go
   - internal/server/handler_recon.go
   - internal/server/mcp_recon.go
-  - internal/server/commander.go
   - internal/client/handler.go
   - internal/recon
   - internal/reconartifact/render.go
@@ -40,7 +39,7 @@ Recon 只采集事实，不判断主机是否被入侵，也不做白名单、�
 2. 选择 **Client**（当前范围内的在线客户端）和 **Profile**（该客户端上报的 Profile，默认为它的 `recon.defaultProfile`，见 [Profile](#profile)）。
 3. 点击 **Start Recon**。
 
-AIR 会话和外部 Agent 也可以调用 MCP 工具 `recon`（参数 `client_id` 和可选的 `profile`），见 [MCP](/reference/mcp#工具)。WebUI、MCP 和服务端 REPL 共用同一套规则和保存位置。
+AIR 会话和外部 Agent 也可以调用 MCP 工具 `recon`（参数 `client_id` 和可选的 `profile`），见 [MCP](/reference/mcp#工具)。WebUI 和 MCP 共用同一套规则和保存位置。
 
 ![Investigations 页的 Recon 标签，已选择客户端和 hunt Profile](../../img/recon-start.png)
 
@@ -50,7 +49,7 @@ AIR 会话和外部 Agent 也可以调用 MCP 工具 `recon`（参数 `client_id
 
 以下情况会结束当前操作并显示错误：
 
-- **同一客户端已有 Recon 在运行**：报 `recon already running`。每个客户端同时只能运行一个 Recon（WebUI、REPL 和 MCP 共用此限制），不同客户端可以并行。
+- **同一客户端已有 Recon 在运行**：报 `recon already running`。每个客户端同时只能运行一个 Recon（WebUI 和 MCP 共用此限制），不同客户端可以并行。
 - **服务端等待超时**：超过 `recon.responseTimeout` 报 `recon timed out after ...`。客户端还没停下时立即重发会收到 `recon already in progress on client`，稍后重试即可。
 - **客户端断开**：报 `Recon failed: context canceled`。
 - **客户端报错**：如权限不足、Profile 不存在或引用了被禁用的插件，错误原文显示在结果区。
@@ -103,7 +102,7 @@ recon:
 
 - Profile 名须匹配 `^[a-z][a-z0-9_-]{0,63}$`，每个 Profile 1 到 64 个不重复模块，模块名必须是本平台存在的模块。
 - recon 插件写作 `plugin:<name>`（如 `[user, process, plugin:chkrootkit]`），由 `plugins.<name>` 控制启停。安装插件不会自动加入任何 Profile；引用缺失或已禁用的插件时配置校验失败。见 [插件](/reference/plugins)。
-- 改完后在服务端 REPL 执行 `reload <Client ID>`。新配置无效时重载被拒绝，客户端保留上一份有效的 Profile，但此时重启客户端会因配置无效而退出。完整配置项见 [客户端配置](/reference/client-config)。
+- 改完后重启客户端加载新配置。新配置中的 Profile 无效时客户端会拒绝启动。完整配置项见 [客户端配置](/reference/client-config)。
 
 ## 模块
 
@@ -137,19 +136,11 @@ Recon 只使用主机上已有的工具，不安装软件。工具缺失或权�
 | --- | --- | --- | --- |
 | `recon.commandTimeout` | 客户端 `config.yaml` | `30` 秒 | 每条底层采集命令的超时，超时只影响该命令的 source。也用于插件和本地 OSS 上传；远程 `run` 见 [执行时限](/reference/mcp#执行时限) |
 | `recon.collectionTimeout` | 客户端 `config.yaml` | `270` 秒 | 整个 Profile 的采集预算。用尽后停止，已完成部分照常保存，未执行的模块记录在快照中，快照为 partial |
-| `recon.responseTimeout` | 服务端 `server_config.yaml` | `300` 秒 | WebUI、REPL 和 MCP 等待客户端结果的上限。服务端下发的采集预算为 `responseTimeout - 30` 秒，客户端取它与 `collectionTimeout` 中较小的值 |
+| `recon.responseTimeout` | 服务端 `server_config.yaml` | `300` 秒 | WebUI 和 MCP 等待客户端结果的上限。服务端下发的采集预算为 `responseTimeout - 30` 秒，客户端取它与 `collectionTimeout` 中较小的值 |
 
 调大 `recon.collectionTimeout` 时要同时调大服务端的 `recon.responseTimeout`，否则采集预算仍被压到 `responseTimeout - 30` 秒。
 
 ## 命令行
-
-**服务端 REPL**：
-
-```bash
->>> recon <Client ID> [Profile]
-```
-
-省略 Profile 时使用客户端的默认 Profile。命令立即返回，完成后在终端打印报告路径，保存位置与 WebUI 相同。见 [服务端 REPL](/reference/repl)。
 
 **本地模式**（在目标主机上直接运行客户端，不连服务端）：
 
@@ -157,4 +148,4 @@ Recon 只使用主机上已有的工具，不安装软件。工具缺失或权�
 ./siren recon [--profile quick]
 ```
 
-在当前目录生成 `SIREN_<主机名>_<时间>.recon.jsonl` 和同名 `.md`，再上传到 OSS 的 `<oss.bucketName>/<oss.docObjectPath>/<文件名>`。上传前需在环境变量中设置 [OSS 凭证](/server/prerequisites#oss-凭证)；上传失败时命令报错退出，本地文件保留。WebUI 和 REPL 不使用 OSS。
+在当前目录生成 `SIREN_<主机名>_<时间>.recon.jsonl` 和同名 `.md`，再上传到 OSS 的 `<oss.bucketName>/<oss.docObjectPath>/<文件名>`。上传前需在环境变量中设置 [OSS 凭证](/server/prerequisites#oss-凭证)；上传失败时命令报错退出，本地文件保留。WebUI 和 MCP 的远程 Recon 不使用 OSS。

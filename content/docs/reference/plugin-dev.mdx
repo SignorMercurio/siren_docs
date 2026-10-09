@@ -2,7 +2,7 @@
 title: 插件开发
 description: 插件清单、程序约定、构建与发布到插件市场
 icon: Code
-verifiedAgainst: v2.33.12
+verifiedAgainst: v2.34.0
 sources:
   - internal/plugin/plugin.go
   - internal/plugin/manage.go
@@ -50,7 +50,6 @@ _plugins/
   "version": "1.0.0",
   "type": "command",
   "description": "A brief description of the plugin",
-  "usage": "myplugin <Client ID> [args]",
   "clientUsage": "myplugin [args]",
   "platforms": ["linux_amd64", "linux_arm64"],
   "entrypoint": "myplugin",
@@ -66,7 +65,6 @@ _plugins/
 | `entrypoint` | 是 | 可执行文件名，所有平台共用。不能为空，不能含 `..`、`/` 或 `\` |
 | `version` | 否 | 只在插件列表中展示，不参与比较 |
 | `description` | 否 | 本地模式下 `./siren --help` 中的命令说明 |
-| `usage` | 否 | REPL `plugins <Client ID>` 表格的 `Usage` 列 |
 | `clientUsage` | 否 | 仅 command 插件。本地模式的命令用法，第一个单词即本地命令名，应以插件名开头；留空时命令名为 `name` |
 | `setup` | 否 | 安装和更新时执行的脚本文件名，限制同 `entrypoint` |
 
@@ -85,7 +83,7 @@ SIREN 客户端只发布这三个平台；`make build-plugins` 默认只构建�
 
 ### 服务端限制
 
-单台客户端最多 64 个插件，超出时服务端拒绝该客户端连接。上报给服务端的 `version` 超过 64 字节、`usage` 超过 256 字节时被截断。
+单台客户端最多 64 个插件，超出时服务端拒绝该客户端连接。上报给服务端的 `version` 超过 64 字节时被截断。
 
 ## 程序约定
 
@@ -93,7 +91,7 @@ SIREN 客户端只发布这三个平台；`make build-plugins` 默认只构建�
 | --- | --- | --- |
 | 参数 | 无 | 用户输入按空白切分后作为命令行参数，不支持引号 |
 | 输出 | stdout 和 stderr 合并写入 Recon 快照，按 Markdown 原样嵌入报告，标题为 `Plugin: <name>`；需要等宽显示时由插件自己输出代码块围栏 | stdout 和 stderr 合并返回调用方 |
-| 非零退出 | 该段落记为失败，已有输出保留，快照变为 partial | 本地模式打印输出后报错；远程调用只返回 `plugin error: ...`，插件输出丢弃 |
+| 非零退出 | 该段落记为失败，已有输出保留，快照变为 partial | 打印已有输出后报错 |
 
 共同执行环境：
 
@@ -102,7 +100,7 @@ SIREN 客户端只发布这三个平台；`make build-plugins` 默认只构建�
 - **超时**：客户端 `recon.commandTimeout`，默认 30 秒，超时后插件及其子进程被终止。
 - **输出上限**：16 MiB；在 Recon 中还受该模块剩余输出预算限制，超出时截断。
 
-远程调用的 command 插件会阻塞同一客户端的 Files、`upload` 等请求。耗时工作应把结果写成文件后尽快返回，让操作者通过 Files 或 REPL `upload` 取回。
+command 插件通过客户端本地命令调用。生成的文件可通过 Files 下载。
 
 ## setup 脚本
 

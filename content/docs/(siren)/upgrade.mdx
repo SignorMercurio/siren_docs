@@ -2,7 +2,7 @@
 title: 升级与数据
 description: 升级服务端和客户端、支持的平台、升级后要核对的配置，以及服务端数据的备份与迁移
 icon: CircleFadingArrowUp
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - internal/upgrade/
   - cmd/server/cli/upgrade.go
@@ -75,7 +75,7 @@ cd /opt/siren
 ./siren_server upgrade -y
 ```
 
-然后 `tmux attach -t siren`，按 `Ctrl+C` 停止旧进程，再执行 `./siren_server`。重启的影响见 [下文](#重启的影响)。
+然后执行 `systemctl restart siren`。重启的影响见 [下文](#重启的影响)。
 
 也可以重新运行服务端安装脚本，它保留已有的 `server_config.yaml` 和证书。
 
@@ -103,7 +103,7 @@ Settings 中服务端的 **Version** 应与 Clients 页每台客户端的 **Vers
 
 ### 重启的影响
 
-以下状态只在服务端内存中，重启后清空：WebUI 登录会话（需要重新登录）、Logs 页面缓冲、签发的 MCP 会话凭证、运行中的 Agentic IR 会话、近期部署与清理记录、MCP `run` 结果缓存，以及所有端口转发。
+以下状态只在服务端内存中，重启后清空：WebUI 登录会话（需要重新登录）、Logs 页面缓冲、签发的 MCP 会话凭证、运行中的 Agentic IR 会话、近期部署与清理记录、MCP `run` 结果缓存。
 
 客户端会自动重连并恢复原 Client ID、Note 和 Project 归属，但连续 10 次重连失败（约 5 分钟）后退出，见 [重连行为](/onboard/manual#重连行为)，所以停机时间要尽量短。运行中的 AIR 会话在关闭时结束，之后可以从 History 继续，见 [服务端重启](/air/sessions#服务端重启)。
 
@@ -148,7 +148,6 @@ diff /opt/siren/server_config.yaml /tmp/server_config.new.yaml
 | `data/client_ids.json` | 客户端身份与 Client ID 的对应关系 |
 | `data/client_notes.json` | 客户端 Note |
 | `data/egress.json` | **Configure egress** 的恢复记录。丢失后无法再用 [Restore egress](/restore-egress) 撤销已下发的出站规则 |
-| `uploads/client-<ID>/` | 服务端 REPL `upload` 拉取的文件 |
 | 工作目录中的其他文件 | Global 范围的 Artifacts，例如 Recon 结果和 AccessKey 报告 |
 | `webui.projectsBaseDir` 下的子目录 | 各 Project 的 Artifacts 和报告；未设置时位于工作目录下 |
 | `webui.dossierDir` | Dossier 静态文件，以及 Blank template 中粘贴的图片 |
@@ -157,7 +156,7 @@ Agentic IR 的会话记录由各 Provider CLI 保存在服务端用户自己的�
 
 ## 备份
 
-1. 在 tmux 中按 `Ctrl+C` 停止服务端，避免复制时文件正在写入。
+1. 执行 `systemctl stop siren` 停止服务端，避免复制时文件正在写入。
 2. 打包工作目录，以及位于工作目录之外的 Project 基准目录、`webui.userDBPath`、`webui.dossierDir`：
 
    ```bash title="控制主机"
@@ -176,7 +175,7 @@ Agentic IR 的会话记录由各 Provider CLI 保存在服务端用户自己的�
 
 ### 准备新主机
 
-新主机同样需要 Linux x86_64 和 tmux。`siren_server` 随工作目录一起复制，不需要运行安装脚本。
+新主机同样需要 Linux x86_64。`siren_server` 随工作目录一起复制，不需要运行安装脚本。
 
 </Step>
 <Step>
@@ -212,7 +211,7 @@ Agentic IR 的会话记录由各 Provider CLI 保存在服务端用户自己的�
 
 ### 启动并核对
 
-在 tmux 中启动服务端，在 Settings 中确认 **Authentication**、**Dossier** 和 **AIR runtime** 正常，在 Clients 页确认客户端以原 Client ID 重新上线。
+按 [用 systemd 启动](/server#用-systemd-启动) 写入 `siren.service` 并启动，在 Settings 中确认 **Authentication**、**Dossier** 和 **AIR runtime** 正常，在 Clients 页确认客户端以原 Client ID 重新上线。
 
 </Step>
 </Steps>

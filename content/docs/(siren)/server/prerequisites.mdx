@@ -2,7 +2,7 @@
 title: 前置条件与凭证
 description: 按功能列出 SIREN Server 依赖的证书、账号、凭证和外部服务
 icon: ListChecks
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - config/server_config.yaml
   - cmd/server/cli/root.go
@@ -13,7 +13,6 @@ sources:
   - internal/server/air_mcp.go
   - internal/server/egress.go
   - internal/server/deployment_discovery.go
-  - internal/server/commander.go
   - internal/server/webui/webui_dossier.go
   - internal/server/air_runtime.go
   - internal/server/shell.go
@@ -40,7 +39,6 @@ import { Callout } from "fumadocs-ui/components/callout";
 | [`webui.publicURL`](#webuipublicurl) | Agentic IR | Agentic IR 会话启动失败 |
 | [Dossier 目录](#dossier-目录) | Reports 页面、Dossier 报告编辑 | 报告无法在 Dossier 中打开 |
 | [AIR Provider CLI](#air-provider-cli) | Agentic IR | 对应 Provider 不可用 |
-| [tmux](#tmux) | 常驻运行服务端、REPL `shell` | REPL `shell` 无法打开 |
 | [OSS 凭证](#oss-凭证) | 本地模式上传 Recon 结果和文件 | 上传失败 |
 | [插件市场](#插件市场) | 客户端插件安装与更新 | 无法下载或更新插件 |
 
@@ -49,8 +47,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 MCP 和 SOAR 凭证都从环境变量读取，不要写进 `server_config.yaml`、Project 目录或 Git 仓库：
 
 - **`.env` 文件（推荐）**：启动时依次读取当前工作目录和二进制所在目录下的 `.env`，环境中已有的同名变量优先。建议权限 `600`。
-- **Shell 导出**：在启动 `siren_server` 的 tmux 窗口里 `export`。
-- **REPL `env KEY=VALUE`**：只修改当前进程，重启后失效。
+- **Shell 导出**：在启动 `siren_server` 的 Shell 中 `export`。
 
 ```bash title="/opt/siren/.env"
 SIREN_MCP_ADMIN_TOKEN=<随机字符串>
@@ -103,7 +100,7 @@ egress:
 
 ## 出口发现 `egress.discovery`
 
-部署（**Deploy SIREN**、REPL `deploy` / `deploy-batch`、MCP `deploy`）时未手动填写出口 IP，SIREN 让目标主机发出一次探测连接，再通过 SOAR 查询云防火墙日志找出它的来源 IP，只放行这个 IP。
+部署（**Deploy SIREN**、MCP `deploy`）时未手动填写出口 IP，SIREN 让目标主机发出一次探测连接，再通过 SOAR 查询云防火墙日志找出它的来源 IP，只放行这个 IP。
 
 ```yaml title="server_config.yaml"
 egress:
@@ -119,16 +116,11 @@ egress:
 
 ## SOAR 凭证
 
-- **用于**：上表所列操作（含对应的 REPL `allow`、`deploy`、`deploy-batch` 和 MCP `deploy`）。
+- **用于**：上表所列操作（含 MCP `deploy`）。
 - **配置**：环境变量 `SOAR_ACCESS_KEY_ID` / `SOAR_ACCESS_KEY_SECRET`，必须成对设置，只设一个会报错。都未设置时回退到 Alibaba Cloud SDK 默认凭证链，例如 `ALIBABA_CLOUD_ACCESS_KEY_ID` / `ALIBABA_CLOUD_ACCESS_KEY_SECRET`。
 - **缺失时**：服务端照常启动，上述操作执行时报错。
 
-凭证在首次使用后缓存，之后改 `.env` 或 Shell 环境需要重启服务端。在 REPL 中用 `env` 设置上述任一变量会立即生效，但只作用于当前进程：
-
-```bash title="SIREN Server"
->>> env SOAR_ACCESS_KEY_ID=<AccessKey ID>
->>> env SOAR_ACCESS_KEY_SECRET=<AccessKey Secret>
-```
+凭证在首次使用后缓存，修改 `.env` 或启动环境后需要重启服务端。
 
 ## webui.publicURL
 
@@ -146,15 +138,11 @@ egress:
 
 在控制主机上安装并登录 Codex、Claude Code、Qoder 或 Pi CLI，由 `air.providers.<name>` 指定路径和参数，见 [准备 AIR Provider](/server/air-providers)。缺失时 Settings 的 **AIR runtime** 下显示对应 Provider 不可用及原因。
 
-## tmux
-
-服务端需要常驻终端，在 tmux 中运行，见 [保持服务端运行](/server#保持服务端运行)。REPL 的 `shell` 命令没有 tmux 时无法使用；WebUI 的 Shells 和 Agentic IR 不依赖 tmux。
-
 ## 网络
 
 | 方向 | 需要放通 |
 | --- | --- |
-| 入方向 | 主 TLS 端口（默认 `443`）对目标主机出口 IP 和操作者开放；使用[端口转发](/reference/portforward)时另开对应端口 |
+| 入方向 | 主 TLS 端口（默认 `443`）对目标主机出口 IP 和操作者开放 |
 | 服务端出方向 | `oss-siren.oss-cn-hongkong.aliyuncs.com`（安装、升级和启动时的版本检查）、SOAR 接入点 `sophonsoar.aliyuncs.com`、各 AIR Provider 的模型服务 |
 | 目标主机出方向 | 客户端下载地址和服务端连接端口，可用 **Configure egress** 下发 |
 

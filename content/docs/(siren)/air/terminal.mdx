@@ -2,7 +2,7 @@
 title: Terminal 界面
 description: 在浏览器中使用 Provider 原生 TUI：适用场景、复制粘贴、图片、尺寸和重新连接
 icon: SquareTerminal
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - internal/server/webui/frontend/src/components/AgentTerminalPanel.tsx
   - internal/server/webui/frontend/src/components/TerminalPanel.tsx
@@ -59,7 +59,7 @@ SIREN 只注入当前范围的 SIREN MCP、会话凭证、开场提示词或要�
 
 重新接入时，服务端回放缓存的原始终端输出：
 
-- 更早的输出已超出回放缓存时，回放开头显示 `[scrollback truncated]`。
+- 更早的输出已超出回放缓存时，回放开头显示 `[scrollback truncated]`。被挤出的输出开启过的全屏、鼠标上报等终端模式会先恢复，Claude Code 等全屏界面重连后仍能滚动。
 - 浏览器处理输出跟不上时，服务端断开这个查看者，页面自动重连并提示 `viewer fell behind; scrollback may be incomplete`。
 
 ## 同一会话不能同时运行两份

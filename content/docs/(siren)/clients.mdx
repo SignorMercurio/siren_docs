@@ -15,7 +15,6 @@ sources:
   - internal/server/client_notes.go
   - internal/server/webui/webui_clients.go
   - internal/server/mcp.go
-  - internal/server/help.go
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
@@ -83,7 +82,3 @@ Note 按客户端稳定身份保存，重连或服务端重启后仍在。客户
 ## 常见问题
 
 **客户端在运行，列表里却没有它**：确认当前范围（未归属的只在 Global 显示，归属其他 Project 的不在当前视图），清空筛选框，并在 [Logs](/logs) 中查看接入失败记录。
-
-<Callout title="命令行等价" type="info">
-  服务端 REPL 的 `ls`、`note`、`clean` 对应列出、备注和清理。REPL 没有 Project 范围：`ls` 总是列出全部客户端，也不能分配 Project。见 [服务端 REPL](/reference/repl)。
-</Callout>

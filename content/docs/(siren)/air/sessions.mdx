@@ -2,7 +2,7 @@
 title: 启动与管理会话
 description: 选择 Provider 和入口模式启动 AIR 会话，在 Running 中重新接入或停止，并从 History 继续以前的会话
 icon: Workflow
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - internal/server/webui/frontend/src/pages/AIRPage.tsx
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
@@ -84,7 +84,7 @@ Provider 下方有三个入口模式，默认选中 **Custom**：
 
 ## Running
 
-**Running** 列出当前范围内运行中的会话，每行显示标题、启动时间、客户端和入口模式，等待操作员时显示 **Approval required** 或 **Question waiting**。点击一行即接入该会话。列表刷新失败时显示 `List may be stale: ...`，其中可能包含已不存在的会话。
+**Running** 列出当前范围内运行中的会话，每行显示标题、启动时间、客户端和入口模式，等待操作员时显示 **Approval required** 或 **Question waiting**。点击一行即接入该会话。Manual 会话以首条提问为标题：GUI 会话发送后即更新，Terminal 会话从 Provider 会话记录中读取，读到之前（包括 SIREN 无法定位记录的新建 Codex Terminal 会话）显示入口模式和短会话 ID。列表刷新失败时显示 `List may be stale: ...`，其中可能包含已不存在的会话。
 
 ### 待处理提示
 

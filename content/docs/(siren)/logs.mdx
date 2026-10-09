@@ -2,7 +2,7 @@
 title: 日志与审计
 description: 在 Logs 页面查看服务端运行日志，按关键词、级别和组件过滤，并追查 Shell、MCP 命令和登录记录
 icon: ScrollText
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - internal/server/webui/frontend/src/pages/LogsPage.tsx
   - internal/server/webui/frontend/src/logs/logQuery.ts
@@ -26,7 +26,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 **Logs** 页面显示服务端内存中最近的运行日志，不必登录控制主机就能看到客户端接入失败、登录失败、Shell 会话、AIR 与 MCP 报错等事件。
 
-这些记录与服务端终端输出的日志相同，同样受 `logging.level` 过滤；`logging.output` 设为 `none` 时页面仍照常保留。服务端 REPL 的命令回显（如 `run`、`info` 的输出）不是日志，不会出现在这里。Logs 不区分 Project，任何范围下都显示全部日志。
+这些记录与服务端写入 journald 的日志相同，同样受 `logging.level` 过滤；`logging.output` 设为 `none` 时页面仍照常保留。Logs 不区分 Project，任何范围下都显示全部日志。
 
 ## 查看与过滤
 
@@ -34,7 +34,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 | --- | --- |
 | 搜索框 | 不区分大小写的子串匹配，覆盖日志正文和所有字段值（如 Client ID、IP、事件名、`audit_id`），不匹配字段名 |
 | **All** / **Debug** / **Info** / **Warning** / **Error** | 级别可多选；**All** 表示不限级别 |
-| **All components** 下拉框 | 按组件过滤，如 `server`、`client`、`webui`、`mcp`、`air`、`recon`、`artifact`、`port_forward` |
+| **All components** 下拉框 | 按组件过滤，如 `server`、`client`、`webui`、`mcp`、`air`、`recon`、`artifact` |
 | **Live** / **Paused** | **Live** 持续拉取新日志，**Paused** 停止拉取 |
 | 复制、下载按钮 | 把当前列表复制为纯文本或下载为文件 |
 
@@ -60,7 +60,6 @@ SIREN 不写日志文件；长期留存见 [日志格式与留存](/reference/se
 | WebUI 登录 | `auth.login.success`、`auth.login.failed`、`auth.login.rate_limited`、`auth.logout.success` | `user`、`remote_ip` |
 | 浏览器 Shell | `shell.session.started`、`shell.session.ended`、`shell.session.request_failed` | `user`、`client_id`、`project`、`duration_ms`、结束原因 `reason` |
 | MCP 命令执行 | `mcp.run.requested`、`mcp.run.finished` | `audit_id`、`command`、`client_id`、`outcome` |
-| REPL 拉取文件 | `artifact.upload.saved` | `client_id`、`path` |
 | WebUI 请求 | `webui.request.completed` 等 | `request_id`、`user`、`route` |
 
 Shell 会话只记录谁在何时对哪台客户端打开、持续多久，不记录输入和输出。

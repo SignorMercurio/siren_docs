@@ -9,8 +9,6 @@
     "server-config",
     "client-config",
     "---命令行---",
-    "repl",
-    "portforward",
     "client-cli",
     "---集成---",
     "mcp",

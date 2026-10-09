@@ -2,7 +2,7 @@
 title: 一键部署
 description: 通过 WebUI Provisioning 向阿里云 ECS 批量安装并接入 SIREN 客户端
 icon: CloudUpload
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - internal/server/webui/frontend/src/components/Provisioning.tsx
   - internal/server/webui/frontend/src/provisioning.ts
@@ -89,6 +89,6 @@ i-demo0004,203.0.113.11,db-1
 - **动态出口**：单次探测只确认该次连接的出口 IP，后续连接换了公网地址仍可能连不上；SIREN 不会放行整个出口池。每次重试都重新探测。
 - **手动指定出口 IP**：SOAR 无法返回出口 IP，或系统不支持自动抓包（如需要第三方抓包驱动的 Windows）时，在目标行第二列填入核对过的公网出口 IP（可在主机上用 `curl ifconfig.co/ip` 获取），SIREN 跳过自动发现直接放行。
 
-<Callout title="命令行等价" type="info">
-  服务端 REPL 的 `deploy-batch` 和 MCP `deploy` 工具走同一套部署流程，见 [服务端 REPL](/reference/repl) 和 [MCP 集成](/reference/mcp)。
+<Callout title="自动化部署" type="info">
+  MCP `deploy` 工具走同一套部署流程，见 [MCP 集成](/reference/mcp)。
 </Callout>

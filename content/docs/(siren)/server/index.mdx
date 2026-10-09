@@ -2,7 +2,7 @@
 title: 安装服务端
 description: 在控制主机上安装、启动、升级 SIREN Server
 icon: ServerCog
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - scripts/get_siren_server.sh
   - config/server_config.yaml
@@ -15,7 +15,6 @@ sources:
   - internal/protocol/shell.go
   - internal/server/mcp_auth.go
   - internal/server/air_mcp.go
-  - internal/server/commander.go
   - internal/server/shell.go
   - internal/server/webui/frontend/src/pages/LoginPage.tsx
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
@@ -96,15 +95,35 @@ SOAR 凭证也可以放在同一个 `.env` 中，加载规则见 [设置服务�
 </Step>
 <Step>
 
-### 在 tmux 中启动
+### 用 systemd 启动
 
-```bash title="控制主机"
-tmux new -s siren
-cd /opt/siren
-./siren_server
+```ini title="/etc/systemd/system/siren.service"
+[Unit]
+Description=SIREN server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=/opt/siren
+ExecStart=/opt/siren/siren_server
+Environment=HOME=/root LANG=en_US.UTF-8
+Environment=PATH=/root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Restart=on-failure
+RestartSec=3s
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-看到 `server listening` 后按 `Ctrl+B` 再按 `D` 分离会话，之后用 `tmux attach -t siren` 回到服务端终端。
+`PATH` 必须包含各 AIR Provider CLI 所在目录，否则对应 Provider 不可用，见 [准备 AIR Provider](/server/air-providers)。
+
+```bash title="控制主机"
+systemctl daemon-reload
+systemctl enable --now siren
+journalctl -u siren -f
+```
+
+看到 `server listening` 即启动完成。
 
 </Step>
 <Step>
@@ -123,7 +142,7 @@ cd /opt/siren
 
 ## 单一 TLS 端口
 
-客户端、交互式 Shell、Web 控制台、`/dossier/` 和 MCP 共用一个 TLS 端口（顶层 `listen` / `port`，默认 `0.0.0.0:443`），按 TLS 握手中的 ALPN 分流；关闭 WebUI 后 `/mcp` 仍在该端口提供服务。只需对目标主机和操作者开放这一个端口，[端口转发](/reference/portforward)的 `fwd` 会另开监听端口。
+客户端、交互式 Shell、Web 控制台、`/dossier/` 和 MCP 共用一个 TLS 端口（顶层 `listen` / `port`，默认 `0.0.0.0:443`），按 TLS 握手中的 ALPN 分流；关闭 WebUI 后 `/mcp` 仍在该端口提供服务。只需对目标主机和操作者开放这一个端口。
 
 <Callout title="不要在前面终止 TLS" type="warn">
   服务端前面的负载均衡或反向代理只能做四层 TCP 透传；终止 TLS 后再转发 HTTP 会让客户端无法连接。
@@ -159,9 +178,7 @@ Agentic IR 会话通过 `webui.publicURL` 访问 SIREN MCP。要求：
 
 ## 保持服务端运行
 
-服务端始终在当前终端运行 [服务端 REPL](/reference/repl)，读到 EOF、`Ctrl+C`、`Ctrl+D` 或执行 `exit` 时立即关闭。systemd 等没有终端输入的环境会让服务端启动后马上退出，请在 tmux 中运行；REPL 的 `shell` 命令也只有在 tmux 中才能使用。
-
-SIREN 不写日志文件，tmux 和 WebUI Logs 页面只保留有限的近期输出。需要留存日志时见 [日志输出](/reference/server-config#日志格式与留存)。
+服务端由 systemd 管理：`systemctl restart siren` 重启，`systemctl stop siren` 停止。日志写入 journald，用 `journalctl -u siren` 查看；WebUI Logs 页面只保留有限的近期记录，留存见 [日志输出](/reference/server-config#日志格式与留存)。
 
 ## 命令行参数
 

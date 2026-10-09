@@ -2,14 +2,13 @@
 title: 常见问题
 description: 按使用流程整理的常见问题，每条指向负责说明的页面
 icon: BadgeQuestionMark
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - cmd/server/cli/root.go
   - cmd/server/cli/upgrade.go
   - cmd/client/cli/upgrade.go
   - internal/server/mcp_auth.go
   - internal/server/egress.go
-  - internal/server/commander.go
   - scripts/get_siren_server.sh
   - scripts/get_siren.sh
   - internal/server/webui/auth.go
@@ -53,7 +52,7 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
 <Accordion title="服务端启动后马上退出">
 
-服务端在当前终端运行 REPL，读到 EOF 就关闭，所以在 systemd 等没有终端输入的环境中启动即退出。在 tmux 中运行，见 [保持服务端运行](/server#保持服务端运行)。
+服务端可以在没有终端输入的环境中运行。启动后立即退出时，检查日志中的配置、证书、监听端口和 MCP 凭证错误，见 [保持服务端运行](/server#保持服务端运行)。
 
 </Accordion>
 
@@ -173,7 +172,7 @@ GUI 显示 **Session did not start** 和原因，最常见的是 `webui.publicUR
 
 <Accordion title="找不到刚生成的文件">
 
-刷新文件树并确认范围：Recon 结果跟随客户端的 Project 归属，AccessKey 报告和 REPL `upload` 始终在 Global，见 [Artifacts 常见问题](/artifacts#常见问题)。
+刷新文件树并确认范围：Recon 结果跟随客户端的 Project 归属，AccessKey 报告始终在 Global，见 [Artifacts 常见问题](/artifacts#常见问题)。
 
 </Accordion>
 
@@ -239,7 +238,7 @@ Logs 页面只在内存中保留最近 `logging.bufferSize` 条（默认 5000）
 
 <Accordion title="如何管理插件？">
 
-只能在服务端 REPL 或客户端本地命令行中安装、卸载、更新和启停，WebUI 没有插件入口，见 [插件](/reference/plugins)。
+在客户端本地命令行中安装、卸载、更新和启停，WebUI 没有插件入口，见 [插件](/reference/plugins)。
 
 </Accordion>
 

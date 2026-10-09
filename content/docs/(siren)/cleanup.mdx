@@ -2,7 +2,7 @@
 title: 清理与结案
 description: 从受害主机移除 SIREN 客户端，并按清单收尾一次应急响应
 icon: ClipboardCheck
-verifiedAgainst: v2.33.11
+verifiedAgainst: v2.34.0
 sources:
   - internal/server/webui/frontend/src/components/ClientsTable.tsx
   - internal/server/webui/frontend/src/pages/ClientsPage.tsx
@@ -11,7 +11,6 @@ sources:
   - internal/server/cleanup_history.go
   - internal/server/webui/webui_cleanups.go
   - internal/server/handler.go
-  - internal/server/commander.go
   - internal/client/cleanup.go
   - internal/client/local_clean*.go
   - internal/client/identity.go
@@ -44,7 +43,7 @@ Project 视图中只能清理本 Project 的客户端。同一客户端已有清
 
 `Cleanup request sent` 只表示请求已发出。客户端收到后：
 
-1. 停止正在执行的任务、Shell 和端口转发，最多等 10 秒。仍有任务没停下时不删除任何文件，直接回报错误。
+1. 停止正在执行的任务和 Shell，最多等 10 秒。仍有任务没停下时不删除任何文件，直接回报错误。
 2. 删除 [清理范围](#清理范围) 中的内容。
 3. 回报结果后退出，不再重连。清理失败也会退出。
 
@@ -92,14 +91,6 @@ Linux 客户端在退出前删除全部目标。Windows 客户端立即删除配
 - 插件安装脚本自行写到 SIREN 目录之外的文件。
 
 ## 命令行
-
-**服务端 REPL**：
-
-```bash
->>> clean <Client ID>
-```
-
-输入 `y` 确认后发送清理请求，效果与 WebUI 相同，结果同样出现在 Recent activity 中。见 [服务端 REPL](/reference/repl)。
 
 **本地模式**（在目标主机上执行）：
 

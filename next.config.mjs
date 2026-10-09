@@ -8,6 +8,8 @@ const config = {
   reactStrictMode: true,
   async redirects() {
     return [
+      { source: '/reference/repl', destination: '/server', permanent: true },
+      { source: '/reference/portforward', destination: '/overview', permanent: true },
       { source: '/credential', destination: '/server/prerequisites', permanent: true },
       { source: '/reference/raven', destination: '/reference/mcp', permanent: true },
       { source: '/infra', destination: '/server/prerequisites', permanent: true },
@@ -19,10 +21,10 @@ const config = {
       { source: '/dossier/syntax', destination: '/reports/syntax', permanent: true },
       { source: '/dossier/workflow', destination: '/reports', permanent: true },
       { source: '/dossier/config', destination: '/reports', permanent: true },
-      { source: '/remote', destination: '/reference/repl', permanent: true },
-      { source: '/misc', destination: '/reference/repl', permanent: true },
-      { source: '/misc/server', destination: '/reference/repl', permanent: true },
-      { source: '/portforward', destination: '/reference/portforward', permanent: true },
+      { source: '/remote', destination: '/server', permanent: true },
+      { source: '/misc', destination: '/server', permanent: true },
+      { source: '/misc/server', destination: '/server', permanent: true },
+      { source: '/portforward', destination: '/overview', permanent: true },
       { source: '/config', destination: '/reference/server-config', permanent: true },
       { source: '/mcp', destination: '/reference/mcp', permanent: true },
       { source: '/dir', destination: '/reference', permanent: true },

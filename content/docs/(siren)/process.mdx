@@ -2,7 +2,7 @@
 title: 进程分析
 description: 在 Investigations 中按 PID、监听端口或进程名查看 Linux 客户端的进程详情
 icon: Activity
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - internal/server/webui/frontend/src/pages/InvestigationsPage.tsx
   - internal/server/webui/frontend/src/pages/ProcessResults.tsx
@@ -12,7 +12,6 @@ sources:
   - internal/server/webui/webui_investigations.go
   - internal/server/webui_process_bridge.go
   - internal/server/info_requests.go
-  - internal/server/commander.go
   - internal/client/info_convert_unix.go
   - internal/info
   - cmd/client/cli/info.go
@@ -85,13 +84,7 @@ CPU 和内存取自 `ps`，CPU 是进程整个生命周期的平均值，不是�
 
 ## 命令行
 
-服务端 REPL 和本地模式提供同样的查询，以文本打印。
-
-```bash tab="服务端 REPL"
->>> info <Client ID> <PID>
->>> info <Client ID> -p <Port>
->>> info <Client ID> -n <Process Name>
-```
+客户端本地命令提供文本形式的查询结果。
 
 ```bash tab="本地模式"
 ./siren info <PID>
@@ -99,5 +92,4 @@ CPU 和内存取自 `ps`，CPU 是进程整个生命周期的平均值，不是�
 ./siren info -n <Process Name>
 ```
 
-- REPL 的 `info` 不支持 Windows 客户端；名称匹配多个进程时打印候选列表（最多 50 个），需再用 PID 查询。见 [服务端 REPL](/reference/repl)。
 - 本地模式的 `info` 只在 Linux 版客户端中提供，名称匹配的候选数量不设上限。

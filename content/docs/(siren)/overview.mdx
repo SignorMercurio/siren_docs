@@ -2,7 +2,7 @@
 title: SIREN 概述
 description: SIREN 是什么、由哪些部分组成、能做哪些事
 icon: BookOpen
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - internal/server/webui/frontend/src/nav.ts
   - internal/server/webui/frontend/src/components/Sidebar.tsx
@@ -24,7 +24,7 @@ import architectureDark from "../../img/architecture-dark.webp";
 import architectureLight from "../../img/architecture-light.webp";
 
 <Callout title="注意" type="warn">
-  SIREN 仅用于合法的应急响应和安全分析。运行信息收集、远程 Shell、文件操作、端口转发或痕迹清除前，请确认你有权调查目标系统。
+  SIREN 仅用于合法的应急响应和安全分析。运行信息收集、远程 Shell、文件操作或痕迹清除前，请确认你有权调查目标系统。
 </Callout>
 
 SIREN（**S**wift **I**ncident **R**esponse **E**vidence **N**avigator）是面向主机应急响应的工具，把接入主机、收集证据、远程排查、AI 辅助调查和报告整理放进同一个 Web 控制台，适合在事件中快速接入少量主机并留存证据。
@@ -33,7 +33,7 @@ SIREN（**S**wift **I**ncident **R**esponse **E**vidence **N**avigator）是面�
 
 - **一台服务端，多个客户端**：SIREN Server 运行在一台 Linux 控制主机上，被调查主机上的客户端主动连接它。目标主机只需能访问服务端的一个端口，不用开放入站端口。
 - **一个 TLS 端口**：客户端接入、交互式 Shell、Web 控制台、MCP 和 Dossier 共用同一个 TLS 端口（默认 `443`），见 [单一 TLS 端口](/server#单一-tls-端口)。
-- **浏览器即操作台**：日常操作和 Agentic IR 都在 Web 控制台中完成；[服务端 REPL](/reference/repl) 只补充端口转发、插件管理等操作。
+- **浏览器即操作台**：日常操作和 Agentic IR 都在 Web 控制台中完成。
 
 ## 能力地图
 
@@ -73,7 +73,6 @@ SIREN（**S**wift **I**ncident **R**esponse **E**vidence **N**avigator）是面�
 | [Settings](/webui#settings) | 账号菜单中查看鉴权、Dossier 和 AIR runtime 等服务端状态 |
 | [MCP](/reference/mcp) | 供 AIR 和外部 MCP 客户端列出客户端、执行命令、运行 Recon |
 | [插件](/reference/plugins) | `command` 和 `recon` 两类客户端插件（如 `jdump`、`chkrootkit`），通过命令行管理 |
-| [服务端 REPL](/reference/repl) | 服务端终端中的命令行，提供 [端口转发](/reference/portforward) 等操作 |
 
 ## 架构
 

@@ -2,7 +2,7 @@
 title: 客户端文件
 description: 在 Files 页面浏览在线客户端的文件系统，预览、下载文件或目录，并向客户端上传文件
 icon: FolderOpen
-verifiedAgainst: v2.33.11
+verifiedAgainst: v2.34.0
 sources:
   - internal/server/webui/frontend/src/pages/ClientFilesPage.tsx
   - internal/server/webui/frontend/src/components/FileBrowser.tsx
@@ -18,7 +18,6 @@ sources:
   - internal/protocol/fs.go
   - internal/client/files.go
   - internal/server/handler.go
-  - internal/server/commander.go
   - cmd/client/cli/upload.go
   - pkg/utils/oss.go
   - config/config_linux.yaml
@@ -62,7 +61,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 单个文件上限 100 MiB；目录中普通文件合计和压缩包本身都不能超过 100 MiB，否则报错 `directory too large for download`。打包时隐藏文件照常包含，符号链接、设备文件等非普通文件和无权读取的文件被静默跳过。
 
-下载只保存到浏览器，不进入服务端 Artifacts；需要在服务端留存，用下文 [命令行](#命令行) 的 REPL `upload`，或把文件上传到 [Artifacts](/artifacts)。
+下载只保存到浏览器，不进入服务端 Artifacts；需要在服务端留存，可把下载的文件上传到 [Artifacts](/artifacts)。
 
 每次读取、下载或上传最多等待客户端 2 分钟。
 
@@ -91,19 +90,8 @@ Files 不提供删除、重命名、新建目录或修改权限，请在 [Shell]
 
 ## 命令行
 
-```bash tab="服务端 REPL"
->>> upload <Client ID> <Client file path>
-```
-
-```bash tab="本地模式"
+```bash
 ./siren upload <file path>
 ```
-
-**服务端 REPL** 的 `upload` 从在线客户端拉取一个文件到服务端：
-
-- 保存到服务端工作目录下的 `uploads/client-<Client ID>/<文件名>`，即 Global Artifacts；客户端属于 Project 时也不进入 Project 目录。
-- 不覆盖同名文件，依次保存为 `<文件名>.1`、`<文件名>.2`……
-- 只能拉取普通文件，单个最大 1 GiB，路径可以含空格（如 `C:\Program Files\...`）。
-- 保存成功后，[Logs](/logs) 中出现带保存路径的 `artifact.upload.saved` 事件。
 
 **本地模式** 的 `./siren upload` 把当前主机上的文件上传到阿里云 OSS 的 `<oss.objectPath>/<文件名>`（安装包配置的前缀为 `tmp/siren_upload`），桶和地域由 `oss.bucketName`、`oss.region` 决定，见 [客户端配置](/reference/client-config)。使用前需在该主机上设置 [OSS 凭证](/server/prerequisites#oss-凭证)。

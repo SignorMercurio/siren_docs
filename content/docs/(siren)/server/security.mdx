@@ -2,7 +2,7 @@
 title: 账号与安全边界
 description: SIREN Server 的访问控制模型、各入口的鉴权方式和公网暴露建议
 icon: ShieldCheck
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - internal/auth/store.go
   - cmd/server/cli/user.go
@@ -18,7 +18,6 @@ sources:
   - internal/server/mcp.go
   - internal/protocol/tls.go
   - internal/server/client_registry.go
-  - internal/server/portforward.go
   - internal/server/webui/frontend/src/pages/LoginPage.tsx
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
 ---
@@ -36,8 +35,6 @@ SIREN Server 各入口的鉴权方式不同，部署到公网前请逐条核对�
 | 托管客户端连接 | 无 | 依靠网络放行控制来源，见 [客户端与服务端之间](#客户端与服务端之间) |
 | `/dossier/` | 无 | 见 [`/dossier/` 不鉴权](#dossier-不鉴权) |
 | 登录页、前端静态文件、`/api/version` | 无 | 暴露服务端版本号 |
-| [端口转发](/reference/portforward)监听端口 | 无 | 在服务端所有网卡上监听，能访问该端口即可连到转发目标 |
-| 服务端 REPL | 控制主机终端 | 只能在运行 `siren_server` 的终端中使用 |
 
 ## WebUI 账号
 
@@ -82,7 +79,7 @@ Agentic IR 启动 Provider CLI 时会从子进程环境中剔除 `SIREN_MCP_ADMI
 
 ### 命令黑名单只作用于 MCP
 
-`mcp.cmdBlacklist` 只检查 MCP 的 `run` 和 `run_batch`。服务端 REPL 的 `run` 和 `shell`、Web 控制台的 Shells 和 Files、Agentic IR 中 Provider 自带的 Shell 工具（在控制主机上执行）都不受约束。
+`mcp.cmdBlacklist` 只检查 MCP 的 `run` 和 `run_batch`。Web 控制台的 Shells 和 Files、Agentic IR 中 Provider 自带的 Shell 工具（在控制主机上执行）都不受约束。
 
 无法编译的正则会被跳过且服务端照常启动，日志中记录 `mcp.blacklist_pattern.invalid` 警告；修改后请检查日志。匹配方式见 [命令黑名单](/reference/mcp#命令黑名单)。
 
@@ -106,7 +103,7 @@ Reports 页面的 **Blank template** 虽然只读，但在其中粘贴的图片�
 <Callout title="上线前核对" type="warn">
   - 启动前用 `siren_server user add` 创建至少一个账号，启动后在 Settings 中确认 **Authentication** 显示已登录用户。
   - 使用覆盖访问域名、且受浏览器信任的证书，见 [更换证书](/server#更换证书)。
-  - 用安全组、防火墙或 VPN 把主 TLS 端口和端口转发的监听端口限制为必要来源（操作者和已放行的目标主机）。
+  - 用安全组、防火墙或 VPN 把主 TLS 端口限制为必要来源（操作者和已放行的目标主机）。
   - `SIREN_MCP_ADMIN_TOKEN` 使用高强度随机值，保存在权限为 `600` 的 `.env` 或服务环境中。
   - 只把 WebUI 账号发给可信操作员；人员变动时删除账号并重启服务端。
   - 不要在 Dossier 目录中放置其他文件，也不要在 Blank template 中粘贴敏感截图。

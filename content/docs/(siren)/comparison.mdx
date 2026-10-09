@@ -2,7 +2,7 @@
 title: 工具对比
 description: SIREN 与常见主机排查和 DFIR 工具的适用场景对比
 icon: Scale
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - internal/server/webui/frontend/src/nav.ts
   - internal/recon/profile.go
@@ -63,7 +63,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 | 核心定位 | 快速应急响应和报告整理 | 终端可见性、DFIR、Hunt 和持续监控 |
 | 运行方式 | 客户端按需部署、结案清除；服务端在事件期间运行 | 持续运行和集中管理 |
 | 查询与扩展 | 内置 Recon 模块和插件系统 | Artifact 生态和 VQL |
-| 交互界面 | Web 控制台为主，服务端 REPL 和客户端命令行为辅 | Web GUI |
+| 交互界面 | Web 控制台、MCP 和客户端本地命令行 | Web GUI |
 | 文件能力 | 客户端 Files、服务端 Artifacts、Dossier 报告 | 基于 VFS 和 Artifact 的取证文件采集 |
 | AI 辅助 | 内置 MCP 与 Agentic IR 工作流 | 以取证和 Hunt 平台能力为主 |
 | 上手成本 | 服务端部署一次，之后都在浏览器中完成 | 更适合有平台运维和 VQL 经验的团队 |

@@ -2,7 +2,7 @@
 title: 浏览器 Shell
 description: 在 Shells 页面打开客户端的交互式终端：多标签、复制粘贴、尺寸，以及会话何时保持、何时结束
 icon: SquareTerminal
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - internal/server/webui/frontend/src/pages/ShellsPage.tsx
   - internal/server/webui/frontend/src/components/TerminalPanel.tsx
@@ -20,8 +20,6 @@ sources:
   - internal/client/shell_windows.go
   - pkg/utils/utils_unix.go
   - pkg/utils/utils_windows.go
-  - cmd/server/cli/shell.go
-  - internal/server/commander.go
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
@@ -32,7 +30,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 Shells 页面没有新建按钮：在 [Clients](/clients#行内操作) 页点击目标客户端行内的 Shell 图标，WebUI 会新开一个标签并跳到 Shells 页面。
 
-Shell 走服务端主 TLS 端口（见 [单一 TLS 端口](/server#单一-tls-端口)），不需要额外开放端口，服务端也不需要 tmux。每个 Shell 是独立终端，不与其他浏览器共享。
+Shell 走服务端主 TLS 端口（见 [单一 TLS 端口](/server#单一-tls-端口)），不需要额外开放端口。每个 Shell 是独立终端，不与其他浏览器共享。
 
 ## 客户端上运行的 Shell
 
@@ -69,14 +67,6 @@ Shell 没有空闲超时。Shell 结束时，客户端会强制结束它及其�
 
 终端保留约 1,000 行滚动历史；需要完整留存的输出，请重定向到文件后用 [Files](/files) 下载。
 
-## 命令行
+## 自动化执行
 
-服务端 REPL 也能打开 Shell 或执行单条命令，见 [服务端 REPL](/reference/repl#远程命令执行)：
-
-```bash
->>> shell <Client ID>
->>> run <Client ID> <Command>
-```
-
-- `shell` 在新的 tmux 窗口中接入客户端 Shell，要求服务端运行在 tmux 中，见 [保持服务端运行](/server#保持服务端运行)。
-- `run` 执行一条命令并返回结果，不需要 tmux，适合非交互命令。
+非交互命令可通过 MCP 的 `run` 或 `run_batch` 执行，见 [MCP](/reference/mcp)。

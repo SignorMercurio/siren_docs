@@ -2,7 +2,7 @@
 title: Artifacts
 description: 浏览、预览、上传和整理服务端上的调查产出与证据文件
 icon: Archive
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - internal/server/webui/frontend/src/pages/ArtifactsPage.tsx
   - internal/server/webui/frontend/src/components/FileBrowser.tsx
@@ -19,7 +19,7 @@ sources:
   - internal/server/app.go
   - internal/server/handler.go
   - internal/server/handler_recon.go
-  - internal/server/commander_cloud.go
+  - internal/server/cloud_operations.go
   - internal/server/webui/webui_dossier.go
 ---
 
@@ -50,7 +50,6 @@ Artifacts 页管理服务端上的证据目录：Recon 快照、AccessKey 报告
 | [Recon](/recon) | `SIREN_<主机名>_<时间戳>_client-<ID>_req-<请求号>.recon.jsonl`（权威快照）和同名 `.md` | 客户端所属 Project 的根目录，未归属时为 Global；与当前视图无关 |
 | [AccessKey 调查](/ak) | `AK_<UID>_<AccessKey ID>_<时间>.md` | 始终为 Global |
 | [Agentic IR](/air/evidence#报告存放位置) | Agent 生成的报告和 `evidence/` 目录 | 启动会话时所在范围的根目录 |
-| 服务端 REPL `upload` | `uploads/client-<Client ID>/<文件名>` | 始终为 Global，即使客户端已归属 Project |
 | Dossier 粘贴图片 | `<报告名>.assets/pasted/paste-<时间>-<序号>.<扩展名>` | 报告所在目录，见 [报告](/reports#粘贴图片) |
 | Artifacts 页 **Upload** | 上传的文件 | 页面顶部 **Target** 所示目录 |
 
@@ -121,7 +120,7 @@ Global 范围的文件没有 `?project=`。其他操作员登录后打开链接�
 
 <Accordions>
 <Accordion title="找不到刚生成的文件">
-点击文件树上方的刷新按钮，并确认页面顶部的范围：Recon 结果跟随客户端的 Project 归属，AccessKey 报告和 REPL `upload` 始终在 Global。
+点击文件树上方的刷新按钮，并确认页面顶部的范围：Recon 结果跟随客户端的 Project 归属，AccessKey 报告始终在 Global。
 </Accordion>
 <Accordion title="点击 Download 没有反应">
 通常是文件超过 100 MiB，或目录内普通文件合计超过 100 MiB。页面不提示，错误只出现在浏览器开发者工具的控制台。改为分别下载子目录或单个文件，或直接在控制主机上打包。
@@ -133,4 +132,4 @@ Global 范围的文件没有 `?project=`。其他操作员登录后打开链接�
 
 ## 命令行
 
-服务端 REPL 没有浏览 Artifacts 的命令，可直接在控制主机上查看上述目录。从在线客户端拉取文件见 [Files](/files#命令行)。
+可直接在控制主机上查看上述目录。从在线客户端下载文件见 [Files](/files)。

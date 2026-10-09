@@ -2,7 +2,7 @@
 title: Project 范围
 description: 按事件隔离客户端、AIR 会话和证据目录
 icon: FolderKanban
-verifiedAgainst: v2.33.11
+verifiedAgainst: v2.34.0
 sources:
   - internal/server/projects.go
   - internal/server/project_names.go
@@ -78,7 +78,7 @@ Project 目录都建在 `webui.projectsBaseDir`（或启动参数 `--webui-proje
 
 - 在 Project 视图中用 **Deploy SIREN** 部署，客户端上线后自动归属当前 Project；在 Global 中部署不分配 Project，已有归属不变。
 - 部署不会把客户端从另一个 Project 迁走。服务端已记录实例属于其他 Project 时，整批部署在修改云资源前被拒绝，报 `deployment target belongs to another project`；上线后才发现属于其他 Project 时保持原归属，该目标标记为 `Deployment project assignment refused; verify ownership manually`。需要转移时回到 Global 手动改。
-- 服务端 REPL 的 `deploy` 不带 Project 上下文；通过 `/mcp/project/<id>` 调用 MCP `deploy` 时，客户端归属该 Project。
+- 通过 `/mcp/project/<id>` 调用 MCP `deploy` 时，客户端归属该 Project。
 
 ## Project 视图下各页的变化
 
@@ -98,7 +98,6 @@ Project ID 形如 `project-<编号>`，可在 Artifacts 链接的 `?project=` �
 
 - **AccessKey 报告始终写入 Global**，在 Project 视图中点 **Open Report** 也会切回 Global。
 - **Recon 结果跟随客户端归属**，与当前视图无关：在 Global 中对已归属 Project 的客户端执行 Recon，结果写入该 Project 目录。
-- **服务端 REPL 的 `upload` 始终写入 Global**，即服务端工作目录下的 `uploads/client-<Client ID>/`。
 - **`/mcp` 端点不受 Project 限制**：使用 `SIREN_MCP_ADMIN_TOKEN` 的外部代理能看到所有客户端。
 
 ## 数据存放位置

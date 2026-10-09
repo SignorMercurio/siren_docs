@@ -2,7 +2,7 @@
 title: 快速开始
 description: 从部署服务端到完成第一次排查
 icon: Rocket
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.34.0
 sources:
   - scripts/get_siren_server.sh
   - scripts/get_siren.sh
@@ -45,11 +45,10 @@ SIREN_MCP_ADMIN_TOKEN=$(openssl rand -hex 32)
 EOF
 ```
 
-然后在 tmux 中启动服务端（终端关闭时服务端会退出，不能直接交给 systemd）：
+然后按 [用 systemd 启动](/server#用-systemd-启动) 写入 `siren.service` 并启动：
 
 ```bash title="控制主机"
-tmux new -s siren
-cd /opt/siren && ./siren_server
+systemctl enable --now siren
 ```
 
 默认启用 MCP，缺少 `SIREN_MCP_ADMIN_TOKEN` 时服务端拒绝启动。证书、`webui.publicURL`、`egress.rules` 和各项依赖见 [安装服务端](/server) 与 [前置条件与凭证](/server/prerequisites)。
