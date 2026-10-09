@@ -67,6 +67,77 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 未显式传入的参数不覆盖配置文件，其默认值只在配置文件也没有该键时生效。`-v`/`--version` 打印版本；子命令（`user`、`upgrade`）见 [安装服务端](/server#命令行参数)。
 
+## 完整示例
+
+列出全部键，取值为内置默认值；没有内置默认值的键标注为必填或示例值。安装包自带配置的差异见 [示例配置与内置默认值](#示例配置与内置默认值)。
+
+```yaml title="server_config.yaml"
+listen: 0.0.0.0
+port: 443
+cert: certs/cert.pem
+key: certs/key.pem
+
+logging:
+  level: info                  # debug / info / warning / error
+  format: text                 # text / json
+  output: stderr               # stderr / stdout / none
+  bufferSize: 5000
+
+webui:
+  enabled: true
+  publicURL: ""                # 使用 Agentic IR 时必填
+  userDBPath: data/users.db
+  dossierDir: ""
+  projectsBaseDir: ""
+
+recon:
+  responseTimeout: 300
+  commandTimeout: 30
+
+egress:
+  rules:                       # 启用 WebUI 时必填，无内置默认值
+    - purpose: siren_server_callback
+      ipProtocol: TCP
+      destCidrIp: 203.0.113.10/32
+      portRange: 443/443
+  discovery:
+    uid: "1601097845544644"
+    region: cn-hangzhou
+    project: cloudfirewall-project-1601097845544644-cn-hangzhou
+    logstore: cloudfirewall-logstore
+
+mcp:
+  enabled: true
+  runOutputMode: auto          # auto / full
+  cmdBlacklist: []             # 无内置默认值；安装包自带 30 条
+
+air:
+  provider: codex              # codex / claude / qoder / pi
+  maxSessions: 20
+  replayBufferBytes: 4194304
+  prompt: 启动安全应急响应，UID：%s，Event ID：%s，SIREN Client ID：%d
+  instancePrompt: 启动安全应急响应，UID：%s，ECS 实例 ID：%s，SIREN Client ID：%d，请先获取该实例的相关告警
+  assetPrompt: 启动安全应急响应，UID：%s，云安全中心资产 UUID：%s，SIREN Client ID：%d，请先获取该资产的相关告警
+  timeRangePrompt: "，告警时间范围：%s"
+  customPromptPrefix: 在 SIREN Client %d 上启动安全应急响应。
+  providers:
+    codex:
+      cliPath: codex
+      args: [--no-alt-screen]
+    claude:
+      cliPath: claude
+      args: []
+    qoder:
+      cliPath: qodercli
+      args: []
+    pi:
+      cliPath: pi
+      args: []
+      agentDir: /root/.pi/agent
+      contextModeDir: /root/.pi/context-mode
+      memoryDir: /root/.pi/agent/memory
+```
+
 ## 监听与证书
 
 | 键 | 类型 | 默认值 | 说明 |
