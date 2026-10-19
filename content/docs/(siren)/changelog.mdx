@@ -11,6 +11,18 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.34.4 <DateTag>2026-10-19</DateTag>
+
+### New Features
+
+- AIR **Running** 中的会话可以重命名：点击行上的铅笔按钮，或双击会话标签、选中后按 `F2`。名称在同一范围内共享，清空即恢复自动标题，见 [重命名会话](/air/sessions#重命名会话)
+- Claude Code GUI 输入框为空时显示的提示建议，现在也可以按 `→` 采用（与 `Tab` 相同）；带修饰键的 `→` 保留原有行为
+
+### Bug Fixes
+
+- 修复 Artifacts 和 Files 文件树中，上传和 **New Folder** 的 **Target** 无法回到根目录、连续新建目录会层层嵌套的问题。现在点选文件时 **Target** 变为文件所在目录，折叠目录时回到上一级，见 [文件操作](/artifacts#文件操作)
+- 修复 AIR GUI 回复中点击脚注编号无法打开来源卡片的问题
+
 ## v2.34.0 <DateTag>2026-10-09</DateTag>
 
 ### Breaking Change
