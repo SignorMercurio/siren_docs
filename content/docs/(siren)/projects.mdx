@@ -49,8 +49,13 @@ Projects 页（`#/projects`）不在侧栏导航里：点击侧栏顶部的 **Pr
 
 ### 目录名规则
 
-- **手动填写**：只能是 ASCII 的一级目录名，不含 `/` 或 `\`，不能是 `.`、`..`，不能以 `.` 开头。含非 ASCII 字符报 `project directory must be ASCII`；与已有 Project 或基准目录下已有目录同名报 `project directory already exists`。
-- **留空自动生成**：名称转小写，字母、数字、`_`、`.` 以外的字符合并为一个 `-`，如 `ACME Breach` 生成 `acme-breach`。重名时追加 `-2`、`-3`……；结果含非 ASCII 字符时末尾追加 Project 编号，如 `web-入侵-3`。
+目录名格式为 `<编号>-<创建日期>-<名称>`，如 `71-1014-上海甄云`。编号是 Project 的序号，日期是服务端本地时间的月日。中英文 Project 都用这个格式，Global 的 Artifacts 中的目录因此按创建顺序排列。
+
+- **留空自动生成**：名称部分由 Project 名转换而来：转小写，字母、数字、`_`、`.` 以外的字符合并为一个 `-`，如 `ACME Breach` 生成 `72-1019-acme-breach`。
+- **手动填写**：只替换名称部分，编号和日期照常加在前面。只能是 ASCII 的一级目录名，不含 `/` 或 `\`，不能是 `.`、`..`，不能以 `.` 开头；含非 ASCII 字符报 `project directory must be ASCII`。
+- **重名**：基准目录下已有同名目录时追加 `-2`、`-3`……
+
+已有 Project 的目录名不变。
 
 ### 基准目录
 
