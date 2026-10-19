@@ -2,7 +2,7 @@
 title: Project 范围
 description: 按事件隔离客户端、AIR 会话和证据目录
 icon: FolderKanban
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.35.0
 sources:
   - internal/server/projects.go
   - internal/server/project_names.go
@@ -14,6 +14,7 @@ sources:
   - cmd/server/cli/root.go
   - internal/server/webui/webui_projects.go
   - internal/server/webui/frontend/src/pages/ProjectsPage.tsx
+  - internal/server/webui/frontend/src/projectBoard.ts
   - internal/server/webui/frontend/src/components/Sidebar.tsx
   - internal/server/webui/frontend/src/requestScope.ts
   - internal/server/webui/frontend/src/components/ClientsTable.tsx
@@ -25,7 +26,7 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 
 Project 把一次事件涉及的客户端、AIR 会话和证据文件放进同一范围，并在服务端固定一个目录；不选 Project 时处于 **Global** 范围。概念见 [核心概念](/concepts#global-与-project-范围)。
 
-Projects 页（`#/projects`）不在侧栏导航里：点击侧栏顶部的 **Project scope**，选 **Manage projects**。同一菜单也用来切换 Global 和各 Project。
+Projects 页（`#/projects`）在侧栏 **System** 分组，也可以从侧栏顶部 **Project scope** 菜单的 **Manage projects** 进入。同一菜单用来切换 Global 和各 Project。
 
 ## 新建 Project
 
@@ -37,12 +38,12 @@ Projects 页（`#/projects`）不在侧栏导航里：点击侧栏顶部的 **Pr
 </Step>
 <Step>
 
-填写 **Project name**（必填，最多 128 个字符）。**Directory name (optional)** 可留空，由服务端按名称生成。
+填写 **Project name**（必填，最多 128 个字符）。**Directory name (optional)** 可留空，由服务端按名称生成；**Owner (optional)** 填负责人，最多 64 个字符，之后也能在看板上改。
 
 </Step>
 <Step>
 
-点击 **Create**。服务端在基准目录下创建该目录，WebUI 随即切换到新 Project。
+点击 **Create**。服务端在基准目录下创建该目录，新 Project 出现在看板的 **Responding** 列，WebUI 随即切换到它。
 
 </Step>
 </Steps>
@@ -67,9 +68,17 @@ Project 目录都建在 `webui.projectsBaseDir`（或启动参数 `--webui-proje
 
 ## 管理 Project
 
-![Projects 页，列出 Project 名称、工作目录和行尾操作按钮](../../img/projects-list.png)
+![Projects 看板：Responding、On hold、Wrapping up、Done 四列，卡片显示名称、负责人和目录名](../../img/projects-board.png)
 
-每行显示 Project 名称和目录完整路径，点击名称即切换。行尾按钮：
+Projects 页是按状态分列的看板，四列依次是 **Responding**（处置中）、**On hold**（暂时挂起）、**Wrapping up**（收尾中）、**Done**（已完成）。
+
+每张卡片显示 Project 名称、负责人和目录名，鼠标悬停在目录名上显示完整路径。点击名称即切换到该 Project。
+
+- **改状态**：把卡片拖到另一列。鼠标悬停或用键盘聚焦到卡片时还会出现状态下拉框，可直接选择；触屏设备上下拉框一直显示。
+- **负责人**：点击卡片上的负责人（未设置时显示 **No owner**）填写名字，最多 64 个字符；清空即取消负责人。负责人是自由文本，不关联 WebUI 账号。
+- 状态和负责人存在服务端，所有操作员看到的是同一块看板。
+
+鼠标悬停在卡片上时显示三个按钮：
 
 - **Copy workspace path**：复制目录绝对路径。
 - **Rename project**：只改显示名，目录不动。

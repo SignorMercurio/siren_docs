@@ -11,6 +11,15 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.35.0 <DateTag>2026-10-19</DateTag>
+
+### New Features
+
+- Projects 页改为看板，按 **Responding**、**On hold**、**Wrapping up**、**Done** 分列。拖动卡片改状态，悬停或聚焦卡片时也可以用状态下拉框；新建的 Project 在 **Responding** 列，已有 Project 升级后也显示在这一列，见 [管理 Project](/projects#管理-project)
+- Project 可以设置负责人：新建时选填，之后点击卡片上的负责人修改
+- Projects 加入侧栏 **System** 分组，**Project scope** 菜单中的 **Manage projects** 入口保留
+- 新建 Project 的目录名统一为 `<编号>-<创建日期>-<名称>`，如 `71-1014-上海甄云`，Global 的 Artifacts 中按创建顺序排列；手动填写的目录名只替换名称部分，已有目录不改名，见 [目录名规则](/projects#目录名规则)
+
 ## v2.34.4 <DateTag>2026-10-19</DateTag>
 
 ### New Features
