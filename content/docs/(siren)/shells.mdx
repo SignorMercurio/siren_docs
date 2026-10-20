@@ -36,7 +36,7 @@ Shell 走服务端主 TLS 端口（见 [单一 TLS 端口](/server#单一-tls-�
 
 | 客户端系统 | 启动的 Shell |
 | --- | --- |
-| Linux、macOS | 依次使用第一个存在的 `/bin/zsh`、`/bin/bash`、`/bin/sh`。设置 `HISTFILE=/dev/null`，命令不会写入主机的历史文件 |
+| Linux、macOS | 依次使用第一个存在的 `/bin/zsh`、`/bin/bash`、`/bin/sh`。zsh 和 bash 不加载主机上的启动文件（`-f`、`--norc`），并设置 `HISTFILE=/dev/null`：命令不会写入主机的历史文件，主机配置的 alias、函数和提示符不生效 |
 | Windows | 优先 PowerShell（`-NoProfile`），否则 `cmd.exe` |
 
 Shell 以客户端进程的用户身份运行，继承其环境变量和工作目录。
