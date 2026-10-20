@@ -9,6 +9,7 @@ sources:
   - internal/server/webui/frontend/src/air/startGuard.ts
   - internal/server/webui/frontend/src/air/airPreference.ts
   - internal/server/webui/frontend/src/air/useAgentSessions.ts
+  - internal/server/webui/frontend/src/air/notifications.ts
   - internal/server/webui/frontend/src/air/panelPersistence.ts
   - internal/server/webui/frontend/src/reconnectBudget.ts
   - internal/server/webui/frontend/src/router.ts
@@ -93,6 +94,22 @@ Provider 下方有三个入口模式，默认选中 **Custom**：
 ### 待处理提示
 
 GUI 会话等待审批或回答时，对应会话标签上也会出现标记；浏览器停留在 Agentic IR 页面时，标签页标题加上 `● Approval` 或 `● Question` 前缀，即使等待的不是当前显示的会话。Terminal 会话的审批出现在 TUI 内，不触发这些提示。
+
+### 系统通知
+
+**Settings** 中的 **AIR notifications** 默认为 **On**。第一次点击 **Start** 启动会话时，浏览器会询问是否允许通知，选择允许即可；之后不再询问。之后你没在看的会话出现下列情况时，系统弹出标题为 `SIREN · <会话名>` 的通知：
+
+| 会话 | 触发时机 | 通知内容 |
+| --- | --- | --- |
+| GUI | 一轮完成 | `Turn finished.` |
+| GUI | 一轮失败 | `Turn failed.` |
+| GUI | 等待审批或回答 | `Waiting for your approval.` 或 `Waiting for your answer.` |
+| Terminal | 持续输出 3 秒以上后静默 5 秒 | `Terminal output went quiet.` |
+
+- **没在看**：浏览器窗口不在前台、标签页被隐藏、不在 Agentic IR 页面，或该会话不是当前显示的标签。
+- **不通知**：被手动停止的一轮；刷新或重连时回放的已有内容。
+- **Terminal**：没有轮次信息，只按输出是否静默判断，所以 Agent 在 TUI 内停下等待审批时也会通知。
+- 点击通知回到对应会话。设置只存于当前浏览器，且需要 SIREN 页面保持打开。浏览器尚未授权时，该行显示 **Allow notifications**，点击后重新弹出授权询问；已阻止时，需要到浏览器的站点设置里重新允许。
 
 ## 重新接入与回放
 
