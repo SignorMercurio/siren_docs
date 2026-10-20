@@ -45,7 +45,7 @@ Allow access 不产生服务端恢复记录，结果刷新页面后消失。
 - 创建或复用专用安全组 `siren-egress-<instanceId>`（带 `siren:managed` 等标签），以 priority 1 写入出站规则并挂载到实例上，不移除已有安全组。
 - 把实例已有安全组中与这些目的地冲突的 priority-1 Drop 规则降到 priority 2，使放行生效，并记入恢复记录。
 
-SOAR 以 `Throttling.User` 限流拒绝某次调用时，SIREN 依次等待 2、4、8、16 秒后重发同一调用；被限流的调用没有执行，重发不会重复修改。四次重试后仍被限流才报错，此时可在 [配置文件](/reference/server-config) 中调低 `SOAR_TRIGGER_QPS`。
+SOAR 以 `Throttling.User` 限流拒绝某次调用时，SIREN 依次等待约 2、4、8、16 秒（各加最多一半的随机延迟）后重发同一调用；被限流的调用没有执行，重发不会重复修改。四次重试后仍被限流才报错，此时可在 [配置文件](/reference/server-config) 中调低 `SOAR_TRIGGER_QPS`。
 
 同一实例上一次 Configure 中途失败、记录停在 **Needs attention** 时，再次 Configure（包括 **Retry failed**）会先自动恢复那次记录的改动，再重新配置，结果中显示 `Restoring unfinished operation <ID> before configuring again`。自动恢复失败时不会继续配置，错误给出原因，记录保留，按 [恢复出站规则](/restore-egress) 处理。仍有执行结果未确认（**Execution unresolved**）时不会自动恢复。
 
