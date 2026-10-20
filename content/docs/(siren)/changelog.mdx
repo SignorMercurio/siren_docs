@@ -18,15 +18,6 @@ export const DateTag = ({ children }) => (
 - 客户端支持 macOS 12 及以上（Apple 芯片和 Intel）：用 `get_siren.sh` 加 `sudo` 安装，用 `siren upgrade` 升级；一键部署不支持 macOS，见 [手动安装客户端](/onboard/manual)
 - macOS 客户端的 Recon 提供 `default`、`quick` 两个 Profile，采集账户、SSH、进程、网络、环境变量、文件和应用信息；登录事件、SSH 认证失败事件、进程环境变量和文件扫描暂不采集，快照标记为 partial，见 [模块](/recon#模块)
 - MCP `run_batch` 的 `os` 参数可以用 `darwin` 筛选 macOS 客户端
-
-### Bug Fixes
-
-- 修复某个采集项达到 2,000 条记录上限时，整次 Recon 报 `recon records exceed collection limits` 失败的问题
-
-## v2.35.5 <DateTag>2026-10-20</DateTag>
-
-### New Features
-
 - AIR 适配手机：从左栏启动、接入或打开会话后左栏自动收起；GUI 输入框按 Enter 换行，点发送按钮发送；手机查看终端不再改变共享终端的行列数，见 [尺寸与滚动](/air/terminal#尺寸与滚动)
 - AIR 会话在你没在看时完成一轮或等待输入，浏览器会弹出系统通知，可在 **Settings** 的 **AIR notifications** 关闭，见 [系统通知](/air/sessions#系统通知)
 - Artifacts 和 Files 文件树支持把文件或目录拖到另一个目录中移动，见 [文件操作](/artifacts#文件操作)
@@ -36,6 +27,7 @@ export const DateTag = ({ children }) => (
 
 ### Bug Fixes
 
+- 修复某个采集项达到 2,000 条记录上限时，整次 Recon 报 `recon records exceed collection limits` 失败的问题
 - 修复刷新页面后多个标签页的 Project 范围互相覆盖的问题，现在每个标签页保持自己的范围
 - 修复 SIREN 自建的专用安全组在规则回读失败后无法恢复、提示 `dedicated group changed externally or rule snapshot incomplete; retained` 的问题，见 [记录状态](/restore-egress#记录状态)
 
@@ -47,11 +39,6 @@ export const DateTag = ({ children }) => (
 - Project 可以设置负责人：新建时选填，之后点击卡片上的负责人修改
 - Projects 加入侧栏 **System** 分组，**Project scope** 菜单中的 **Manage projects** 入口保留
 - 新建 Project 的目录名统一为 `<编号>-<创建日期>-<名称>`，如 `71-1014-上海甄云`，Global 的 Artifacts 中按创建顺序排列；手动填写的目录名只替换名称部分，已有目录不改名，见 [目录名规则](/projects#目录名规则)
-
-## v2.34.4 <DateTag>2026-10-19</DateTag>
-
-### New Features
-
 - AIR **Running** 中的会话可以重命名：点击行上的铅笔按钮，或双击会话标签、选中后按 `F2`。名称在同一范围内共享，清空即恢复自动标题，见 [重命名会话](/air/sessions#重命名会话)
 - Claude Code GUI 输入框为空时显示的提示建议，现在也可以按 `→` 采用（与 `Tab` 相同）；带修饰键的 `→` 保留原有行为
 
