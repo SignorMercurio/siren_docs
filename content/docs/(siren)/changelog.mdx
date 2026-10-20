@@ -11,6 +11,18 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.36.0 <DateTag>2026-10-20</DateTag>
+
+### New Features
+
+- 客户端支持 macOS 12 及以上（Apple 芯片和 Intel）：用 `get_siren.sh` 加 `sudo` 安装，用 `siren upgrade` 升级；一键部署不支持 macOS，见 [手动安装客户端](/onboard/manual)
+- macOS 客户端的 Recon 提供 `default`、`quick` 两个 Profile，采集账户、SSH、进程、网络、环境变量、文件和应用信息；登录事件、SSH 认证失败事件、进程环境变量和文件扫描暂不采集，快照标记为 partial，见 [模块](/recon#模块)
+- MCP `run_batch` 的 `os` 参数可以用 `darwin` 筛选 macOS 客户端
+
+### Bug Fixes
+
+- 修复某个采集项达到 2,000 条记录上限时，整次 Recon 报 `recon records exceed collection limits` 失败的问题
+
 ## v2.35.5 <DateTag>2026-10-20</DateTag>
 
 ### New Features
