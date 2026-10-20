@@ -11,6 +11,22 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.35.5 <DateTag>2026-10-20</DateTag>
+
+### New Features
+
+- AIR 适配手机：从左栏启动、接入或打开会话后左栏自动收起；GUI 输入框按 Enter 换行，点发送按钮发送；手机查看终端不再改变共享终端的行列数，见 [尺寸与滚动](/air/terminal#尺寸与滚动)
+- AIR 会话在你没在看时完成一轮或等待输入，浏览器会弹出系统通知，可在 **Settings** 的 **AIR notifications** 关闭，见 [系统通知](/air/sessions#系统通知)
+- Artifacts 和 Files 文件树支持把文件或目录拖到另一个目录中移动，见 [文件操作](/artifacts#文件操作)
+- Projects 看板卡片上的目录名可点击，切换到该 Project 并在 Artifacts 中打开它的目录
+- SOAR 限流（`Throttling.User`）时，出站规则配置和恢复会退避后自动重试，见 [Configure egress](/onboard/egress#configure-egress)
+- 对 **Needs attention** 的实例再次 Configure 时，会先自动恢复上次未完成的改动再重新配置
+
+### Bug Fixes
+
+- 修复刷新页面后多个标签页的 Project 范围互相覆盖的问题，现在每个标签页保持自己的范围
+- 修复 SIREN 自建的专用安全组在规则回读失败后无法恢复、提示 `dedicated group changed externally or rule snapshot incomplete; retained` 的问题，见 [记录状态](/restore-egress#记录状态)
+
 ## v2.35.0 <DateTag>2026-10-19</DateTag>
 
 ### New Features

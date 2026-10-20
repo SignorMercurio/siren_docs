@@ -34,8 +34,10 @@ import { Callout } from "fumadocs-ui/components/callout";
 | --- | --- |
 | Configuring | 正在配置，尚不可恢复 |
 | Waiting for shared rules | 本实例已恢复；多个实例共用的 Drop 规则要等最后一个依赖它的实例恢复后才还原，之后自动转为 Restored |
-| Needs attention | 检测到规则在外部被改动，或恢复依据不完整；SIREN 不覆盖，保留记录和相关资源并说明原因，需人工处理 |
+| Needs attention | 配置或恢复中途失败，或检测到规则在外部被改动、恢复依据不完整；SIREN 不覆盖，保留记录和相关资源并说明原因。可直接恢复，或对该实例再次 Configure：它会先自动恢复再重新配置 |
 | Execution unresolved | 有尚未确认结果的 SOAR 执行。点 **Recheck execution** 只重新查询该执行结果，不重新提交修改；缺少执行 ID 时按面板提示人工核对 SOAR 执行历史后再恢复 |
+
+SIREN 自建的专用安全组中，若某条规则授权成功但回读失败，记录里只有配置意图、没有规则 ID。恢复时，只要组内恰好有一条规则的描述与之相同、且字段与配置完全一致，就视为 SIREN 添加的规则，随专用组一并删除；描述重复或字段被改过时仍保留该组。
 
 ## 记录保留
 
