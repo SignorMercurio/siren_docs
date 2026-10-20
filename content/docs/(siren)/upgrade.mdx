@@ -2,7 +2,7 @@
 title: 升级与数据
 description: 升级服务端和客户端、支持的平台、升级后要核对的配置，以及服务端数据的备份与迁移
 icon: CircleFadingArrowUp
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.36.0
 sources:
   - internal/upgrade/
   - cmd/server/cli/upgrade.go
@@ -57,6 +57,10 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 
 ```powershell tab="Windows"
 C:\Windows\Temp\siren\siren.exe upgrade -y
+```
+
+```bash tab="macOS"
+/opt/siren/siren upgrade -y
 ```
 
 这一步只替换磁盘上的程序，Shell 不会断开。客户端需要能解析并访问发布地址 `oss-siren.oss-cn-hongkong.aliyuncs.com`，否则下载失败。
@@ -132,7 +136,7 @@ diff /opt/siren/server_config.yaml /tmp/server_config.new.yaml
 
 **服务端**只发布 Linux x86_64 版本（`siren_server.tar.gz`），安装脚本在其他架构上直接退出。
 
-**客户端**支持 Linux x86_64、Linux ARM64 和 Windows x64，另有旧内核 Linux 和 Windows 7 时代系统的兼容包，不支持 macOS。安装包与系统版本的对应见 [客户端平台](/onboard#客户端平台)。
+**客户端**支持 Linux x86_64、Linux ARM64、Windows x64 和 macOS（Apple 芯片、Intel），另有旧内核 Linux 和 Windows 7 时代系统的兼容包。安装包与系统版本的对应见 [客户端平台](/onboard#客户端平台)。
 
 ## 服务端数据
 

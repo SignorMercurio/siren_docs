@@ -70,7 +70,7 @@ Project 视图中只能清理本 Project 的客户端。同一客户端已有清
 | 凭证环境变量 | 从客户端进程中清除 `OSS_ACCESS_KEY_ID`、`OSS_ACCESS_KEY_SECRET`、`ALIBABA_CLOUD_ACCESS_KEY_ID`、`ALIBABA_CLOUD_ACCESS_KEY_SECRET` |
 | 配置文件 | 客户端当前加载的配置文件 |
 | 插件 | 客户端启动目录下的 `plugins/` |
-| 客户端身份 | 用户配置目录中的 `siren/agent_id`（Linux 通常为 `~/.config/siren/agent_id`，Windows 为 `%AppData%\siren\agent_id`）；`siren` 目录为空时一并删除 |
+| 客户端身份 | 用户配置目录中的 `siren/agent_id`（Linux 通常为 `~/.config/siren/agent_id`，macOS 为 `~/Library/Application Support/siren/agent_id`，Windows 为 `%AppData%\siren\agent_id`）；`siren` 目录为空时一并删除 |
 | 本地 Recon 文件 | 客户端工作目录中的 `SIREN_*.md`、`SIREN_*.recon.jsonl`、`SIREN_*.partial` |
 | 程序文件 | 安装目录是 SIREN 专用目录时整个删除，包括其中的日志和 PID 文件；否则只删除客户端可执行文件 |
 | WinPTY 临时目录 | 仅 Windows：当前客户端进程释放的 WinPTY 目录 |
@@ -81,7 +81,7 @@ Project 视图中只能清理本 Project 的客户端。同一客户端已有清
 
 ### 平台差异
 
-Linux 客户端在退出前删除全部目标。Windows 客户端立即删除配置、插件、身份和 Recon 文件；程序文件（或整个专用目录）和 WinPTY 目录由系统临时目录中的一次性脚本 `siren-cleanup-*.cmd` 在客户端退出后删除。所以 **Deletion scheduled** 不代表文件已删掉，需要时登录主机确认。
+Linux 和 macOS 客户端在退出前删除全部目标。Windows 客户端立即删除配置、插件、身份和 Recon 文件；程序文件（或整个专用目录）和 WinPTY 目录由系统临时目录中的一次性脚本 `siren-cleanup-*.cmd` 在客户端退出后删除。所以 **Deletion scheduled** 不代表文件已删掉，需要时登录主机确认。
 
 ### 不会清理的内容
 

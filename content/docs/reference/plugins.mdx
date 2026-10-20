@@ -30,7 +30,7 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 
 两类插件共用以下规则：
 
-- 安装在客户端工作目录下的 `plugins/<name>/`：一键部署的 Linux 客户端为 `/opt/siren/plugins/`，Windows 客户端为 `C:\Windows\Temp\siren\plugins\`。插件以相对路径写出的文件也落在这里。
+- 安装在客户端工作目录下的 `plugins/<name>/`：一键部署的 Linux 客户端和安装脚本安装的 macOS 客户端为 `/opt/siren/plugins/`，Windows 客户端为 `C:\Windows\Temp\siren\plugins\`。插件以相对路径写出的文件也落在这里。
 - 由客户端 `config.yaml` 中的 `plugins.<name>`（布尔值）启停；recon 插件还须写进 Profile 才会执行。
 
 ## 内置插件

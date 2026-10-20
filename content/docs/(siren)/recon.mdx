@@ -2,7 +2,7 @@
 title: 自动化信息收集
 description: 用 Recon 在客户端上采集一份有范围、有上限的主机快照，保存到 Artifacts
 icon: ScanSearch
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.36.0
 sources:
   - internal/server/webui/frontend/src/pages/InvestigationsPage.tsx
   - internal/server/webui/frontend/src/pages/InvestigationResults.tsx
@@ -18,6 +18,7 @@ sources:
   - internal/reconartifact/hunt_summary.go
   - config/config_linux.yaml
   - config/config_windows.yaml
+  - config/config_darwin.yaml
   - config/server_config.yaml
   - cmd/client/cli/recon.go
   - pkg/utils/oss.go
@@ -30,7 +31,7 @@ Recon 在目标主机上按 Profile 采集一份主机快照：账户、进程�
 Recon 只采集事实，不判断主机是否被入侵，也不做白名单、黑名单、矿工、Webshell、Rootkit 或漏洞判定。配置、凭据和依赖文本中疑似密钥、令牌、密码赋值的内容，只记录模式、行号、脱敏值和 SHA-256。
 
 <Callout title="前置条件" type="info">
-  客户端必须以 root（Linux）或管理员（Windows）身份运行，否则采集在开始前失败，报 `user with root permission required` 一类错误。快照包含环境变量、配置、历史记录和凭据原文，只应保存在受控的服务端目录中。
+  客户端必须以 root（Linux、macOS）或管理员（Windows）身份运行，否则采集在开始前失败，报 `user with root permission required` 一类错误。快照包含环境变量、配置、历史记录和凭据原文，只应保存在受控的服务端目录中。
 </Callout>
 
 ## 发起 Recon
@@ -80,11 +81,11 @@ Recon 报告不带 Dossier frontmatter，不出现在 [Reports](/reports) 列表
 
 Profile 是命名的模块集合，只决定采集哪些模块，不改变超时和上限。基础信息总会采集，不写进 Profile。内置三个 Profile，默认 `default`：
 
-| Profile | 用途 | Linux 模块 | Windows 模块 |
-| --- | --- | --- | --- |
-| `default` | 标准完整采集 | `user` `ssh` `process` `network` `cron` `service` `env` `file` `rootkit` `application` | `user` `process` `network` `schtask` `env` `file` `application` |
-| `quick` | 去掉耗时较长的 `file`，其余同 `default` | `user` `ssh` `process` `network` `cron` `service` `env` `rootkit` `application` | `user` `process` `network` `schtask` `env` `application` |
-| `hunt` | 供 Agent 离线分析：以运行中的应用、中间件、容器和监听进程为中心，补充配置、日志、凭据和供应链证据 | `user` `ssh` `process` `network` `cron` `service` `env` `application` `topology` `supplychain` `config` `activity` `credential` | `user` `process` `network` `schtask` `env` `application` `topology` `supplychain` `config` `activity` `credential` |
+| Profile | 用途 | Linux 模块 | Windows 模块 | macOS 模块 |
+| --- | --- | --- | --- | --- |
+| `default` | 标准完整采集 | `user` `ssh` `process` `network` `cron` `service` `env` `file` `rootkit` `application` | `user` `process` `network` `schtask` `env` `file` `application` | `user` `ssh` `process` `network` `env` `file` `application` |
+| `quick` | 去掉耗时较长的 `file`，其余同 `default` | `user` `ssh` `process` `network` `cron` `service` `env` `rootkit` `application` | `user` `process` `network` `schtask` `env` `application` | `user` `ssh` `process` `network` `env` `application` |
+| `hunt` | 供 Agent 离线分析：以运行中的应用、中间件、容器和监听进程为中心，补充配置、日志、凭据和供应链证据 | `user` `ssh` `process` `network` `cron` `service` `env` `application` `topology` `supplychain` `config` `activity` `credential` | `user` `process` `network` `schtask` `env` `application` `topology` `supplychain` `config` `activity` `credential` | 不提供 |
 
 ### 自定义 Profile
 
@@ -106,29 +107,29 @@ recon:
 
 ## 模块
 
-同名模块在 Linux 和 Windows 上的采集项不同。
+同名模块在不同平台上的采集项不同。macOS 只提供下表中标明 macOS 的模块。
 
 | 模块 | 平台 | 采集内容 |
 | --- | --- | --- |
-| 基础信息（始终采集） | 两者 | 时间、OS、主机标识、主 IP、网络接口、CPU、内存、磁盘与挂载 |
-| `user` | 两者 | 账户、组、当前会话、登录记录、登录与新增用户事件；Linux 另有 sudoers 和 `/etc/passwd` 元数据 |
-| `ssh` | Linux | `sshd_config`、用户 SSH 配置与公钥、认证失败事件、PAM 与 inetd 配置 |
-| `process` | 两者 | 完整进程快照，含父进程、路径和命令行 |
-| `network` | 两者 | Socket 快照、hosts、DNS、路由；Linux 另有防火墙规则，Windows 另有网络共享 |
+| 基础信息（始终采集） | Linux、Windows、macOS | 时间、OS、主机标识、主 IP、网络接口、CPU、内存、磁盘与挂载 |
+| `user` | Linux、Windows、macOS | 账户、组、当前会话、登录记录、登录与新增用户事件；Linux 另有 sudoers 和 `/etc/passwd` 元数据；macOS 从目录服务读取账户和组，另有 sudoers，不采集登录与新增用户事件 |
+| `ssh` | Linux、macOS | `sshd_config`、用户 SSH 配置与公钥、认证失败事件、PAM 与 inetd 配置；macOS 没有 inetd 配置，不采集认证失败事件 |
+| `process` | Linux、Windows、macOS | 完整进程快照，含父进程、路径和命令行；macOS 不记录可执行文件路径 |
+| `network` | Linux、Windows、macOS | Socket 快照、hosts、DNS、路由；Linux 另有防火墙规则，Windows 另有网络共享，macOS 另有 pf 规则和应用防火墙状态 |
 | `cron` | Linux | 用户级和系统级 cron 任务、cron 日志 |
 | `schtask` | Windows | 计划任务、启动文件夹、系统启动项、注册表启动项和服务列表 |
 | `service` | Linux | 服务快照、服务文件、`/etc/rc.local` 和 init 启动项 |
-| `env` | 两者 | Linux：环境变量、运行中进程的环境变量、`LD_PRELOAD` 与 `/etc/ld.so.preload`、profile/rc 文件和 alias；Windows：环境变量、PATH、PowerShell 配置与历史、Defender 排除项 |
-| `file` | 两者 | Linux：Shell 历史、临时目录、SUID、已删除仍打开的文件、最近 24 小时修改的文件、大文件；Windows：临时目录、最近访问的文件、近 30 天变更的系统目录可执行文件、最近 24 小时修改的事件日志文件、启动目录文件、卷影副本 |
+| `env` | Linux、Windows、macOS | Linux：环境变量、运行中进程的环境变量、`LD_PRELOAD` 与 `/etc/ld.so.preload`、profile/rc 文件和 alias；macOS：环境变量、`DYLD_*` 注入相关变量、系统 Shell 配置（含 zsh）、profile/rc 文件和 alias，不采集运行中进程的环境变量；Windows：环境变量、PATH、PowerShell 配置与历史、Defender 排除项 |
+| `file` | Linux、Windows、macOS | Linux：Shell 历史、临时目录、SUID、已删除仍打开的文件、最近 24 小时修改的文件、大文件；macOS：Shell 历史、临时目录、已删除仍打开的文件，不扫描 SUID、近期修改的文件和大文件；Windows：临时目录、最近访问的文件、近 30 天变更的系统目录可执行文件、最近 24 小时修改的事件日志文件、启动目录文件、卷影副本 |
 | `rootkit` | Linux | 已加载内核模块列表。名称沿用旧称，不做 Rootkit 检测 |
-| `application` | 两者 | Linux：Redis 配置、容器运行时与容器；Windows：远程桌面配置、IIS 配置、近 3 天修改的 IIS 日志文件列表、Defender 状态 |
-| `topology` | 两者 | 按实例归并的 Web 服务、中间件、容器和监听进程，以及它们与进程、Socket、配置、挂载之间可直接观察到的关系 |
-| `supplychain` | 两者 | 运行中应用和容器载荷的可执行文件 SHA-256、版本来源、依赖清单和容器镜像引用；不枚举全部软件包，不访问镜像仓库 |
-| `config` | 两者 | 运行态直接引用的配置文件原文，以及 systemd/Windows 服务、Compose、Kubernetes、IIS 等部署材料 |
-| `activity` | 两者 | 当前运行应用和容器直接关联的近期本地日志尾部；不读取 Windows 事件日志 |
-| `credential` | 两者 | Linux：密码 hash 与策略、SSH 私钥、云 CLI、Kubernetes、Docker、数据库等客户端凭据文件；Windows：密码策略、Credential Manager 元数据、AutoLogon、IIS 连接字符串等，不采集 SAM/SECURITY/LSA |
+| `application` | Linux、Windows、macOS | Linux 和 macOS：Redis 配置、容器运行时与容器；Windows：远程桌面配置、IIS 配置、近 3 天修改的 IIS 日志文件列表、Defender 状态 |
+| `topology` | Linux、Windows | 按实例归并的 Web 服务、中间件、容器和监听进程，以及它们与进程、Socket、配置、挂载之间可直接观察到的关系 |
+| `supplychain` | Linux、Windows | 运行中应用和容器载荷的可执行文件 SHA-256、版本来源、依赖清单和容器镜像引用；不枚举全部软件包，不访问镜像仓库 |
+| `config` | Linux、Windows | 运行态直接引用的配置文件原文，以及 systemd/Windows 服务、Compose、Kubernetes、IIS 等部署材料 |
+| `activity` | Linux、Windows | 当前运行应用和容器直接关联的近期本地日志尾部；不读取 Windows 事件日志 |
+| `credential` | Linux、Windows | Linux：密码 hash 与策略、SSH 私钥、云 CLI、Kubernetes、Docker、数据库等客户端凭据文件；Windows：密码策略、Credential Manager 元数据、AutoLogon、IIS 连接字符串等，不采集 SAM/SECURITY/LSA |
 
-Recon 只使用主机上已有的工具，不安装软件。工具缺失或权限不足时，对应 source 记为 unavailable，快照变为 partial。
+Recon 只使用主机上已有的工具，不安装软件。工具缺失或权限不足时，对应 source 记为 unavailable，快照变为 partial。macOS 尚未实现的登录与新增用户事件、SSH 认证失败事件、运行中进程的环境变量和文件扫描同样记为 unavailable，所以用内置 Profile 采集的 macOS 快照总是 partial。
 
 ## 超时
 

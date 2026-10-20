@@ -2,7 +2,7 @@
 title: MCP
 description: SIREN MCP 的端点、鉴权、工具参数、结果回读、命令黑名单与审计
 icon: Plug
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.36.0
 sources:
   - internal/server/mcp.go
   - internal/server/mcp_http.go
@@ -150,7 +150,7 @@ SIREN MCP 不提供告警查询工具。
 | --- | --- |
 | `command` | 要执行的命令，最长 50 KiB |
 | `client_ids` | 目标客户端数组，最多 64 项，格式同 `client_id`，重复项自动去重；任一项无法唯一匹配时整批拒绝，不执行任何命令。在 `/mcp` 上必填；在 Project 端点上省略表示该 Project 的全部在线客户端 |
-| `os` | 可选，`linux` 或 `windows`，在选中的客户端中再按系统过滤 |
+| `os` | 可选，`linux`、`windows` 或 `darwin`（macOS），在选中的客户端中再按系统过滤 |
 | `concurrency` | 同时执行的主机数，默认 8，范围 1–16 |
 
 - 过滤后没有客户端时报 `no connected clients match the request`；超过 64 台时报错，要求用 `client_ids` 缩小范围。

@@ -2,10 +2,11 @@
 title: 客户端配置
 description: 客户端 config.yaml 的全部配置项、平台默认值、Profile 校验与插件开关
 icon: FileSliders
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.36.0
 sources:
   - config/config_linux.yaml
   - config/config_windows.yaml
+  - config/config_darwin.yaml
   - cmd/client/cli/root.go
   - cmd/client/cli/client.go
   - internal/client/handler.go
@@ -22,7 +23,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ### 配置文件位置
 
-1. `-c` / `--config` 指定的文件。一键部署和安装脚本启动的客户端都用它，路径为 Linux `/opt/siren/config.yaml`、Windows `C:\Windows\Temp\siren\config.yaml`。
+1. `-c` / `--config` 指定的文件。一键部署和安装脚本启动的客户端都用它，路径为 Linux 和 macOS `/opt/siren/config.yaml`、Windows `C:\Windows\Temp\siren\config.yaml`。
 2. 未指定时依次在当前工作目录和 `config/` 子目录中查找 `config.yaml`。
 
 找不到或无法解析配置文件时，客户端直接退出。
@@ -98,6 +99,30 @@ oss:
   objectPath: tmp/siren_upload
   docObjectPath: tmp/siren_upload/docs/latest
 ```
+
+```yaml tab="macOS"
+server: 47.111.170.208
+port: 443
+
+recon:
+  commandTimeout: 30
+  collectionTimeout: 270
+  defaultProfile: default
+  profiles:
+    default: [user, ssh, process, network, env, file, application]
+    quick: [user, ssh, process, network, env, application]
+
+plugins:
+  marketplace: https://oss-siren.oss-cn-hongkong.aliyuncs.com/plugins
+
+oss:
+  region: cn-hongkong
+  bucketName: ir-transfer-station
+  objectPath: tmp/siren_upload
+  docObjectPath: tmp/siren_upload/docs/latest
+```
+
+macOS 安装包不带 `hunt` Profile，见 [Profile](/recon#profile)。
 
 <Callout title="包内 server 指向官方服务端" type="info">
   一键部署会把 `server` / `port` 改写为 `siren_server_callback` 规则中的地址，见 [一键部署](/onboard/provisioning#前置条件)。手动安装时用安装脚本的 `--server` / `--port`（Windows 为 `-Server` / `-Port`）写入，或启动时用 `-s` / `-p` 指定，见 [手动安装客户端](/onboard/manual#启动客户端)。

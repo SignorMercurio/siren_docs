@@ -2,7 +2,7 @@
 title: 手动安装客户端
 description: 在能访问服务端的主机上安装并启动 SIREN 客户端
 icon: SquareTerminal
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.36.0
 sources:
   - scripts/get_siren.sh
   - scripts/get_siren.ps1
@@ -10,6 +10,7 @@ sources:
   - internal/client/client.go
   - config/config_linux.yaml
   - config/config_windows.yaml
+  - config/config_darwin.yaml
   - internal/server/webui/frontend/src/components/ClientsTable.tsx
 ---
 
@@ -24,7 +25,7 @@ import { Steps, Step } from "fumadocs-ui/components/steps";
 
 ## 安装客户端
 
-Linux 需要 root，Windows 需要以管理员身份运行 PowerShell。
+Linux 需要 root，macOS 需要 `sudo`，Windows 需要以管理员身份运行 PowerShell。
 
 ```bash tab="Linux"
 curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sh
@@ -34,7 +35,11 @@ curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sh
 iwr -Uri 'https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.ps1' -UseBasicParsing | iex
 ```
 
-安装脚本把 `siren` 和 `config.yaml` 装到 `/opt/siren`（Linux）或 `C:\Windows\Temp\siren`（Windows），不会启动客户端。
+```bash tab="macOS"
+curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sudo sh
+```
+
+安装脚本把 `siren` 和 `config.yaml` 装到 `/opt/siren`（Linux、macOS）或 `C:\Windows\Temp\siren`（Windows），不会启动客户端。macOS 与 Linux 共用 `get_siren.sh`，按 CPU 架构选择 Apple 芯片或 Intel 安装包。
 
 <Callout title="重装不会更新已有安装" type="warn">
   安装完好时再次运行安装脚本会跳过下载，不升级程序也不改配置（传了 `--server`、`--port` 时只改写这两个键）。安装损坏时才重新安装，并用包内 `config.yaml` 替换现有配置，手工改动会丢失。升级见 [升级与数据](/upgrade)。
@@ -52,11 +57,16 @@ Set-Location C:\Windows\Temp\siren
 .\siren.exe client -s <SIREN Server IP> -p 443
 ```
 
+```bash tab="macOS"
+cd /opt/siren
+sudo ./siren client -s <SIREN Server IP> -p 443
+```
+
 省略 `-s`、`-p` 时使用 `config.yaml` 中的 `server`、`port`。安装包预置的 `server` 是官方服务端 `47.111.170.208`，连接自建服务端必须传 `-s`；改过服务端连接端口时把 `443` 换成实际端口。
 
-也可以安装时写入地址，之后启动不必传参：Linux 运行 `curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sh -s -- --server <SIREN Server IP> --port 443`，Windows 安装脚本对应参数为 `-Server`、`-Port`。
+也可以安装时写入地址，之后启动不必传参：Linux 运行 `curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sh -s -- --server <SIREN Server IP> --port 443`，macOS 把其中的 `| sh` 换成 `| sudo sh`，Windows 安装脚本对应参数为 `-Server`、`-Port`。
 
-连接成功后客户端出现在 [Clients](/clients) 页。客户端是前台进程，应放到 systemd、nohup、Windows 计划任务等常驻环境中运行。
+连接成功后客户端出现在 [Clients](/clients) 页。客户端是前台进程，应放到 systemd、launchd、nohup、Windows 计划任务等常驻环境中运行。
 
 ### 重连行为
 
