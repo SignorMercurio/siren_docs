@@ -11,6 +11,25 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.37.0 <DateTag>2026-10-21</DateTag>
+
+### Breaking Change
+
+- AIR 的 Pi 固定为 Pi 1.0.0，改用 Pi 内置的 MCP 支持接入 SIREN MCP，不再提供子 Agent 和跨会话记忆，`air.providers.pi.memoryDir` 移除。已安装 Pi 的服务端重新运行 `scripts/install_pi_provider.sh`，并从 `<agentDir>/settings.json` 的 `packages` 中删除 `pi-mcp-adapter`、`pi-subagents` 和 `pi-memory`；`pi-mcp-adapter` 会取代 Pi 内置的 MCP 支持，使 SIREN MCP 无法接入，见 [Pi](/server/air-providers#pi)
+
+### New Features
+
+- Clients 页 **Recent activity** 中，批量部署按目标显示结果：每个目标一个色块，后面按失败、超时、需手工确认、已连接等计数；展开后逐行列出每个目标的结果和原因，部署结束后需要处理的排在前面，点击目标查看它自己的日志，**Copy N failed IDs** 复制失败目标的实例 ID 以便重新部署，见 [Recent activity](/clients#recent-activity)
+- AIR 来源卡片直接显示脚注所引证据文件中的那几行，并标明是工具保存的原件、保存后被改动还是 Agent 自己写的文件；**Copy for report** 把这些行复制为可粘贴进报告的代码块；Artifacts 打开带行号的链接时高亮对应行，见 [在时间线中查看来源](/air/evidence#在时间线中查看来源)
+- MCP 新增 `save_evidence`（仅 Project 端点），把 `run` / `run_batch` 的原始输出连同命令、主机、时间和 SHA-256 原样保存到 Project 的 `evidence/` 目录；AIR GUI 会话要求 Agent 用它保存证据，多步结论先列时间线表格，报告中用代码块引用原文，见 [`save_evidence`](/reference/mcp#save_evidence)
+- macOS 客户端的 Recon 补齐 `cron`、`service`、`rootkit` 模块，提供与 Linux 相同的 `hunt` Profile，并采集登录与 SSH 认证失败事件、进程环境变量和数据卷文件扫描；另记录运行程序的签名与下载隔离属性、SIP、Gatekeeper、FileVault、TCC 授权和配置描述文件。授予客户端“完全磁盘访问”后采集才完整，见 [模块](/recon#模块) 和 [macOS 的完全磁盘访问](/onboard/manual#macos-的完全磁盘访问)
+- 未登录时打开 Dossier 报告链接，先跳到登录页，登录后回到该报告
+
+### Bug Fixes
+
+- 客户端 Shell 不再加载主机上的 Shell 启动文件和 PowerShell 配置文件，主机上的 alias 和函数无法改写调查命令，见 [客户端上运行的 Shell](/shells#客户端上运行的-shell)
+- 修复安装或升级客户端、服务端和插件后，文件属主为构建机用户而不是 root 的问题
+
 ## v2.36.0 <DateTag>2026-10-20</DateTag>
 
 ### New Features
