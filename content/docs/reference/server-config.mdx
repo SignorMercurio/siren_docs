@@ -134,7 +134,6 @@ air:
       args: []
       agentDir: /root/.pi/agent
       contextModeDir: /root/.pi/context-mode
-      memoryDir: /root/.pi/agent/memory
 ```
 
 ## 监听与证书
@@ -244,7 +243,6 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 | `air.providers.<name>.args` | list | `[]`；Codex 为 `[--no-alt-screen]` | 附加 CLI 参数，GUI 与 Terminal 共用；SIREN 接管的参数见 [Provider 参数](/server/air-providers#provider-参数) |
 | `air.providers.pi.agentDir` | string | `/root/.pi/agent` | Pi 的配置、认证（`auth.json`）、Skills 与会话目录 |
 | `air.providers.pi.contextModeDir` | string | `/root/.pi/context-mode` | Pi 长上下文卸载与恢复目录 |
-| `air.providers.pi.memoryDir` | string | `/root/.pi/agent/memory` | Pi 跨会话长期记忆目录 |
 
 `<name>` 为 `codex`、`claude`、`qoder` 或 `pi`。修改 Prompt 模板时须保持占位符的数量和顺序，见 [Prompt 模板](/server/air-providers#prompt-模板)。
 

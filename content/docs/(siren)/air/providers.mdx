@@ -42,7 +42,7 @@ GUI 只在 Provider 主动请求确认时显示审批卡。是否需要确认由
 - **Codex**：命令执行、文件修改和 MCP 工具调用按 Codex 审批策略请求确认。**Decline and stop** 表示拒绝并停止当前轮次；**Allow for session** 的范围由 Codex 决定。
 - **Claude Code**：选择 **Allow for session** 后，同名工具在本会话剩余时间内自动放行。
 - **Qoder**：**Allow for session** 由 SIREN 实现，同类工具调用在本会话内自动选择 “允许一次”。Qoder 自带的 “总是允许 / 总是拒绝” 不会出现，避免写入持久规则。Qoder GUI 读写文件或执行终端命令时，路径只能位于本会话工作目录内，不会通过符号链接写入。
-- **Pi**：文件、Shell、MCP 和子 Agent 操作直接执行，不产生审批卡。
+- **Pi**：文件、Shell 和 MCP 操作直接执行，不产生审批卡。
 
 **Allow for session** 只在当前会话内有效，不写入 Provider 配置；会话结束或继续历史会话后需重新确认。SIREN 启动 CLI 时注入的内容见 [准备 AIR Provider](/server/air-providers#边界)。
 

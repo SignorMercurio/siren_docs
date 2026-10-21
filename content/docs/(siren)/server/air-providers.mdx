@@ -84,7 +84,6 @@ air:
       args: []
       agentDir: /root/.pi/agent
       contextModeDir: /root/.pi/context-mode
-      memoryDir: /root/.pi/agent/memory
 ```
 
 配置只在启动时读取，修改后需重启 `siren_server`。
@@ -101,7 +100,7 @@ air:
 
 ## Pi
 
-Pi 复用服务端用户的全局 Pi 安装、插件、Skills、配置和 memory，新会话固定从 Qwen Aegis 模型开始。安装脚本和默认目录都按 root 设计。
+Pi 复用服务端用户的全局 Pi 安装、插件、Skills 和配置，新会话固定从 Qwen Aegis 模型开始。安装脚本和默认目录都按 root 设计。
 
 1. 在 SIREN 源码仓库中以 root 运行安装脚本（需要 Node.js 24）。脚本全局安装 Pi CLI 及其插件，并把 SIREN 的 Pi 配置合并进 Agent 目录：
 
@@ -119,13 +118,13 @@ Pi 复用服务端用户的全局 Pi 安装、插件、Skills、配置和 memory
    }
    ```
 
-3. 不要在 `<agentDir>/mcp.json` 中手工添加名为 `siren` 的 MCP Server，它会与 SIREN 为每个会话动态注册的 MCP 冲突。
+3. 不要在 `<agentDir>/mcp.json` 中手工添加名为 `siren` 的 MCP Server。Pi 中 `mcp.json` 的同名条目优先于 SIREN 为每个会话注册的 MCP，会话会连到错误的地址或使用错误的凭证。
 
 <Callout title="不要只改 agentDir" type="warn">
   安装脚本写入的 `models.json` 固定从 `/root/.pi/agent/auth.json` 读取密钥，而 SIREN 检查的是 `air.providers.pi.agentDir` 下的 `auth.json`。改了 Agent 目录却不同步 `models.json` 的读取路径，状态检查会通过，实际请求仍认证失败。
 </Callout>
 
-Pi 的文件、Shell、MCP 和子 Agent 操作直接执行，不产生权限审批。
+Pi 的文件、Shell 和 MCP 操作直接执行，不产生权限审批。
 
 ## 检查可用性
 
@@ -203,7 +202,7 @@ Custom 和 Event 入口用模板生成种子 prompt，默认值见 [配置文件
 
 </Accordion>
 
-<Accordion title='Pi 报 MCP server "siren" is already registered'>
+<Accordion title="Pi 会话中 SIREN 工具不可用或范围不对">
 
 删除 `<agentDir>/mcp.json`（默认 `/root/.pi/agent/mcp.json`）中名为 `siren` 的静态条目，SIREN 会为每个会话动态注册。
 

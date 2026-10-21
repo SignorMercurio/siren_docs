@@ -85,7 +85,7 @@ Agentic IR 启动 Provider CLI 时会从子进程环境中剔除 `SIREN_MCP_ADMI
 
 ## `/dossier/` 不鉴权
 
-`webui.dossierDir` 通过 `/dossier/` 作为静态文件提供，不经过 WebUI 登录。没有目录列表，但知道路径的人都能下载其中的文件。
+`webui.dossierDir` 通过 `/dossier/` 作为静态文件提供，不经过 WebUI 登录。没有目录列表，但知道路径的人都能下载其中的文件。只有编辑器页面本身例外：启用登录后，未登录打开报告链接会先跳到登录页，登录后回到该报告。
 
 Reports 页面的 **Blank template** 虽然只读，但在其中粘贴的图片会立即写入 `dossierDir/report.assets/pasted/`，无需登录即可访问。不要在 Blank template 中粘贴敏感截图，也不要在 Dossier 目录中存放运行文件以外的内容。从 Artifacts、Reports 或 AIR 报告卡片打开的实际报告不受影响，其图片读取需要登录。
 

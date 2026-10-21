@@ -9,6 +9,8 @@ sources:
   - internal/server/webui/frontend/src/components/EditableNote.tsx
   - internal/server/webui/frontend/src/components/Provisioning.tsx
   - internal/server/webui/frontend/src/recentCleanups.ts
+  - internal/server/webui/frontend/src/deploymentActivity.ts
+  - internal/server/webui/frontend/src/components/DeploymentTargets.tsx
   - internal/server/webui/frontend/src/preferences.ts
   - internal/server/webui/frontend/src/reconnectBudget.ts
   - internal/server/clientnote/note.go
@@ -75,7 +77,11 @@ Note 按客户端稳定身份保存，重连或服务端重启后仍在。客户
 
 ## Recent activity
 
-**Recent activity** 合并显示近期部署（Deploy）和清理（Cleanup）记录，Project 视图只显示本 Project 的。部署记录可点开看逐步日志，刷新页面后进行中的部署仍可继续查看。
+**Recent activity** 合并显示近期部署（Deploy）和清理（Cleanup）记录，Project 视图只显示本 Project 的。刷新页面后进行中的部署仍可继续查看。
+
+部署记录中每个目标对应一个色块，后面按结果计数，如 `1 failed · 1 timed out · 5 connected`：红色为失败或超时，琥珀色为需手工确认，紫色为进行中，灰色为排队等待，绿色为已连接。
+
+点开部署记录，逐行列出每个目标的实例 ID、IP、结果和原因，部署结束后需要处理的目标排在前面。点击目标行查看该目标自己的日志，只有一个目标时日志默认展开。有失败或超时的目标时，**Copy N failed IDs** 复制这些实例 ID（每行一个），可粘贴到 [Deploy SIREN](/onboard/provisioning) 重新部署；需手工确认的目标已经连上，不在其中。
 
 部署结果不确定时先在这里核对再决定是否重试；清理状态含义见 [痕迹清除](/cleanup)。
 
