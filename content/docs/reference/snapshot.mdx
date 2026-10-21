@@ -364,7 +364,7 @@ snapshot_end
 | `user` | `account` 实体（Linux 和 macOS 另有 `group`）；会话和登录记录的 fact |
 | `process` | `process` 实体 |
 | `network` | `socket` 实体（macOS 的 Socket 快照只记为 fact）；hosts、DNS、路由等 fact |
-| `service`（Linux）、`schtask`（Windows） | `service` 实体；启动项和计划任务的 fact |
+| `service`（Linux、macOS）、`schtask`（Windows） | `service` 实体（macOS 为 launchd 任务）；启动项和计划任务的 fact |
 | `application` | 应用配置的 fact；Linux 和 macOS 另有运行中的 `container` 实体 |
 | `ssh`、`cron`、`env`、`file`、`rootkit` | fact |
 | `topology` | `component`、`container_runtime`、`remote_endpoint`、`mount` 和容器端口 `socket` 实体，以及 `runs`、`listens`、`connects_to`、`mounts`、`uses_runtime` 关系，并补写之前模块未写过的进程、Socket、服务和容器 |

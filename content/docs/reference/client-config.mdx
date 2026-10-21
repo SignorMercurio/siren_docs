@@ -109,8 +109,9 @@ recon:
   collectionTimeout: 270
   defaultProfile: default
   profiles:
-    default: [user, ssh, process, network, env, file, application]
-    quick: [user, ssh, process, network, env, application]
+    default: [user, ssh, process, network, cron, service, env, file, rootkit, application]
+    quick: [user, ssh, process, network, cron, service, env, rootkit, application]
+    hunt: [user, ssh, process, network, cron, service, env, application, topology, supplychain, config, activity, credential]
 
 plugins:
   marketplace: https://oss-siren.oss-cn-hongkong.aliyuncs.com/plugins
@@ -121,8 +122,6 @@ oss:
   objectPath: tmp/siren_upload
   docObjectPath: tmp/siren_upload/docs/latest
 ```
-
-macOS 安装包不带 `hunt` Profile，见 [Profile](/recon#profile)。
 
 <Callout title="包内 server 指向官方服务端" type="info">
   一键部署会把 `server` / `port` 改写为 `siren_server_callback` 规则中的地址，见 [一键部署](/onboard/provisioning#前置条件)。手动安装时用安装脚本的 `--server` / `--port`（Windows 为 `-Server` / `-Port`）写入，或启动时用 `-s` / `-p` 指定，见 [手动安装客户端](/onboard/manual#启动客户端)。
