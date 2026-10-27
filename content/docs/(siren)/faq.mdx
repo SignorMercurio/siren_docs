@@ -9,6 +9,7 @@ sources:
   - cmd/client/cli/upgrade.go
   - internal/server/mcp_auth.go
   - internal/server/egress.go
+  - internal/server/cloud_operations.go
   - scripts/get_siren_server.sh
   - scripts/get_siren.sh
   - internal/server/webui/auth.go
@@ -83,6 +84,8 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 <Accordion title="一键部署失败或超时">
 
 最常见的原因是目标 ECS 出方向默认拒绝，先 [Configure egress](/onboard/egress#configure-egress) 再部署。出口 IP 无法自动发现时在目标行手动填写。见 [一键部署](/onboard/provisioning#注意事项)。
+
+失败信息含 `no execution results found` 时，安装命令没有返回结果。可能是目标主机的云助手离线，也可能是主机无法出网下载客户端。先 Configure egress 再部署；仍然失败时，在 ECS 控制台检查该实例的云助手状态。
 
 </Accordion>
 

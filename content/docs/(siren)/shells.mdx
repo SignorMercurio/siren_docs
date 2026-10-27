@@ -46,10 +46,11 @@ Shell 以客户端进程的用户身份运行，继承其环境变量和工作�
 | 操作 | 结果 |
 | --- | --- |
 | 切换到 WebUI 其他页面 | Shell 继续运行，回到 Shells 页可接着输入 |
-| 在 Global 与 Project、或不同 Project 之间切换 | 关闭在其他范围打开的 Shell，只保留新范围中的 |
-| 刷新页面、关闭浏览器标签页或退出登录 | 全部 Shell 关闭，无法恢复 |
+| 在 Global 与 Project、或不同 Project 之间切换（包括打开指向其他 Project 的 Artifacts 链接） | 先弹出确认；确认后关闭当前范围的全部 Shell，取消则留在原范围 |
+| 刷新页面或关闭浏览器标签页 | 浏览器先询问是否离开；离开后全部 Shell 关闭，无法恢复 |
+| 退出登录 | 全部 Shell 关闭，无法恢复 |
 | 网络中断或客户端断开 | 该 Shell 结束，显示 `--- session ended ---`；不会自动重连，需从 Clients 页重新打开 |
-| 关闭 Shell 标签 | 立即结束该 Shell，不需要确认 |
+| 关闭 Shell 标签 | 先弹出确认；确认后结束该 Shell，无法重新接入 |
 
 Shell 没有空闲超时。Shell 结束时，客户端会强制结束它及其前台任务。需要断开后继续运行的命令，请用 `nohup`、`setsid` 或 tmux 自行脱离。
 

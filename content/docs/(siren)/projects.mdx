@@ -19,6 +19,7 @@ sources:
   - internal/server/webui/frontend/src/requestScope.ts
   - internal/server/webui/frontend/src/components/ClientsTable.tsx
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
+  - internal/server/webui/frontend/src/App.tsx
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
@@ -99,7 +100,7 @@ Projects 页是按状态分列的看板，四列依次是 **Responding**（处�
 | 页面 | Project 视图中的行为 |
 | --- | --- |
 | Clients | 只列本 Project 的客户端，不能分配 Project；**Recent activity** 只显示本 Project 的记录 |
-| Shells | 只能对本 Project 的客户端开 Shell；切换范围时关闭其他范围的 Shell 标签 |
+| Shells | 只能对本 Project 的客户端开 Shell；有打开的 Shell 时，切换范围前先确认，确认后这些 Shell 关闭 |
 | Agentic IR | 新会话的工作目录是 Project 目录，MCP 端点是 `/mcp/project/<id>`；**Running** 和 **History** 只列本范围会话。切换范围后其他范围的 AIR 标签被移除，会话仍在运行，切回后可从 **Running** 重新接入 |
 | Files、Investigations | 只能选本 Project 的客户端；AccessKey 见下文例外 |
 | Artifacts | 根目录是 Project 目录，链接形如 `#/artifacts/<路径>?project=<id>`，打开时自动切换到该 Project |
