@@ -2,7 +2,7 @@
 title: 服务端配置
 description: server_config.yaml 的全部配置项、默认值、命令行覆盖和环境变量
 icon: FileCog
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.38.1
 sources:
   - config/server_config.yaml
   - cmd/server/cli/root.go
@@ -20,6 +20,7 @@ sources:
   - internal/server/air_pi_config.go
   - internal/server/air_mcp.go
   - internal/server/air_history.go
+  - internal/server/air_usage_report.go
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
@@ -111,7 +112,7 @@ mcp:
   cmdBlacklist: []             # 无内置默认值；安装包自带 30 条
 
 air:
-  provider: codex              # codex / claude / qoder / pi
+  provider: codex              # codex / claude / pi
   maxSessions: 20
   replayBufferBytes: 4194304
   prompt: 启动安全应急响应，UID：%s，Event ID：%s，SIREN Client ID：%d
@@ -126,14 +127,16 @@ air:
     claude:
       cliPath: claude
       args: []
-    qoder:
-      cliPath: qodercli
-      args: []
     pi:
       cliPath: pi
       args: []
       agentDir: /root/.pi/agent
       contextModeDir: /root/.pi/context-mode
+  usage:
+    currency: CNY
+    prices:
+      - {model: claude-sonnet-5-5, input: 14.2, output: 71, cacheRead: 0.71, cacheWrite: 17.75, cacheWrite1h: 28.4}
+      - {model: gpt-6.1-sol, input: 14.2, output: 71, cacheRead: 0.71, cacheWrite: 17.75}
 ```
 
 ## 监听与证书
@@ -231,7 +234,7 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 
 | 键 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `air.provider` | string | `codex` | 浏览器所选 Provider 不可用时先回退到的 Provider：`codex`、`claude`、`qoder` 或 `pi` |
+| `air.provider` | string | `codex` | 浏览器所选 Provider 不可用时先回退到的 Provider：`codex`、`claude` 或 `pi` |
 | `air.maxSessions` | int | `20` | GUI 与 Terminal 合计的并发会话上限，跨所有 Project；`0` 或负数表示不限制 |
 | `air.replayBufferBytes` | int（字节） | `4194304` | 每个会话的断线重连回放预算；`0` 或负数时使用默认的 4 MiB，不会关闭回放 |
 | `air.prompt` | string | `启动安全应急响应，UID：%s，Event ID：%s，SIREN Client ID：%d` | Event 入口按安全中心告警 ID 启动时的种子 prompt |
@@ -239,12 +242,27 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 | `air.assetPrompt` | string | `启动安全应急响应，UID：%s，云安全中心资产 UUID：%s，SIREN Client ID：%d，请先获取该资产的相关告警` | Event 入口按云安全中心资产 UUID 启动时的种子 prompt |
 | `air.timeRangePrompt` | string | `，告警时间范围：%s` | 实例或资产目标限定时间范围时追加在种子 prompt 后 |
 | `air.customPromptPrefix` | string | `在 SIREN Client %d 上启动安全应急响应。` | Custom 入口加在用户 prompt 前的前缀 |
-| `air.providers.<name>.cliPath` | string | `codex`、`claude`、`qodercli`、`pi` | CLI 命令名或绝对路径；空字符串使该 Provider 不可用 |
+| `air.providers.<name>.cliPath` | string | `codex`、`claude`、`pi` | CLI 命令名或绝对路径；空字符串使该 Provider 不可用 |
 | `air.providers.<name>.args` | list | `[]`；Codex 为 `[--no-alt-screen]` | 附加 CLI 参数，GUI 与 Terminal 共用；SIREN 接管的参数见 [Provider 参数](/server/air-providers#provider-参数) |
 | `air.providers.pi.agentDir` | string | `/root/.pi/agent` | Pi 的配置、认证（`auth.json`）、Skills 与会话目录 |
 | `air.providers.pi.contextModeDir` | string | `/root/.pi/context-mode` | Pi 长上下文卸载与恢复目录 |
+| `air.usage.currency` | string | `CNY` | [Usage](/usage) 页显示费用所用的货币，仅作标注，不做汇率换算 |
+| `air.usage.prices` | list | `[]` | 各模型每百万 token 的单价，单位为 `air.usage.currency`；未列出的模型只计 token，不计费用 |
 
-`<name>` 为 `codex`、`claude`、`qoder` 或 `pi`。修改 Prompt 模板时须保持占位符的数量和顺序，见 [Prompt 模板](/server/air-providers#prompt-模板)。
+`<name>` 为 `codex`、`claude` 或 `pi`。修改 Prompt 模板时须保持占位符的数量和顺序，见 [Prompt 模板](/server/air-providers#prompt-模板)。
+
+`air.usage.prices` 每项的字段：
+
+| 字段 | 说明 |
+| --- | --- |
+| `model` | 模型 ID，与转录文件中记录的一致，如 `claude-sonnet-5-5`、`gpt-6.1-sol` |
+| `input` | 输入单价，不含缓存读写 |
+| `output` | 输出单价，含推理 token |
+| `cacheRead` | 缓存读取单价 |
+| `cacheWrite` | 缓存写入单价；Claude 为 5 分钟缓存 |
+| `cacheWrite1h` | Claude 1 小时缓存写入单价 |
+
+模型 ID 含点号，因此价格写成列表而不是以模型为键的映射。安装包自带的 `server_config.yaml` 已按公开标价填好常用模型。
 
 <Callout title="空字符串不会回退到默认值" type="warn">
   Prompt 模板和 `cliPath` 只在键不存在时使用内置默认值；空字符串是有效值，会生成残缺的 prompt 或让 Provider 不可用。要恢复默认，删除该键。
@@ -263,6 +281,7 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 | 变量 | 用途 |
 | --- | --- |
 | `SIREN_MCP_ADMIN_TOKEN` | 运维 MCP 客户端访问 `/mcp` 和任意 `/mcp/project/<id>` 的 Bearer 凭证；`mcp.enabled: true` 时必填 |
+| `SIREN_MCP_RAVEN_TOKEN` | 可选，Raven 钉钉群会话换取 Project 凭证用，须与 `SIREN_MCP_ADMIN_TOKEN` 不同，见 [MCP 鉴权](/reference/mcp#鉴权) |
 | `SOAR_ACCESS_KEY_ID` / `SOAR_ACCESS_KEY_SECRET` | SOAR 凭证，必须成对设置，用于 **Allow access**、**Configure egress**、**Restore egress**、**Deploy SIREN**、出口发现和 AccessKey 调查，见 [SOAR 凭证](/server/prerequisites#soar-凭证) |
 | `ALIBABA_CLOUD_ACCESS_KEY_ID` / `ALIBABA_CLOUD_ACCESS_KEY_SECRET` | 两个 `SOAR_*` 凭证变量都未设置时，经阿里云 SDK 默认凭证链使用 |
 | `SOAR_TRIGGER_QPS` | 触发 SOAR 剧本的速率上限，默认 `10`；持续出现 `Throttling.User` 时调低 |

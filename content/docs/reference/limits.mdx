@@ -2,8 +2,8 @@
 title: 限制速查
 description: SIREN 的大小、数量和超时上限一览
 icon: Gauge
-verifiedAgainst: v2.34.0
-dossierVerifiedAgainst: 6a69582
+verifiedAgainst: v2.38.1
+dossierVerifiedAgainst: 45f310e
 sources:
   - internal/server/clientnote/note.go
   - internal/server/project_names.go
@@ -52,6 +52,9 @@ sources:
   - internal/server/webui/frontend/src/air/useAgentSessions.ts
   - internal/server/webui/frontend/src/air/toolResults.ts
   - internal/server/webui/frontend/src/components/AIRToolResults.tsx
+  - internal/server/webui/frontend/src/components/AIRMarkdown.tsx
+  - internal/server/webui/frontend/src/evidence.ts
+  - internal/server/webui/webui_agent_terminal.go
   - internal/server/webui/frontend/src/components/TerminalPanel.tsx
   - internal/protocol/run_v2.go
   - internal/server/run_v2.go
@@ -59,6 +62,7 @@ sources:
   - internal/server/mcp_run_results.go
   - internal/client/session_dispatch.go
   - internal/server/mcp_run_batch.go
+  - internal/server/mcp_evidence.go
   - internal/server/mcp.go
   - internal/server/mcp_auth.go
   - internal/server/webui/auth.go
@@ -66,6 +70,8 @@ sources:
   - internal/server/webui/frontend/src/logs/useServerLogs.ts
   - internal/server/webui/frontend/src/logs/logQuery.ts
   - internal/client/client.go
+  - internal/server/webui/webui_air_usage.go
+  - internal/server/air_usage.go
 ---
 
 SIREN 的大小、数量和超时上限，按功能分组。**配置项**为空的值固定不可改，可配置的键见 [服务端配置](/reference/server-config) 和 [客户端配置](/reference/client-config)。
@@ -76,6 +82,14 @@ SIREN 的大小、数量和超时上限，按功能分组。**配置项**为空�
 | --- | --- | --- | --- |
 | 客户端备注 | 256 个字符 | | [Clients 页](/clients) |
 | Project 名称 | 128 个字符 | | [Projects](/projects) |
+| Project 负责人 | 64 个字符 | | [Projects](/projects) |
+
+## AI 用量
+
+| 限制 | 值 | 配置项 | 详见 |
+| --- | --- | --- | --- |
+| Usage 日期范围 | 366 天 | | [AI 用量](/usage) |
+| 新调用出现在 Usage 中的延迟 | 最多约 30 秒 | | [AI 用量](/usage) |
 
 ## 客户端文件
 
@@ -172,6 +186,7 @@ Shell 没有空闲超时。
 | 限制 | 值 | 配置项 | 详见 |
 | --- | --- | --- | --- |
 | 同时运行的会话 | 20 个，全服务端合计；`0` 或负数不限制 | `air.maxSessions` | [会话管理](/air/sessions) |
+| 会话名称 | 80 个字符 | | [重命名会话](/air/sessions#重命名会话) |
 | 每个会话的回放缓存 | 4 MiB；`0` 或负数时使用默认值 | `air.replayBufferBytes` | [会话管理](/air/sessions) |
 | 粘贴图片 | PNG、JPEG、WebP、GIF；每条消息或每次粘贴 4 张，单张 8 MiB | | [GUI](/air/gui)、[Terminal](/air/terminal) |
 | 断线自动重连 | 连续 5 次 | | [会话管理](/air/sessions) |
@@ -179,6 +194,7 @@ Shell 没有空闲超时。
 | 服务端关闭时等待 Provider 退出 | 5 秒 | | [会话管理](/air/sessions) |
 | 每轮 Report 卡 | 10 张 | | [GUI](/air/gui) |
 | 结果卡列出的主机或告警 | 20 个 | | [GUI](/air/gui) |
+| 来源卡片的证据摘录 | 每张卡片 3 段；每段最多 40 行引用行，另加前后各 2 行 | | [证据与报告](/air/evidence#在时间线中查看来源) |
 | Terminal 滚动历史 | 20,000 行 | | [Terminal](/air/terminal) |
 | TUI 写入剪贴板（OSC 52） | 用户在终端内操作后 2 秒内 | | [Terminal](/air/terminal) |
 
@@ -200,6 +216,7 @@ Shell 没有空闲超时。
 | `search_run_result` | 最多 20 个匹配、正文 8 KiB、查询 1,024 字节、上下文默认 2 行最多 10 行 | | [MCP](/reference/mcp#长结果回读) |
 | 可回读结果的保存 | 60 分钟，合计 512 条或 32 MiB，超出淘汰最早的 | | [MCP](/reference/mcp#结果保存) |
 | `recon` 返回的 Markdown 正文 | 2 MiB，完整内容见 `reportPath` 或 `snapshotPath` | | [MCP](/reference/mcp) |
+| `save_evidence` 的 `label` | 48 个字符 | | [MCP](/reference/mcp#save_evidence) |
 | 同时有效的 MCP 访问凭证 | 10,000 个，含所有 AIR 会话凭证；满时拒绝签发 | | [MCP](/reference/mcp#鉴权) |
 
 ## 账号与登录

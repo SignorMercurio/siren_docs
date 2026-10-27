@@ -11,6 +11,21 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.38.0 <DateTag>2026-10-26</DateTag>
+
+### Breaking Change
+
+- 移除 AIR 的 Qoder Provider，AIR 只支持 Codex、Claude Code 和 Pi。Qoder 的历史会话不再列出；`server_config.yaml` 中的 `air.providers.qoder` 不再读取，可以删除；**Settings** 的默认 Provider 固定为 Qoder 时改回沿用上次，见 [Provider 差异](/air/providers)
+
+### New Features
+
+- 新增 **Usage** 页面（侧栏 **System** 分组），读取服务端上 Claude Code、Codex 和 Pi 的会话转录，按日期、Project、Provider 和模型统计 token 用量、调用次数和会话数，并按 `air.usage.prices` 中的单价估算费用；未配置单价的模型只计 token。安装包自带的配置已填好常用模型的标价，见 [AI 用量](/usage)
+- Projects 看板的列顺序改为 **Responding**、**Wrapping up**、**On hold**、**Done**，见 [管理 Project](/projects#管理-project)
+
+### Bug Fixes
+
+- 修复 Project 很多时，侧栏 **Project scope** 菜单超出窗口、下方的 Project 无法选择的问题
+
 ## v2.37.0 <DateTag>2026-10-21</DateTag>
 
 ### Breaking Change

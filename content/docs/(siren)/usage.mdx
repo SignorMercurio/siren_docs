@@ -1,0 +1,59 @@
+---
+title: AI 用量
+description: 在 Usage 页面按日期、Project、Provider 和模型统计 AIR 的 token 用量与估算费用
+icon: ChartColumn
+verifiedAgainst: v2.38.1
+sources:
+  - internal/server/webui/frontend/src/pages/UsagePage.tsx
+  - internal/server/webui/frontend/src/usage/usageFormat.ts
+  - internal/server/webui/frontend/src/nav.ts
+  - internal/server/webui/webui_air_usage.go
+  - internal/server/air_usage.go
+  - internal/server/air_usage_parse.go
+  - internal/server/air_usage_report.go
+  - cmd/server/cli/root.go
+  - config/server_config.yaml
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+**Usage** 页面（侧栏 **System** 分组）统计服务端上 Claude Code、Codex 和 Pi 的 token 用量，并按配置的单价估算费用。
+
+数据来自这些 Provider 在服务端留下的会话转录文件，与 AIR 历史会话读取的是同一批文件，因此也包含在服务端直接运行 CLI 的会话，以及 Usage 页面出现之前的会话。同一次模型调用出现在多个转录中（如继续会话或子 Agent）时只计一次。
+
+页面统计全部 Project，不随侧栏的 Project 范围切换；要只看某个 Project，用页面上的 Project 筛选。
+
+## 统计范围
+
+每次调用按其工作目录归属：
+
+- 服务端工作目录中的调用归入 **Global**。
+- Project 目录（含子目录）中的调用归入该 Project；Project 嵌套时归入最内层的那个。
+- Project 已删除时，按 `webui.projectsBaseDir` 下的目录名单独成行，标记 **deleted**。
+- 工作目录不在上述位置的调用不统计。
+
+## 查看与筛选
+
+| 控件 | 作用 |
+| --- | --- |
+| **7d** / **30d** / **90d** | 最近 7、30、90 天，含今天；默认 30 天 |
+| 起止日期 | 自定义日期范围，最长 366 天；日期按服务端所在时区划分 |
+| **All projects** / **All providers** / **All models** | 按 Project、Provider 或模型筛选；**Clear filters** 清除这三项 |
+
+点击表格中的 Project 名或模型名也会按它筛选，再点一次取消。
+
+页面顶部显示范围内的总费用、token 数、调用次数和会话数。
+
+- **Daily**：每日柱状图，可切换 **Cost** / **Tokens**，左上角标出峰值；鼠标悬停在某天上，旁边浮出当天的日期、费用和 token 数。图下方按输入（Input）、缓存读取（Cache read）、缓存写入（Cache write）和输出（Output）分列 token 构成。
+- **By project**、**By model**：按 Project 或按模型汇总。点击 **Cost** 或 **Tokens** 列头按该列从大到小排序，再点一次改为从小到大；默认按费用从大到小。**Share** 列显示该行在当前排序指标中的占比。范围内没有任何调用有单价时，按 **Cost** 排序和占比都改用 token 数。
+
+## 费用估算
+
+费用按 `air.usage.prices` 中各模型每百万 token 的单价，分别乘以输入、输出、缓存读取和缓存写入的 token 数后相加，货币为 `air.usage.currency`，见 [服务端配置](/reference/server-config#air)。修改后需重启服务端。
+
+- 没有单价的模型仍计入 token 和调用次数，但不计费用：模型行标记 **unpriced**；整行都没有单价时费用显示 `—`；部分调用没有单价时费用后带 `*`，悬停可看到未计入的调用数。
+- 订阅额度内的调用（如 Claude Max、ChatGPT 订阅）同样按标价估算，页面费用不等于实际账单。
+
+<Callout title="服务端启动后需要先读取转录" type="info">
+  服务端启动时在后台读取全部转录文件，转录较多时需要十几秒；读取完成前页面顶部显示 **reading transcripts…**，数字会自动补全。之后页面最多每 30 秒增量读取一次新内容，最新的调用可能晚半分钟出现。
+</Callout>

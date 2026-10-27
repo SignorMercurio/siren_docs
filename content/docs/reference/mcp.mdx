@@ -2,11 +2,12 @@
 title: MCP
 description: SIREN MCP 的端点、鉴权、工具参数、结果回读、命令黑名单与审计
 icon: Plug
-verifiedAgainst: v2.36.0
+verifiedAgainst: v2.38.1
 sources:
   - internal/server/mcp.go
   - internal/server/mcp_http.go
   - internal/server/mcp_auth.go
+  - internal/server/group_projects.go
   - internal/server/mcp_audit.go
   - internal/server/mcp_command_policy.go
   - internal/server/mcp_run.go
@@ -20,7 +21,6 @@ sources:
   - internal/server/air_mcp.go
   - internal/server/air_mcp_auth.go
   - internal/server/air_terminal_cmd.go
-  - internal/server/air_gui_qoder.go
   - internal/server/air_codex_shared.go
   - internal/client/run_v2.go
   - config/server_config.yaml
@@ -28,7 +28,7 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-SIREN Server 内置 [MCP](https://modelcontextprotocol.io/) 服务，提供 7 个工具：列出客户端、执行命令、回读长输出、触发 Recon 和部署 SIREN。[Agentic IR](/air) 自动接入它；本页供外部 MCP 客户端接入和排查时查阅。
+SIREN Server 内置 [MCP](https://modelcontextprotocol.io/) 服务，提供 8 个工具（`save_evidence` 只在 Project 端点提供）：列出客户端、执行命令、回读长输出、保存证据、触发 Recon 和部署 SIREN。[Agentic IR](/air) 自动接入它；本页供外部 MCP 客户端接入和排查时查阅。
 
 ## 端点
 
@@ -62,8 +62,10 @@ MCP 由 [`server_config.yaml`](/reference/server-config) 中的 `mcp.enabled` �
 | --- | --- | --- | --- |
 | 管理凭证 | 服务端环境变量 `SIREN_MCP_ADMIN_TOKEN` | `/mcp` 和任意 `/mcp/project/<id>` | 长期 |
 | AIR 会话凭证 | 每个 AIR 会话启动时签发 | Project 会话只能访问本 Project 的路径，Global 会话只能访问 `/mcp` | 会话结束时吊销 |
+| 群会话凭证 | Raven 用 `SIREN_MCP_RAVEN_TOKEN` 调用 `/api/mcp/group-session` 换取 | 该钉钉群对应 Project 的路径 | 1 小时 |
 
 - `mcp.enabled` 为 `true` 时 `SIREN_MCP_ADMIN_TOKEN` 必须非空，否则服务端启动即退出，报 `MCP requires SIREN_MCP_ADMIN_TOKEN`。不用 MCP 和 AIR 时可设 `mcp.enabled: false`。
+- `SIREN_MCP_RAVEN_TOKEN` 可选，只在接入 Raven 钉钉群会话时设置，且必须与 `SIREN_MCP_ADMIN_TOKEN` 不同，否则服务端拒绝启动。每个钉钉群第一次换取凭证时自动创建一个绑定该群的 Project，群名未知时暂名 `DingTalk <群 ID>`，之后提供群名时改用群名。
 - 签发的凭证只存在服务端内存中，重启后全部失效。
 - 凭证放在受保护的服务环境文件中，不要写进 `server_config.yaml`、Project 目录、URL 或聊天消息。设置方法见 [MCP 凭证](/server/prerequisites#mcp-凭证)，安全含义见 [MCP 鉴权](/server/security#mcp-鉴权)。
 

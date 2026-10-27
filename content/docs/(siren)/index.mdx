@@ -2,7 +2,7 @@
 title: 快速开始
 description: 从部署服务端到完成第一次排查
 icon: Rocket
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.38.1
 sources:
   - scripts/get_siren_server.sh
   - scripts/get_siren.sh
@@ -10,9 +10,11 @@ sources:
   - cmd/server/cli/user.go
   - cmd/server/cli/root.go
   - cmd/client/cli/root.go
+  - cmd/client/cli/info.go
   - internal/server/mcp_auth.go
   - internal/server/webui/frontend/src/nav.ts
   - internal/server/webui/frontend/src/components/Provisioning.tsx
+  - internal/server/webui/frontend/src/pages/ProjectsPage.tsx
   - internal/server/webui/frontend/src/pages/InvestigationsPage.tsx
   - internal/server/webui/frontend/src/pages/AIRPage.tsx
 ---
@@ -62,7 +64,7 @@ systemctl enable --now siren
 
 ![登录后的 Web 控制台，默认打开 Clients 页](../../img/webui-clients.png)
 
-需要按事件隔离主机和取证文件时，先在侧栏顶部的范围菜单中创建并切换到一个 [Project](/projects)，之后接入的主机会自动归属到它。
+需要按事件隔离主机和取证文件时，先在 [Projects](/projects) 页新建一个 Project，WebUI 随即切换到它。之后在其中用 **Deploy SIREN** 部署的主机自动归属到它，其他主机需在 Global 范围手动分配，见 [分配客户端](/projects#分配客户端)。
 
 </Step>
 <Step>
@@ -112,7 +114,7 @@ cd /opt/siren
 sudo ./siren recon
 ```
 
-本地模式只有 Recon、进程分析、上传和清理等客户端命令，没有 Web 控制台、Shell、Agentic IR 和 Project。见 [Recon](/recon)。
+本地模式只有 Recon、进程分析（仅 Linux）、上传和清理等客户端命令，没有 Web 控制台、Shell、Agentic IR 和 Project。见 [Recon](/recon)。
 
 ## 下一步
 

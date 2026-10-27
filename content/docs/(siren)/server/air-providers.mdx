@@ -1,8 +1,8 @@
 ---
 title: 准备 AIR Provider
-description: 在服务端安装并登录 Claude Code、Codex、Qoder 或 Pi，供 WebUI 启动 Agentic IR 会话
+description: 在服务端安装并登录 Claude Code、Codex 或 Pi，供 WebUI 启动 Agentic IR 会话
 icon: Bot
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.38.1
 sources:
   - config/server_config.yaml
   - cmd/server/cli/root.go
@@ -41,7 +41,6 @@ Agentic IR（AIR）会话运行在服务端上：`siren_server` 以自身系统�
 | --- | --- | --- | --- | --- |
 | Codex | `codex` | `codex` | Codex CLI 自身登录 | `$CODEX_HOME/sessions`，未设置时为 `~/.codex/sessions` |
 | Claude Code | `claude` | `claude` | Claude Code 自身登录 | `~/.claude/projects` |
-| Qoder | `qoder` | `qodercli` | QoderCLI 自身登录 | `~/.qoder/projects` |
 | Pi | `pi` | `pi` | `<agentDir>/auth.json` 中的 Qwen Aegis 密钥 | `<agentDir>/sessions` |
 
 `~` 指 `siren_server` 进程用户的主目录。
@@ -76,9 +75,6 @@ air:
     codex:
       cliPath: /usr/local/bin/codex
       args: [--no-alt-screen]
-    qoder:
-      cliPath: qodercli
-      args: []
     pi:
       cliPath: pi
       args: []
@@ -100,7 +96,7 @@ air:
 
 ## Pi
 
-Pi 复用服务端用户的全局 Pi 安装、插件、Skills 和配置，新会话固定从 Qwen Aegis 模型开始。安装脚本和默认目录都按 root 设计。
+Pi 复用服务端用户的全局 Pi 安装、插件、Skills 和配置，新会话固定从 Qwen Aegis 模型开始，思考等级取 Pi 的默认设置（安装脚本设为 `max`）。安装脚本和默认目录都按 root 设计。
 
 1. 在 SIREN 源码仓库中以 root 运行安装脚本（需要 Node.js 24）。脚本全局安装 Pi CLI 及其插件，并把 SIREN 的 Pi 配置合并进 Agent 目录：
 
@@ -118,7 +114,12 @@ Pi 复用服务端用户的全局 Pi 安装、插件、Skills 和配置，新会
    }
    ```
 
-3. 不要在 `<agentDir>/mcp.json` 中手工添加名为 `siren` 的 MCP Server。Pi 中 `mcp.json` 的同名条目优先于 SIREN 为每个会话注册的 MCP，会话会连到错误的地址或使用错误的凭证。
+   安装脚本还配置了阿里云百炼上的 Kimi K3、DeepSeek V4.1 Flash 和 GLM 5.3 Prime。要在会话中切换到这些模型，在 `auth.json` 中按同样格式加一条 `bailian`，脚本不会写入它。
+
+3. SIREN 通过 Pi 内置的 MCP 支持为每个会话注册 SIREN MCP：
+
+   - 不要在 `<agentDir>/mcp.json` 中手工添加名为 `siren` 的 MCP Server。Pi 中 `mcp.json` 的同名条目优先于 SIREN 为每个会话注册的 MCP，会话会连到错误的地址或使用错误的凭证。
+   - 不要安装 `pi-mcp-adapter` 等 MCP 适配插件，它会取代 Pi 内置的 MCP 支持，使 SIREN MCP 无法接入。安装脚本不会删除 `<agentDir>/settings.json` 的 `packages` 中已有的插件，需要手工移除。
 
 <Callout title="不要只改 agentDir" type="warn">
   安装脚本写入的 `models.json` 固定从 `/root/.pi/agent/auth.json` 读取密钥，而 SIREN 检查的是 `air.providers.pi.agentDir` 下的 `auth.json`。改了 Agent 目录却不同步 `models.json` 的读取路径，状态检查会通过，实际请求仍认证失败。
@@ -136,7 +137,7 @@ Pi 的文件、Shell 和 MCP 操作直接执行，不产生权限审批。
 升级或安装 CLI 后重新检查即可，不需要重启 SIREN。
 
 <Callout title="状态不代表已登录" type="warn">
-  Claude Code、Codex 和 Qoder 的检查不验证登录状态。CLI 未登录时，会话启动后由 CLI 自己报错。
+  Claude Code 和 Codex 的检查不验证登录状态。CLI 未登录时，会话启动后由 CLI 自己报错。
 </Callout>
 
 **Settings** 页 **Server** 区的 **AIR runtime** 显示 AIR 不可用的原因，并列出各 Provider 可用的界面和不可用原因；每次打开 Settings 都会重新检查。**Agentic IR** 页中也可点击 **Running** 旁的刷新按钮重新检查。
@@ -148,7 +149,6 @@ Pi 的文件、Shell 和 MCP 操作直接执行，不产生权限审批。
 | `Pi Qwen Aegis authentication is missing: ...` | 按上文写入 `auth.json` |
 | `Pi authentication file ... has mode ...; expected 0600` | `chmod 600 /root/.pi/agent/auth.json` |
 | `Pi qwen-aegis model is not configured or authenticated` | 重新运行 Pi 安装脚本，确认 `models.json` 中有 `qwen-aegis` |
-| `Qoder ACP protocol version ... is incompatible; SIREN requires v1` | 升级 QoderCLI |
 | `Claude CLI does not advertise bidirectional stream-json` 或握手请求失败 | 升级对应 CLI；升级前可先用 Terminal |
 
 ## 配置项
@@ -162,7 +162,7 @@ Pi 的文件、Shell 和 MCP 操作直接执行，不产生权限审批。
 ### Provider 参数
 
 - **Codex**：默认的 `--no-alt-screen` 让 Terminal 保留浏览器终端的滚动历史；旧版 Codex 不识别该参数时设为 `args: []`。SIREN 注入的 `siren` MCP Server 会覆盖用户配置中的同名条目。
-- **Claude Code、Qoder**：SIREN MCP 配置、会话 ID 和 GUI 传输参数由 SIREN 加入，不要写进 `args`。
+- **Claude Code**：SIREN MCP 配置、会话 ID 和 GUI 传输参数由 SIREN 加入，不要写进 `args`。
 - **Pi**：`args` 中的 `--session`、`--resume`、`--session-id`、`--provider`、`--model`、`--thinking`、`--mode` 会被丢弃，由 SIREN 决定。
 
 模型、推理强度、权限、沙箱、Shell 审批和工具限制写进对应 CLI 的用户配置或 `args`，SIREN 不配置。
@@ -186,7 +186,7 @@ Custom 和 Event 入口用模板生成种子 prompt，默认值见 [配置文件
 <Callout title="SIREN 只做这些" type="info">
   - 用 `cliPath` 和 `args` 启动 CLI，为所有入口（包括 Manual）注入当前范围的 SIREN MCP 和会话凭证，并按入口加入种子 prompt 或要继续的会话 ID。
   - GUI 只展示 Provider 主动返回的审批和提问；“本会话允许”不写入 CLI 的用户级配置。
-  - 不修改 Claude Code、Codex、Qoder 的全局设置，也不替它们跳过权限确认。
+  - 不修改 Claude Code、Codex 的全局设置，也不替它们跳过权限确认。
   - 会话凭证随会话结束或服务端重启失效；长期 MCP 管理凭证不会注入 Provider。
 </Callout>
 
@@ -204,7 +204,7 @@ Custom 和 Event 入口用模板生成种子 prompt，默认值见 [配置文件
 
 <Accordion title="Pi 会话中 SIREN 工具不可用或范围不对">
 
-删除 `<agentDir>/mcp.json`（默认 `/root/.pi/agent/mcp.json`）中名为 `siren` 的静态条目，SIREN 会为每个会话动态注册。
+删除 `<agentDir>/mcp.json`（默认 `/root/.pi/agent/mcp.json`）中名为 `siren` 的静态条目，SIREN 会为每个会话动态注册；`<agentDir>/settings.json` 的 `packages` 中有 `pi-mcp-adapter` 时也将其删除，见 [Pi](#pi)。
 
 </Accordion>
 

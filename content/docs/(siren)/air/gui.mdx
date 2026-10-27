@@ -2,7 +2,7 @@
 title: GUI 时间线
 description: 在结构化时间线中跟踪 Agent 的操作、回答审批与提问、检索和导出会话
 icon: MessageSquareText
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.38.1
 sources:
   - internal/server/webui/frontend/src/components/AIRGUIChatPanel.tsx
   - internal/server/webui/frontend/src/components/AIRTranscript.tsx
@@ -34,9 +34,11 @@ GUI 是 AIR 会话的默认界面：SIREN 把 Provider 的事件按轮次整理�
 
 在底部输入框按 Enter 发送，Shift+Enter 换行。手机（触屏且宽度不超过 768px 或高度不超过 500px）的软键盘没有 Shift+Enter，Enter 只换行，点击输入框右侧的发送按钮发送。
 
+Provider 给出提示建议时（见 [Provider 差异](/air/providers#对比总览)），会话空闲且输入框为空时以占位文字显示建议的下一条请求，按 Tab 或 → 填入输入框，可修改后再发送。
+
 - **空闲时**：开启新的一轮。
 - **运行中**：内容作为方向调整交给当前轮次，带 **Steered** 标签。各 Provider 的处理方式见 [Provider 差异](/air/providers#运行中调整方向)。
-- **停止当前轮次**：点击输入框右侧的停止按钮，只停止这一轮，会话保持连接。Codex、Claude 和 Qoder 中等待处理的审批与提问随之取消，记录为 `Cancelled`。结束整个会话见 [启动与管理会话](/air/sessions#停止与结束)。
+- **停止当前轮次**：点击输入框右侧的停止按钮，只停止这一轮，会话保持连接。Codex 和 Claude 中等待处理的审批与提问随之取消，记录为 `Cancelled`。结束整个会话见 [启动与管理会话](/air/sessions#停止与结束)。
 
 <Callout title="调整方向不会撤销已完成的操作" type="warn">
   方向调整和停止只影响 Agent 之后的行为。已执行的命令、文件修改和对客户端的远程操作不会回滚，请在时间线中核对。

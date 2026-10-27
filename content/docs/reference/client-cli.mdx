@@ -2,7 +2,7 @@
 title: 客户端命令行
 description: siren 客户端二进制的子命令、参数与本地模式
 icon: SquareTerminal
-verifiedAgainst: v2.33.11
+verifiedAgainst: v2.37.0
 sources:
   - cmd/client/cli/root.go
   - cmd/client/cli/client.go
@@ -11,6 +11,7 @@ sources:
   - cmd/client/cli/upload.go
   - cmd/client/cli/clean.go
   - cmd/client/cli/probe_egress.go
+  - internal/egressprobe
   - cmd/client/cli/upgrade.go
   - cmd/client/cli/plugins.go
   - pkg/utils/oss.go
@@ -34,7 +35,7 @@ sources:
 | `info` | `siren info <pid> \| -p <port> \| -n <name>` | 查看进程详情（仅 Linux） |
 | `upload` | `siren upload <file path>` | 将本地文件上传到 OSS |
 | `clean` | `siren clean` | 清除 SIREN 管理的客户端文件并退出 |
-| `probe-egress` | `siren probe-egress [--json]` | 观测一次出站 SYN，用于出口发现 |
+| `probe-egress` | `siren probe-egress [--json]` | 观测一次出站 SYN，用于出口发现（仅 Linux、Windows） |
 | `upgrade` | `siren upgrade [-y]` | 检查并升级客户端二进制，`-y` 跳过确认 |
 | `plugins` | `siren plugins [install\|uninstall\|toggle\|update <name>]` | 列出或管理本地插件 |
 
@@ -66,4 +67,4 @@ siren client -s 203.0.113.10 -p 443
 
 ## 本地模式
 
-目标主机无法回连服务端时，可作为次要方案在该主机上直接运行 `recon`、`info`、`upload`、`clean`，无需连接服务端。`recon` 和 `upload` 把结果写入 OSS，需在客户端配置 [OSS 凭证](/server/prerequisites#oss-凭证)，之后从 OSS 下载结果分析。
+目标主机无法回连服务端时，可作为次要方案在该主机上直接运行 `recon`、`info`、`upload`、`clean`，无需连接服务端。`recon` 和 `upload` 把结果写入 OSS，需在运行命令的终端中设置 [OSS 凭证](/server/prerequisites#oss-凭证)，之后从 OSS 下载结果分析。

@@ -1,8 +1,8 @@
 ---
 title: Provider 差异
-description: Codex、Claude Code、Qoder 和 Pi 在 AIR GUI 中的审批、提问、命令、模型、额度和图片支持差异
+description: Codex、Claude Code 和 Pi 在 AIR GUI 中的审批、提问、命令、模型、额度和图片支持差异
 icon: Boxes
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.38.1
 sources:
   - internal/server/air_provider.go
   - internal/server/air_gui_provider.go
@@ -12,28 +12,26 @@ sources:
   - internal/server/air_gui_claude.go
   - internal/server/air_gui_claude_bridge.go
   - internal/server/air_gui_claude_commands.go
+  - internal/server/air_gui_claude_events.go
   - internal/server/air_gui_claude_models.go
-  - internal/server/air_gui_qoder.go
-  - internal/server/air_gui_qoder_commands.go
-  - internal/server/air_gui_qoder_permissions.go
-  - internal/server/air_gui_qoder_workspace.go
   - internal/server/air_gui_pi.go
   - internal/server/air_gui_pi_models.go
   - internal/server/webui/frontend/src/components/AIRModelPicker.tsx
   - internal/server/webui/frontend/src/components/AIRStatusline.tsx
 ---
 
-四个 Provider 共用同一套 [GUI 时间线](/air/gui)，但审批、提问、命令和额度等能力取决于各自的 CLI。四个 Provider 都支持 GUI 和 Terminal，实际能否使用取决于服务端的 [可用性检查](/server/air-providers#检查可用性)；GUI 不可用而 Terminal 可用时，可以先用 [Terminal 界面](/air/terminal)。
+三个 Provider 共用同一套 [GUI 时间线](/air/gui)，但审批、提问、命令和额度等能力取决于各自的 CLI。三个 Provider 都支持 GUI 和 Terminal，实际能否使用取决于服务端的 [可用性检查](/server/air-providers#检查可用性)；GUI 不可用而 Terminal 可用时，可以先用 [Terminal 界面](/air/terminal)。
 
 ## 对比总览
 
-| 能力 | Codex | Claude Code | Qoder | Pi |
-| --- | --- | --- | --- | --- |
-| 操作审批 | 由 Codex 配置决定 | 由 Claude Code 配置决定 | 由 Qoder 决定 | 无 |
-| 审批选项 | **Allow once**、**Allow for session**、**Decline**，Codex 提供时还有 **Decline and stop** | **Allow once**、**Allow for session**、**Decline** | **Allow once**、**Decline**、**Allow for session** | — |
-| 提问卡 | 有 | 有 | 无，直接在回复中提问 | 有（由 Pi 扩展发起） |
-| 运行中调整方向 | 追加到当前轮次 | 中断当前轮次后作为新消息发送 | 中断当前轮次后作为新消息发送 | 追加到当前轮次 |
-| `/model` | 模型 + 推理强度 | 模型 + 推理强度 | 仅模型，且需会话公布模型配置 | 模型 + 思考等级 |
+| 能力 | Codex | Claude Code | Pi |
+| --- | --- | --- | --- |
+| 操作审批 | 由 Codex 配置决定 | 由 Claude Code 配置决定 | 无 |
+| 审批选项 | **Allow once**、**Allow for session**、**Decline**，Codex 提供时还有 **Decline and stop** | **Allow once**、**Allow for session**、**Decline** | — |
+| 提问卡 | 有 | 有 | 有（由 Pi 扩展发起） |
+| 运行中调整方向 | 追加到当前轮次 | 中断当前轮次后作为新消息发送 | 追加到当前轮次 |
+| `/model` | 模型 + 推理强度 | 模型 + 推理强度 | 模型 + 思考等级 |
+| 提示建议 | 无 | 有，由 Claude Code 的 `promptSuggestionEnabled` 设置决定 | 无 |
 
 ## 审批
 
@@ -41,21 +39,19 @@ GUI 只在 Provider 主动请求确认时显示审批卡。是否需要确认由
 
 - **Codex**：命令执行、文件修改和 MCP 工具调用按 Codex 审批策略请求确认。**Decline and stop** 表示拒绝并停止当前轮次；**Allow for session** 的范围由 Codex 决定。
 - **Claude Code**：选择 **Allow for session** 后，同名工具在本会话剩余时间内自动放行。
-- **Qoder**：**Allow for session** 由 SIREN 实现，同类工具调用在本会话内自动选择 “允许一次”。Qoder 自带的 “总是允许 / 总是拒绝” 不会出现，避免写入持久规则。Qoder GUI 读写文件或执行终端命令时，路径只能位于本会话工作目录内，不会通过符号链接写入。
 - **Pi**：文件、Shell 和 MCP 操作直接执行，不产生审批卡。
 
 **Allow for session** 只在当前会话内有效，不写入 Provider 配置；会话结束或继续历史会话后需重新确认。SIREN 启动 CLI 时注入的内容见 [准备 AIR Provider](/server/air-providers#边界)。
 
 ## 运行中调整方向
 
-Claude Code 和 Qoder 收到运行中的消息时，SIREN 先中断当前轮次再发送：被中断轮次中未完成的操作不再继续，等待中的审批被取消。
+Claude Code 收到运行中的消息时，SIREN 先中断当前轮次再发送：被中断轮次中未完成的操作不再继续，等待中的审批被取消。
 
 ## 模型与推理强度
 
 空闲时点击状态条中的模型名称或输入 `/model` 切换，只作用于当前会话，不写入 Provider 配置。新会话使用 Provider 的默认模型（Pi 固定从 Qwen Aegis 开始，见 [准备 AIR Provider](/server/air-providers#pi)）；继续历史会话时不强制指定模型。
 
 - **Claude Code**：读取模型菜单失败时会话照常可用，只是没有模型选择器。
-- **Qoder**：会话未公布模型配置时，`/model` 不出现在命令菜单中。
 - **Pi**：列出服务器上 Pi 已配置的模型；只有当前模型列出可选思考等级，切换模型后先沿用 Pi 自动调整的等级。
 
 ## GUI 命令
@@ -68,12 +64,11 @@ Claude Code 和 Qoder 收到运行中的消息时，SIREN 先中断当前轮次�
 | Codex | `/review`：内联代码 Review | 空闲 |
 | Codex | `/mcp`：只读列出 MCP Server 的名称、认证状态和工具数量 | 随时 |
 | Claude Code | 当前会话公布的斜杠命令和 Skills | 空闲 |
-| Qoder | 无 | — |
 | Pi | `/compact`，以及 Pi 公布的扩展命令等 | 空闲 |
 
 - CLI 版本不支持某项命令时只有该命令报错，会话可以继续。
-- 菜单中没有的 `/xxx`：Codex、Claude Code 和 Pi 原样作为普通消息发给 Provider；Qoder 在发送前拒绝。
-- Qoder 的 Skills、插件、MCP prompts 和 workflows，以及其他 Provider 的 TUI 专属命令和设置，请在 [Terminal 界面](/air/terminal) 中使用。
+- 菜单中没有的 `/xxx` 原样作为普通消息发给 Provider。
+- 各 Provider 的 TUI 专属命令和设置，请在 [Terminal 界面](/air/terminal) 中使用。
 
 ## 额度与上下文
 
@@ -81,9 +76,8 @@ Claude Code 和 Qoder 收到运行中的消息时，SIREN 先中断当前轮次�
 | --- | --- | --- |
 | Codex | 显示 | 额度窗口（如 5h、7d）、剩余百分比和重置倒计时 |
 | Claude Code | 不显示（Claude Code 不报告上下文上限） | 显示 |
-| Qoder | 显示 | Qoder Personal 不提供可编程额度，状态条显示 **Usage** 外链 |
 | Pi | 显示 | 不显示 |
 
 ## 图片输入
 
-Codex、Claude Code 和 Qoder 都接受粘贴图片。Pi 以当前模型声明的输入能力为准，未声明图片输入时拒绝粘贴，切换到支持图片的模型即可。模型能否理解图片由 Provider 和模型决定。
+Codex 和 Claude Code 都接受粘贴图片。Pi 以当前模型声明的输入能力为准，未声明图片输入时拒绝粘贴，切换到支持图片的模型即可。模型能否理解图片由 Provider 和模型决定。

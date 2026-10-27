@@ -2,7 +2,7 @@
 title: 核心概念
 description: SIREN 的几个基本名词，以及它们在 WebUI 中的对应关系
 icon: Lightbulb
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.38.1
 sources:
   - internal/client/identity.go
   - internal/server/client_ids.go
@@ -49,7 +49,7 @@ import conceptsLight from "../../img/concepts-light.webp";
 
 ## Global 与 Project 范围
 
-**Project** 是按事件划分的工作区，有名称、颜色和服务端上的专用目录；每个客户端最多归属一个 Project。**Global** 是不选 Project 时的范围：能看到所有客户端，也是唯一能给客户端分配 Project 的地方。
+**Project** 是按事件划分的工作区，有名称、颜色、负责人、处置状态和服务端上的专用目录；每个客户端最多归属一个 Project。**Global** 是不选 Project 时的范围：能看到所有客户端，也是唯一能给客户端分配 Project 的地方。
 
 当前范围由侧栏顶部的 **Project scope** 菜单切换：
 
@@ -66,7 +66,7 @@ import conceptsLight from "../../img/concepts-light.webp";
 
 ## Agentic IR 会话
 
-**Agentic IR**（AIR）会话是在服务端运行的 AI 代理，Provider 可选 Codex、Claude、Pi 或 Qoder。代理通过 SIREN MCP 操作客户端，需要审批或提问时停下等操作员回应。AIR 只能在 WebUI 中使用。
+**Agentic IR**（AIR）会话是在服务端运行的 AI 代理，Provider 可选 Codex、Claude 或 Pi。代理通过 SIREN MCP 操作客户端，需要审批或提问时停下等操作员回应。AIR 只能在 WebUI 中使用。
 
 - **界面**：**GUI** 是结构化时间线，**Terminal** 是 Provider 原生终端界面。
 - **入口模式**：

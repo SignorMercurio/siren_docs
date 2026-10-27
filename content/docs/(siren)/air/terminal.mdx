@@ -2,7 +2,7 @@
 title: Terminal 界面
 description: 在浏览器中使用 Provider 原生 TUI：适用场景、复制粘贴、图片、尺寸和重新连接
 icon: SquareTerminal
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.38.1
 sources:
   - internal/server/webui/frontend/src/components/AgentTerminalPanel.tsx
   - internal/server/webui/frontend/src/components/TerminalPanel.tsx
@@ -20,7 +20,7 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-Terminal 界面在服务端的伪终端（PTY）中运行 Codex、Claude Code、Pi 或 Qoder 的原生 TUI，并在浏览器中原样显示，Provider 自己的斜杠命令、Skills、插件、自定义 statusline 和交互菜单都照常可用。
+Terminal 界面在服务端的伪终端（PTY）中运行 Codex、Claude Code 或 Pi 的原生 TUI，并在浏览器中原样显示，Provider 自己的斜杠命令、Skills、插件、自定义 statusline 和交互菜单都照常可用。
 
 在启动表单中按下 Provider 按钮旁的终端图标后启动会话，或在只读历史会话中点击 **Continue in Terminal**。会话运行期间不能在 GUI 和 Terminal 之间切换。
 
@@ -36,7 +36,7 @@ Terminal 界面在服务端的伪终端（PTY）中运行 Codex、Claude Code、
 
 SIREN 只注入当前范围的 SIREN MCP、会话凭证、开场提示词或要继续的会话 ID，其他一切按服务端用户的 CLI 配置和 `air.providers.<name>.args` 运行，见 [边界](/server/air-providers#边界)。因此：
 
-- 模型、推理强度、权限、沙箱和审批都由 CLI 决定。需要确认的操作以 TUI 自身的提示出现，不生成 GUI 审批卡片，也不触发 Running 列表或浏览器标签页标题上的待处理提示。
+- 模型、推理强度、权限、沙箱和审批都由 CLI 决定。需要确认的操作以 TUI 自身的提示出现，不生成 GUI 审批卡片，也不触发 Running 列表或浏览器标签页标题上的待处理提示；[系统通知](/air/sessions#系统通知) 只按输出是否静默判断。
 - SIREN 不附加证据引用约定，脚注也不渲染成来源卡片。需要可追溯的结论时，在提示词中要求 Agent 标注来源，或改用 GUI，见 [证据与报告](/air/evidence)。
 
 ## 复制与粘贴

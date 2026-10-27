@@ -2,7 +2,7 @@
 title: 手动安装客户端
 description: 在能访问服务端的主机上安装并启动 SIREN 客户端
 icon: SquareTerminal
-verifiedAgainst: v2.36.0
+verifiedAgainst: v2.38.1
 sources:
   - scripts/get_siren.sh
   - scripts/get_siren.ps1
@@ -11,6 +11,8 @@ sources:
   - config/config_linux.yaml
   - config/config_windows.yaml
   - config/config_darwin.yaml
+  - internal/recon/file_darwin.go
+  - internal/recon/application_darwin.go
   - internal/server/webui/frontend/src/components/ClientsTable.tsx
 ---
 

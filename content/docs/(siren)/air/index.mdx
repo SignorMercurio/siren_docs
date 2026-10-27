@@ -1,8 +1,8 @@
 ---
 title: Agentic 应急响应
-description: 在 WebUI 中让 Codex、Claude Code、Pi 或 Qoder 通过 SIREN 排查在线主机
+description: 在 WebUI 中让 Codex、Claude Code 或 Pi 通过 SIREN 排查在线主机
 icon: Brain
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.38.1
 sources:
   - internal/server/webui/frontend/src/pages/AIRPage.tsx
   - internal/server/webui/frontend/src/components/AIRRequests.tsx
@@ -13,6 +13,7 @@ sources:
   - internal/server/agent_session_registry.go
   - internal/server/mcp.go
   - internal/server/mcp_deploy.go
+  - internal/server/mcp_evidence.go
   - internal/server/mcp_command_policy.go
 ---
 
@@ -23,7 +24,7 @@ import { FileSearch, FileText, PanelsTopLeft, Scale, SquareTerminal, Workflow } 
 import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
 import airStartEvent from '../../../img/air-start-event.png';
 
-Agentic 应急响应（Agentic IR，简称 AIR）让 Codex、Claude Code、Pi 或 Qoder 通过 SIREN MCP 在在线客户端上执行排查命令、触发 Recon，并协助整理 Markdown 报告。
+Agentic 应急响应（Agentic IR，简称 AIR）让 Codex、Claude Code 或 Pi 通过 SIREN MCP 在在线客户端上执行排查命令、触发 Recon，并协助整理 Markdown 报告。
 
 AIR 是交互式会话，不是无人值守的自动处置：操作员需要盯着执行过程、回答审批和提问、随时补充方向或停止会话，并在写入报告前核对结论。
 
@@ -77,7 +78,7 @@ Agent 的回复与操作按顺序显示，点击操作可展开输入和输出�
 
 ### 回答审批和提问
 
-Provider 要求确认操作时，时间线中出现 **Approval required** 卡片，列出命令、路径或参数，并给出 **Allow once**、**Allow for session**、**Decline** 等选项；Agent 需要补充信息时出现提问卡片。选项因 Provider 而异，见 [Provider 差异](/air/providers#审批)；后台会话的提示见 [待处理提示](/air/sessions#待处理提示)。
+Provider 要求确认操作时，时间线中出现 **Approval required** 卡片，列出命令、路径或参数，并给出 **Allow once**、**Allow for session**、**Decline** 等选项；Agent 需要补充信息时出现提问卡片。选项因 Provider 而异，见 [Provider 差异](/air/providers#审批)；后台会话的提示见 [待处理提示](/air/sessions#待处理提示) 和 [系统通知](/air/sessions#系统通知)。
 
 </Step>
 <Step>
@@ -101,6 +102,7 @@ Agent 通过 SIREN MCP 操作客户端，参数和限制见 [MCP 集成](/refere
 | `run` | 在一台客户端上执行命令 |
 | `run_batch` | 在多台客户端上并发执行同一命令并按主机汇总 |
 | `read_run_result`、`search_run_result` | 回读或搜索长命令输出的原文 |
+| `save_evidence` | 仅 Project 会话：把 `run` / `run_batch` 的原始输出原样保存到 `evidence/` 目录，供脚注引用 |
 | `recon` | 在客户端上触发一次 [Recon](/recon)，结果保存到 Artifacts |
 | `deploy` | 通过 SOAR 向一台阿里云 ECS 部署 SIREN，并等待客户端连接 |
 

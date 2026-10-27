@@ -2,11 +2,12 @@
 title: 一键部署
 description: 通过 WebUI Provisioning 向阿里云 ECS 批量安装并接入 SIREN 客户端
 icon: CloudUpload
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.38.1
 sources:
   - internal/server/webui/frontend/src/components/Provisioning.tsx
   - internal/server/webui/frontend/src/provisioning.ts
   - internal/server/webui/frontend/src/pages/ClientsPage.tsx
+  - internal/server/webui/frontend/src/deploymentActivity.ts
   - internal/server/deploy_batch.go
   - internal/server/deployment_manager.go
   - internal/server/deployment_matching.go
@@ -27,7 +28,7 @@ import { Steps, Step } from "fumadocs-ui/components/steps";
 
 ## 前置条件
 
-- 目标是阿里云 ECS，云助手状态正常；已知其所属账号的 Alibaba Cloud UID。
+- 目标是阿里云 ECS 上的 Linux 或 Windows 主机，云助手状态正常；已知其所属账号的 Alibaba Cloud UID。
 - 服务端已配置 SOAR 访问凭证与 `egress.rules`，见 [前置条件与凭证](/server/prerequisites)。
 - `egress.rules` 中 `siren_server_callback` 规则的 `destCidrIp` 是服务端公网 IP，且只含这一个 IPv4 地址（`/32`），目标主机客户端按它回连。不满足时部署直接失败：`SIREN callback must configure exactly one server IP (destCidrIp ending in /32)`。
 
@@ -41,7 +42,7 @@ import { Steps, Step } from "fumadocs-ui/components/steps";
 填写 **Alibaba Cloud UID**（纯数字），在 **Instance IDs** 中每行填一个目标。
 </Step>
 <Step>
-点击 **Deploy to N instances**，等待每个目标给出结果。
+点击 **Deploy to N instances**。面板显示完成数和结果计数；每个目标的状态、原因和日志在下方 [Recent activity](/clients#recent-activity) 本次部署的记录中。
 </Step>
 </Steps>
 
@@ -70,14 +71,14 @@ i-demo0004,203.0.113.11,db-1
 从 Project 视图发起的部署，客户端自动归入当前 Project；目标已归属另一个 Project 时部署被拒绝，见 [部署时自动归属](/projects#部署时自动归属)。
 
 <Callout title="需要手工确认客户端" type="warn">
-  SIREN 无法确认新上线的客户端就是该目标时（如多个目标共享出口 IP），不按 IP 猜测，也不写入 Project 或备注。该目标显示 `manual_required`，需在 Clients 中核对主机后手动设置；面板不为它提供重试，以免重复部署。
+  SIREN 无法确认新上线的客户端就是该目标时（如多个目标共享出口 IP），不按 IP 猜测，也不写入 Project 或备注。该目标在 Recent activity 中显示为 **Manual**，需在 Clients 中核对主机后手动设置；它已经连上，面板不为它提供重试，**Copy N failed IDs** 也不包含它，以免重复部署。
 </Callout>
 
 ## 结果与记录
 
 - **重试**：存在失败目标时，**Retry N failed** 只重新提交失败项，沿用原 UID 和 Project；**Edit targets** 修改目标后重新开始。
 - **出站问题**：失败明确指向出站时，面板出现 **Configure egress for N target(s)**，带入这些实例切到 [配置出站](/onboard/egress)。
-- **Recent activity**：部署记录可在 Clients 页 [Recent activity](/clients#recent-activity) 展开查看日志，服务端重启后清空。刷新页面或关闭浏览器不会取消云端操作。
+- **Recent activity**：**View logs** 跳到本次部署在 Clients 页 [Recent activity](/clients#recent-activity) 中的记录，展开后逐个目标查看结果、原因和日志，并可复制失败目标的实例 ID 重新部署。记录在服务端重启后清空。刷新页面或关闭浏览器不会取消云端操作。
 
 <Callout title="结果未知时先看 Recent activity" type="warn">
   目标显示 **Needs verification**（如部署事件流中断）时，服务端可能仍在执行。不要直接重试，先在 Recent activity 核对最终结果再决定。

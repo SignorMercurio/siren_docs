@@ -2,7 +2,7 @@
 title: 常见问题
 description: 按使用流程整理的常见问题，每条指向负责说明的页面
 icon: BadgeQuestionMark
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.38.1
 sources:
   - cmd/server/cli/root.go
   - cmd/server/cli/upgrade.go
@@ -167,6 +167,12 @@ GUI 显示 **Session did not start** 和原因，最常见的是 `webui.publicUR
 <Accordion title="进程分析是灰的，或下拉框里没有目标客户端">
 
 进程分析只支持在线的 Linux 客户端，且只列出当前范围内的客户端，见 [进程分析常见问题](/process#常见问题)。
+
+</Accordion>
+
+<Accordion title="macOS 客户端的 Recon 结果有 partial">
+
+客户端缺少“完全磁盘访问”时读不到 TCC 隐私授权，文件扫描也会跳过受保护的目录。按启动方式授权后重启客户端，见 [macOS 的完全磁盘访问](/onboard/manual#macos-的完全磁盘访问)。
 
 </Accordion>
 

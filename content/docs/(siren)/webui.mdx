@@ -2,7 +2,7 @@
 title: WebUI 导览
 description: Web 控制台的导航、范围切换和各页面用途
 icon: LayoutDashboard
-verifiedAgainst: v2.33.13
+verifiedAgainst: v2.38.1
 sources:
   - internal/server/webui/frontend/src/nav.ts
   - internal/server/webui/frontend/src/components/Sidebar.tsx
@@ -28,12 +28,12 @@ Web 控制台是使用 SIREN 的主要方式，浏览器直接访问 `https://<S
 | **Respond** | [Clients](/clients)、[Agentic IR](/air) | 在线客户端列表与 **Provisioning**（部署、放行、出站恢复）；AI 辅助排查 |
 | **Tools** | [Shells](/shells)、[Files](/files)、[Investigations](#investigations) | 交互式终端；客户端文件浏览和上传下载；Recon / 进程分析 / AccessKey 调查 |
 | **Evidence** | [Artifacts](/artifacts)、[Reports](/reports) | 服务端证据目录；当前范围内的 Dossier 应急报告 |
-| **System** | [Projects](/projects)、[Logs](/logs) | 新建和管理 Project；服务端运行日志与 MCP 命令审计 |
+| **System** | [Projects](/projects)、[Usage](/usage)、[Logs](/logs) | 新建和管理 Project；AI 用量与费用统计；服务端运行日志与 MCP 命令审计 |
 
 导航之外还有两个入口：
 
 - **范围菜单**：侧栏顶部的 **Project scope**，在 Global 和各 Project 视图之间切换，**Manage projects** 也能打开 [Projects](/projects) 页面。
-- **账号菜单**：侧栏左下角，提供 [Settings](#settings) 和退出登录。
+- **账号菜单**：侧栏左下角，提供 [Settings](#settings)、本文档（**Docs**）、问题反馈（**Feedback**）和退出登录。
 
 每个页面、工具标签、AIR 会话和选中文件都有自己的 URL，可以刷新或分享。
 
@@ -47,7 +47,8 @@ Web 控制台是使用 SIREN 的主要方式，浏览器直接访问 `https://<S
 
 - **Preferences**：只保存在当前浏览器，不跟随账号同步。
   - 启动时的 Project 范围：沿用上次的范围（刷新时各标签页保持自己的范围），或每次从 Global 开始。
-  - Agentic IR 默认 Provider：沿用上次，或固定 Codex / Claude / Pi / Qoder，单次会话仍可临时切换。
+  - Agentic IR 默认 Provider：沿用上次，或固定 Codex / Claude / Pi，单次会话仍可临时切换。
   - Agentic IR 默认界面：沿用上次，或固定 GUI / Terminal。
+  - AIR 系统通知：默认开启，没在看的会话完成或等待时弹出浏览器通知，见 [系统通知](/air/sessions#系统通知)。
   - Clients 列表刷新频率。
 - **Server**：只读的版本号、鉴权状态与当前用户、Dossier 目录，以及每个 AIR Provider 实际可用的界面；Provider 不可用时显示原因。

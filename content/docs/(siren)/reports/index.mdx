@@ -2,8 +2,8 @@
 title: 报告
 description: 在 SIREN 中创建、查找、编辑和导出 Dossier 应急响应报告
 icon: FileText
-verifiedAgainst: v2.33.11
-dossierVerifiedAgainst: 6a69582
+verifiedAgainst: v2.37.0
+dossierVerifiedAgainst: 45f310e
 sources:
   - internal/server/webui/frontend/src/pages/ReportsPage.tsx
   - internal/server/webui/frontend/src/reports.ts
@@ -22,6 +22,7 @@ sources:
   - dossier:src/document-session.js
   - dossier:src/idb.js
   - dossier:src/export.js
+  - dossier:src/main.js
   - dossier:src/pages.js
   - dossier:src/core-utils.js
 ---
@@ -90,7 +91,7 @@ Global 视图扫描服务端工作目录和所有 Project 目录；Project 视�
 
 ### 打开报告
 
-从 Reports 页的 **Open in Dossier**、Artifacts 中选中 `.md` 后的 **Dossier** 按钮，或 AIR Report 卡的 **Edit in Dossier** 打开。Dossier 在新标签页中加载文件，保存时写回原位置。
+从 Reports 页的 **Open in Dossier**、Artifacts 中选中 `.md` 后的 **Dossier** 按钮，或 AIR Report 卡的 **Edit in Dossier** 打开。Dossier 在新标签页中加载文件，保存时写回原位置。报告链接可以直接发给其他操作员，未登录时先进入登录页，登录后回到该报告。
 
 </Step>
 <Step>
@@ -156,6 +157,8 @@ Global 视图扫描服务端工作目录和所有 Project 目录；Project 视�
 | **MD** | 下载当前源文件，保留 HTML 注释 |
 
 源文件有解析错误、图片未上传完成或上传失败、图片或字体加载失败、引用了本报告附件以外的图片时，导出中止并提示原因。导出 HTML 时如果服务端上的 Dossier 已更新，刷新页面后重新导出。
+
+导出 PDF 前，如果还有未填写的模板占位，或有 PDF 中打不开的链接，会先请求确认。PDF 中只有 `http(s)` 和 `mailto` 链接能打开，指向附件的相对路径链接应改写为纯文本文件名。
 
 导出交付用的 PDF 前先 **保存**，并在 **校样** 中检查溢出、图片尺寸和分页。
 

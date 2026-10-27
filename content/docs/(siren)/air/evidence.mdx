@@ -2,7 +2,7 @@
 title: 证据与报告
 description: AIR GUI 会话如何为结论标注证据来源、保存原始材料和交付报告，以及操作员如何核验
 icon: FileCheck
-verifiedAgainst: v2.33.12
+verifiedAgainst: v2.37.0
 sources:
   - internal/server/air_gui_evidence.go
   - internal/server/mcp_evidence.go
@@ -22,7 +22,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 在 AIR 的 GUI 会话中，SIREN 要求 Agent 为调查结论标注证据来源，并把临时取得的原始输出保存到工作区。
 
 <Callout title="只适用于 GUI 会话" type="info">
-  证据要求随 GUI 会话注入，四个 Provider 均适用。[Terminal 界面](/air/terminal) 不注入这些要求，回复中通常没有可点击的来源卡片。
+  证据要求随 GUI 会话注入，三个 Provider 均适用。[Terminal 界面](/air/terminal) 不注入这些要求，回复中通常没有可点击的来源卡片。
 </Callout>
 
 ## SIREN 对 Agent 的要求
@@ -33,7 +33,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 - **多步结论先列时间线**：攻击链或事件时间线开头用表格逐步列出时间（含时区）、阶段、资产、发现和对应脚注；多个来源印证同一事件时，写明共同的 IP、路径或账号以及时间差。
 - **脚注内容**：证据摘要、实际数据来源（主机和原始路径，或云账号、日志库、告警或记录 ID）、带时区的采集时间和查看原件的位置；日志查询另写查询时间范围。引用已保存的证据文件时链接到具体行，如 `evidence/<文件>.txt#L120-L122`（行号含文件头，最多 20 行）。
 - **复用已有材料**：优先引用工作区中已有的 Recon 报告、JSONL 快照等文件。
-- **由工具保存原始输出**：依赖 SIREN `run` / `run_batch` 的输出前，调用 [`save_evidence`](/reference/mcp#save_evidence) 由 SIREN 原样保存，不由 Agent 重新抄写；日志查询优先用支持保存证据的查询工具（如 `sls -save`）。其他临时输出由 Agent 在权限允许时保存到工作区的 `evidence/` 目录（不覆盖已有文件），并记录来源、采集时间、完整命令或查询语句，以及截断或缺失情况。
+- **由工具保存原始输出**：依赖 SIREN `run` / `run_batch` 的输出前，调用 [`save_evidence`](/reference/mcp#save_evidence)（仅 Project 会话提供）由 SIREN 原样保存，不由 Agent 重新抄写；日志查询优先用支持保存证据的查询工具（如 `sls -save`）。其他临时输出由 Agent 在权限允许时保存到工作区的 `evidence/` 目录（不覆盖已有文件），并记录来源、采集时间、完整命令或查询语句，以及截断或缺失情况。
 - **报告中引用原文**：保存的报告把引用的原始行从证据文件复制到代码块中，上一行写来源说明。
 - **不得编造**：只引用实际取得的材料，保存、定位或读取失败时在脚注中说明缺口并省略链接。AI 生成的摘要不算原始证据。
 

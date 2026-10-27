@@ -2,7 +2,7 @@
 title: 选择接入方式
 description: 按目标主机环境选择一键部署、手动安装或本地模式
 icon: Signpost
-verifiedAgainst: v2.36.0
+verifiedAgainst: v2.37.0
 sources:
   - scripts/get_siren.sh
   - scripts/get_siren.ps1
@@ -34,7 +34,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 | macOS Apple 芯片 | `siren_darwin_arm64.tar.gz` | macOS 12 及以上 |
 | macOS Intel | `siren_darwin_amd64.tar.gz` | macOS 12 及以上 |
 
-安装脚本按架构和系统版本自动选包。Windows 需要 PowerShell 5.1；不支持 32 位 Windows 和 Windows ARM。一键部署只面向阿里云 ECS 上的 Linux 和 Windows，macOS 主机用手动安装或本地模式；macOS 客户端的 Recon 模块少于 Linux，见 [模块](/recon#模块)。
+安装脚本按架构和系统版本自动选包。Windows 需要 PowerShell 5.1；不支持 32 位 Windows 和 Windows ARM。一键部署只面向阿里云 ECS 上的 Linux 和 Windows，macOS 主机用手动安装或本地模式。各平台的 Recon 采集项见 [模块](/recon#模块)；macOS 客户端需要“完全磁盘访问”才能完整采集，见 [macOS 的完全磁盘访问](/onboard/manual#macos-的完全磁盘访问)。
 
 <Callout title="版本一致" type="warn">
   客户端与服务端必须运行同一版本，SIREN 不会检查或提示不一致。升级见 [升级与数据](/upgrade)。

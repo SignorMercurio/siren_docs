@@ -2,7 +2,7 @@
 title: 启动与管理会话
 description: 选择 Provider 和入口模式启动 AIR 会话，在 Running 中重新接入或停止，并从 History 继续以前的会话
 icon: Workflow
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.38.1
 sources:
   - internal/server/webui/frontend/src/pages/AIRPage.tsx
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
@@ -32,7 +32,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ## 选择 Provider 和界面
 
-启动表单第一行是 Provider 按钮（Codex、Claude、Pi、Qoder）和一个终端图标按钮：
+启动表单第一行是 Provider 按钮（Codex、Claude、Pi）和一个终端图标按钮：
 
 - **Provider 按钮**：服务端不可用的 Provider 置灰，原因见 [检查可用性](/server/air-providers#检查可用性)。
 - **终端图标**：未按下用 **GUI**，按下用 **Terminal**。某种界面不可用时页面自动改用另一种。
@@ -97,7 +97,7 @@ GUI 会话等待审批或回答时，对应会话标签上也会出现标记；�
 
 ### 系统通知
 
-**Settings** 中的 **AIR notifications** 默认为 **On**。第一次点击 **Start** 启动会话时，浏览器会询问是否允许通知，选择允许即可；之后不再询问。之后你没在看的会话出现下列情况时，系统弹出标题为 `SIREN · <会话名>` 的通知：
+**Settings** 中的 **AIR notifications** 默认为 **On**。第一次从启动表单启动会话时，浏览器会询问是否允许通知，选择允许即可；之后不再询问。之后你没在看的会话出现下列情况时，系统弹出标题为 `SIREN · <会话名>` 的通知：
 
 | 会话 | 触发时机 | 通知内容 |
 | --- | --- | --- |

@@ -2,7 +2,7 @@
 title: 插件
 description: recon 插件与 command 插件的启用方式、管理命令和内置插件
 icon: Puzzle
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.37.0
 sources:
   - internal/plugin/plugin.go
   - internal/plugin/manage.go
@@ -12,6 +12,7 @@ sources:
   - internal/client/handler.go
   - cmd/client/cli/plugins.go
   - internal/recon/profile.go
+  - scripts/get_siren.sh
   - _plugins/chkrootkit
   - _plugins/jdump
 ---
@@ -121,7 +122,7 @@ plugins:
 ### 容易踩的坑
 
 - **本地命令不影响运行中的客户端**：运行中的客户端不会自动重新加载插件目录或配置。完成变更后须重启客户端。
-- **重新部署会替换配置**：重新运行客户端安装脚本会替换 `config.yaml`，插件目录保留，但 `plugins.<name>` 开关和自定义 Profile 丢失。用 `toggle` 重新启用插件（`install` 会因插件已存在而拒绝）。
+- **重装会替换配置**：安装完好时重新运行客户端安装脚本（包括一键部署）最多改写 `server`、`port`，插件开关和自定义 Profile 保留；安装损坏需要重装时，`config.yaml` 被安装包中的版本替换，插件目录保留，但 `plugins.<name>` 开关和自定义 Profile 丢失，见 [重装与配置](/reference/client-config#重装与配置)。此时用 `toggle` 重新启用插件（`install` 会因插件已存在而拒绝）。
 
 ## 调用 command 插件
 

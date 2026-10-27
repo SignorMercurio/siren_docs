@@ -2,7 +2,7 @@
 title: 账号与安全边界
 description: SIREN Server 的访问控制模型、各入口的鉴权方式和公网暴露建议
 icon: ShieldCheck
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.38.1
 sources:
   - internal/auth/store.go
   - cmd/server/cli/user.go
@@ -11,6 +11,7 @@ sources:
   - internal/server/webui/webui.go
   - internal/server/webui/webui_dossier.go
   - internal/server/artifact_resolver.go
+  - internal/server/artifact_mutations.go
   - internal/server/artifact_reports.go
   - internal/server/mcp_auth.go
   - internal/server/air_mcp_auth.go
@@ -62,11 +63,12 @@ cd /opt/siren
 
 ### 账号的权限范围
 
-所有账号权限相同，没有角色区分。Project 是工作区划分，不是权限边界，任何账号都能切换到任意 Project 或 Global 视图。一个 WebUI 账号可以：
+所有账号权限相同，没有角色区分。Project 是工作区划分，Project 负责人只是标注，二者都不是权限边界，任何账号都能切换到任意 Project 或 Global 视图。一个 WebUI 账号可以：
 
 - 操作所有在线客户端：Shell、Files 上传覆盖、Recon、清理，以及部署和出站放行等云端写操作。
-- 在 Global 视图的 Artifacts 中浏览、下载、上传、重命名和删除服务端工作目录下的文件。状态目录、账号库、配置、证书、二进制和 `.env` 等点号开头的文件受保护，见 [服务端自身文件](/artifacts#服务端自身文件)。
+- 在 Global 视图的 Artifacts 中浏览、下载、上传、重命名、移动和删除服务端工作目录下的文件。状态目录、账号库、配置、证书、二进制和 `.env` 等点号开头的文件受保护，见 [服务端自身文件](/artifacts#服务端自身文件)。
 - 查看全部服务端日志，见 [Logs 包含敏感信息](#logs-包含敏感信息)。
+- 在 [Usage](/usage) 页面查看所有 Project 的 AI 用量和估算费用。
 - 启动 Agentic IR。Provider CLI 以服务端进程身份运行在控制主机上，其自带的 Shell 和文件工具直接作用于控制主机；审批和沙箱由 Provider 自身配置决定。
 
 因此 WebUI 账号只应发给可以完全信任、相当于控制主机管理员的操作员。

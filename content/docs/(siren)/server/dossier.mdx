@@ -2,8 +2,8 @@
 title: 部署 Dossier
 description: 把 Dossier 报告编辑器部署到 SIREN 服务端，供 WebUI 打开和编辑报告
 icon: Upload
-verifiedAgainst: v2.34.0
-dossierVerifiedAgainst: 6a69582
+verifiedAgainst: v2.38.1
+dossierVerifiedAgainst: 45f310e
 sources:
   - cmd/server/cli/root.go
   - config/server_config.yaml
@@ -138,7 +138,7 @@ webui:
 
 ## 注意事项
 
-- `/dossier/` 下的静态文件无需登录即可访问，读写报告仍需 WebUI 登录，见 [`/dossier/` 不鉴权](/server/security#dossier-不鉴权)。
+- 除编辑器页面外，`/dossier/` 下的静态文件无需登录即可访问；读写报告仍需 WebUI 登录，见 [`/dossier/` 不鉴权](/server/security#dossier-不鉴权)。
 - **Blank template** 只读、不能保存。在其中粘贴的图片写入 `<dossierDir>/report.assets/pasted/`，不属于任何报告，下次 `make deploy` 时会被删除。正式报告请从 **Reports** 或 **Artifacts** 打开再编辑。
 - 在 SIREN 前面放代理时，按 [单一 TLS 端口](/server#单一-tls-端口) 只做四层透传，并转发整个端口。编辑器通过同源的 `/api/reports/*` 读写报告，只代理 `/dossier/` 会出现页面能打开、但读取或保存失败。
 

@@ -2,7 +2,7 @@
 title: 插件开发
 description: 插件清单、程序约定、构建与发布到插件市场
 icon: Code
-verifiedAgainst: v2.36.0
+verifiedAgainst: v2.37.0
 sources:
   - internal/plugin/plugin.go
   - internal/plugin/manage.go
@@ -109,6 +109,7 @@ command 插件通过客户端本地命令调用。生成的文件可通过 Files
 - 安装和更新时以 `sh <setup>` 执行，工作目录是临时准备目录而非最终安装路径，不要写死 `plugins/<name>/` 的绝对路径。
 - 最长 5 分钟，输出上限 16 MiB。非零退出、超时或输出超限都会让安装或更新失败，插件目录和配置回到操作前的状态。
 - 对插件目录以外的修改（安装系统包、写入 `/usr/local` 等）不会回滚，脚本应可重复执行，例如先检查目标文件是否已存在。
+- 脚本通常以 root 执行。解包 tar 时加 `--no-same-owner`，让文件属主为执行用户，而不是沿用压缩包中记录的 UID。
 
 ## 构建
 
@@ -145,7 +146,7 @@ dist/plugins/myplugin/
 | 可执行文件 | `{marketplace}/{name}/{platform}/{entrypoint}`；Windows 上不带扩展名的 `entrypoint` 加 `.exe` |
 | setup 脚本 | `{marketplace}/{name}/{setup}` |
 
-默认市场为 `https://oss-siren.oss-cn-hongkong.aliyuncs.com/plugins`。上传后在测试客户端上执行 `plugins <Client ID> install <name>`，再用 `plugins <Client ID>` 确认。
+默认市场为 `https://oss-siren.oss-cn-hongkong.aliyuncs.com/plugins`。上传后在测试客户端的工作目录执行 `./siren plugins install <name>`，再用 `./siren plugins` 确认。
 
 ## 不经市场测试
 

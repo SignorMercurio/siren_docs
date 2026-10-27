@@ -2,7 +2,7 @@
 title: Project 范围
 description: 按事件隔离客户端、AIR 会话和证据目录
 icon: FolderKanban
-verifiedAgainst: v2.35.0
+verifiedAgainst: v2.38.1
 sources:
   - internal/server/projects.go
   - internal/server/project_names.go
@@ -68,9 +68,9 @@ Project 目录都建在 `webui.projectsBaseDir`（或启动参数 `--webui-proje
 
 ## 管理 Project
 
-![Projects 看板：Responding、On hold、Wrapping up、Done 四列，卡片显示名称、负责人和目录名](../../img/projects-board.png)
+![Projects 看板：Responding、Wrapping up、On hold、Done 四列，卡片显示名称、负责人和目录名](../../img/projects-board.png)
 
-Projects 页是按状态分列的看板，四列依次是 **Responding**（处置中）、**On hold**（暂时挂起）、**Wrapping up**（收尾中）、**Done**（已完成）。
+Projects 页是按状态分列的看板，四列依次是 **Responding**（处置中）、**Wrapping up**（收尾中）、**On hold**（暂时挂起）、**Done**（已完成）。
 
 每张卡片显示 Project 名称、负责人和目录名。点击名称即切换到该 Project；点击目录名切换到该 Project 并在 [Artifacts](/artifacts) 中打开它的目录。
 
@@ -82,7 +82,7 @@ Projects 页是按状态分列的看板，四列依次是 **Responding**（处�
 
 - **Copy workspace path**：复制目录绝对路径。
 - **Rename project**：只改显示名，目录不动。
-- **Delete project**：删除 Project 元数据并解除所有客户端归属，目录和文件保留；删除当前 Project 后回到 Global。目录仍在，所以不能再手动新建同名目录的 Project。
+- **Delete project**：删除 Project 元数据并解除所有客户端归属，目录和文件保留；删除当前 Project 后回到 Global。留下的目录不能再挂回新 Project，新建的 Project 总是另建带新编号的目录。Raven 为钉钉群自动创建的 Project 不能删除，见 [MCP 鉴权](/reference/mcp#鉴权)。
 
 ## 分配客户端
 

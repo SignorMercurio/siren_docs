@@ -2,7 +2,7 @@
 title: 前置条件与凭证
 description: 按功能列出 SIREN Server 依赖的证书、账号、凭证和外部服务
 icon: ListChecks
-verifiedAgainst: v2.34.0
+verifiedAgainst: v2.38.1
 sources:
   - config/server_config.yaml
   - cmd/server/cli/root.go
@@ -136,7 +136,7 @@ egress:
 
 ## AIR Provider CLI
 
-在控制主机上安装并登录 Codex、Claude Code、Qoder 或 Pi CLI，由 `air.providers.<name>` 指定路径和参数，见 [准备 AIR Provider](/server/air-providers)。缺失时 Settings 的 **AIR runtime** 下显示对应 Provider 不可用及原因。
+在控制主机上安装并登录 Codex、Claude Code 或 Pi CLI，由 `air.providers.<name>` 指定路径和参数，见 [准备 AIR Provider](/server/air-providers)。缺失时 Settings 的 **AIR runtime** 下显示对应 Provider 不可用及原因。
 
 ## 网络
 
