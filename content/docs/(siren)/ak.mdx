@@ -26,7 +26,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 1. 打开 [Web 控制台](/webui#investigations) 的 **Investigations** 页面。
 2. 在 **AccessKey** 表单中填写 Alibaba Cloud UID、AccessKey ID 和可选的 Region，点击 **Run**。
-3. 完成后点击 **Open Report** 在 [Artifacts](/artifacts) 中查看 Markdown 报告。
+3. 完成后点击 **Open report** 在 [Artifacts](/artifacts) 中查看 Markdown 报告。
 
 ![Investigations 页的 AccessKey 标签，填写 UID、AccessKey ID 和可选 Region](../../img/ak-investigation.png)
 
@@ -36,7 +36,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 报告文件名形如 `AK_<UID>_<AccessKey ID>_<YYYY-MM-DD_HH-MM-SS>.md`，包含 SOAR 返回的调用历史，如调用时间、操作类型和来源 IP。
 
-AccessKey 调查不绑定客户端，也不跟随 Project 视图：报告始终写入 Global Artifacts（`siren_server` 当前工作目录），在 Project 视图中发起时 **Open Report** 也会打开 Global 中的报告。
+AccessKey 调查不绑定客户端，也不跟随 Project 视图：报告始终写入 Global Artifacts（`siren_server` 当前工作目录），在 Project 视图中发起时 **Open report** 也会打开 Global 中的报告。
 
 <Callout title="敏感信息" type="warn">
   报告包含 AccessKey ID 和调用历史。下载、转发或写入应急报告前，先确认接收范围和脱敏要求。
