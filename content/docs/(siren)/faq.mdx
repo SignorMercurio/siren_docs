@@ -85,7 +85,11 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
 最常见的原因是目标 ECS 出方向默认拒绝，先 [Configure egress](/onboard/egress#configure-egress) 再部署。出口 IP 无法自动发现时在目标行手动填写。见 [一键部署](/onboard/provisioning#注意事项)。
 
-失败信息含 `no execution results found` 时，安装命令没有返回结果。可能是目标主机的云助手离线，也可能是主机无法出网下载客户端。先 Configure egress 再部署；仍然失败时，在 ECS 控制台检查该实例的云助手状态。
+失败信息含 `no execution results found` 时，安装命令没有返回结果。SIREN 随后会查询该实例的云助手状态，并在失败信息中写明原因：
+
+- 云助手在线：主机可能无法下载客户端。先 Configure egress 再部署。
+- 云助手离线：失败信息会给出最后心跳时间。先 Configure egress；已经配置过时，检查主机防火墙或 EDR 是否隔离了主机。
+- 云助手从未上报：主机可能没有安装云助手。先安装云助手再部署。
 
 </Accordion>
 
