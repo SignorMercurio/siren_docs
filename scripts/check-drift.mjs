@@ -85,7 +85,9 @@ function versionCommit(repo, version) {
     try {
       commit = git(repo, ['rev-parse', '--verify', '--quiet', `${version}^{commit}`]);
     } catch {
-      commit = git(repo, ['log', '-1', '--format=%H', '--fixed-strings', `--grep=chore: bump version to ${version}`]);
+      // Anchored, so v2.38.1 does not match the v2.38.10 bump.
+      const pattern = version.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      commit = git(repo, ['log', '-1', '--format=%H', '-E', `--grep=^chore: bump version to ${pattern}$`]);
     }
     versionCommits.set(key, commit);
   }
