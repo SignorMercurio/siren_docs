@@ -2,8 +2,8 @@
 title: 报告语法
 description: Dossier Markdown 速查：frontmatter、章节、分页、正文和结构块
 icon: BookOpenText
-verifiedAgainst: v2.37.0
-dossierVerifiedAgainst: 45f310e
+verifiedAgainst: v2.39.0
+dossierVerifiedAgainst: 8c1902c
 sources:
   - dossier:src/source.js
   - dossier:src/source-syntax.js
@@ -14,6 +14,7 @@ sources:
   - dossier:src/sanitize.js
   - dossier:src/core-utils.js
   - dossier:src/report-schema.json
+  - dossier:src/toc.js
   - dossier:src/styles/report.css
 ---
 
@@ -40,6 +41,7 @@ Dossier Markdown 是普通 Markdown 正文加少量报告专用的 `:::` 结构�
 
 - `##` 是章，`###` 是节，`####` 是嵌套小节。
 - 英文标题可选，写成 `中文 / English`，`/` 两侧各留一个空格。
+- 英文报告的章标题只写英文，与英文模板一致，如 `## Event Overview`、`## Technical Analysis`。切换语言见 [报告语言](/reports#报告语言)。
 - `###` 末尾加 `{page}`，该节从新页开始；`{page slot=3.4}` 同时固定节号。`{page}` 只对 `###` 生效。
 - 标题以点分编号开头（`### 3.1 排查过程`）也会固定该节编号。
 

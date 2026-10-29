@@ -2,13 +2,16 @@
 title: WebUI 导览
 description: Web 控制台的导航、范围切换和各页面用途
 icon: LayoutDashboard
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
   - internal/server/webui/frontend/src/nav.ts
   - internal/server/webui/frontend/src/components/Sidebar.tsx
   - internal/server/webui/frontend/src/sidebarShortcut.ts
   - internal/server/webui/frontend/src/router.ts
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
+  - internal/server/webui/frontend/src/pages/SettingsAIR.tsx
+  - internal/server/air_settings.go
+  - internal/server/air_settings_extensions.go
   - internal/server/webui/frontend/src/preferences.ts
   - internal/server/webui/frontend/src/air/airPreference.ts
   - internal/server/webui/frontend/src/pages/InvestigationsPage.tsx
@@ -43,12 +46,17 @@ Web 控制台是使用 SIREN 的主要方式，浏览器直接访问 `https://<S
 
 ## Settings
 
-从左下角的账号菜单打开，分两部分：
+从左下角的账号菜单打开，分四个标签：
 
-- **Preferences**：只保存在当前浏览器，不跟随账号同步。
+- **Personal**：只保存在当前浏览器，不跟随账号同步。
   - 启动时的 Project 范围：沿用上次的范围（刷新时各标签页保持自己的范围），或每次从 Global 开始。
   - Agentic IR 默认 Provider：沿用上次，或固定 Codex / Claude / Pi，单次会话仍可临时切换。
   - Agentic IR 默认界面：沿用上次，或固定 GUI / Terminal。
   - AIR 系统通知：默认开启，没在看的会话完成或等待时弹出浏览器通知，见 [系统通知](/air/sessions#系统通知)。
   - Clients 列表刷新频率。
+- **AIR**：全部用户共用的 AIR 默认值，任何登录用户都可以修改，点击 **Save** 后对之后新启动的 GUI 和 Terminal 会话生效，已在运行的会话不受影响。
+  - 每个 Provider 的默认模型和 effort。留空时沿用该 Provider 自己的配置，输入框和下拉框中灰色显示当前生效的值。
+  - **Instructions**：追加到每个 AIR 会话系统提示词的文字，排在 Provider 自身配置的指令之后。
+  - 保存前别人已经改过时，页面提示 **Reload**；重新加载会用对方的版本替换你未保存的修改。
+- **MCP & Skills**：只读列出 AIR 会话可用的 MCP 服务器和服务端 `~/.agents/skills` 下的 Skills。MCP 服务器标出来源 Provider，SIREN 自己的 MCP 排在最前；页面不显示 MCP 的请求头、令牌和命令参数。
 - **Server**：只读的版本号、鉴权状态与当前用户、Dossier 目录，以及每个 AIR Provider 实际可用的界面；Provider 不可用时显示原因。

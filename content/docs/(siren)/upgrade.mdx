@@ -2,8 +2,9 @@
 title: 升级与数据
 description: 升级服务端和客户端、支持的平台、升级后要核对的配置，以及服务端数据的备份与迁移
 icon: CircleFadingArrowUp
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
+  - internal/server/air_settings.go
   - internal/upgrade/
   - cmd/server/cli/upgrade.go
   - cmd/client/cli/upgrade.go
@@ -65,8 +66,8 @@ C:\Windows\Temp\siren\siren.exe upgrade -y
 
 这一步只替换磁盘上的程序，Shell 不会断开。客户端需要能解析并访问发布地址 `oss-siren.oss-cn-hongkong.aliyuncs.com`，否则下载失败。
 
-<Callout title="重新运行安装脚本不会升级客户端" type="warn">
-  客户端安装脚本发现已有安装完好时会跳过下载。已安装的主机用 `upgrade` 升级。
+<Callout title="用 upgrade 升级，不要重新运行安装脚本" type="warn">
+  安装脚本发现程序版本过期时会重新安装，并用安装包中的 `config.yaml` 替换现有配置，手工改动会丢失。已安装的主机用 `upgrade` 升级，它只替换可执行文件。
 </Callout>
 
 </Step>
@@ -152,6 +153,7 @@ diff /opt/siren/server_config.yaml /tmp/server_config.new.yaml
 | `data/client_ids.json` | 客户端身份与 Client ID 的对应关系 |
 | `data/client_notes.json` | 客户端 Note |
 | `data/egress.json` | **Configure egress** 的恢复记录。丢失后无法再用 [Restore egress](/restore-egress) 撤销已下发的出站规则 |
+| `data/air_settings.json` | [Settings](/webui#settings) 中的 AIR 全局默认值 |
 | 工作目录中的其他文件 | Global 范围的 Artifacts，例如 Recon 结果和 AccessKey 报告 |
 | `webui.projectsBaseDir` 下的子目录 | 各 Project 的 Artifacts 和报告；未设置时位于工作目录下 |
 | `webui.dossierDir` | Dossier 静态文件，以及 Blank template 中粘贴的图片 |

@@ -2,12 +2,13 @@
 title: Clients 页
 description: 查看在线客户端，编辑 Note，分配 Project，并从客户端行发起各种操作
 icon: Users
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
   - internal/server/webui/frontend/src/pages/ClientsPage.tsx
   - internal/server/webui/frontend/src/components/ClientsTable.tsx
   - internal/server/webui/frontend/src/components/EditableNote.tsx
   - internal/server/webui/frontend/src/components/Provisioning.tsx
+  - internal/server/webui/frontend/src/components/ConnectCommand.tsx
   - internal/server/webui/frontend/src/recentCleanups.ts
   - internal/server/webui/frontend/src/deploymentActivity.ts
   - internal/server/webui/frontend/src/components/DeploymentTargets.tsx
@@ -69,11 +70,13 @@ Note 按客户端稳定身份保存，重连或服务端重启后仍在。客户
 - **Assign project**：仅 Global 范围显示，选 Project 或 **Unassigned** 后立即生效，不再确认。规则见 [Project 范围](/projects)。
 - **Clean N**：输入选中数量后点 **Send N requests**。
 
-批量操作作用于全部已选客户端，包括被筛选隐藏的（计数旁显示 `· M hidden by filter`），执行前先确认。
+批量操作作用于全部已选客户端，包括被筛选隐藏的（计数旁显示 `· M hidden by filter`），执行前先确认。部分客户端失败时，提示列出失败的客户端和原因，并只保留它们的勾选，可以直接重试。
 
 ## Provisioning
 
-表格下方的 **Provisioning** 面板通过 SOAR 操作阿里云 ECS：**Deploy SIREN** 见 [一键部署](/onboard/provisioning)，**Allow access** 和 **Configure egress** 见 [出站与入站放行](/onboard/egress)，**Restore egress** 见 [恢复出站规则](/restore-egress)。
+表格下方的 **Provisioning** 面板通过 SOAR 操作阿里云 ECS：**Deploy SIREN** 见 [一键部署](/onboard/provisioning)，**Allow access** 和 **Configure egress** 见 [出站与入站放行](/onboard/egress)，**Restore egress** 见 [恢复出站规则](/restore-egress)。**Deploy SIREN** 的部署按钮下方有 **Or install manually**，给出在主机上手动安装并连接的命令，见 [手动安装客户端](/onboard/manual#安装客户端)。
+
+面板可以折叠。有在线客户端时默认折叠，没有时默认展开；手动折叠或展开后，当前浏览器沿用这个选择。
 
 ## Recent activity
 

@@ -2,8 +2,8 @@
 title: 限制速查
 description: SIREN 的大小、数量和超时上限一览
 icon: Gauge
-verifiedAgainst: v2.38.1
-dossierVerifiedAgainst: 45f310e
+verifiedAgainst: v2.39.0
+dossierVerifiedAgainst: 8c1902c
 sources:
   - internal/server/clientnote/note.go
   - internal/server/project_names.go
@@ -72,6 +72,7 @@ sources:
   - internal/client/client.go
   - internal/server/webui/webui_air_usage.go
   - internal/server/air_usage.go
+  - internal/server/air_settings.go
 ---
 
 SIREN 的大小、数量和超时上限，按功能分组。**配置项**为空的值固定不可改，可配置的键见 [服务端配置](/reference/server-config) 和 [客户端配置](/reference/client-config)。
@@ -187,6 +188,8 @@ Shell 没有空闲超时。
 | --- | --- | --- | --- |
 | 同时运行的会话 | 20 个，全服务端合计；`0` 或负数不限制 | `air.maxSessions` | [会话管理](/air/sessions) |
 | 会话名称 | 80 个字符 | | [重命名会话](/air/sessions#重命名会话) |
+| Settings 中的 AIR 默认模型 | 128 个字符 | | [Settings](/webui#settings) |
+| Settings 中的 AIR 附加指令 | 16 KiB | | [Settings](/webui#settings) |
 | 每个会话的回放缓存 | 4 MiB；`0` 或负数时使用默认值 | `air.replayBufferBytes` | [会话管理](/air/sessions) |
 | 粘贴图片 | PNG、JPEG、WebP、GIF；每条消息或每次粘贴 4 张，单张 8 MiB | | [GUI](/air/gui)、[Terminal](/air/terminal) |
 | 断线自动重连 | 连续 5 次 | | [会话管理](/air/sessions) |

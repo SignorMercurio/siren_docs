@@ -2,7 +2,7 @@
 title: 恢复出站规则
 description: 撤销 Configure egress 对云端安全组所做的改动
 icon: Undo2
-verifiedAgainst: v2.37.0
+verifiedAgainst: v2.39.0
 sources:
   - internal/server/webui/frontend/src/components/EgressRecovery.tsx
   - internal/server/webui/frontend/src/components/Provisioning.tsx
@@ -16,7 +16,7 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-**Restore egress** 撤销 [Configure egress](/onboard/egress) 对阿里云安全组的改动：移除新增的放行规则、还原被降级的 Drop 优先级，并在专用安全组空闲时删除它。它只撤销 SIREN 记录过的规则，不触碰原有配置和后续人工改动。入口是 Clients 页 **Provisioning** 面板的 **Restore egress** 标签。
+**Restore egress** 撤销 [Configure egress](/onboard/egress) 对阿里云安全组的改动：移除新增的放行规则、还原被降级的 Drop 优先级，并在专用安全组空闲时删除它。它只撤销 SIREN 记录过的规则，不触碰原有配置和后续人工改动。入口是 Clients 页 **Provisioning** 面板的 **Restore** 标签（悬停显示全名 Restore egress）。
 
 <Callout title="先 Clean 再 Restore" type="warn">
   恢复会撤销客户端回连所需的出方向放行，可能切断客户端。需要清理客户端时，先执行 [Clean](/cleanup)，再恢复（恢复不依赖客户端在线）。清理成功后面板会提示 **N cleaned clients have egress changes to restore. Review**，但不会自动执行。
@@ -24,7 +24,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ## 操作步骤
 
-1. 在 Provisioning 面板选择 **Restore egress** 标签，面板列出服务端保存的恢复记录。
+1. 在 Provisioning 面板选择 **Restore** 标签，面板列出服务端保存的恢复记录。
 2. 勾选要恢复的记录，每次最多 20 个实例。
 3. 点击 **Restore N instances**。
 

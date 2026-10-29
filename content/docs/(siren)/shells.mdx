@@ -2,7 +2,7 @@
 title: 浏览器 Shell
 description: 在 Shells 页面打开客户端的交互式终端：多标签、复制粘贴，以及会话何时保持、何时结束
 icon: SquareTerminal
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
   - internal/server/webui/frontend/src/pages/ShellsPage.tsx
   - internal/server/webui/frontend/src/components/TerminalPanel.tsx
@@ -20,6 +20,8 @@ sources:
   - internal/client/shell_windows.go
   - pkg/utils/utils_unix.go
   - pkg/utils/utils_windows.go
+  - pkg/utils/session_unix.go
+  - internal/server/webui/frontend/src/components/SessionExpiredDialog.tsx
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
@@ -28,7 +30,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ## 打开 Shell
 
-Shells 页面没有新建按钮：在 [Clients](/clients#行内操作) 页点击目标客户端行内的 Shell 图标，WebUI 会新开一个标签并跳到 Shells 页面。
+在 [Clients](/clients#行内操作) 页点击目标客户端行内的 Shell 图标，WebUI 会新开一个标签并跳到 Shells 页面。还没有打开的 Shell 时，也可以在 Shells 页选择客户端后点 **Open shell**。
 
 Shell 走服务端主 TLS 端口（见 [单一 TLS 端口](/server#单一-tls-端口)），不需要额外开放端口。每个 Shell 是独立终端，不与其他浏览器共享。
 
@@ -49,10 +51,11 @@ Shell 以客户端进程的用户身份运行，继承其环境变量和工作�
 | 在 Global 与 Project、或不同 Project 之间切换（包括打开指向其他 Project 的 Artifacts 链接） | 先弹出确认；确认后关闭当前范围的全部 Shell，取消则留在原范围 |
 | 刷新页面或关闭浏览器标签页 | 浏览器先询问是否离开；离开后全部 Shell 关闭，无法恢复 |
 | 退出登录 | 全部 Shell 关闭，无法恢复 |
+| 登录过期 | 页面上弹出 **Session expired** 登录框，Shell 不关闭；重新登录后继续使用，点 **Sign out** 则全部关闭 |
 | 网络中断或客户端断开 | 该 Shell 结束，显示 `--- session ended ---`；不会自动重连，需从 Clients 页重新打开 |
 | 关闭 Shell 标签 | 先弹出确认；确认后结束该 Shell，无法重新接入 |
 
-Shell 没有空闲超时。Shell 结束时，客户端会强制结束它及其前台任务。需要断开后继续运行的命令，请用 `nohup`、`setsid` 或 tmux 自行脱离。
+Shell 没有空闲超时。Shell 结束时，Linux 和 macOS 客户端会强制结束该 Shell 会话中的全部进程，包括后台任务和用 `nohup` 启动的命令。需要断开后继续运行的命令，请用 `setsid` 或 tmux 脱离该会话。
 
 <Callout title="Project 范围" type="info">
   Project 视图下只能对当前 Project 的客户端打开 Shell。Project 不是权限边界，任何账号都可以切到其他范围操作任意客户端，见 [账号的权限范围](/server/security#账号的权限范围)。

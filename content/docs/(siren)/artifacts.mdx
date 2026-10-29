@@ -2,7 +2,7 @@
 title: Artifacts
 description: 浏览、预览、上传和整理服务端上的调查产出与证据文件
 icon: Archive
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
   - internal/server/webui/frontend/src/pages/ArtifactsPage.tsx
   - internal/server/webui/frontend/src/components/FileBrowser.tsx
@@ -13,6 +13,8 @@ sources:
   - internal/server/webui/frontend/src/router.ts
   - internal/server/webui/webui_artifacts.go
   - internal/server/webui/webui_download.go
+  - internal/server/webui/frontend/src/download.ts
+  - internal/server/webui/frontend/src/App.tsx
   - internal/server/webui/path_helpers.go
   - internal/server/artifact_resolver.go
   - internal/server/artifact_mutations.go
@@ -124,8 +126,8 @@ Global 范围的文件没有 `?project=`。其他操作员登录后打开链接�
 <Accordion title="找不到刚生成的文件">
 点击文件树上方的刷新按钮，并确认页面顶部的范围：Recon 结果跟随客户端的 Project 归属，AccessKey 报告始终在 Global。
 </Accordion>
-<Accordion title="点击 Download 没有反应">
-通常是文件超过 100 MiB，或目录内普通文件合计超过 100 MiB。页面不提示，错误只出现在浏览器开发者工具的控制台。改为分别下载子目录或单个文件，或直接在控制主机上打包。
+<Accordion title="下载失败，提示 file too large 或 directory too large">
+下载期间页面显示 `Downloading <名称>…`，失败时提示 `Download of <名称> failed` 和原因。原因含 `too large` 时，文件超过 100 MiB，或目录内普通文件合计超过 100 MiB。改为分别下载子目录或单个文件，或直接在控制主机上打包。
 </Accordion>
 <Accordion title="上传或新建时报 hidden filenames not allowed">
 名称以 `.` 开头，Artifacts 不允许创建隐藏文件或目录，换一个名称。

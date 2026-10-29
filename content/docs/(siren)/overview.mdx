@@ -2,12 +2,13 @@
 title: SIREN 概述
 description: SIREN 是什么、由哪些部分组成、能做哪些事
 icon: BookOpen
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
   - internal/server/webui/frontend/src/nav.ts
   - internal/server/webui/frontend/src/components/Sidebar.tsx
   - internal/server/webui/frontend/src/pages/ProjectsPage.tsx
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
+  - internal/server/webui/frontend/src/pages/UsagePage.tsx
   - internal/server/shared_tls.go
   - cmd/server/cli/root.go
   - internal/server/mcp_http.go
@@ -71,8 +72,9 @@ SIREN（**S**wift **I**ncident **R**esponse **E**vidence **N**avigator）是面�
 | 能力 | 用途 |
 | --- | --- |
 | [Projects](/projects) | 按事件隔离客户端、AIR 会话和证据目录，在看板上跟踪负责人和处置状态 |
+| [Usage](/usage) | 统计 AIR 的 token 用量、估算费用和活跃时间 |
 | [Logs](/logs) | 服务端内存中最近的运行日志，可按关键词、级别和组件过滤 |
-| [Settings](/webui#settings) | 账号菜单中设置浏览器偏好，查看鉴权、Dossier 和 AIR runtime 等服务端状态 |
+| [Settings](/webui#settings) | 账号菜单中设置浏览器偏好和 AIR 全局默认值，查看 MCP 与技能、鉴权、Dossier 和 AIR runtime 等服务端状态 |
 | [MCP](/reference/mcp) | 供 AIR 和外部 MCP 客户端列出客户端、执行命令、运行 Recon |
 | [插件](/reference/plugins) | `command` 和 `recon` 两类客户端插件（如 `jdump`、`chkrootkit`），通过命令行管理 |
 

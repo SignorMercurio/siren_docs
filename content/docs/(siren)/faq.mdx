@@ -2,7 +2,7 @@
 title: 常见问题
 description: 按使用流程整理的常见问题，每条指向负责说明的页面
 icon: BadgeQuestionMark
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
   - cmd/server/cli/root.go
   - cmd/server/cli/upgrade.go
@@ -12,6 +12,7 @@ sources:
   - internal/server/cloud_operations.go
   - scripts/get_siren_server.sh
   - scripts/get_siren.sh
+  - scripts/get_siren.ps1
   - internal/server/webui/auth.go
   - internal/auth/store.go
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
@@ -107,7 +108,7 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
 <Accordion title="重新运行安装脚本能升级客户端吗？">
 
-不能，已有安装完好时安装脚本会跳过下载。用 `siren upgrade -y`，见 [升级](/upgrade#升级)。
+能，但不要这样做。安装脚本发现版本过期时会重新安装，并用安装包中的 `config.yaml` 替换现有配置，手工改动会丢失。已安装的主机用 `siren upgrade -y`，见 [升级](/upgrade#升级)。
 
 </Accordion>
 
@@ -137,7 +138,7 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
 <Accordion title="Provider 显示不可用，或只能用 Terminal">
 
-**Settings** 中 **Server** 一栏的 **AIR runtime** 列出每个 Provider 可用的界面和原因，处理见 [准备 AIR Provider](/server/air-providers#常见问题)。
+**Settings** 中 **Server** 标签的 **AIR runtime** 列出每个 Provider 可用的界面和原因，处理见 [准备 AIR Provider](/server/air-providers#常见问题)。
 
 </Accordion>
 

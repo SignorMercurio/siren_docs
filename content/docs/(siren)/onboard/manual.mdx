@@ -2,7 +2,7 @@
 title: 手动安装客户端
 description: 在能访问服务端的主机上安装并启动 SIREN 客户端
 icon: SquareTerminal
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
   - scripts/get_siren.sh
   - scripts/get_siren.ps1
@@ -13,7 +13,8 @@ sources:
   - config/config_darwin.yaml
   - internal/recon/file_darwin.go
   - internal/recon/application_darwin.go
-  - internal/server/webui/frontend/src/components/ClientsTable.tsx
+  - internal/server/webui/frontend/src/components/ConnectCommand.tsx
+  - internal/server/webui/frontend/src/components/Provisioning.tsx
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
@@ -26,6 +27,8 @@ import { Steps, Step } from "fumadocs-ui/components/steps";
 目标主机能访问服务端主 TLS 端口（默认 `443`），且服务端已放行该主机的出口 IP：在 WebUI 用 [Allow access](/onboard/egress#allow-access)，或自行在服务端防火墙放行。服务端配置见 [前置条件与凭证](/server/prerequisites)。
 
 ## 安装客户端
+
+WebUI 也提供可直接复制的命令：在 [Clients](/clients) 页的 **Provisioning** 中选择 **Deploy SIREN**，部署按钮下方的 **Or install manually** 按 Linux、macOS、Windows 给出安装并连接的命令，服务端地址已填好。地址取 Deploy SIREN 的回连地址；没有配置回连地址时取当前页面的域名，主机经其他地址访问服务端时需要改掉。
 
 Linux 需要 root，macOS 需要 `sudo`，Windows 需要以管理员身份运行 PowerShell。
 
@@ -43,8 +46,8 @@ curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sudo sh
 
 安装脚本把 `siren` 和 `config.yaml` 装到 `/opt/siren`（Linux、macOS）或 `C:\Windows\Temp\siren`（Windows），不会启动客户端。macOS 与 Linux 共用 `get_siren.sh`，按 CPU 架构选择 Apple 芯片或 Intel 安装包。
 
-<Callout title="重装不会更新已有安装" type="warn">
-  安装完好时再次运行安装脚本会跳过下载，不升级程序也不改配置（传了 `--server`、`--port` 时只改写这两个键）。安装损坏时才重新安装，并用包内 `config.yaml` 替换现有配置，手工改动会丢失。升级见 [升级与数据](/upgrade)。
+<Callout title="重装会替换过期或损坏的安装" type="warn">
+  再次运行安装脚本时，已安装的程序与发布的最新版本一致就跳过下载，不改配置（传了 `--server`、`--port` 时只改写这两个键）。程序版本过期或安装损坏时重新安装，并用包内 `config.yaml` 替换现有配置，手工改动会丢失。读不到发布版本号时（如主机无法访问 OSS），保留现有安装。升级见 [升级与数据](/upgrade)。
 </Callout>
 
 ## 启动客户端

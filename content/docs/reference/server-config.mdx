@@ -2,7 +2,7 @@
 title: 服务端配置
 description: server_config.yaml 的全部配置项、默认值、命令行覆盖和环境变量
 icon: FileCog
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
   - config/server_config.yaml
   - cmd/server/cli/root.go
@@ -110,6 +110,7 @@ mcp:
   enabled: true
   runOutputMode: auto          # auto / full
   cmdBlacklist: []             # 无内置默认值；安装包自带 30 条
+  allowHuntRecon: false
 
 air:
   provider: codex              # codex / claude / pi
@@ -222,6 +223,7 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 | --- | --- | --- | --- |
 | `mcp.enabled` | bool | `true` | 是否提供 `/mcp` 和 `/mcp/project/<id>`。为 `true` 时必须设置 `SIREN_MCP_ADMIN_TOKEN`，否则拒绝启动；关闭后 Agentic IR 无法使用 |
 | `mcp.runOutputMode` | string | `auto` | `run` 结果的默认返回方式：`auto` 超过 8 KiB 返回首尾预览；`full` 在 50 KiB 内返回完整结果。单次调用可用 `output_mode` 覆盖，见 [MCP](/reference/mcp) |
+| `mcp.allowHuntRecon` | bool | `false` | 为 `true` 时 MCP `recon` 才能运行 `hunt` Profile（含客户端默认 Profile 为 `hunt` 的情况）；为 `false` 时只能由运维人员在 WebUI 的 Recon 中运行，见 [MCP](/reference/mcp#recon) |
 | `mcp.cmdBlacklist` | list（正则） | 无 | MCP `run` / `run_batch` 下发前检查的命令黑名单，无法编译的表达式被忽略。只作用于 MCP，见 [命令黑名单只作用于 MCP](/server/security#命令黑名单只作用于-mcp) |
 
 <Callout title="删除 cmdBlacklist 等于不设黑名单" type="warn">

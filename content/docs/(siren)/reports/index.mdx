@@ -2,8 +2,8 @@
 title: 报告
 description: 在 SIREN 中创建、查找、编辑和导出 Dossier 应急响应报告
 icon: FileText
-verifiedAgainst: v2.37.0
-dossierVerifiedAgainst: 45f310e
+verifiedAgainst: v2.39.0
+dossierVerifiedAgainst: 8c1902c
 sources:
   - internal/server/webui/frontend/src/pages/ReportsPage.tsx
   - internal/server/webui/frontend/src/reports.ts
@@ -15,6 +15,9 @@ sources:
   - internal/server/artifact_dossier.go
   - dossier:index.html
   - dossier:report.md
+  - dossier:report.en.md
+  - dossier:src/report-language.js
+  - dossier:src/locale.js
   - dossier:src/siren-adapter.js
   - dossier:src/save-queue.js
   - dossier:src/source-panel.js
@@ -116,6 +119,15 @@ Global 视图扫描服务端工作目录和所有 Project 目录；Project 视�
 
 </Step>
 </Steps>
+
+### 报告语言
+
+工具栏的 **中 | EN** 切换报告语言。语言是当前浏览器的偏好，不写入 Markdown 源文件：
+
+- 切换后，封面、法律声明、目录、服务概述、版权页和报告中的固定标签改为对应语言。
+- 文档仍是未改动的默认模板时，换成另一种语言的模板；其他文档保留正文，只改上述内容。
+- **Blank template** 按当前语言打开中文或英文模板。
+- 编辑器界面始终是中文。导出的 HTML 保持导出时的语言。
 
 ### 保存失败
 

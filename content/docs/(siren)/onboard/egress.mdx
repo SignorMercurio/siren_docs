@@ -2,7 +2,7 @@
 title: 出站与入站放行
 description: 放行客户端访问服务端，并为出方向默认拒绝的 ECS 配置专用出站安全组
 icon: ArrowRightFromLine
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
   - internal/server/webui/frontend/src/components/Provisioning.tsx
   - internal/server/cloud_operations.go
@@ -25,17 +25,19 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 **Allow access** 通过 SOAR 剧本为客户端公网 IP 添加到服务端回连端口的入方向放行，用于手动安装或自行掌握出口 IP 的场景。一键部署会自动放行探测到的出口 IP，无需单独执行。
 
-1. 在 Provisioning 面板选择 **Allow access** 标签。
+1. 在 Provisioning 面板选择 **Allow** 标签（悬停显示全名 Allow access）。
 2. 每行填一个客户端公网 IPv4 地址，如 `203.0.113.10`，每批 1–20 个。
 3. 点击 **Allow N IPs**。单项失败不影响其他项。
 
 Allow access 不产生服务端恢复记录，结果刷新页面后消失。
 
+Allow access 和 Configure egress 由当前浏览器逐个目标执行，执行期间保持页面打开；离开页面时尚未开始的目标不会执行。点击 **Stop after current** 可在当前目标完成后停止。
+
 ## Configure egress
 
 对出方向默认拒绝的阿里云 ECS，**Configure egress** 把客户端回连所需的出方向放行加到实例上。
 
-1. 在 Provisioning 面板选择 **Configure egress** 标签。
+1. 在 Provisioning 面板选择 **Egress** 标签（悬停显示全名 Configure egress）。
 2. 填写 **Alibaba Cloud UID**，每行填一个 **Instance ID**，每批 1–20 个。
 3. 核对面板展示的出站规则（来自服务端配置，只读；加载失败时无法执行）。
 4. 点击 **Configure N instances**。结果给出安全组 ID 与地域。

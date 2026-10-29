@@ -2,7 +2,7 @@
 title: 快速开始
 description: 从部署服务端到完成第一次排查
 icon: Rocket
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
   - scripts/get_siren_server.sh
   - scripts/get_siren.sh
@@ -14,6 +14,7 @@ sources:
   - internal/server/mcp_auth.go
   - internal/server/webui/frontend/src/nav.ts
   - internal/server/webui/frontend/src/components/Provisioning.tsx
+  - internal/server/webui/frontend/src/components/ConnectCommand.tsx
   - internal/server/webui/frontend/src/pages/ProjectsPage.tsx
   - internal/server/webui/frontend/src/pages/InvestigationsPage.tsx
   - internal/server/webui/frontend/src/pages/AIRPage.tsx
@@ -74,7 +75,7 @@ systemctl enable --now siren
 在 **Clients** 页的 **Provisioning** 区域选择接入方式：
 
 - **阿里云 ECS**：选择 **Deploy SIREN**，填写 Alibaba Cloud UID 和 Instance ID（每行一个）。SIREN 通过云助手安装客户端并放行网络。见 [一键部署](/onboard/provisioning)。
-- **其他主机**：先用 **Allow access** 放行目标主机的公网出口 IP，再登录目标主机运行安装脚本并启动客户端。见 [手动安装客户端](/onboard/manual)。
+- **其他主机**：先用 **Allow access** 放行目标主机的公网出口 IP，再在目标主机上运行 **Deploy SIREN** 下方 **Or install manually** 给出的命令，安装并启动客户端。见 [手动安装客户端](/onboard/manual)。
 
 客户端连接后出现在 Clients 列表中。见 [选择接入方式](/onboard)。
 

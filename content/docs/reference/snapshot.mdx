@@ -2,7 +2,7 @@
 title: Recon 快照格式
 description: snapshot-jsonl-v2 的事件顺序、记录类型、稳定 ID、状态值和上限
 icon: FileJson
-verifiedAgainst: v2.36.0
+verifiedAgainst: v2.39.0
 sources:
   - internal/reconartifact/schema.go
   - internal/reconartifact/validate.go
@@ -15,6 +15,8 @@ sources:
   - internal/recon/hunt_files.go
   - internal/recon/config_references.go
   - internal/recon/content_patterns.go
+  - internal/recon/credential_metadata.go
+  - internal/recon/hunt_files_windows.go
   - internal/recon/activity.go
   - internal/recon/supplychain.go
   - internal/recon/workload.go
@@ -26,7 +28,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 [Recon](/recon) 的结果是 `snapshot-jsonl-v2` 格式的 `*.recon.jsonl` 快照，以及由它渲染的同名 `*.md` 报告。
 
 <Callout title="快照内容是不可信数据" type="warn">
-  快照中的文件内容、日志、命令输出和环境变量来自被调查主机，可能受攻击者控制。人工阅读或交给 Agent 分析时都只能当作证据，不能当作指令。快照含凭据原文，应只保存在受控目录。
+  快照中的文件内容、日志、命令输出和环境变量来自被调查主机，可能受攻击者控制。人工阅读或交给 Agent 分析时都只能当作证据，不能当作指令。凭据文件只记录元数据，但环境变量、命令行和日志等内容仍可能含敏感信息，快照应只保存在受控目录。
 </Callout>
 
 ## 文件
@@ -206,19 +208,25 @@ snapshot_end
 | `entityType` | `config_file`、`credential_file` 或 `supplychain_file`。由路径和内容决定，与发现它的模块无关 |
 | `path`、`size`、`mode`、`mtime` | 文件元数据 |
 | `discoverySource`、`relatedEntityIds` | 文件是怎么找到的，以及关联的实体 |
-| `contentPolicy` | `full`：`content` 中有原文；`metadata_only`：只有元数据，`contentOmittedReason` 为 `binary_material` 或 `bounded_preview` |
+| `contentPolicy` | `full`：`content` 中有原文；`metadata_only`：只有元数据，`contentOmittedReason` 为 `credential_material`、`binary_material` 或 `bounded_preview` |
 | `content`、`contentScope` | 原文，以及它是完整内容（`full`）还是前缀（`prefix`） |
 | `contentEncoding` | `utf-8`，有非法字节被替换时为 `utf-8-replacement` |
 | `sha256`、`hashScope`、`hashBytes` | `hashScope` 为 `full_file` 时是整个文件的摘要；为 `collected_content` 时只覆盖已采集的 `hashBytes` 字节 |
 | `hashOmittedReason` | 没有全文件摘要的原因：`file_byte_limit`、`total_byte_limit` 或 `changed_during_read` |
 | `binary`、`contentTruncated`、`changedDuringRead` | 二进制、内容被截断、读取期间文件发生变化 |
 | `certificate`、`credentialType`、`sensitive` | PEM 证书摘要；私钥文件标为 `tls_private_key` 且 `sensitive: true` |
+| `privateKeys` | 凭据文件中每个私钥的 `pemType`、`encrypted`，能推出公钥时另有 `publicKeyType` 和 `publicKeyFingerprint`（与 `ssh-keygen -l` 相同的 `SHA256:` 形式） |
+| `shadowAccounts`、`shadowPasswordHashAccounts`、`shadowNoPasswordHashAccounts`、`shadowEmptyPasswordAccounts` | shadow 文件的账户总数，以及有密码哈希、无密码哈希、密码为空的账户数 |
+
+`credential_file` 一律为 `metadata_only`，`contentOmittedReason` 为 `credential_material`，带 `sensitive: true`，不写 `content`，也没有 `evidence_preview` 或 `evidence_content`。记录只有路径、权限、属主、大小、修改时间、摘要，以及上表中的私钥指纹和 shadow 账户计数。
+
+`credential` 模块在 Windows 上执行的凭据命令会把输出中的密码等取值替换为 `<redacted>`；AutoLogon 只报告是否设置了默认密码。
 
 ### 常见事实
 
 | factType | 说明 |
 | --- | --- |
-| `evidence_preview` | `metadata_only` 文件的有界前缀，原文在 `rawText`，带 `contentSha256` |
+| `evidence_preview` | 只保存预览的普通文件的有界前缀，原文在 `rawText`，带 `contentSha256`；凭据文件没有预览 |
 | `evidence_content` | 后续直接引用需要比预览更长的内容时补写，通过 `fileEntityId` 指向原 `evidence_file`，原文在 `content` |
 | `content_pattern_match` | 已读取文本中疑似凭据的位置，见下文 |
 | `content_pattern_scan_status` | 模式扫描达到上限时写入，带 `matchScanTruncated: true` |
@@ -231,8 +239,8 @@ snapshot_end
 `content_pattern_match` 只表示“某位置匹配了某种形态”，不判断凭据是否有效：
 
 - 字段：`path`、`line`、`patternId`、`fileEntityId`、`maskedValue`（保留至多 4 字节前缀，其余以 `*` 遮盖）、`valueLength`、`valueSha256`。
-- `patternId`：`aliyun_access_key_id`、`aws_access_key_id`、`tencent_secret_id`、`gcp_service_account_key`、`github_token`、`slack_token`、`jwt`、`pem_private_key`、`password_assignment`、`url_userinfo_credential`。
-- `valueSha256` 是完整匹配值的摘要，可跨主机比对同一凭据；原文仍在对应 `evidence_file` 中。
+- `patternId`：`aliyun_access_key_id`、`aws_access_key_id`、`tencent_secret_id`、`gcp_service_account_key`、`github_token`、`slack_token`、`jwt`、`pem_private_key`、`password_assignment`、`cloud_secret_assignment`、`url_userinfo_credential`。
+- `valueSha256` 是完整匹配值的摘要，可跨主机比对同一凭据。有匹配的文件归为 `credential_file`，快照中没有原文。
 
 ## 稳定 ID
 

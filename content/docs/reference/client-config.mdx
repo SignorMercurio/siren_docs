@@ -2,7 +2,7 @@
 title: 客户端配置
 description: 客户端 config.yaml 的全部配置项、平台默认值、Profile 校验与插件开关
 icon: FileSliders
-verifiedAgainst: v2.37.0
+verifiedAgainst: v2.39.0
 sources:
   - config/config_linux.yaml
   - config/config_windows.yaml
@@ -15,6 +15,8 @@ sources:
   - pkg/utils/utils.go
   - internal/plugin/manage.go
   - pkg/utils/oss.go
+  - scripts/get_siren.sh
+  - scripts/get_siren.ps1
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
@@ -48,7 +50,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ### 重装与配置
 
-安装完好时重新运行安装脚本（包括一键部署）会跳过下载，现有配置保持不变，只有安装脚本带服务端地址参数时会改写 `server`、`port`。安装损坏时才会重装，并用安装包内的 `config.yaml` 替换现有配置，手工修改会丢失。见 [手动安装客户端](/onboard/manual)。
+安装完好且版本与发布版本一致时，重新运行安装脚本（包括一键部署）会跳过下载，现有配置保持不变，只有安装脚本带服务端地址参数时会改写 `server`、`port`。程序版本过期或安装损坏时会重装，并用安装包内的 `config.yaml` 替换现有配置，手工修改会丢失。读不到发布版本号时（如主机无法访问 OSS），保留现有安装。见 [手动安装客户端](/onboard/manual)。
 
 ## 平台默认配置
 

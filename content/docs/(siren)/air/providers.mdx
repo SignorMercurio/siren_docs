@@ -2,7 +2,7 @@
 title: Provider 差异
 description: Codex、Claude Code 和 Pi 在 AIR GUI 中的审批、提问、命令、模型、额度和图片支持差异
 icon: Boxes
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
   - internal/server/air_provider.go
   - internal/server/air_gui_provider.go
@@ -16,6 +16,7 @@ sources:
   - internal/server/air_gui_claude_models.go
   - internal/server/air_gui_pi.go
   - internal/server/air_gui_pi_models.go
+  - internal/server/air_settings.go
   - internal/server/webui/frontend/src/components/AIRModelPicker.tsx
   - internal/server/webui/frontend/src/components/AIRStatusline.tsx
 ---
@@ -49,7 +50,7 @@ Claude Code 收到运行中的消息时，SIREN 先中断当前轮次再发送�
 
 ## 模型与推理强度
 
-空闲时点击状态条中的模型名称或输入 `/model` 切换，只作用于当前会话，不写入 Provider 配置。新会话使用 Provider 的默认模型（Pi 固定从 Qwen Aegis 开始，见 [准备 AIR Provider](/server/air-providers#pi)）；继续历史会话时不强制指定模型。
+空闲时点击状态条中的模型名称或输入 `/model` 切换，只作用于当前会话，不写入 Provider 配置。新会话使用 [Settings](/webui#settings) 中 AIR 默认值指定的模型和推理强度，没有指定时用 Provider 自己的默认值（Pi 从 Qwen Aegis 开始，见 [准备 AIR Provider](/server/air-providers#pi)）。继续历史会话时，Codex 和 Claude Code 同样使用 Settings 中指定的值，Pi 保留会话原来的模型和思考等级。
 
 - **Claude Code**：读取模型菜单失败时会话照常可用，只是没有模型选择器。
 - **Pi**：列出服务器上 Pi 已配置的模型；只有当前模型列出可选思考等级，切换模型后先沿用 Pi 自动调整的等级。

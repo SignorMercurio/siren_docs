@@ -2,9 +2,11 @@
 title: 一键部署
 description: 通过 WebUI Provisioning 向阿里云 ECS 批量安装并接入 SIREN 客户端
 icon: CloudUpload
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
   - internal/server/webui/frontend/src/components/Provisioning.tsx
+  - internal/server/webui/frontend/src/components/ConnectCommand.tsx
+  - internal/server/cloud_operations.go
   - internal/server/webui/frontend/src/provisioning.ts
   - internal/server/webui/frontend/src/pages/ClientsPage.tsx
   - internal/server/webui/frontend/src/deploymentActivity.ts
@@ -36,7 +38,7 @@ import { Steps, Step } from "fumadocs-ui/components/steps";
 
 <Steps>
 <Step>
-在 Clients 页 **Provisioning** 面板选择 **Deploy SIREN** 标签。
+在 Clients 页展开 **Provisioning** 面板，选择 **Deploy SIREN** 标签。已有客户端在线时面板默认折叠，展开或折叠的选择会被记住。
 </Step>
 <Step>
 填写 **Alibaba Cloud UID**（纯数字），在 **Instance IDs** 中每行填一个目标。
@@ -47,6 +49,8 @@ import { Steps, Step } from "fumadocs-ui/components/steps";
 </Steps>
 
 ![Provisioning 面板的 Deploy SIREN 标签，已填写 UID 和两个目标](../../../img/provisioning-deploy.png)
+
+部署按钮下方的 **Or install manually** 给出在主机上手动安装并连接的命令，适用于不能一键部署的主机，见 [手动安装客户端](/onboard/manual)。
 
 ### 目标格式
 
@@ -77,6 +81,7 @@ i-demo0004,203.0.113.11,db-1
 ## 结果与记录
 
 - **重试**：存在失败目标时，**Retry N failed** 只重新提交失败项，沿用原 UID 和 Project；**Edit targets** 修改目标后重新开始。
+- **安装无结果**：云助手没有返回安装命令的执行结果时，日志按目标的云助手状态给出可能原因：云助手在线时多为无法下载客户端，需配置出站；从未上报时多为未安装云助手；已离线时给出最后心跳时间，可能是出站、主机防火墙或 EDR 隔离所致。
 - **出站问题**：失败明确指向出站时，面板出现 **Configure egress for N target(s)**，带入这些实例切到 [配置出站](/onboard/egress)。
 - **Recent activity**：**View logs** 跳到本次部署在 Clients 页 [Recent activity](/clients#recent-activity) 中的记录，展开后逐个目标查看结果、原因和日志，并可复制失败目标的实例 ID 重新部署。记录在服务端重启后清空。刷新页面或关闭浏览器不会取消云端操作。
 

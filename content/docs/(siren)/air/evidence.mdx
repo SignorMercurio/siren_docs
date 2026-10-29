@@ -2,7 +2,7 @@
 title: 证据与报告
 description: AIR GUI 会话如何为结论标注证据来源、保存原始材料和交付报告，以及操作员如何核验
 icon: FileCheck
-verifiedAgainst: v2.37.0
+verifiedAgainst: v2.39.0
 sources:
   - internal/server/air_gui_evidence.go
   - internal/server/mcp_evidence.go
@@ -27,7 +27,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ## SIREN 对 Agent 的要求
 
-启动或继续 GUI 会话时，SIREN 在 Provider 的系统提示后附加一段证据说明，操作者已有的追加提示保留。要点：
+启动或继续 GUI 会话时，SIREN 在 Provider 的系统提示后附加一段证据说明。操作者已有的追加提示和 [Settings](/webui#settings) 中的 AIR 附加指令都保留，排在证据说明之前。要点：
 
 - **用脚注引用**：实质性结论用 Markdown 脚注（`[^1]`）标注来源，普通提问和进度更新不需要。
 - **多步结论先列时间线**：攻击链或事件时间线开头用表格逐步列出时间（含时区）、阶段、资产、发现和对应脚注；多个来源印证同一事件时，写明共同的 IP、路径或账号以及时间差。

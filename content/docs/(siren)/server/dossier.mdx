@@ -2,8 +2,8 @@
 title: 部署 Dossier
 description: 把 Dossier 报告编辑器部署到 SIREN 服务端，供 WebUI 打开和编辑报告
 icon: Upload
-verifiedAgainst: v2.38.1
-dossierVerifiedAgainst: 45f310e
+verifiedAgainst: v2.39.0
+dossierVerifiedAgainst: 8c1902c
 sources:
   - cmd/server/cli/root.go
   - config/server_config.yaml
@@ -18,6 +18,7 @@ sources:
   - dossier:package.json
   - dossier:tools/prepare-deploy-runtime.mjs
   - dossier:tools/runtime-transaction.mjs
+  - dossier:tools/skill-transaction.mjs
   - dossier:tools/deploy-utils.mjs
   - dossier:tools/dist/
   - dossier:src/source-file.js
@@ -40,7 +41,7 @@ Dossier 是纯静态的报告编辑器，不随 `siren_server` 打包。SIREN �
 | --- | --- |
 | `index.html` | 编辑器入口，缺失时视为未部署 |
 | `editor.js`、`editor.css` | 构建产物 |
-| `report.md` | 默认报告模板，**Blank template** 打开的就是它 |
+| `report.md` | 默认中文报告模板，报告语言为中文时 **Blank template** 打开的就是它；英文模板已打包进 `editor.js` |
 | `assets/` | 字体和图片等本地资源 |
 
 ## 使用 make deploy 发布
@@ -68,7 +69,7 @@ make deploy-dry-run
 make deploy
 ```
 
-`make deploy` 把运行时发布到 `DOSSIER_DEPLOY_DIR`（默认 `SIREN:/opt/siren/dossier`，`SIREN` 是 ssh 主机名），并把 `report.md` 同步到 Sleuth skill 的模板目录 `SKILL_DIR`（默认 `../sleuth/skills/sleuth/assets`）。`SKILL_DIR` 不存在或不可写时，部署在动服务端之前中止。只需要其中一部分时：
+`make deploy` 把运行时发布到 `DOSSIER_DEPLOY_DIR`（默认 `SIREN:/opt/siren/dossier`，`SIREN` 是 ssh 主机名），并把中文模板 `report.md` 和英文模板 `report.en.md` 一起同步到 Sleuth skill 的模板目录 `SKILL_DIR`（默认 `../sleuth/skills/sleuth/assets`）。`SKILL_DIR` 不存在或不可写时，部署在动服务端之前中止。只需要其中一部分时：
 
 ```bash title="Dossier 仓库"
 make deploy-runtime                       # 只发布 SIREN 上的运行时
@@ -127,7 +128,7 @@ webui:
 ## 验证
 
 1. 刷新 WebUI 页面。Dossier 状态在登录后只检查一次。
-2. **Settings** 页 **Server** 区的 **Dossier** 行应显示目录路径，不可用时显示原因：
+2. **Settings** 页 **Server** 标签中的 **Dossier** 行应显示目录路径，不可用时显示原因：
 
    | 显示内容 | 含义 |
    | --- | --- |

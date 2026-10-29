@@ -2,7 +2,7 @@
 title: 插件开发
 description: 插件清单、程序约定、构建与发布到插件市场
 icon: Code
-verifiedAgainst: v2.37.0
+verifiedAgainst: v2.39.0
 sources:
   - internal/plugin/plugin.go
   - internal/plugin/manage.go
@@ -11,6 +11,8 @@ sources:
   - internal/protocol/plugin.go
   - internal/protocol/client.go
   - pkg/utils/utils.go
+  - pkg/utils/utils_unix.go
+  - pkg/utils/command_job_windows.go
   - cmd/client/cli/plugins.go
   - Makefile
   - _plugins/chkrootkit/setup.sh
@@ -100,6 +102,7 @@ SIREN 客户端只发布这五个平台；`make build-plugins` 默认只构建�
 - **工作目录**：`plugins/<name>/`。相对路径写出的文件落在这里，客户端被[清理](/cleanup)时一起删除。
 - **用户与环境变量**：与客户端进程相同（通常是 root 或管理员）。
 - **超时**：客户端 `recon.commandTimeout`，默认 30 秒，超时后插件及其子进程被终止。
+- **子进程**：插件退出时，它启动的仍在运行的子进程也被终止，setup 脚本同样如此。不要依赖插件留下后台进程。
 - **输出上限**：16 MiB；在 Recon 中还受该模块剩余输出预算限制，超出时截断。
 
 command 插件通过客户端本地命令调用。生成的文件可通过 Files 下载。

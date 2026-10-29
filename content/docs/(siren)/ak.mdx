@@ -2,10 +2,11 @@
 title: AccessKey 调查
 description: 调查泄露 AccessKey 的云上调用历史
 icon: Key
-verifiedAgainst: v2.37.0
+verifiedAgainst: v2.39.0
 sources:
   - internal/server/webui/frontend/src/pages/InvestigationsPage.tsx
   - internal/server/webui/frontend/src/pages/InvestigationResults.tsx
+  - internal/server/webui/frontend/src/accountUID.ts
   - internal/server/webui/webui_soar.go
   - internal/server/webui/types_soar.go
   - internal/server/cloud_operations.go
@@ -31,6 +32,8 @@ import { Callout } from "fumadocs-ui/components/callout";
 ![Investigations 页的 AccessKey 标签，填写 UID、AccessKey ID 和可选 Region](../../img/ak-investigation.png)
 
 `Region` 留空时默认 `cn-hangzhou`，需要时可填写其他区域 ID。
+
+UID 按 Project 保存在当前浏览器中，与 Provisioning 和 AIR **Event** 模式共用同一个值。运行期间切换 Project 不会中断查询，结果仍显示在页面上。
 
 ## 输出位置
 

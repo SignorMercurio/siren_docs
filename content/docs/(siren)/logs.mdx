@@ -2,7 +2,7 @@
 title: 日志与审计
 description: 在 Logs 页面查看服务端运行日志，按关键词、级别和组件过滤，并追查 Shell、MCP 命令和登录记录
 icon: ScrollText
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
   - internal/server/webui/frontend/src/pages/LogsPage.tsx
   - internal/server/webui/frontend/src/logs/logQuery.ts
@@ -14,6 +14,7 @@ sources:
   - cmd/server/cli/root.go
   - config/server_config.yaml
   - internal/server/webui/request_log.go
+  - internal/server/air_settings.go
   - internal/server/webui/auth.go
   - internal/server/webui/webui_shell.go
   - internal/server/mcp_audit.go
@@ -60,6 +61,7 @@ SIREN 不写日志文件；长期留存见 [日志格式与留存](/reference/se
 | WebUI 登录 | `auth.login.success`、`auth.login.failed`、`auth.login.rate_limited`、`auth.logout.success` | `user`、`remote_ip` |
 | 浏览器 Shell | `shell.session.started`、`shell.session.ended`、`shell.session.request_failed` | `user`、`client_id`、`project`、`duration_ms`、结束原因 `reason` |
 | MCP 命令执行 | `mcp.run.requested`、`mcp.run.finished` | `audit_id`、`command`、`client_id`、`outcome` |
+| AIR 全局默认值 | `air.settings.updated` | `user`、`revision`、各 Provider 的模型和 effort |
 | WebUI 请求 | `webui.request.completed` 等 | `request_id`、`user`、`route` |
 
 Shell 会话只记录谁在何时对哪台客户端打开、持续多久，不记录输入和输出。

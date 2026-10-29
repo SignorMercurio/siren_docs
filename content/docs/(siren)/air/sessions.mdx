@@ -2,7 +2,7 @@
 title: 启动与管理会话
 description: 选择 Provider 和入口模式启动 AIR 会话，在 Running 中重新接入或停止，并从 History 继续以前的会话
 icon: Workflow
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
   - internal/server/webui/frontend/src/pages/AIRPage.tsx
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
@@ -14,6 +14,7 @@ sources:
   - internal/server/webui/frontend/src/reconnectBudget.ts
   - internal/server/webui/frontend/src/router.ts
   - internal/server/webui/frontend/src/components/AIRSessionListItem.tsx
+  - internal/server/webui/frontend/src/components/AIRHistoryTable.tsx
   - internal/server/webui/frontend/src/components/AIRGUIChatPanel.tsx
   - internal/server/webui/frontend/src/components/ClientsTable.tsx
   - internal/server/webui/types_air.go
@@ -34,7 +35,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 启动表单第一行是 Provider 按钮（Codex、Claude、Pi）和一个终端图标按钮：
 
-- **Provider 按钮**：服务端不可用的 Provider 置灰，原因见 [检查可用性](/server/air-providers#检查可用性)。
+- **Provider 按钮**：服务端不可用的 Provider 置灰，鼠标悬停显示原因，排查见 [检查可用性](/server/air-providers#检查可用性)。
 - **终端图标**：未按下用 **GUI**，按下用 **Terminal**。某种界面不可用时页面自动改用另一种。
 
 页面在当前浏览器记住上次选择的 Provider 和界面。要固定默认值，在 **Settings** 的 **Default AIR provider** 和 **Default AIR surface** 中选择。所选 Provider 不可用时回退到服务端配置的 `air.provider`。
@@ -154,6 +155,17 @@ SIREN 服务端正常关闭时结束所有运行中的会话，让 Provider 保�
 - **范围**：只列出当前选中 Provider、当前范围工作目录下的会话。要看另一个 Provider 的历史，先切换 Provider 按钮。
 - **内容**：按更新时间倒序，最多 50 条；运行中的会话和没有用户输入的会话不列出。
 - **搜索**：按空格拆分关键词，要求全部命中，匹配会话 ID、时间、输入、消息和分支。
+
+### 没有打开会话时的历史表
+
+没有打开任何会话时，右侧显示 **History** 表，列出当前范围内所有 Provider 的历史会话，不随左栏的 Provider 按钮变化。
+
+- 每行显示会话标题、Provider、时间和主要模型，以及该会话的 token 数、调用次数和估算费用，计算方法同 [AI 用量](/usage)。
+- 用 Provider 图标按钮筛选，**All** 显示全部；右侧的搜索框规则同上。
+- 点击行首展开，查看最后一条消息和会话 ID（可复制）。
+- **Transcript** 以只读时间线打开会话；**Continue** 继续会话，该 Provider 的 GUI 可用时用 GUI，否则用 Terminal。运行中的会话不在表中，见 [Running](#running)。
+
+在 [Usage](/usage) 页面的 **Top sessions** 中点击会话标题，也会在这里以只读时间线打开该会话。
 
 ### 继续历史会话
 

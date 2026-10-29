@@ -2,7 +2,7 @@
 title: 安装服务端
 description: 在控制主机上安装、启动、升级 SIREN Server
 icon: ServerCog
-verifiedAgainst: v2.38.1
+verifiedAgainst: v2.39.0
 sources:
   - scripts/get_siren_server.sh
   - config/server_config.yaml
@@ -130,7 +130,7 @@ journalctl -u siren -f
 
 ### 打开 Web 控制台
 
-浏览器访问 `https://<控制主机域名或 IP>`，用刚创建的账号登录，从账号菜单打开 **Settings**，在 **Server** 一栏核对：
+浏览器访问 `https://<控制主机域名或 IP>`，用刚创建的账号登录，从账号菜单打开 **Settings**，在 **Server** 标签中核对：
 
 - **Authentication** 显示 `Signed in as <用户名>`。显示 **Disabled (local access)** 说明本次启动未启用鉴权，按上一步处理。
 - **Dossier** 和 **AIR runtime** 显示可用；否则按提示处理，或见 [部署 Dossier](/server/dossier)、[准备 AIR Provider](/server/air-providers)。

@@ -11,6 +11,33 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.39.0 <DateTag>2026-10-29</DateTag>
+
+### Breaking Change
+
+- MCP 的 `recon` 默认不再运行 `hunt` Profile，指定 `hunt` 或客户端默认 Profile 为 `hunt` 时都会拒绝；运维人员在 WebUI 的 Recon 中照常运行。要让 Agent 自行运行，在 `server_config.yaml` 中设 `mcp.allowHuntRecon: true`，见 [`recon`](/reference/mcp#recon)
+
+### New Features
+
+- **Settings** 新增 **AIR** 标签，为全部用户统一设置各 Provider 的默认模型和 effort，以及追加到每个会话系统提示词的 **Instructions**，对之后新启动的 GUI 和 Terminal 会话生效；新增只读的 **MCP & Skills** 标签，列出 AIR 会话可用的 MCP 服务器和 Skills，见 [Settings](/webui#settings)
+- **Usage** 页面顶部汇总 token、缓存命中率、调用次数、会话数和活跃时长，会话数下方显示每个会话 token 数的中位数和 p90；新增按星期和小时的调用热力图 **By hour**，以及可按 token、费用或活跃时长排序的 **Top sessions**，点击会话在 AIR 中打开它的记录；**By project** 和 **By model** 可以导出 CSV，见 [AI 用量](/usage)
+- Agentic IR 没有打开会话时，右侧列出当前范围内全部 Provider 的历史会话，显示每个会话的 token、调用次数和费用，可直接查看记录或继续，见 [没有打开会话时的历史表](/air/sessions#没有打开会话时的历史表)
+- **Provisioning** 的 **Deploy SIREN** 下方新增 **Or install manually**，按 Linux、macOS、Windows 给出已填好服务端地址的安装并连接命令，可直接复制，见 [手动安装客户端](/onboard/manual#安装客户端)
+- 登录过期时在当前页面上弹出登录框，重新登录后已打开的 Shell、AIR 会话和页面内容保持不变
+- 只有一个可选客户端时自动选中；**Provisioning** 有客户端在线时默认收起，并记住你的选择
+- 安装包自带配置的 `air.usage.prices` 增加 `glm-5.3-prime` 的单价；已有服务端需自行添加，见 [费用估算](/usage#费用估算)
+
+### Bug Fixes
+
+- Recon 的凭据文件只记录元数据（路径、权限、属主、大小、修改时间、hash、私钥的公钥指纹、shadow 文件的账户数），不再保存文件内容；Windows 命令输出中的密码值被遮蔽，见 [模块](/recon#模块)
+- 服务端保存 Recon 快照后，客户端删除主机上的本地副本
+- 命令执行结束、Shell 或 AIR 终端关闭时，结束其启动的全部子进程，后台任务不再残留
+- 再次运行客户端安装脚本时，重新安装版本过期的客户端；Linux 安装脚本在固定的 OSS 地址解析失败时改用主机 DNS，Windows 安装脚本下载失败时自动重试，见 [手动安装客户端](/onboard/manual#安装客户端)
+- 一键部署的安装命令没有返回结果时，标出云助手的状态和可能原因，见 [结果与记录](/onboard/provisioning#结果与记录)
+- 单个页面出错时只影响该页面，其他页面和已打开的会话照常使用
+- 表单对话框在服务端接受修改后才关闭，失败时保留输入；错误提示停留 12 秒，鼠标悬停时不消失
+- AIR 的证据脚注只出现在对话回复中，不再写入 Agent 生成的文件
+
 ## v2.38.0 <DateTag>2026-10-26</DateTag>
 
 ### Breaking Change
