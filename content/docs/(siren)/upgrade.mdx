@@ -5,6 +5,7 @@ icon: CircleFadingArrowUp
 verifiedAgainst: v2.39.0
 sources:
   - internal/server/air_settings.go
+  - internal/auth/sessions.go
   - internal/upgrade/
   - cmd/server/cli/upgrade.go
   - cmd/client/cli/upgrade.go
@@ -108,7 +109,7 @@ Settings 中服务端的 **Version** 应与 Clients 页每台客户端的 **Vers
 
 ### 重启的影响
 
-以下状态只在服务端内存中，重启后清空：WebUI 登录会话（需要重新登录）、Logs 页面缓冲、签发的 MCP 会话凭证、运行中的 Agentic IR 会话、近期部署与清理记录、MCP `run` 结果缓存。
+以下状态只在服务端内存中，重启后清空：Logs 页面缓冲、签发的 MCP 会话凭证、运行中的 Agentic IR 会话、近期部署与清理记录、MCP `run` 结果缓存。WebUI 登录会话保存在账号库中，重启后无需重新登录。
 
 客户端会自动重连并恢复原 Client ID、Note 和 Project 归属，但连续 10 次重连失败（约 5 分钟）后退出，见 [重连行为](/onboard/manual#重连行为)，所以停机时间要尽量短。运行中的 AIR 会话在关闭时结束，之后可以从 History 继续，见 [服务端重启](/air/sessions#服务端重启)。
 
@@ -148,7 +149,7 @@ diff /opt/siren/server_config.yaml /tmp/server_config.new.yaml
 | `server_config.yaml` | 服务端配置 |
 | `.env` | MCP、SOAR 等凭证 |
 | `certs/` | 默认 TLS 证书和私钥 |
-| `data/users.db` | WebUI 账号库，可用 `webui.userDBPath` 改位置 |
+| `data/users.db` | WebUI 账号库，含登录会话，可用 `webui.userDBPath` 改位置 |
 | `data/projects.json` | Project 列表、各 Project 目录的绝对路径、客户端归属 |
 | `data/client_ids.json` | 客户端身份与 Client ID 的对应关系 |
 | `data/client_notes.json` | 客户端 Note |
