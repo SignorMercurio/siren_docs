@@ -63,7 +63,7 @@ siren client -s 203.0.113.10 -p 443
 
 ### probe-egress
 
-向配置中的 `server` / `port` 发出一次出站 SYN 并观测其五元组，供基于云防火墙的出口发现使用。`--json` 输出结构化证据。见 [出站放行](/onboard/egress)。
+向配置中的 `server` / `port` 发出一次出站 SYN 并观测其五元组，供基于云防火墙的出口发现使用。`--json` 在第一行输出一个 JSON 对象：成功时为 `{"probe": {...}}`，失败时为 `{"probeError": "原因"}`，退出码非 0。见 [出站放行](/onboard/egress)。
 
 ## 本地模式
 

@@ -156,7 +156,7 @@ Pi 的文件、Shell 和 MCP 操作直接执行，不产生权限审批。
 
 各键的类型和默认值见 [配置文件](/reference/server-config#air)。以下是需要额外说明的行为：
 
-- **`air.provider`**：回退 Provider。浏览器默认选用上次使用的 Provider（首次为 Pi），可在 **Settings** 的 **Default AIR provider** 中固定；所选 Provider 不可用时先回退到 `air.provider`，再回退到第一个可用的 Provider。
+- **`air.provider`**：回退 Provider。浏览器默认选用上次使用的 Provider（首次使用 `air.provider`），可在 **Settings** 的 **Default AIR provider** 中固定；所选 Provider 不可用时先回退到 `air.provider`，再回退到第一个可用的 Provider。
 - **`air.maxSessions`**（默认 `20`）：全服务端 AIR 会话上限，GUI 与 Terminal、所有 Project、Manual/Custom/Event 和继续会话合计；超出时报 `agent session limit reached (N)`。`0` 或负数表示不限制。
 - **`air.replayBufferBytes`**（默认 4 MiB）：每个会话的断线重连回放预算，Terminal 按原始输出、GUI 按结构化事件计算。`0` 或负数时使用默认值，不会关闭回放。
 
