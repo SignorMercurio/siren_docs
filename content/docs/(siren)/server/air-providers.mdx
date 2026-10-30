@@ -42,7 +42,7 @@ Agentic IR（AIR）会话运行在服务端上：`siren_server` 以自身系统�
 | --- | --- | --- | --- | --- |
 | Codex | `codex` | `codex` | Codex CLI 自身登录 | `$CODEX_HOME/sessions`，未设置时为 `~/.codex/sessions` |
 | Claude Code | `claude` | `claude` | Claude Code 自身登录 | `~/.claude/projects` |
-| Pi | `pi` | `pi` | `<agentDir>/auth.json` 中的 Qwen Aegis 密钥 | `<agentDir>/sessions` |
+| Pi | `pi` | `pi` | `<agentDir>/auth.json` 中的阿里云百炼密钥 | `<agentDir>/sessions` |
 
 `~` 指 `siren_server` 进程用户的主目录。
 
@@ -97,25 +97,25 @@ air:
 
 ## Pi
 
-Pi 复用服务端用户的全局 Pi 安装、插件、Skills 和配置，新会话从 [Settings](/webui#settings) 中 AIR 默认值指定的模型和思考等级开始；没有指定模型时从 Qwen Aegis 开始，没有指定思考等级时取 Pi 的默认设置（安装脚本设为 `max`）。安装脚本和默认目录都按 root 设计。
+Pi 复用服务端用户的全局 Pi 安装、插件、Skills 和配置，新会话从 [Settings](/webui#settings) 中 AIR 默认值指定的模型和思考等级开始；没有指定模型时从阿里云百炼上的 DeepSeek V4.1 Flash 开始，没有指定思考等级时取 Pi 的默认设置（安装脚本设为 `max`）。安装脚本和默认目录都按 root 设计。
 
 1. 在 SIREN 源码仓库中以 root 运行安装脚本（需要 Node.js 24）。脚本全局安装 Pi CLI 及其插件，并把 SIREN 的 Pi 配置合并进 Agent 目录：
 
    ```bash title="SIREN 源码仓库（root）"
-   QWEN_AEGIS_API_KEY=<Qwen Aegis API Key> bash scripts/install_pi_provider.sh
+   BAILIAN_API_KEY=<百炼 API Key> bash scripts/install_pi_provider.sh
    ```
 
-   Agent 目录默认 `/root/.pi/agent`，可用 `SIREN_PI_AGENT_DIR` 指定。设置了 `QWEN_AEGIS_API_KEY` 时脚本写入 `auth.json`，否则只提示 Qwen Aegis 暂不可用。
+   Agent 目录默认 `/root/.pi/agent`，可用 `SIREN_PI_AGENT_DIR` 指定。设置了 `BAILIAN_API_KEY` 时脚本把密钥写入 `auth.json`，否则只提示百炼暂不可用。要同时使用 Qwen Aegis，再加上 `QWEN_AEGIS_API_KEY=<Qwen Aegis API Key>`。
 
-2. 确认 `<agentDir>/auth.json` 权限为 `0600`，且含 `type` 为 `api_key`、`key` 非空的 `qwen-aegis` 条目，否则 Pi 的 GUI 和 Terminal 都不可用：
+2. 确认 `<agentDir>/auth.json` 权限为 `0600`，且含 `type` 为 `api_key`、`key` 非空的 `bailian` 条目，否则 Pi 的 GUI 和 Terminal 都不可用：
 
    ```json title="/root/.pi/agent/auth.json"
    {
-     "qwen-aegis": { "type": "api_key", "key": "<Qwen Aegis API Key>" }
+     "bailian": { "type": "api_key", "key": "<百炼 API Key>" }
    }
    ```
 
-   安装脚本还配置了阿里云百炼上的 Kimi K3、DeepSeek V4.1 Flash 和 GLM 5.3 Prime。要在会话中切换到这些模型，在 `auth.json` 中按同样格式加一条 `bailian`，脚本不会写入它。
+   安装脚本配置了百炼上的 DeepSeek V4.1 Flash、Kimi K3 和 GLM 5.3 Prime，以及可选的 Qwen Aegis。要在会话中切换到 Qwen Aegis，在 `auth.json` 中按同样格式加一条 `qwen-aegis`。
 
 3. SIREN 通过 Pi 内置的 MCP 支持为每个会话注册 SIREN MCP：
 
@@ -147,16 +147,16 @@ Pi 的文件、Shell 和 MCP 操作直接执行，不产生权限审批。
 | --- | --- |
 | `Codex CLI was not found`（其他 Provider 同理） | 安装 CLI，或把 `cliPath` 改为绝对路径后重启 |
 | `structured AIR is not supported on Windows servers` | 改用 Linux 服务端 |
-| `Pi Qwen Aegis authentication is missing: ...` | 按上文写入 `auth.json` |
+| `Pi bailian authentication is missing: ...` | 按上文写入 `auth.json` |
 | `Pi authentication file ... has mode ...; expected 0600` | `chmod 600 /root/.pi/agent/auth.json` |
-| `Pi qwen-aegis model is not configured or authenticated` | 重新运行 Pi 安装脚本，确认 `models.json` 中有 `qwen-aegis` |
+| `Pi bailian/deepseek-v4.1-flash model is not configured or authenticated` | 重新运行 Pi 安装脚本，确认 `models.json` 的 `bailian` 中有 `deepseek-v4.1-flash` |
 | `Claude CLI does not advertise bidirectional stream-json` 或握手请求失败 | 升级对应 CLI；升级前可先用 Terminal |
 
 ## 配置项
 
 各键的类型和默认值见 [配置文件](/reference/server-config#air)。以下是需要额外说明的行为：
 
-- **`air.provider`**：回退 Provider。浏览器默认选用上次使用的 Provider（首次为 Codex），可在 **Settings** 的 **Default AIR provider** 中固定；所选 Provider 不可用时先回退到 `air.provider`，再回退到第一个可用的 Provider。
+- **`air.provider`**：回退 Provider。浏览器默认选用上次使用的 Provider（首次为 Pi），可在 **Settings** 的 **Default AIR provider** 中固定；所选 Provider 不可用时先回退到 `air.provider`，再回退到第一个可用的 Provider。
 - **`air.maxSessions`**（默认 `20`）：全服务端 AIR 会话上限，GUI 与 Terminal、所有 Project、Manual/Custom/Event 和继续会话合计；超出时报 `agent session limit reached (N)`。`0` 或负数表示不限制。
 - **`air.replayBufferBytes`**（默认 4 MiB）：每个会话的断线重连回放预算，Terminal 按原始输出、GUI 按结构化事件计算。`0` 或负数时使用默认值，不会关闭回放。
 

@@ -39,7 +39,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 左侧文件树从根目录开始：Linux 和 macOS 为 `/`，Windows 为 `C:\`。
 
 - **Path**：输入路径后按 Enter 或点 **Open**，文件树改从该路径开始。留空表示 `.`，即客户端进程的工作目录，相对路径也相对于它。
-- 搜索框（**Search...**）只在已载入的条目中按名称筛选，不搜索未展开的目录。
+- 搜索框（**Search loaded folders...**）只在已载入的条目中按名称筛选，不搜索未展开的目录。
 - 隐藏文件照常显示。
 
 每个目录最多列出 1,000 个条目，超出时显示 `Showing first 1000 entries`。截取按客户端读取顺序进行，省略的不一定是排序后的最后几项；完整内容请在 [Shell](/shells) 中用 `ls` 或 `find` 查看。

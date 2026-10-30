@@ -13,14 +13,22 @@ export const DateTag = ({ children }) => (
 
 ## v2.40.0 <DateTag>2026-10-30</DateTag>
 
+### Breaking Change
+
+- AIR 的默认 Provider 改为 Pi，Pi 新会话默认使用阿里云百炼上的 DeepSeek V4.1 Flash。Pi 改为检查 `auth.json` 中的 `bailian` 密钥，没有时 Pi 不可用；安装脚本用 `BAILIAN_API_KEY` 写入它，见 [Pi](/server/air-providers#pi)。仍要以 Codex 为回退 Provider 时，在 `server_config.yaml` 中设 `air.provider: codex`
+- Dossier 报告的节号和阶段号一律按顺序自动分配，标题开头写的点分编号和 `::: phase` 后的编号会被去掉，只有 `{page slot=…}` 能固定节号，见 [报告语法](/reports/syntax)
+
 ### New Features
 
 - AIR 调查时按排查清单持续推进：一个方向受阻不会停止整个调查，清单还有可查的项时 Agent 不结束回合。调查底稿每轮更新当前结论、清单状态和最后更新时间，调查进行中即可在 Artifacts 中查看进展；正式报告仍在你确认后生成
 - WebUI 登录会话保存在账号库中，服务端重启后无需重新登录，见 [账号与安全边界](/server/security)
 - 登录页更新动画和登录卡片样式，登录失败时卡片晃动提示
+- **Artifacts** 的搜索框按名称在当前范围内查找文件和目录，包括尚未展开的目录，见 [浏览与预览](/artifacts#浏览与预览)
+- 中文统一使用简体中文字体，中英文和数字之间自动留出间距；复制按钮按下时有反馈
 
 ### Bug Fixes
 
+- 一键部署的出口 IP 探测失败时，显示客户端给出的具体原因，不再只显示固定提示
 - 在 Dossier 中保存报告时，如果打开后 AIR 或其他操作员已改写同一份报告，保存会被拒绝，不再覆盖对方的修改；恢复的浏览器草稿同样适用，见 [保存失败](/reports#保存失败)
 
 ## v2.39.0 <DateTag>2026-10-29</DateTag>
