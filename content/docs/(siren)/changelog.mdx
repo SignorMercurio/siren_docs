@@ -11,6 +11,18 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.40.0 <DateTag>2026-10-30</DateTag>
+
+### New Features
+
+- AIR 调查时按排查清单持续推进：一个方向受阻不会停止整个调查，清单还有可查的项时 Agent 不结束回合。调查底稿每轮更新当前结论、清单状态和最后更新时间，调查进行中即可在 Artifacts 中查看进展；正式报告仍在你确认后生成
+- WebUI 登录会话保存在账号库中，服务端重启后无需重新登录，见 [账号与安全边界](/server/security)
+- 登录页更新动画和登录卡片样式，登录失败时卡片晃动提示
+
+### Bug Fixes
+
+- 在 Dossier 中保存报告时，如果打开后 AIR 或其他操作员已改写同一份报告，保存会被拒绝，不再覆盖对方的修改；恢复的浏览器草稿同样适用，见 [保存失败](/reports#保存失败)
+
 ## v2.39.0 <DateTag>2026-10-29</DateTag>
 
 ### Breaking Change
