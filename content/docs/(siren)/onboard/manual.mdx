@@ -26,11 +26,30 @@ import { Steps, Step } from "fumadocs-ui/components/steps";
 
 目标主机能访问服务端主 TLS 端口（默认 `443`），且服务端已放行该主机的出口 IP：在 WebUI 用 [Allow access](/onboard/egress#allow-access)，或自行在服务端防火墙放行。服务端配置见 [前置条件与凭证](/server/prerequisites)。
 
-## 安装客户端
+## 安装并在后台启动
 
-WebUI 也提供可直接复制的命令：在 [Clients](/clients) 页的 **Provisioning** 中选择 **Deploy SIREN**，部署按钮下方的 **Or install manually** 按 Linux、macOS、Windows 给出安装并连接的命令，服务端地址已填好。地址取 Deploy SIREN 的回连地址；没有配置回连地址时取当前页面的域名，主机经其他地址访问服务端时需要改掉。
+安装脚本的部署模式一步完成安装、写入服务端地址和后台启动，Deploy SIREN 一键部署用的也是这个模式。Linux 需要 root，macOS 需要 `sudo`，Windows 需要以管理员身份运行 PowerShell。
 
-Linux 需要 root，macOS 需要 `sudo`，Windows 需要以管理员身份运行 PowerShell。
+```bash tab="Linux"
+curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sh -s -- --deploy --server <SIREN Server IP> --port 443
+```
+
+```powershell tab="Windows"
+iwr -Uri 'https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.ps1' -UseBasicParsing -OutFile "$env:TEMP\get_siren.ps1"
+powershell -NoProfile -ExecutionPolicy Bypass -File "$env:TEMP\get_siren.ps1" -Deploy -Server <SIREN Server IP> -Port 443
+```
+
+```bash tab="macOS"
+curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sudo sh -s -- --deploy --server <SIREN Server IP> --port 443
+```
+
+部署模式把地址写入 `config.yaml`，先停止之前由安装脚本启动的客户端，再在后台启动新客户端。客户端不随终端退出。进程号写在安装目录的 `siren.pid`，输出写在 `siren.log`（Windows 为 `siren.stdout.log` 和 `siren.stderr.log`）。客户端启动后立即退出时，脚本重装一次再试；仍失败则恢复原有安装并报错。Windows 先把安装脚本下载成文件再运行，因为 `iwr | iex` 无法传参数。
+
+WebUI 也提供可直接复制的命令：在 [Clients](/clients) 页的 **Provisioning** 中选择 **Deploy SIREN**，部署按钮下方的 **Or install manually** 按 Linux、macOS、Windows 给出上面的部署模式命令，服务端地址已填好。地址取 Deploy SIREN 的回连地址；没有配置回连地址时取当前页面的域名，主机经其他地址访问服务端时需要改掉。
+
+## 只安装客户端
+
+需要自己管理客户端进程时，安装脚本可以只安装、不启动：
 
 ```bash tab="Linux"
 curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sh
@@ -71,7 +90,7 @@ sudo ./siren client -s <SIREN Server IP> -p 443
 
 也可以安装时写入地址，之后启动不必传参：Linux 运行 `curl -fsSL https://oss-siren.oss-cn-hongkong.aliyuncs.com/get_siren.sh | sh -s -- --server <SIREN Server IP> --port 443`，macOS 把其中的 `| sh` 换成 `| sudo sh`，Windows 安装脚本对应参数为 `-Server`、`-Port`。
 
-连接成功后客户端出现在 [Clients](/clients) 页。客户端是前台进程，应放到 systemd、launchd、nohup、Windows 计划任务等常驻环境中运行。
+连接成功后客户端出现在 [Clients](/clients) 页。这样启动的客户端是前台进程，随终端退出；需要常驻时用 [部署模式](#安装并在后台启动)，或自行放到 systemd、launchd、Windows 计划任务等环境中运行。
 
 ### macOS 的完全磁盘访问
 
