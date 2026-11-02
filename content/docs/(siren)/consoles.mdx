@@ -45,7 +45,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 | **Site** | **China site**（`signin.aliyun.com`，默认）或 **International site**（`signin.alibabacloud.com`） |
 | **RAM user** | RAM 用户登录名，形如 `name@account.onaliyun.com` |
 | **Password** | RAM 用户密码 |
-| **MFA secret (base32)** | 虚拟 MFA 的密钥。为 RAM 用户绑定虚拟 MFA 时，选择无法扫描二维码即可看到这串密钥；登录时 SIREN 用它计算 6 位验证码 |
+| **MFA secret (base32)** | 虚拟 MFA 的密钥。为 RAM 用户绑定虚拟 MFA 时，选择无法扫描二维码即可看到这串密钥；登录时 SIREN 用它计算 6 位验证码。账号用短信做 MFA 时留空 |
 
 凭据只保存在控制台 Mac 上，SIREN 不保存，也不会再显示。保存新凭据会替换旧凭据，并恢复自动登录。
 
@@ -59,12 +59,12 @@ import { Callout } from "fumadocs-ui/components/callout";
 | --- | --- |
 | **Signed in** | 已进入控制台 |
 | **Refused** | 控制台拒绝了登录，通常是密码错误。替换凭据后重新登录 |
-| **Waiting for an SMS code** | 控制台要求短信验证。点 **Enter SMS code**，输入账号手机收到的验证码 |
+| **Waiting for an SMS code** | 控制台要求短信验证，SIREN 已让控制台发出验证码。在 5 分钟内点 **Enter SMS code**，输入账号手机收到的验证码 |
 | **Stopped at a captcha on the console Mac** | 出现了验证码页面。需要有人在控制台 Mac 上处理 |
 | **Stopped at an unknown page** | 登录停在无法识别的页面 |
 | **No credentials** / **Not signed in yet** | 还没有保存凭据，或还没有登录过 |
 
-服务端每 10 分钟检查一次有凭据的浏览器，登录状态失效时自动重新登录。
+服务端每 10 分钟检查一次全部浏览器：浏览器与 opencli 断开时重启它，有凭据的浏览器登录状态失效时自动重新登录。浏览器重启后保留登录状态。
 
 <Callout type="warn">
 结果为 **Refused**、短信验证、验证码或未知页面时，自动登录暂停，避免反复失败锁定 RAM 用户。替换凭据或手动点 **Sign in** 后恢复。
@@ -79,7 +79,7 @@ AIR 会话中的 opencli 只认得当前 Project 的浏览器：
 - **会话启动后才添加或删除**：不需要重启会话，下一条 opencli 命令就会使用新的浏览器列表。
 
 <Callout type="warn">
-没有默认浏览器（Project 没有浏览器或有多个）时，如果控制台 Mac 上恰好只连着一个浏览器，opencli 会直接使用它，它可能属于其他 Project。控制台 Mac 上同时连着多个浏览器时，这种命令会报错，要求指定浏览器。
+没有默认浏览器（Project 没有浏览器或有多个）时，如果控制台 Mac 上恰好只连着一个浏览器，opencli 会直接使用它，它可能属于其他 Project。控制台 Mac 上同时连着多个浏览器时，这种命令会报错，要求指定浏览器。不要在控制台 Mac 的其他浏览器中启用 opencli 扩展。
 </Callout>
 
 ## Global 视图
@@ -104,7 +104,8 @@ Project 中的浏览器在控制台 Mac 上已不存在时，卡片显示 **Not 
    ```
 
 3. 在 Mac 上用 launchd 保持一条到服务端的反向隧道，把 Mac 的 opencli 端口 `19825` 和 SSH 端口转发到服务端（例如 `2222`）。服务端为这把隧道密钥设置 `restrict,port-forwarding,permitlisten="19825",permitlisten="2222",command="/bin/false"`。
-4. 在 `server_config.yaml` 中填写 [`consoleBrowser`](/reference/server-config#consolebrowser)，重启服务端：
+4. 在 Mac 上用 launchd 运行 opencli daemon，设置 `KeepAlive`，程序为 Node.js 加 opencli 安装目录中的 `dist/src/daemon.js`，输出写入 `logs/opencli-daemon.log`。opencli 自己启动的 daemon 退出后没有人重启，全部浏览器都会断开。
+5. 在 `server_config.yaml` 中填写 [`consoleBrowser`](/reference/server-config#consolebrowser)，重启服务端：
 
    ```yaml
    consoleBrowser:
@@ -113,4 +114,4 @@ Project 中的浏览器在控制台 Mac 上已不存在时，卡片显示 **Not 
      identityFile: /root/.ssh/siren_browser
    ```
 
-5. 打开 Consoles 页面，在 Project 中添加浏览器，确认能创建并登录。
+6. 打开 Consoles 页面，在 Project 中添加浏览器，确认能创建并登录。
