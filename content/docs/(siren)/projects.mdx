@@ -11,6 +11,7 @@ sources:
   - internal/server/handler.go
   - internal/server/app.go
   - internal/server/mcp_http.go
+  - internal/server/air_runtime.go
   - cmd/server/cli/root.go
   - internal/server/webui/webui_projects.go
   - internal/server/webui/frontend/src/pages/ProjectsPage.tsx
@@ -41,6 +42,8 @@ Projects 页（`#/projects`）在侧栏 **System** 分组，也可以从侧栏�
 <Step>
 
 填写 **Project name**（必填，最多 128 个字符）。**Directory name (optional)** 可留空，由服务端按名称生成；**Owner (optional)** 填负责人，最多 64 个字符，之后也能在看板上改。
+
+填写 **Customer order UID**（必填）：客户下单所用阿里云账号的 UID，只能是数字，最多 32 位。该 Project 中的 Pi 会话按这个 UID 计费，见 [下单 UID](#下单-uid)。
 
 </Step>
 <Step>
@@ -74,17 +77,27 @@ Project 目录都建在 `webui.projectsBaseDir`（或启动参数 `--webui-proje
 
 Projects 页是按状态分列的看板，四列依次是 **Responding**（处置中）、**Wrapping up**（收尾中）、**On hold**（暂时挂起）、**Done**（已完成）。
 
-每张卡片显示 Project 名称、负责人和目录名。点击名称即切换到该 Project；点击目录名切换到该 Project 并在 [Artifacts](/artifacts) 中打开它的目录。
+每张卡片显示 Project 名称、负责人、下单 UID 和目录名。点击名称即切换到该 Project；点击目录名切换到该 Project 并在 [Artifacts](/artifacts) 中打开它的目录。
 
 - **改状态**：把卡片拖到另一列。鼠标悬停或用键盘聚焦到卡片时还会出现状态下拉框，可直接选择；触屏设备上下拉框一直显示。
 - **负责人**：点击卡片上的负责人（未设置时显示 **No owner**）填写名字，最多 64 个字符；清空即取消负责人。负责人是自由文本，不关联 WebUI 账号。
-- 状态和负责人存在服务端，所有操作员看到的是同一块看板。
+- **下单 UID**：点击卡片上的下单 UID（未设置时显示 **No order UID**）修改，不能清空。
+- 状态、负责人和下单 UID 存在服务端，所有操作员看到的是同一块看板。
 
 鼠标悬停在卡片上时显示三个按钮：
 
 - **Copy workspace path**：复制目录绝对路径。
 - **Rename project**：只改显示名，目录不动。
 - **Delete project**：删除 Project 元数据并解除所有客户端归属，目录和文件保留；删除当前 Project 后回到 Global。留下的目录不能再挂回新 Project，新建的 Project 总是另建带新编号的目录。Raven 为钉钉群自动创建的 Project 不能删除，见 [MCP 鉴权](/reference/mcp#鉴权)。
+
+### 下单 UID
+
+阿里云百炼按 Project 的下单 UID 为 Pi 会话计费。SIREN 在启动 Pi 会话时读取当前 Project 的下单 UID；Global 中的 Pi 会话记到 SIREN 自己的账号。Claude Code 和 Codex 会话不使用下单 UID。
+
+- **没有下单 UID 时不能启动 Pi**：报 `project <名称> has no order UID; set it on the Projects page before starting Pi`。v2.40.4 之前建的 Project 和 Raven 为钉钉群自动创建的 Project 都没有下单 UID，在卡片上补填后即可启动。
+- **修改只影响新会话**：运行中的 Pi 会话继续按启动时的 UID 计费；要让它改用新 UID，结束后重新开启会话。
+
+服务端的 Pi 配置也要支持按 Project 计费，见 [Pi](/server/air-providers#pi)。
 
 ## 分配客户端
 
