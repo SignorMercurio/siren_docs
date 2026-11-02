@@ -92,7 +92,7 @@ Projects 页是按状态分列的看板，四列依次是 **Responding**（处�
 
 ### 下单 UID
 
-阿里云百炼按 Project 的下单 UID 为 Pi 会话计费。SIREN 在启动 Pi 会话时读取当前 Project 的下单 UID；Global 中的 Pi 会话记到 SIREN 自己的账号。Claude Code 和 Codex 会话不使用下单 UID。
+阿里云百炼按 Project 的下单 UID 为 Pi 会话计费。SIREN 在启动 Pi 会话时读取当前 Project 的下单 UID。Claude Code 和 Codex 会话不使用下单 UID。
 
 - **没有下单 UID 时不能启动 Pi**：报 `project <名称> has no order UID; set it on the Projects page before starting Pi`。v2.40.4 之前建的 Project 和 Raven 为钉钉群自动创建的 Project 都没有下单 UID，在卡片上补填后即可启动。
 - **修改只影响新会话**：运行中的 Pi 会话继续按启动时的 UID 计费；要让它改用新 UID，结束后重新开启会话。
@@ -115,7 +115,7 @@ Projects 页是按状态分列的看板，四列依次是 **Responding**（处�
 | --- | --- |
 | Clients | 只列本 Project 的客户端，不能分配 Project；**Recent activity** 只显示本 Project 的记录 |
 | Shells | 只能对本 Project 的客户端开 Shell；有打开的 Shell 时，切换范围前先确认，确认后这些 Shell 关闭 |
-| Agentic IR | 新会话的工作目录是 Project 目录，MCP 端点是 `/mcp/project/<id>`；**Running** 和 **History** 只列本范围会话。切换范围后其他范围的 AIR 标签被移除，会话仍在运行，切回后可从 **Running** 重新接入 |
+| Agentic IR | 只有 Project 视图能启动会话，Global 中不能启动。新会话的工作目录是 Project 目录，MCP 端点是 `/mcp/project/<id>`；**Running** 和 **History** 只列本范围会话。切换范围后其他范围的 AIR 标签被移除，会话仍在运行，切回后可从 **Running** 重新接入 |
 | Files、Investigations | 只能选本 Project 的客户端；AccessKey 见下文例外 |
 | Artifacts | 根目录是 Project 目录，链接形如 `#/artifacts/<路径>?project=<id>`，打开时自动切换到该 Project |
 | Reports | 只扫描 Project 目录；Global 下汇总服务端工作目录和所有 Project |

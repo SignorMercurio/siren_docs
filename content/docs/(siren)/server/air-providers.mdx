@@ -118,7 +118,7 @@ Pi 复用服务端用户的全局 Pi 安装、插件、Skills 和配置，新会
 
    安装脚本配置了百炼上的 DeepSeek V4.1 Flash、Kimi K3 和 GLM 5.3 Prime，以及可选的 Qwen Aegis。要在会话中切换到 Qwen Aegis，在 `auth.json` 中按同样格式加一条 `qwen-aegis`。
 
-   百炼按请求头 `x-dashscope-euid` 中的 `accountId` 计费。安装脚本写入的 `models.json` 中，`bailian` 的 `accountId` 为 `${SIREN_ORDER_UID}`；SIREN 启动 Pi 时把这个环境变量设为当前 Project 的 [下单 UID](/projects#下单-uid)，Global 会话设为 SIREN 自己的账号。v2.40.4 之前安装的 Pi 仍写死旧账号，重新运行安装脚本即可更新。不要在 `models.json` 中改回固定 UID，否则所有 Project 都记到同一个账号。
+   百炼按请求头 `x-dashscope-euid` 中的 `accountId` 计费。安装脚本写入的 `models.json` 中，`bailian` 的 `accountId` 为 `${SIREN_ORDER_UID}`；SIREN 启动 Pi 时把这个环境变量设为当前 Project 的 [下单 UID](/projects#下单-uid)。v2.40.4 之前安装的 Pi 仍写死旧账号，重新运行安装脚本即可更新。不要在 `models.json` 中改回固定 UID，否则所有 Project 都记到同一个账号。
 
 3. SIREN 通过 Pi 内置的 MCP 支持为每个会话注册 SIREN MCP：
 

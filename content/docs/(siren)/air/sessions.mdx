@@ -70,13 +70,9 @@ Provider 下方有三个入口模式，默认选中 **Custom**：
 
 ## Project 范围
 
-会话启动时的范围决定它的工作目录和 MCP 范围，之后不随侧栏切换而改变：
+AIR 会话只能在 Project 视图中启动。会话的工作目录是该 Project 的 Artifacts 目录，SIREN MCP 和 **Client** 下拉框只包含本 Project 的客户端。这些在会话启动时确定，之后不随侧栏切换而改变。
 
-| | Global | Project 视图 |
-| --- | --- | --- |
-| 工作目录 | 服务端进程的工作目录 | 该 Project 的 Artifacts 目录 |
-| SIREN MCP 与 **Client** 下拉框 | 全部客户端 | 本 Project 的客户端 |
-| **Running** 和 **History** | 服务端上的全部会话 | 本 Project 的会话 |
+在 Global 中，**Start** 按钮不可用，下方提示 `Switch to a project to start AIR`；**History** 中的旧会话只能打开记录查看，不能继续。**Running** 和 **History** 在 Global 中列出服务端上的全部会话，在 Project 视图中只列本 Project 的会话。
 
 切换范围时，属于其他范围的会话标签会被关闭，但会话继续运行，回到原范围后可从 **Running** 重新打开。完整规则见 [Project 范围](/projects)。
 

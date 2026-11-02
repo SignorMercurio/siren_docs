@@ -61,7 +61,7 @@ MCP 由 [`server_config.yaml`](/reference/server-config) 中的 `mcp.enabled` �
 | 凭证 | 来源 | 可访问 | 有效期 |
 | --- | --- | --- | --- |
 | 管理凭证 | 服务端环境变量 `SIREN_MCP_ADMIN_TOKEN` | `/mcp` 和任意 `/mcp/project/<id>` | 长期 |
-| AIR 会话凭证 | 每个 AIR 会话启动时签发 | Project 会话只能访问本 Project 的路径，Global 会话只能访问 `/mcp` | 会话结束时吊销 |
+| AIR 会话凭证 | 每个 AIR 会话启动时签发 | 只能访问会话所在 Project 的路径 | 会话结束时吊销 |
 | 群会话凭证 | Raven 用 `SIREN_MCP_RAVEN_TOKEN` 调用 `/api/mcp/group-session` 换取 | 该钉钉群对应 Project 的路径 | 1 小时 |
 
 - `mcp.enabled` 为 `true` 时 `SIREN_MCP_ADMIN_TOKEN` 必须非空，否则服务端启动即退出，报 `MCP requires SIREN_MCP_ADMIN_TOKEN`。不用 MCP 和 AIR 时可设 `mcp.enabled: false`。
