@@ -1,0 +1,116 @@
+---
+title: 云控制台浏览器
+description: 在 Consoles 页面为 Project 管理客户云控制台的独立浏览器：添加账号、保存凭据、登录，以及 AIR 如何使用它们
+icon: AppWindow
+verifiedAgainst: v2.41.0
+sources:
+  - internal/server/webui/frontend/src/pages/ConsolesPage.tsx
+  - internal/server/webui/frontend/src/pages/ProjectsPage.tsx
+  - internal/server/webui/webui_console.go
+  - internal/server/console_browser.go
+  - internal/server/air_runtime.go
+  - internal/server/projects.go
+  - scripts/siren_browser.mjs
+  - config/server_config.yaml
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+**Consoles** 页面管理控制台 Mac 上的浏览器。每个浏览器只登录一个客户的阿里云控制台账号（RAM 用户），各自保存登录状态，互不影响。你在 SIREN 中保存凭据、点击登录，不需要登录到那台 Mac；AIR 会话通过 opencli 操作这些浏览器。
+
+一个 Project 可以有多个控制台浏览器，例如同一客户的生产账号和测试账号。每个浏览器只属于一个 Project。
+
+## 前置条件
+
+- 服务端已接入控制台 Mac，见 [接入控制台 Mac](#接入控制台-mac)。没有接入时，页面提示 `No console Mac is configured`。
+- 要保存凭据，需要该 RAM 用户的登录名、密码和虚拟 MFA 密钥。
+
+## 添加浏览器
+
+1. 在范围菜单中切换到目标 Project。Global 视图中不能添加。
+2. 打开 **Consoles**。还没有浏览器时，页面显示 **Not set up**。
+3. 在 **New profile** 中确认名称后点 **Create**。名称默认取 Project 目录名，已被占用时自动加 `-2`、`-3`；只能用小写字母、数字和 `-`，最长 32 个字符。
+4. 等待浏览器启动并连上 opencli，通常需要几十秒。
+
+已有浏览器时，卡片下方显示 **Add another console account**，用法相同。
+
+在 [Projects](/projects) 页面，卡片上列出该 Project 的浏览器名称；点击后跳到这个 Project 的 Consoles 页面。
+
+## 保存凭据
+
+在卡片上点 **Set credentials**（已保存过时显示 **Replace credentials**），填写：
+
+| 字段 | 内容 |
+| --- | --- |
+| **Site** | **China site**（`signin.aliyun.com`，默认）或 **International site**（`signin.alibabacloud.com`） |
+| **RAM user** | RAM 用户登录名，形如 `name@account.onaliyun.com` |
+| **Password** | RAM 用户密码 |
+| **MFA secret (base32)** | 虚拟 MFA 的密钥。为 RAM 用户绑定虚拟 MFA 时，选择无法扫描二维码即可看到这串密钥；登录时 SIREN 用它计算 6 位验证码 |
+
+凭据只保存在控制台 Mac 上，SIREN 不保存，也不会再显示。保存新凭据会替换旧凭据，并恢复自动登录。
+
+卡片顶部显示账号域名（登录名 `@` 之后的部分），用来区分同一 Project 的多个账号。
+
+## 登录
+
+点 **Sign in**。登录通常需要 10 到 60 秒，期间卡片显示 **Signing in** 和已用时间。结果显示在卡片右上角：
+
+| 状态 | 含义与处理 |
+| --- | --- |
+| **Signed in** | 已进入控制台 |
+| **Refused** | 控制台拒绝了登录，通常是密码错误。替换凭据后重新登录 |
+| **Waiting for an SMS code** | 控制台要求短信验证。点 **Enter SMS code**，输入账号手机收到的验证码 |
+| **Stopped at a captcha on the console Mac** | 出现了验证码页面。需要有人在控制台 Mac 上处理 |
+| **Stopped at an unknown page** | 登录停在无法识别的页面 |
+| **No credentials** / **Not signed in yet** | 还没有保存凭据，或还没有登录过 |
+
+服务端每 10 分钟检查一次有凭据的浏览器，登录状态失效时自动重新登录。
+
+<Callout type="warn">
+结果为 **Refused**、短信验证、验证码或未知页面时，自动登录暂停，避免反复失败锁定 RAM 用户。替换凭据或手动点 **Sign in** 后恢复。
+</Callout>
+
+## AIR 如何使用
+
+AIR 会话中的 opencli 只认得当前 Project 的浏览器：
+
+- **只有一个浏览器**：opencli 命令默认使用它，不需要指定。
+- **有多个浏览器**：AIR 运行 `opencli profile list` 查看本 Project 的浏览器名称，再在每条命令中用 `--profile <名称>` 指定。
+- **会话启动后才添加或删除**：不需要重启会话，下一条 opencli 命令就会使用新的浏览器列表。
+
+<Callout type="warn">
+没有默认浏览器（Project 没有浏览器或有多个）时，如果控制台 Mac 上恰好只连着一个浏览器，opencli 会直接使用它，它可能属于其他 Project。控制台 Mac 上同时连着多个浏览器时，这种命令会报错，要求指定浏览器。
+</Callout>
+
+## Global 视图
+
+Global 视图列出控制台 Mac 上的全部浏览器，包括所属 Project、账号域名和登录状态，可以登录、修改凭据和删除，不能添加。所属 Project 被删除的浏览器显示 **No project**。
+
+## 删除浏览器
+
+点 **Delete** 并确认。控制台 Mac 关闭该浏览器，删除它的登录状态和凭据，Project 中也同时移除它；该 Project 的 AIR 会话随即无法再使用它。
+
+Project 中的浏览器在控制台 Mac 上已不存在时，卡片显示 **Not on the console Mac**，删除即可移除。
+
+## 接入控制台 Mac
+
+控制台 Mac 是运行这些浏览器的一台 macOS 主机，通常放在能访问客户内网的办公网络中。服务端通过反向 SSH 隧道访问它。
+
+1. 在 Mac 上安装 Chrome for Testing（或 Chromium）、Node.js、opencli 和解压后的 opencli Browser Bridge 扩展，再把 SIREN 源码中的 `scripts/siren_browser.mjs` 复制到 Mac 上。脚本开头的注释写明了 `config.json` 的格式。
+2. 在 Mac 的 `~/.ssh/authorized_keys` 中为服务端的 SSH 公钥设置强制命令，只允许运行这个脚本：
+
+   ```text
+   command="/path/to/node /path/to/siren_browser.mjs",restrict ssh-ed25519 AAAA... siren
+   ```
+
+3. 在 Mac 上用 launchd 保持一条到服务端的反向隧道，把 Mac 的 opencli 端口 `19825` 和 SSH 端口转发到服务端（例如 `2222`）。服务端为这把隧道密钥设置 `restrict,port-forwarding,permitlisten="19825",permitlisten="2222",command="/bin/false"`。
+4. 在 `server_config.yaml` 中填写 [`consoleBrowser`](/reference/server-config#consolebrowser)，重启服务端：
+
+   ```yaml
+   consoleBrowser:
+     sshTarget: <Mac 用户名>@127.0.0.1
+     sshPort: 2222
+     identityFile: /root/.ssh/siren_browser
+   ```
+
+5. 打开 Consoles 页面，在 Project 中添加浏览器，确认能创建并登录。

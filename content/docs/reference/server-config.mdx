@@ -21,6 +21,7 @@ sources:
   - internal/server/air_mcp.go
   - internal/server/air_history.go
   - internal/server/air_usage_report.go
+  - internal/server/console_browser.go
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
@@ -93,6 +94,11 @@ webui:
 recon:
   responseTimeout: 300
   commandTimeout: 30
+
+consoleBrowser:
+  sshTarget: ""                # 留空时不启用 Consoles
+  sshPort: 2222
+  identityFile: ""
 
 egress:
   rules:                       # 启用 WebUI 时必填，无内置默认值
@@ -189,6 +195,16 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 | `recon.commandTimeout` | int（秒） | `30` | MCP `run` / `run_batch` 下发命令的超时，与客户端的 `recon.commandTimeout` 取较小值 |
 
 两个键为 `0` 或负数时使用默认值。客户端侧超时见 [客户端配置](/reference/client-config#recon)。
+
+## consoleBrowser
+
+| 键 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `consoleBrowser.sshTarget` | string | `""` | 控制台 Mac 的 SSH 目标，通常是反向隧道在服务端上的 `<用户名>@127.0.0.1`；留空时不启用 [Consoles](/consoles) |
+| `consoleBrowser.sshPort` | int | `2222` | 连接 `sshTarget` 的端口；`0` 时使用 SSH 默认端口 |
+| `consoleBrowser.identityFile` | string | `""` | 连接控制台 Mac 的私钥；留空时使用服务端用户的默认 SSH 密钥 |
+
+接入步骤见 [接入控制台 Mac](/consoles#接入控制台-mac)。
 
 ## egress
 

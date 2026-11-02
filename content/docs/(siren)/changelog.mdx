@@ -11,6 +11,25 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.41.0 <DateTag>2026-11-02</DateTag>
+
+### Breaking Change
+
+- 新建 Project 必须填写客户下单所用阿里云账号的 UID，Pi 会话按这个 UID 在百炼计费；没有下单 UID 的 Project 不能启动 Pi，在 Projects 页的卡片上补填，见 [下单 UID](/projects#下单-uid)
+- AIR 会话只能在 Project 视图中启动，Global 下不再显示启动和继续按钮，见 [会话](/air/sessions)
+- Pi 新会话默认使用百炼上的 Kimi K3，思考等级默认 high，见 [Pi](/server/air-providers#pi)
+
+### New Features
+
+- 新增 **Consoles** 页面：在控制台 Mac 上为每个客户云控制台账号运行独立浏览器，在 SIREN 中保存凭据并一键登录，登录失效时自动重新登录。一个 Project 可以有多个浏览器，AIR 会话中的 opencli 只能使用本 Project 的浏览器，会话启动后添加的浏览器也立即可用，见 [云控制台浏览器](/consoles)
+- AIR 会话没有浏览器打开、Provider 也没有新输出达到 `air.idleTimeoutHours`（默认 72 小时）后自动停止，见 [停止与结束](/air/sessions#停止与结束)
+- AIR 标签栏新增复制链接按钮，在另一个浏览器中打开链接即进入同一会话或历史记录
+- **Or install manually** 中的命令改用安装脚本的部署模式，一步完成安装、写入服务端地址和后台启动，见 [安装并在后台启动](/onboard/manual#安装并在后台启动)
+
+### Bug Fixes
+
+- 代码、命令和终端统一使用等宽字体，中文 Windows 上的 Chrome 不再显示为新宋体；终端等字体加载完成后再排版，字符不再错位
+
 ## v2.40.0 <DateTag>2026-10-30</DateTag>
 
 ### Breaking Change
