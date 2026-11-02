@@ -113,8 +113,9 @@ mcp:
   allowHuntRecon: false
 
 air:
-  provider: codex              # codex / claude / pi
+  provider: pi                 # codex / claude / pi
   maxSessions: 20
+  idleTimeoutHours: 72
   replayBufferBytes: 4194304
   prompt: 启动安全应急响应，UID：%s，Event ID：%s，SIREN Client ID：%d
   instancePrompt: 启动安全应急响应，UID：%s，ECS 实例 ID：%s，SIREN Client ID：%d，请先获取该实例的相关告警
@@ -238,6 +239,7 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 | --- | --- | --- | --- |
 | `air.provider` | string | `pi` | 浏览器所选 Provider 不可用时先回退到的 Provider：`codex`、`claude` 或 `pi` |
 | `air.maxSessions` | int | `20` | GUI 与 Terminal 合计的并发会话上限，跨所有 Project；`0` 或负数表示不限制 |
+| `air.idleTimeoutHours` | int（小时） | `72` | 会话没有浏览器打开、Provider 也没有新输出达到该时长后自动停止；`0` 或负数表示不自动停止 |
 | `air.replayBufferBytes` | int（字节） | `4194304` | 每个会话的断线重连回放预算；`0` 或负数时使用默认的 4 MiB，不会关闭回放 |
 | `air.prompt` | string | `启动安全应急响应，UID：%s，Event ID：%s，SIREN Client ID：%d` | Event 入口按安全中心告警 ID 启动时的种子 prompt |
 | `air.instancePrompt` | string | `启动安全应急响应，UID：%s，ECS 实例 ID：%s，SIREN Client ID：%d，请先获取该实例的相关告警` | Event 入口按 ECS 实例 ID 启动时的种子 prompt |

@@ -187,6 +187,7 @@ Shell 没有空闲超时。
 | 限制 | 值 | 配置项 | 详见 |
 | --- | --- | --- | --- |
 | 同时运行的会话 | 20 个，全服务端合计；`0` 或负数不限制 | `air.maxSessions` | [会话管理](/air/sessions) |
+| 会话空闲自动停止 | 72 小时没有浏览器打开且 Provider 没有新输出；`0` 或负数不自动停止 | `air.idleTimeoutHours` | [停止与结束](/air/sessions#停止与结束) |
 | 会话名称 | 80 个字符 | | [重命名会话](/air/sessions#重命名会话) |
 | Settings 中的 AIR 默认模型 | 128 个字符 | | [Settings](/webui#settings) |
 | Settings 中的 AIR 附加指令 | 16 KiB | | [Settings](/webui#settings) |

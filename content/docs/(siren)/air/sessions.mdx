@@ -82,7 +82,9 @@ Provider 下方有三个入口模式，默认选中 **Custom**：
 
 ## 会话标签
 
-每个会话在右侧的一个标签中打开。关闭标签只关闭视图，不停止会话；刷新浏览器后已打开的标签自动恢复。地址栏中的会话地址可以直接分享或收藏。
+每个会话在右侧的一个标签中打开。关闭标签只关闭视图，不停止会话；刷新浏览器后已打开的标签自动恢复。
+
+点击标签栏右端的链接按钮，复制当前会话的链接。链接带有会话所在的 Project 范围，在另一个浏览器中打开时自动切换到该范围，并打开同一个运行中的会话或 History 记录。也可以直接分享或收藏地址栏中的地址。
 
 ## Running
 
@@ -127,6 +129,8 @@ GUI 会话等待审批或回答时，对应会话标签上也会出现标记；�
 
 点击 **Running** 行右侧的关闭按钮，在 **Stop session** 对话框中确认即可结束会话。Provider 进程被终止，会话记录保留在磁盘上，之后可从 **History** 继续。只停止 GUI 当前这一轮见 [GUI 时间线](/air/gui#发送请求与调整方向)。
 
+会话长时间空闲时，服务端会自动停止它，效果与手动停止相同。空闲指既没有浏览器打开它，Provider 也没有新输出；只要有浏览器打开着该会话，就不会自动停止。默认空闲时间见 [限制](/reference/limits)。
+
 会话结束后，已打开的标签保留内容，顶部显示 **Session ended** 和原因：
 
 | 原因 | 含义 |
@@ -134,6 +138,7 @@ GUI 会话等待审批或回答时，对应会话标签上也会出现标记；�
 | `session stopped by an operator` | 有人在 Running 中停止了会话 |
 | `session ended: the agent process exited` | Provider 进程自行退出 |
 | `session ended: server shut down` | SIREN 服务端正在关闭 |
+| `session stopped after a long idle period` | 会话空闲超时，服务端自动停止了它 |
 | `unknown agent session` | 服务端上已没有该会话，通常因为服务端重启过 |
 
 会话未能启动时，GUI 显示 **Session did not start**、原因和 **Retry** 按钮，Terminal 显示 **Session ended** 和错误原因。常见原因：
