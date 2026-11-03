@@ -11,6 +11,18 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.41.2 <DateTag>2026-11-03</DateTag>
+
+### New Features
+
+- 控制台账号用短信做 MFA 时也能登录：MFA 密钥留空，登录时 SIREN 让控制台发出验证码，在 5 分钟内点 **Enter SMS code** 输入即可，见 [登录](/consoles#登录)
+- 服务端每 10 分钟检查控制台浏览器，与 opencli 断开的浏览器自动重启，重启后保留登录状态
+- Consoles 的 Global 视图改为与 Project 卡片一致的样式：登录状态带状态点，每行一个下一步按钮，等待短信验证码的行突出显示
+
+### Bug Fixes
+
+- 服务端运行环境的 SSH 配置开启了连接复用时，访问控制台 Mac 不再复用其他密钥的连接，始终走为 SIREN 密钥设置的强制命令
+
 ## v2.41.0 <DateTag>2026-11-02</DateTag>
 
 ### Breaking Change
