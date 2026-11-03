@@ -11,6 +11,21 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.42.0 <DateTag>2026-11-03</DateTag>
+
+### Breaking Change
+
+- AIR 的 Event 入口改为 **Account**：填写账号 UID，可选告警时间范围（最近 3、7、14、30 天或自定义，默认 30 天），会话先拉取该账号在范围内的告警，作为排查起点。按告警 ID、ECS 实例或云安全中心资产启动的方式已删除，见 [入口模式](/air/sessions#入口模式)
+- `air.prompt` 改为 UID 和时间范围两个占位符；`air.instancePrompt`、`air.assetPrompt`、`air.timeRangePrompt` 不再使用。配置文件中仍是旧模板时，升级后须改成新模板或删除该键，见 [Prompt 模板](/server/air-providers#prompt-模板)
+
+### New Features
+
+- AIR 左栏按会话分组：**Needs you**、**Running**、**Open**、**Today**、**Earlier**，合并全部 Provider 的历史，可按 Provider 筛选和搜索，见 [左栏](/air/sessions#左栏)
+- 标签栏移除，会话上方改为标题栏：显示会话路径和 Provider，菜单中可重命名、复制链接、关闭视图或停止会话，并可在 Chat 和 Terminal 之间切换，见 [会话标题栏](/air/sessions#会话标题栏)
+- 新会话启动页直接选择模型：菜单按 Provider 分组，列出服务端 CLI 报告的模型，选中模型即选定 Provider，见 [选择模型和界面](/air/sessions#选择模型和界面)
+- 入口模式改名为 **Ask**、**Client**、**Account**。Ask 先写第一条消息再启动，消息原样发给 Agent；**Start** 按钮上显示 ⌘↩（Windows 和 Linux 上为 Ctrl ↩）快捷键
+- Chat 输入框改为卡片样式，模型和状态放在卡片内的工具栏中；你发送的消息以强调色气泡显示
+
 ## v2.41.4 <DateTag>2026-11-03</DateTag>
 
 ### Bug Fixes
@@ -84,7 +99,7 @@ export const DateTag = ({ children }) => (
 
 - **Settings** 新增 **AIR** 标签，为全部用户统一设置各 Provider 的默认模型和 effort，以及追加到每个会话系统提示词的 **Instructions**，对之后新启动的 GUI 和 Terminal 会话生效；新增只读的 **MCP & Skills** 标签，列出 AIR 会话可用的 MCP 服务器和 Skills，见 [Settings](/webui#settings)
 - **Usage** 页面顶部汇总 token、缓存命中率、调用次数、会话数和活跃时长，会话数下方显示每个会话 token 数的中位数和 p90；新增按星期和小时的调用热力图 **By hour**，以及可按 token、费用或活跃时长排序的 **Top sessions**，点击会话在 AIR 中打开它的记录；**By project** 和 **By model** 可以导出 CSV，见 [AI 用量](/usage)
-- Agentic IR 没有打开会话时，右侧列出当前范围内全部 Provider 的历史会话，显示每个会话的 token、调用次数和费用，可直接查看记录或继续，见 [没有打开会话时的历史表](/air/sessions#没有打开会话时的历史表)
+- Agentic IR 没有打开会话时，右侧列出当前范围内全部 Provider 的历史会话，显示每个会话的 token、调用次数和费用，可直接查看记录或继续，见 [没有打开会话时的历史表](/air/sessions#历史表)
 - **Provisioning** 的 **Deploy SIREN** 下方新增 **Or install manually**，按 Linux、macOS、Windows 给出已填好服务端地址的安装并连接命令，可直接复制，见 [手动安装客户端](/onboard/manual#安装客户端)
 - 登录过期时在当前页面上弹出登录框，重新登录后已打开的 Shell、AIR 会话和页面内容保持不变
 - 只有一个可选客户端时自动选中；**Provisioning** 有客户端在线时默认收起，并记住你的选择
