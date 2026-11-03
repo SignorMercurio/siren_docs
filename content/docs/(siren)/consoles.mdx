@@ -1,10 +1,13 @@
 ---
-title: 云控制台浏览器
-description: 在 Consoles 页面为 Project 管理客户云控制台的独立浏览器：添加账号、保存凭据、登录，以及 AIR 如何使用它们
+title: 云访问
+description: 在 Cloud Access 页面为 Project 管理客户云控制台的独立浏览器和阿里云 AccessKey，以及 AIR 如何使用它们
 icon: AppWindow
-verifiedAgainst: v2.41.4
+verifiedAgainst: v2.43.0
 sources:
   - internal/server/webui/frontend/src/pages/ConsolesPage.tsx
+  - internal/server/webui/frontend/src/pages/AliyunKeysSection.tsx
+  - internal/server/webui/webui_aliyun_keys.go
+  - internal/server/aliyun_keys.go
   - internal/server/webui/frontend/src/pages/ProjectsPage.tsx
   - internal/server/webui/webui_console.go
   - internal/server/console_browser.go
@@ -16,7 +19,9 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-**Consoles** 页面管理控制台 Mac 上的浏览器。每个浏览器只登录一个客户的阿里云控制台账号（RAM 用户），各自保存登录状态，互不影响。你在 SIREN 中保存凭据、点击登录，不需要登录到那台 Mac；AIR 会话通过 opencli 操作这些浏览器。
+**Cloud Access** 页面管理 AIR 访问客户阿里云账号的两种凭据：控制台 Mac 上的浏览器，和客户提供的 [AccessKey](#accesskey)。
+
+控制台浏览器每个浏览器只登录一个客户的阿里云控制台账号（RAM 用户），各自保存登录状态，互不影响。你在 SIREN 中保存凭据、点击登录，不需要登录到那台 Mac；AIR 会话通过 opencli 操作这些浏览器。
 
 一个 Project 可以有多个控制台浏览器，例如同一客户的生产账号和测试账号。每个浏览器只属于一个 Project。
 
@@ -28,13 +33,13 @@ import { Callout } from "fumadocs-ui/components/callout";
 ## 添加浏览器
 
 1. 在范围菜单中切换到目标 Project。Global 视图中不能添加。
-2. 打开 **Consoles**。还没有浏览器时，页面显示 **Not set up**。
+2. 打开 **Cloud Access**。还没有浏览器时，**Console profiles** 下显示 **Not set up**。
 3. 在 **New profile** 中确认名称后点 **Create**。名称默认取 Project 目录名，已被占用时自动加 `-2`、`-3`；只能用小写字母、数字和 `-`，最长 32 个字符。
 4. 等待浏览器启动并连上 opencli，通常需要几十秒。
 
 已有浏览器时，卡片下方显示 **Add another console account**，用法相同。
 
-在 [Projects](/projects) 页面，卡片上列出该 Project 的浏览器名称；点击后跳到这个 Project 的 Consoles 页面。
+在 [Projects](/projects) 页面，卡片上列出该 Project 的浏览器名称；点击后跳到这个 Project 的 Cloud Access 页面。
 
 ## 保存凭据
 
@@ -94,6 +99,45 @@ Global 视图列出控制台 Mac 上的全部浏览器，包括所属 Project、
 
 Project 中的浏览器在控制台 Mac 上已不存在时，卡片显示 **Not on the console Mac**，删除即可移除。
 
+## AccessKey
+
+客户提供阿里云 AccessKey 时，可以把它配置到 Project。AIR 会话中的 `aliyun` 命令只使用本 Project 的 AccessKey 查询客户账号。一个 Project 可以有多对 AccessKey，例如同一客户的多个账号，每对只属于这个 Project。
+
+这里的 AccessKey 是客户授权你使用的凭据，与 [AccessKey 调查](/ak) 中被调查的泄露 AccessKey 无关。
+
+服务端需要安装 aliyun CLI。没有安装时，**AccessKeys** 下提示 `The SIREN server has no aliyun CLI`，AIR 会话无法使用这些 AccessKey。
+
+### 添加 AccessKey
+
+1. 在范围菜单中切换到目标 Project。Global 视图中不能添加。
+2. 打开 **Cloud Access**，在 **AccessKeys** 下点 **Add AccessKey**。
+3. 填写下表中的字段，点 **Add**。
+
+| 字段 | 内容 |
+| --- | --- |
+| **Name** | AccessKey 在 aliyun CLI 中的 profile 名。只能用小写字母、数字和 `-`，最长 32 个字符；同一 Project 中不能重名，不同 Project 可以重名 |
+| **AccessKey ID** | 客户提供的 AccessKey ID |
+| **AccessKey secret** | 客户提供的 AccessKey Secret |
+
+SIREN 不检查 AccessKey 是否有效。AccessKey 保存在 SIREN 服务端，页面只显示 AccessKey ID 的前 4 位和后 4 位，Secret 不会再显示。
+
+<Callout type="warn">
+SIREN 不限制 AccessKey 能调用的 API。请客户提供只读权限的 RAM 用户 AccessKey，排查结束后请客户禁用或删除它。
+</Callout>
+
+### AIR 如何使用 AccessKey
+
+- **只有一对 AccessKey**：aliyun 命令默认使用它，不需要指定。
+- **有多对 AccessKey**：AIR 在每条命令中用 `--profile <名称>` 指定。命令没有指定时直接报错，不会任选一对。
+- **没有 AccessKey**：aliyun 命令报错，不会使用服务端操作系统用户自己的 aliyun 配置（`~/.aliyun/config.json`）。
+- **会话启动后才添加或删除**：不需要重启会话，下一条 aliyun 命令就会使用新的 AccessKey 列表。
+
+### 删除 AccessKey
+
+点 **Delete** 并确认。该 Project 的 AIR 会话随即无法再使用这对 AccessKey。AccessKey 在客户账号中仍然有效，直到客户禁用它。删除 Project 时，它的 AccessKey 一并删除。
+
+Global 视图列出全部 Project 的 AccessKey 及所属 Project，可以删除，不能添加。
+
 ## 接入控制台 Mac
 
 控制台 Mac 是运行这些浏览器的一台 macOS 主机，通常放在能访问客户内网的办公网络中。服务端通过反向 SSH 隧道访问它。
@@ -116,4 +160,4 @@ Project 中的浏览器在控制台 Mac 上已不存在时，卡片显示 **Not 
      identityFile: /root/.ssh/siren_browser
    ```
 
-6. 打开 Consoles 页面，在 Project 中添加浏览器，确认能创建并登录。
+6. 打开 Cloud Access 页面，在 Project 中添加浏览器，确认能创建并登录。

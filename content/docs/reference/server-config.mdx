@@ -96,7 +96,7 @@ recon:
   commandTimeout: 30
 
 consoleBrowser:
-  sshTarget: ""                # 留空时不启用 Consoles
+  sshTarget: ""                # 留空时不启用控制台浏览器
   sshPort: 2222
   identityFile: ""
 
@@ -196,7 +196,7 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 
 | 键 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `consoleBrowser.sshTarget` | string | `""` | 控制台 Mac 的 SSH 目标，通常是反向隧道在服务端上的 `<用户名>@127.0.0.1`；留空时不启用 [Consoles](/consoles) |
+| `consoleBrowser.sshTarget` | string | `""` | 控制台 Mac 的 SSH 目标，通常是反向隧道在服务端上的 `<用户名>@127.0.0.1`；留空时不启用 [控制台浏览器](/consoles) |
 | `consoleBrowser.sshPort` | int | `2222` | 连接 `sshTarget` 的端口；`0` 时使用 SSH 默认端口 |
 | `consoleBrowser.identityFile` | string | `""` | 连接控制台 Mac 的私钥；留空时使用服务端用户的默认 SSH 密钥 |
 

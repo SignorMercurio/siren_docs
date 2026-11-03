@@ -11,6 +11,17 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.43.0 <DateTag>2026-11-03</DateTag>
+
+### Breaking Change
+
+- AIR 会话中的 `aliyun` 命令只使用 Project 的 AccessKey，不再读取服务端的 `~/.aliyun/config.json`。原来手工写在这个文件中的 profile，需要在对应 Project 中重新添加，见 [AccessKey](/consoles#accesskey)
+
+### New Features
+
+- Project 可以配置客户提供的阿里云 AccessKey，一个 Project 可以有多对。AIR 会话用 aliyun CLI 查询客户账号时只使用本 Project 的 AccessKey，有多对时用 `--profile` 指定，会话启动后添加的 AccessKey 也立即可用，见 [AccessKey](/consoles#accesskey)
+- **Consoles** 页面改名为 **Cloud Access**，同时管理控制台浏览器和 AccessKey
+
 ## v2.42.0 <DateTag>2026-11-03</DateTag>
 
 ### Breaking Change
