@@ -11,6 +11,13 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.43.1 <DateTag>2026-11-03</DateTag>
+
+### Bug Fixes
+
+- 用新版 Claude Code 跑的历史会话，只读时间线中不再多出一条以 `<system-reminder>` 开头的用户消息
+- 依次打开多条历史会话时，只读时间线不再越积越多：打开另一条历史会话时替换当前的只读时间线，**Agentic IR** 图标上的计数不再随之增加，见 [History](/air/sessions#history)
+
 ## v2.43.0 <DateTag>2026-11-03</DateTag>
 
 ### Breaking Change
