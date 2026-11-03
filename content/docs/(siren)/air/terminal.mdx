@@ -23,7 +23,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 Terminal 界面在服务端的伪终端（PTY）中运行 Codex、Claude Code 或 Pi 的原生 TUI，并在浏览器中原样显示，Provider 自己的斜杠命令、Skills、插件、自定义 statusline 和交互菜单都照常可用。
 
-在启动表单中按下 Provider 按钮旁的终端图标后启动会话，或在只读历史会话中点击 **Continue in Terminal**。会话运行期间不能在 GUI 和 Terminal 之间切换。
+在新建表单中选择 **Terminal** 后启动会话，或在只读历史会话中点击 **Continue in Terminal**。运行中的会话不能原地切换界面；用标题栏的 **Chat** / **Terminal** 切换时，SIREN 先停止会话再在另一种界面中继续，见 [会话标题栏](/air/sessions#会话标题栏)。
 
 ## 何时使用 Terminal
 

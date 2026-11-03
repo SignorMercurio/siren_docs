@@ -55,7 +55,7 @@ Web 控制台是使用 SIREN 的主要方式，浏览器直接访问 `https://<S
   - AIR 系统通知：默认开启，没在看的会话完成或等待时弹出浏览器通知，见 [系统通知](/air/sessions#系统通知)。
   - Clients 列表刷新频率。
 - **AIR**：全部用户共用的 AIR 默认值，任何登录用户都可以修改，点击 **Save** 后对之后新启动的 GUI 和 Terminal 会话生效，已在运行的会话不受影响。
-  - 每个 Provider 的默认模型和 effort。留空时沿用该 Provider 自己的配置，输入框和下拉框中灰色显示当前生效的值。
+  - 每个 Provider 的默认模型和 effort。留空时沿用该 Provider 自己的配置，输入框和下拉框中灰色显示当前生效的值。新建会话时可以在模型菜单中为单个会话另选模型，见 [选择模型和界面](/air/sessions#选择模型和界面)。
   - **Instructions**：追加到每个 AIR 会话系统提示词的文字，排在 Provider 自身配置的指令之后。
   - 保存前别人已经改过时，页面提示 **Reload**；重新加载会用对方的版本替换你未保存的修改。
 - **MCP & Skills**：只读列出 AIR 会话可用的 MCP 服务器和服务端 `~/.agents/skills` 下的 Skills。MCP 服务器标出来源 Provider，SIREN 自己的 MCP 排在最前；页面不显示 MCP 的请求头、令牌和命令参数。

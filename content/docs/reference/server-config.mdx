@@ -123,10 +123,7 @@ air:
   maxSessions: 20
   idleTimeoutHours: 72
   replayBufferBytes: 4194304
-  prompt: 启动安全应急响应，UID：%s，Event ID：%s，SIREN Client ID：%d
-  instancePrompt: 启动安全应急响应，UID：%s，ECS 实例 ID：%s，SIREN Client ID：%d，请先获取该实例的相关告警
-  assetPrompt: 启动安全应急响应，UID：%s，云安全中心资产 UUID：%s，SIREN Client ID：%d，请先获取该资产的相关告警
-  timeRangePrompt: "，告警时间范围：%s"
+  prompt: 启动安全应急响应，UID：%s。请先获取该账号%s的告警，作为排查起点。
   customPromptPrefix: 在 SIREN Client %d 上启动安全应急响应。
   providers:
     codex:
@@ -257,11 +254,8 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 | `air.maxSessions` | int | `20` | GUI 与 Terminal 合计的并发会话上限，跨所有 Project；`0` 或负数表示不限制 |
 | `air.idleTimeoutHours` | int（小时） | `72` | 会话没有浏览器打开、Provider 也没有新输出达到该时长后自动停止；`0` 或负数表示不自动停止 |
 | `air.replayBufferBytes` | int（字节） | `4194304` | 每个会话的断线重连回放预算；`0` 或负数时使用默认的 4 MiB，不会关闭回放 |
-| `air.prompt` | string | `启动安全应急响应，UID：%s，Event ID：%s，SIREN Client ID：%d` | Event 入口按安全中心告警 ID 启动时的种子 prompt |
-| `air.instancePrompt` | string | `启动安全应急响应，UID：%s，ECS 实例 ID：%s，SIREN Client ID：%d，请先获取该实例的相关告警` | Event 入口按 ECS 实例 ID 启动时的种子 prompt |
-| `air.assetPrompt` | string | `启动安全应急响应，UID：%s，云安全中心资产 UUID：%s，SIREN Client ID：%d，请先获取该资产的相关告警` | Event 入口按云安全中心资产 UUID 启动时的种子 prompt |
-| `air.timeRangePrompt` | string | `，告警时间范围：%s` | 实例或资产目标限定时间范围时追加在种子 prompt 后 |
-| `air.customPromptPrefix` | string | `在 SIREN Client %d 上启动安全应急响应。` | Custom 入口加在用户 prompt 前的前缀 |
+| `air.prompt` | string | `启动安全应急响应，UID：%s。请先获取该账号%s的告警，作为排查起点。` | Account 入口的种子 prompt，占位符为 UID 和时间范围，见 [Prompt 模板](/server/air-providers#prompt-模板) |
+| `air.customPromptPrefix` | string | `在 SIREN Client %d 上启动安全应急响应。` | Client 入口加在用户 prompt 前的前缀 |
 | `air.providers.<name>.cliPath` | string | `codex`、`claude`、`pi` | CLI 命令名或绝对路径；空字符串使该 Provider 不可用 |
 | `air.providers.<name>.args` | list | `[]`；Codex 为 `[--no-alt-screen]` | 附加 CLI 参数，GUI 与 Terminal 共用；SIREN 接管的参数见 [Provider 参数](/server/air-providers#provider-参数) |
 | `air.providers.pi.agentDir` | string | `/root/.pi/agent` | Pi 的配置、认证（`auth.json`）、Skills 与会话目录 |
@@ -323,4 +317,3 @@ Agentic IR 启动 Provider CLI 时会剔除 MCP 凭证变量，其余环境变�
 | `egress.rules` | 三条规则，`siren_server_callback` 指向官方服务端 `47.111.170.208` | 无（必填） | 自建服务端部署前须改成自己的公网 IP 和端口；一键部署的客户端也连这个地址 |
 | `mcp.cmdBlacklist` | 30 条破坏性命令规则 | 无 | 删除该键即不拦截任何命令 |
 | `webui.dossierDir` | `/opt/siren/dossier` | `""` | 目录需单独部署，见 [部署 Dossier](/server/dossier) |
-| `air.instancePrompt`、`air.assetPrompt`、`air.timeRangePrompt` | 以注释形式给出 | 见 [air](#air) | 取消注释后才覆盖默认值 |

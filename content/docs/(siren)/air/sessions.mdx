@@ -1,6 +1,6 @@
 ---
 title: 启动与管理会话
-description: 选择 Provider 和入口模式启动 AIR 会话，在 Running 中重新接入或停止，并从 History 继续以前的会话
+description: 选择模型和入口模式启动 AIR 会话，在左栏中重新接入或停止，并从 History 继续以前的会话
 icon: Workflow
 verifiedAgainst: v2.39.0
 sources:
@@ -14,12 +14,15 @@ sources:
   - internal/server/webui/frontend/src/reconnectBudget.ts
   - internal/server/webui/frontend/src/router.ts
   - internal/server/webui/frontend/src/components/AIRSessionListItem.tsx
+  - internal/server/webui/frontend/src/components/AIRLaunchModelSelect.tsx
   - internal/server/webui/frontend/src/components/AIRHistoryTable.tsx
   - internal/server/webui/frontend/src/components/AIRGUIChatPanel.tsx
   - internal/server/webui/frontend/src/components/ClientsTable.tsx
   - internal/server/webui/types_air.go
   - internal/server/air.go
   - internal/server/air_runtime.go
+  - internal/server/air_gui_probe.go
+  - internal/server/agent_terminal.go
   - internal/server/air_history.go
   - internal/server/agent_session_registry.go
   - internal/server/agent_session_lifecycle.go
@@ -27,76 +30,78 @@ sources:
   - cmd/server/cli/root.go
 ---
 
-import { Callout } from "fumadocs-ui/components/callout";
+**Agentic IR** 页面左栏只列会话，右侧显示当前会话或新建会话表单。点击左栏顶部的 **＋** 打开新建表单；没有打开任何会话时，右侧也显示这个表单。窗口宽度不超过 768px 时左栏移到右侧内容上方，选中会话或点击 **＋** 后左栏自动收起，点击标题栏左端的按钮可重新展开。Provider 的服务端准备见 [准备 AIR Provider](/server/air-providers)。
 
-**Agentic IR** 页面左栏从上到下是启动表单、**Running** 列表和 **History**，右侧以标签页显示已打开的会话。窗口宽度不超过 768px 时左栏移到会话上方；从左栏启动、接入或打开会话后左栏自动收起，点击会话标签栏左端的按钮可重新展开。Provider 的服务端准备见 [准备 AIR Provider](/server/air-providers)。
+## 选择模型和界面
 
-## 选择 Provider 和界面
+表单底部有模型菜单和 **Chat** / **Terminal** 切换：
 
-启动表单第一行是 Provider 按钮（Codex、Claude、Pi）和一个终端图标按钮：
+- **模型菜单**：按 Provider（Codex、Claude、Pi）分组列出模型，选中模型即同时选定 Provider。标有 **default** 的是该 Provider 的默认模型，即 **Settings** 中的 AIR 默认模型，未设置时为 CLI 自身的默认值。服务端不可用的 Provider 在分组标题旁显示原因，排查见 [检查可用性](/server/air-providers#检查可用性)；服务端读不到模型列表时，该 Provider 只显示 **Default model**。
+- **Chat / Terminal**：**Chat** 即 GUI 时间线，**Terminal** 运行 Provider 原生 TUI。某种界面不可用时页面自动改用另一种。
 
-- **Provider 按钮**：服务端不可用的 Provider 置灰，鼠标悬停显示原因，排查见 [检查可用性](/server/air-providers#检查可用性)。
-- **终端图标**：未按下用 **GUI**，按下用 **Terminal**。某种界面不可用时页面自动改用另一种。
+所选模型只对这一个会话生效，不修改 **Settings**。页面在当前浏览器记住上次选择的 Provider、各 Provider 的模型和界面；要固定默认 Provider 和界面，在 **Settings** 的 **Default AIR provider** 和 **Default AIR surface** 中选择。所选 Provider 不可用时回退到服务端配置的 `air.provider`。
 
-页面在当前浏览器记住上次选择的 Provider 和界面。要固定默认值，在 **Settings** 的 **Default AIR provider** 和 **Default AIR surface** 中选择。所选 Provider 不可用时回退到服务端配置的 `air.provider`。
+填写完成后点击 **Start**，或在表单任意输入框中按 `⌘↩`（Windows 和 Linux 为 `Ctrl ↩`）。
 
 ## 入口模式
 
-Provider 下方有三个入口模式，默认选中 **Custom**：
+表单顶部有三个入口模式，默认选中 **Client**：
 
 | 模式 | 需要填写 | 会话开始时 |
 | --- | --- | --- |
-| **Manual** | 无 | 空白会话，不绑定客户端，没有开场提示词 |
-| **Custom** | **Client**、**Prompt** | 把 Client ID 前缀和你的描述作为开场提示词 |
-| **Event** | **Client**、**UID**、**Target** | 把账号 UID、事件目标和 Client ID 作为开场提示词，让 Agent 先查相关告警。SIREN 不代为查询，能否查到取决于 Provider 自身的工具或 Skill |
+| **Ask** | 第一条消息 | 把你的消息原样发给 Agent，不绑定客户端 |
+| **Client** | 客户端、排查描述 | 把 Client ID 前缀和你的描述作为开场提示词 |
+| **Account** | **UID**、**Alert time range** | 让 Agent 先查该账号在时间范围内的告警，以此为排查起点。SIREN 不代为查询，能否查到取决于 Provider 自身的工具或 Skill |
 
-三种模式都注入当前范围的 SIREN MCP。开场提示词模板由运维人员配置，见 [Prompt 模板](/server/air-providers#prompt-模板)。在 [Clients 页](/clients) 点击某一行的 AIR 图标，会以 **Custom** 模式选中该客户端。
+三种模式都注入当前范围的 SIREN MCP。开场提示词模板由运维人员配置，见 [Prompt 模板](/server/air-providers#prompt-模板)。在 [Clients 页](/clients) 点击某一行的 AIR 图标，会以 **Client** 模式选中该客户端。
 
-### Event 目标
+### Account 时间范围
 
-**Target** 下拉框选择目标类型，再填入对应 ID：
-
-| 目标 | 填写 |
-| --- | --- |
-| **Event** | 一条安全中心告警的 ID |
-| **ECS** | ECS 实例 ID（`i-…`），查该实例的相关告警 |
-| **Asset** | 云安全中心资产 UUID，查该资产的相关告警 |
-
-选择 **ECS** 或 **Asset** 时，可以展开 **Time range** 限定告警时间：**Default**（由 Agent 决定）、**3d**、**7d**、**30d** 或 **Custom**（必须填 **From**）。时间按字面值写入提示词，不做时区换算。
-
-<Callout title="告警 ID" type="info">
-  **Event** 目标的 ID 指阿里云安全中心告警详情页“基础信息”中的“告警 ID”，不是“关联安全事件”里的“事件 ID”。
-</Callout>
+**Alert time range** 默认为 **30d**，可选 **3d**、**7d**、**14d**、**30d** 或 **Custom**。选 **Custom** 时必须填 **From**，**To** 默认为当前时间。时间按字面值写入提示词，不做时区换算。
 
 ## Project 范围
 
-AIR 会话只能在 Project 视图中启动。会话的工作目录是该 Project 的 Artifacts 目录，SIREN MCP 和 **Client** 下拉框只包含本 Project 的客户端。这些在会话启动时确定，之后不随侧栏切换而改变。
+AIR 会话只能在 Project 视图中启动。会话的工作目录是该 Project 的 Artifacts 目录，SIREN MCP 和 **Client** 模式的客户端下拉框只包含本 Project 的客户端。这些在会话启动时确定，之后不随侧栏切换而改变。
 
-在 Global 中，**Start** 按钮不可用，下方提示 `Switch to a project to start AIR`；**History** 中的旧会话只能打开记录查看，不能继续。**Running** 和 **History** 在 Global 中列出服务端上的全部会话，在 Project 视图中只列本 Project 的会话。
+在 Global 中，**Start** 按钮不可用，下方提示 `Switch to a project to start AIR`；历史会话只能打开记录查看，不能继续。左栏在 Global 中列出服务端上的全部会话，在 Project 视图中只列本 Project 的会话。
 
-切换范围时，属于其他范围的会话标签会被关闭，但会话继续运行，回到原范围后可从 **Running** 重新打开。完整规则见 [Project 范围](/projects)。
+切换范围时，属于其他范围的会话视图会被关闭，但会话继续运行，回到原范围后可从 **Running** 重新打开。完整规则见 [Project 范围](/projects)。
 
-## 会话标签
+## 左栏
 
-每个会话在右侧的一个标签中打开。关闭标签只关闭视图，不停止会话；刷新浏览器后已打开的标签自动恢复。
+左栏顶部的 **All**、**Codex**、**Claude**、**Pi** 按 Provider 筛选；放大镜按钮打开搜索框，运行中的会话按标题匹配，历史会话的规则见 [History](#history)。会话分组如下：
 
-点击标签栏右端的链接按钮，复制当前会话的链接。链接带有会话所在的 Project 范围，在另一个浏览器中打开时自动切换到该范围，并打开同一个运行中的会话或 History 记录。也可以直接分享或收藏地址栏中的地址。
+| 分组 | 内容 |
+| --- | --- |
+| **Needs you** | 等待审批或回答的会话，显示 **Approval** 或 **Needs input**；没有时不显示 |
+| **Running** | 其余运行中的会话 |
+| **Open** | 已打开但不属于上面各组的视图，例如已结束的会话；没有时不显示 |
+| **Today**、**Earlier** | 历史会话，见 [History](#history) |
 
-## Running
+点击一行即打开该会话。Ask 会话以首条消息为标题，Account 会话以 UID 为标题。Terminal 会话的标题从 Provider 会话记录中读取，读到之前（包括 SIREN 无法定位记录的新建 Codex Terminal 会话）显示入口模式和短会话 ID。列表刷新失败时显示 `List may be stale: ...`，其中可能包含已不存在的会话。
 
-**Running** 列出当前范围内运行中的会话，每行显示标题、启动时间、客户端和入口模式，等待操作员时显示 **Approval required** 或 **Question waiting**。点击一行即接入该会话。Manual 会话以首条提问为标题：GUI 会话发送后即更新，Terminal 会话从 Provider 会话记录中读取，读到之前（包括 SIREN 无法定位记录的新建 Codex Terminal 会话）显示入口模式和短会话 ID。列表刷新失败时显示 `List may be stale: ...`，其中可能包含已不存在的会话。
+## 会话标题栏
+
+右侧顶部显示 Project 和会话标题，以及 Provider 和入口模式。点击标题打开会话菜单：
+
+- **Rename**：重命名运行中的会话，见 [重命名会话](#重命名会话)。
+- **Copy link**：复制当前会话的链接。链接带有会话所在的 Project 范围，在另一个浏览器中打开时自动切换到该范围，并打开同一个运行中的会话或历史记录。也可以直接分享或收藏地址栏中的地址。
+- **Close view**：只关闭视图，不停止会话。刷新浏览器后已打开的视图自动恢复。
+- **Stop session**：结束会话，见 [停止与结束](#停止与结束)。
+
+标题栏右端的 **Chat** / **Terminal** 切换会话界面。运行中的会话不能原地切换：确认 **Reopen in …** 对话框后，SIREN 停止该会话，再以原会话 ID 在另一种界面中继续，进行中的一轮会被中断。历史会话直接在所选界面中继续。
 
 ### 重命名会话
 
-把鼠标移到 **Running** 中的一行，点击铅笔按钮；也可以双击会话标签，或选中标签后按 `F2`。在 **Rename session** 对话框中输入新名称（最多 80 个字符），**Running** 和会话标签都改用这个名称。名称保存在服务端，同一范围内的所有人都能看到；清空后确认即恢复自动标题。名称只在会话运行期间保留，**History** 仍显示自动标题。
+把鼠标移到 **Running** 中的一行点击铅笔按钮，或在会话菜单中选择 **Rename**。在 **Rename session** 对话框中输入新名称（最多 80 个字符），左栏和标题栏都改用这个名称。名称保存在服务端，同一范围内的所有人都能看到；清空后确认即恢复自动标题。名称只在会话运行期间保留，历史中仍显示自动标题。
 
 ### 待处理提示
 
-GUI 会话等待审批或回答时，对应会话标签上也会出现标记；浏览器停留在 Agentic IR 页面时，标签页标题加上 `● Approval` 或 `● Question` 前缀，即使等待的不是当前显示的会话。Terminal 会话的审批出现在 TUI 内，不触发这些提示。
+GUI 会话等待审批或回答时移到左栏的 **Needs you** 分组；浏览器停留在 Agentic IR 页面时，标签页标题加上 `● Approval` 或 `● Question` 前缀，即使等待的不是当前显示的会话。Terminal 会话的审批出现在 TUI 内，不触发这些提示。
 
 ### 系统通知
 
-**Settings** 中的 **AIR notifications** 默认为 **On**。第一次从启动表单启动会话时，浏览器会询问是否允许通知，选择允许即可；之后不再询问。之后你没在看的会话出现下列情况时，系统弹出标题为 `SIREN · <会话名>` 的通知：
+**Settings** 中的 **AIR notifications** 默认为 **On**。第一次从新建表单启动会话时，浏览器会询问是否允许通知，选择允许即可；之后不再询问。之后你没在看的会话出现下列情况时，系统弹出标题为 `SIREN · <会话名>` 的通知：
 
 | 会话 | 触发时机 | 通知内容 |
 | --- | --- | --- |
@@ -105,14 +110,14 @@ GUI 会话等待审批或回答时，对应会话标签上也会出现标记；�
 | GUI | 等待审批或回答 | `Waiting for your approval.` 或 `Waiting for your answer.` |
 | Terminal | 持续输出 3 秒以上后静默 5 秒 | `Terminal output went quiet.` |
 
-- **没在看**：浏览器窗口不在前台、标签页被隐藏、不在 Agentic IR 页面，或该会话不是当前显示的标签。
+- **没在看**：浏览器窗口不在前台、标签页被隐藏、不在 Agentic IR 页面，或该会话不是当前显示的会话。
 - **不通知**：被手动停止的一轮；刷新或重连时回放的已有内容。
 - **Terminal**：没有轮次信息，只按输出是否静默判断，所以 Agent 在 TUI 内停下等待审批时也会通知。
 - 点击通知回到对应会话。设置只存于当前浏览器，且需要 SIREN 页面保持打开。浏览器尚未授权时，该行显示 **Allow notifications**，点击后重新弹出授权询问；已阻止时，需要到浏览器的站点设置里重新允许。
 
 ## 重新接入与回放
 
-会话托管在服务端，刷新浏览器、切换页面、关闭会话标签或短暂断网都不会中断它。重新打开时，页面先回放服务端缓存的内容，再继续显示实时输出；多个浏览器可以同时查看同一会话。
+会话托管在服务端，刷新浏览器、切换页面、关闭会话视图或短暂断网都不会中断它。重新打开时，页面先回放服务端缓存的内容，再继续显示实时输出；多个浏览器可以同时查看同一会话。
 
 连接中断后页面自动重连，仍未恢复时显示以下提示和 **Reconnect** 按钮：
 
@@ -123,11 +128,11 @@ GUI 会话等待审批或回答时，对应会话标签上也会出现标记；�
 
 ## 停止与结束
 
-点击 **Running** 行右侧的关闭按钮，在 **Stop session** 对话框中确认即可结束会话。Provider 进程被终止，会话记录保留在磁盘上，之后可从 **History** 继续。只停止 GUI 当前这一轮见 [GUI 时间线](/air/gui#发送请求与调整方向)。
+点击 **Running** 行右侧的关闭按钮，或在会话菜单中选择 **Stop session**，在 **Stop session** 对话框中确认即可结束会话。Provider 进程被终止，会话记录保留在磁盘上，之后可从 **History** 继续。只停止 GUI 当前这一轮见 [GUI 时间线](/air/gui#发送请求与调整方向)。
 
 会话长时间空闲时，服务端会自动停止它，效果与手动停止相同。空闲指既没有浏览器打开它，Provider 也没有新输出；只要有浏览器打开着该会话，就不会自动停止。默认空闲时间见 [限制](/reference/limits)。
 
-会话结束后，已打开的标签保留内容，顶部显示 **Session ended** 和原因：
+会话结束后，已打开的视图保留内容，顶部显示 **Session ended** 和原因：
 
 | 原因 | 含义 |
 | --- | --- |
@@ -151,26 +156,26 @@ SIREN 服务端正常关闭时结束所有运行中的会话，让 Provider 保�
 
 ## History
 
-**History** 收起在左栏底部，点击展开。
+左栏的 **Today** 和 **Earlier** 列出当前范围工作目录下的历史会话。
 
-- **范围**：只列出当前选中 Provider、当前范围工作目录下的会话。要看另一个 Provider 的历史，先切换 Provider 按钮。
-- **内容**：按更新时间倒序，最多 50 条；运行中的会话和没有用户输入的会话不列出。
+- **内容**：所有 Provider 的会话按更新时间倒序，最多 50 条；运行中的会话和没有用户输入的会话不列出。左栏顶部的 Provider 按钮同样筛选历史。
 - **搜索**：按空格拆分关键词，要求全部命中，匹配会话 ID、时间、输入、消息和分支。
+- 点击一行，会话以只读时间线打开。
 
-### 没有打开会话时的历史表
+### 历史表
 
-没有打开任何会话时，右侧显示 **History** 表，列出当前范围内所有 Provider 的历史会话，不随左栏的 Provider 按钮变化。
+点击左栏底部的 **All history**，右侧显示 **History** 表：
 
 - 每行显示会话标题、Provider、时间和主要模型，以及该会话的 token 数、调用次数和估算费用，计算方法同 [AI 用量](/usage)。
 - 用 Provider 图标按钮筛选，**All** 显示全部；右侧的搜索框规则同上。
 - 点击行首展开，查看最后一条消息和会话 ID（可复制）。
-- **Transcript** 以只读时间线打开会话；**Continue** 继续会话，该 Provider 的 GUI 可用时用 GUI，否则用 Terminal。运行中的会话不在表中，见 [Running](#running)。
+- **Transcript** 以只读时间线打开会话；**Continue** 继续会话，该 Provider 的 GUI 可用时用 GUI，否则用 Terminal。运行中的会话不在表中，见 [左栏](#左栏)。
 
-在 [Usage](/usage) 页面的 **Top sessions** 中点击会话标题，也会在这里以只读时间线打开该会话。
+在 [Usage](/usage) 页面的 **Top sessions** 中点击会话标题，也会以只读时间线打开该会话。
 
 ### 继续历史会话
 
-1. 点击 History 中的一行，会话以只读时间线打开。
-2. 点击 **Continue session** 用 GUI 继续，或在该 Provider 的 Terminal 可用时点击 **Continue in Terminal**。
+- 在只读时间线中点击 **Continue session** 用 GUI 继续，或在该 Provider 的 Terminal 可用时点击 **Continue in Terminal**；也可以用标题栏的 **Chat** / **Terminal** 切换。
+- 新建表单下方的 **Continue:** 按钮列出最近 3 个历史会话，点击即继续。
 
-会话以原 ID 在新标签中重新启动，工作目录和 MCP 范围取当前范围。
+会话以原 ID 重新启动，工作目录和 MCP 范围取当前范围。

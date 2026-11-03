@@ -23,7 +23,7 @@ import { Card, Cards } from "fumadocs-ui/components/card";
 import { Step, Steps } from "fumadocs-ui/components/steps";
 import { FileSearch, FileText, PanelsTopLeft, Scale, SquareTerminal, Workflow } from 'lucide-react';
 import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
-import airStartEvent from '../../../img/air-start-event.png';
+import airStartAccount from '../../../img/air-start-account.png';
 
 Agentic 应急响应（Agentic IR，简称 AIR）让 Codex、Claude Code 或 Pi 通过 SIREN MCP 在在线客户端上执行排查命令、触发 Recon，并协助整理 Markdown 报告。
 
@@ -33,39 +33,39 @@ AIR 是交互式会话，不是无人值守的自动处置：操作员需要盯�
 
 - **Provider 跑在服务端**：在 WebUI 的 **Agentic IR** 页面启动会话后，SIREN 以 `siren_server` 进程的系统用户启动对应 CLI。刷新或离开页面不会中断会话。
 - **会话属于 Project**：会话只能在 Project 视图中启动。每个会话都注入名为 `siren` 的 MCP Server，只能访问本 Project 的客户端，工作目录是 Project 目录，见 [启动与管理会话](/air/sessions#project-范围)。
-- **两种界面**：**GUI** 是按轮次组织的结构化时间线，**Terminal** 运行 Provider 原生的 TUI。启动前选择，运行期间不能切换。
+- **两种界面**：**GUI**（表单中的 **Chat**）是按轮次组织的结构化时间线，**Terminal** 运行 Provider 原生的 TUI。启动前选择；运行中切换需要先停止会话，再以原会话 ID 继续。
 
 AIR 在 WebUI 中使用。
 
 ## 前置条件
 
 - 运维人员已在服务端安装并登录至少一个 Provider CLI，启用 MCP 并设置 `webui.publicURL`，见 [准备 AIR Provider](/server/air-providers)。
-- Custom 和 Event 模式需要至少一台在线客户端，见 [选择接入方式](/onboard)。
-- Event 模式要求 Provider 自身具备查询阿里云安全中心告警的工具或 Skill；SIREN MCP 不提供告警查询，只把 UID 和事件目标写进开场提示词。
+- Client 模式需要至少一台在线客户端，见 [选择接入方式](/onboard)。
+- Account 模式要求 Provider 自身具备查询阿里云安全中心告警的工具或 Skill；SIREN MCP 不提供告警查询，只把 UID 和时间范围写进开场提示词。
 - 要从报告卡片直接打开 Dossier 编辑，需要先 [部署 Dossier](/server/dossier)。
 
 ## 第一次会话
 
-下面以 Event 模式排查一条安全中心告警为例。
+下面以 Account 模式排查一个账号的安全中心告警为例。
 
 <Steps>
 <Step>
 
-### 选择 Provider
+### 选择模型
 
-打开 **Agentic IR** 页面，在左栏顶部点选一个可用的 Provider，保持终端图标未按下（即使用 GUI）。
+打开 **Agentic IR** 页面，点击左栏顶部的 **＋**。在表单底部的模型菜单中选一个模型，模型所属的 Provider 随之选定；保持 **Chat**（即使用 GUI）。
 
 </Step>
 <Step>
 
-### 填写 Event 模式并启动
+### 填写 Account 模式并启动
 
-点击 **Event**，选择告警所在主机对应的 **Client**，填写阿里云账号 **UID**，在 **Target** 中保持 **Event** 并填入告警 ID，然后点击 **Start Codex**（按钮名随 Provider 变化）。
+点击 **Account**，填写阿里云账号 **UID**，按需调整 **Alert time range**（默认最近 30 天），然后点击 **Start** 或按 `⌘↩`。
 
 {/* Captured at 2x; render at its CSS size so the narrow crop is not enlarged. */}
-<ImageZoom src={airStartEvent} width={546} alt="Agentic IR 左栏的 Event 模式，已选择 Provider、Client 并填写 UID 和告警 ID" />
+<ImageZoom src={airStartAccount} width={752} alt="Agentic IR 新建表单的 Account 模式，已填写 UID 并选择 30d 时间范围" />
 
-会话在右侧的新标签中打开。其他入口模式见 [启动与管理会话](/air/sessions#入口模式)。
+会话在右侧打开，并出现在左栏的 **Running** 中。其他入口模式见 [启动与管理会话](/air/sessions#入口模式)。
 
 </Step>
 <Step>
