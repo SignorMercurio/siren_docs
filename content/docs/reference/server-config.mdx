@@ -136,7 +136,6 @@ air:
       cliPath: pi
       args: []
       agentDir: /root/.pi/agent
-      contextModeDir: /root/.pi/context-mode
   usage:
     currency: CNY
     prices:
@@ -259,7 +258,6 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 | `air.providers.<name>.cliPath` | string | `codex`、`claude`、`pi` | CLI 命令名或绝对路径；空字符串使该 Provider 不可用 |
 | `air.providers.<name>.args` | list | `[]`；Codex 为 `[--no-alt-screen]` | 附加 CLI 参数，GUI 与 Terminal 共用；SIREN 接管的参数见 [Provider 参数](/server/air-providers#provider-参数) |
 | `air.providers.pi.agentDir` | string | `/root/.pi/agent` | Pi 的配置、认证（`auth.json`）、Skills 与会话目录 |
-| `air.providers.pi.contextModeDir` | string | `/root/.pi/context-mode` | Pi 长上下文卸载与恢复目录 |
 | `air.usage.currency` | string | `CNY` | [Usage](/usage) 页显示费用所用的货币，仅作标注，不做汇率换算 |
 | `air.usage.prices` | list | `[]` | 各模型每百万 token 的单价，单位为 `air.usage.currency`；未列出的模型只计 token，不计费用 |
 
