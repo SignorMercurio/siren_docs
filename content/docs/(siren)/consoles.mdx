@@ -72,10 +72,10 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ## AIR 如何使用
 
-AIR 会话中的 opencli 只认得当前 Project 的浏览器：
+AIR 会话中的 opencli 用浏览器名称标出当前 Project 的浏览器。`opencli profile list` 会列出控制台 Mac 上所有已连接的浏览器，只有带名称（alias）的属于当前 Project，AIR 只使用这些浏览器：
 
 - **只有一个浏览器**：opencli 命令默认使用它，不需要指定。
-- **有多个浏览器**：AIR 运行 `opencli profile list` 查看本 Project 的浏览器名称，再在每条命令中用 `--profile <名称>` 指定。
+- **有多个浏览器**：AIR 在每条命令中用 `--profile <名称>` 指定浏览器。
 - **会话启动后才添加或删除**：不需要重启会话，下一条 opencli 命令就会使用新的浏览器列表。
 
 <Callout type="warn">
