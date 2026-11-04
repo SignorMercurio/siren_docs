@@ -13,8 +13,11 @@ sources:
   - internal/server/mcp_run.go
   - internal/server/mcp_run_batch.go
   - internal/server/mcp_run_results.go
+  - internal/server/mcp_run_search.go
   - internal/server/mcp_run_streams.go
   - internal/server/mcp_evidence.go
+  - internal/server/mcp_case.go
+  - internal/server/case_store.go
   - internal/server/mcp_recon.go
   - internal/server/mcp_deploy.go
   - internal/server/run_result_storage.go
@@ -28,7 +31,7 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-SIREN Server 内置 [MCP](https://modelcontextprotocol.io/) 服务，提供 8 个工具（`save_evidence` 只在 Project 端点提供）：列出客户端、执行命令、回读长输出、保存证据、触发 Recon 和部署 SIREN。[Agentic IR](/air) 自动接入它；本页供外部 MCP 客户端接入和排查时查阅。
+SIREN Server 内置 [MCP](https://modelcontextprotocol.io/) 服务，提供 10 个工具（`save_evidence`、`case_read`、`case_update` 只在 Project 端点提供）：列出客户端、执行命令、回读和检索结果、保存证据、维护排查清单、触发 Recon 和部署 SIREN。[Agentic IR](/air) 自动接入它；本页供外部 MCP 客户端接入和排查时查阅。
 
 ## 端点
 
@@ -107,8 +110,10 @@ bearer_token_env_var = "SIREN_MCP_ADMIN_TOKEN"
 | `run` | **`client_id`**、**`command`**、`output_mode` | 在一台客户端上执行命令 |
 | `run_batch` | **`command`**、`client_ids`、`os`、`concurrency` | 在多台客户端上并发执行同一命令，按主机汇总 |
 | `read_run_result` | **`audit_id`**、`stream`、`offset`、`limit` | 按字节范围回读 `run` / `run_batch` 的原始输出 |
-| `search_run_result` | **`audit_id`**、**`query`**、`stream`、`case_sensitive`、`context_lines`、`max_matches` | 在 `run` / `run_batch` 的原始输出中做字面搜索 |
+| `search_run_result` | `audit_id`、`query`、`stream`、`case_sensitive`、`context_lines`、`max_matches`、`client_id`、`limit` | 在一次结果中做字面搜索；Project 端点不传 `audit_id` 时查本 Project 的全部结果 |
 | `save_evidence` | **`audit_id`**、**`label`**、`stream` | 仅 Project 端点：把 `run` / `run_batch` 的原始输出原样保存到 Project 的 `evidence/` 目录 |
+| `case_read` | 无 | 仅 Project 端点：读取 [Case Board](/air/case-board) |
+| `case_update` | `items`、`reports` | 仅 Project 端点：更新排查清单，登记报告覆盖的证据版本 |
 | `recon` | **`client_id`**、`profile` | 触发一次 Recon 并等待结果 |
 | `deploy` | **`uid`**、**`instance_id`**、`public_ip` | 通过 SOAR 向一台阿里云 ECS 部署 SIREN，等待客户端连接 |
 
@@ -176,6 +181,8 @@ SIREN MCP 不提供告警查询工具。
 
 ### `search_run_result`
 
+传 `audit_id` 时搜索这一次结果。Global 端点必须传 `audit_id` 和 `query`。
+
 | 参数 | 说明 |
 | --- | --- |
 | `audit_id` | `run` 或 `run_batch` 返回的 `audit_id` |
@@ -186,6 +193,19 @@ SIREN MCP 不提供告警查询工具。
 | `max_matches` | 最多返回的匹配数，默认 20，范围 1–20 |
 
 每个匹配返回字节范围和行号。正文最多 8 KiB，放不下时截断并标记 `truncated`；`total_matches` 为全部匹配数。
+
+Project 端点（`/mcp/project/<id>`）不传 `audit_id` 时，在本 Project 的全部结果中查找，此时不能传 `stream`、`context_lines` 和 `max_matches`：
+
+| 参数 | 说明 |
+| --- | --- |
+| `query` | 字面文本，最长 1 KiB，在命令和 `text` 输出中查找；不传时列出最近的执行 |
+| `client_id` | 只看这台客户端 |
+| `case_sensitive` | 是否区分大小写，默认 `false` |
+| `limit` | 最多返回的执行数，默认 20，范围 1–50 |
+
+- 最新的执行排在最前。`runs` 的每条摘要含 `audit_id`、客户端、主机、命令、`outcome`、开始时间、输出匹配数和第一条匹配行。
+- 命令和匹配行各最多 240 字节，文本结果最多 8 KiB。放不下或超过 `limit` 时标记 `truncated`。
+- 只查 [仍可回读](#结果保存) 的结果，不会重新执行命令。需要全文时用 `audit_id` 回读。
 
 ### `save_evidence`
 
@@ -201,6 +221,52 @@ SIREN MCP 不提供告警查询工具。
 - 文件以 `# SIREN evidence` 开头的文件头记录 `audit_id`、客户端和主机、命令、开始和完成时间、`outcome`、退出码、输出流、是否完整捕获和正文的 SHA-256，以 `# ---` 结束，其后是原样输出。
 - 返回文件路径、正文起始行号和行数。引用格式为 `evidence/<文件>#L<n>-L<m>`，行号从文件第一行（含文件头）算起，WebUI 据此在来源卡片中显示摘录，见 [证据与报告](/air/evidence#在时间线中查看来源)。
 - 只能保存本端点产生、仍可回读的结果，见 [结果保存](#结果保存)；被黑名单拦截、通信失败等没有命令输出的结果不能保存。
+
+### `case_read`
+
+只在 Project 端点提供，没有参数。返回 [Case Board](/air/case-board) 的全部内容：排查项、实体、证据、版本号和已登记的报告。
+
+### `case_update`
+
+只在 Project 端点提供。`items` 和 `reports` 至少传一个，一次调用全部成功或全部不生效。
+
+`items` 每次最多 50 项，不传 `id` 时新建：
+
+| 字段 | 说明 |
+| --- | --- |
+| `id` | 已有排查项的编号，如 `Q01` |
+| `question` | 要回答的问题；新建时必填 |
+| `dimension` | `lead`、`entry`、`credentials`、`execution_persistence`、`lateral_assets`、`impact_data`、`response_status`；新建时必填 |
+| `priority` | `high`、`medium`、`low`，默认 `medium` |
+| `state` | `open`、`active`、`confirmed`、`refuted`、`gap`、`blocked`、`not_applicable`，默认 `open` |
+| `entities` | 已有实体的 `id`，或新实体的 `kind` 和 `value`。`kind` 为 `host`、`ip`、`domain`、`identity`、`file`、`resource`；`host` 的 `value` 是本 Project 的在线 Client ID |
+| `evidence` | 证据列表，见下文 |
+| `derived_from` | 引出这一项的排查项编号 |
+| `next_action`、`reason`、`tried_sources` | 下一步、原因、已试的证据源 |
+
+列表字段传入时整体替换。文本字段最长 2,000 字节，列表最多 50 条。部分状态有必填内容：
+
+| 状态 | 必须提供 |
+| --- | --- |
+| `confirmed` | 实体和 `role` 为 `supports` 的证据 |
+| `refuted` | 实体和 `role` 为 `refutes` 的证据 |
+| `gap` | `tried_sources` |
+| `blocked`、`not_applicable` | `reason` |
+
+每条证据只用下面一种写法，`role` 为 `supports`、`refutes` 或 `baseline`，默认 `supports`：
+
+- `id`：复用已有证据，如 `CE01`。
+- `audit_id` 加 `label`（可选 `stream`）：SIREN 把结果原样保存到 `evidence/`，规则同 [`save_evidence`](#save_evidence)，重复提交不会报错。
+- `path`：`evidence/` 下的文件，可带行号，如 `evidence/<文件>#L12-L30`。文件头记录的 SHA-256 与正文不符时拒绝。
+
+`reports` 登记报告写作时依据的证据版本，每次最多 50 条：
+
+| 字段 | 说明 |
+| --- | --- |
+| `path` | Project 内的 Dossier 报告路径 |
+| `evidence_version` | 写报告前 `case_read` 返回的 `evidenceVersion` |
+
+版本不能高于当前版本，同一份报告的版本不能回退。排查项的证据变化，或状态进入、离开 `open` 和 `active` 以外的状态时，证据版本加 1，此前登记的报告显示为需要复核。
 
 ### `recon`
 
@@ -268,8 +334,8 @@ SIREN MCP 不提供告警查询工具。
 
 ### 结果保存
 
-- 结果只保存在服务端进程内存中，创建后 60 分钟过期，读取不续期，服务端重启后清空。
-- 合计最多 512 条或 32 MiB，超出时淘汰最早的结果；正在执行的命令也计入。
+- 结果只保存在服务端进程内存中，创建后 24 小时过期，读取不续期，服务端重启后清空。需要长期保留时用 [`save_evidence`](#save_evidence)。
+- 所有端点合计最多 4096 条或 256 MiB，超出时淘汰最早的结果；正在执行的命令也计入。
 - 结果只能在产生它的端点上读取，Global 与各 Project 互不可读，管理凭证也不例外。
 - 已过期、已淘汰、不存在或属于其他范围的结果，都报 `run result unavailable in current project: not_found`。
 
@@ -347,7 +413,7 @@ MCP 日志写入服务端日志，组件为 `mcp`，可在 [Logs](/logs) 页按�
 - `project` 为 Project ID，Global 端点记为 `global`。
 - 每次 `run` 写同一 `audit_id` 的一对 `mcp.run.requested` / `mcp.run.finished`，被拦截、目标被拒绝、取消和超时的调用也不例外。
 - `run_batch` 每台主机各有一对记录，以 `batch_id` 关联；整批被黑名单拦截或目标解析失败时只有 `mcp.tool.finished`。
-- 日志含完整命令，不含命令输出；输出需在 60 分钟内用 `read_run_result` 回读。
+- 日志含完整命令，不含命令输出；输出需在 24 小时内用 `read_run_result` 回读。
 - Debug 级记录只在 `logging.level` 为 `debug` 时保留。
 
 <Callout title="日志含敏感信息" type="warn">
