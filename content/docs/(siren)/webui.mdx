@@ -2,7 +2,7 @@
 title: WebUI 导览
 description: Web 控制台的导航、范围切换和各页面用途
 icon: LayoutDashboard
-verifiedAgainst: v2.39.0
+verifiedAgainst: v2.45.0
 sources:
   - internal/server/webui/frontend/src/nav.ts
   - internal/server/webui/frontend/src/components/Sidebar.tsx
@@ -50,7 +50,7 @@ Web 控制台是使用 SIREN 的主要方式，浏览器直接访问 `https://<S
 
 - **Personal**：只保存在当前浏览器，不跟随账号同步。
   - 启动时的 Project 范围：沿用上次的范围（刷新时各标签页保持自己的范围），或每次从 Global 开始。
-  - Agentic IR 默认 Provider：沿用上次，或固定 Codex / Claude / Pi，单次会话仍可临时切换。
+  - Agentic IR 默认 Provider：沿用上次（还没有选过时跟随服务端的 `air.provider`），或固定 Codex / Claude / Pi，单次会话仍可临时切换。
   - Agentic IR 默认界面：沿用上次，或固定 GUI / Terminal。
   - AIR 系统通知：默认开启，没在看的会话完成或等待时弹出浏览器通知，见 [系统通知](/air/sessions#系统通知)。
   - Clients 列表刷新频率。

@@ -2,7 +2,7 @@
 title: 常见问题
 description: 按使用流程整理的常见问题，每条指向负责说明的页面
 icon: BadgeQuestionMark
-verifiedAgainst: v2.39.0
+verifiedAgainst: v2.45.0
 sources:
   - cmd/server/cli/root.go
   - cmd/server/cli/upgrade.go
@@ -17,6 +17,7 @@ sources:
   - internal/auth/store.go
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
   - internal/server/air_runtime.go
+  - internal/server/webui/frontend/src/air/startGuard.ts
   - internal/server/mcp_command_policy.go
   - internal/server/webui/frontend/src/recentCleanups.ts
   - config/server_config.yaml
@@ -142,15 +143,27 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
 </Accordion>
 
+<Accordion title="Start 按钮不可用，提示 Switch to a project to start AIR">
+
+AIR 会话只能在 Project 视图中启动，先切换到一个 Project，见 [Project 范围](/air/sessions#project-范围)。
+
+</Accordion>
+
 <Accordion title="会话一启动就失败">
 
-GUI 显示 **Session did not start** 和原因，最常见的是 `webui.publicURL` 未设置、会话数达到 `air.maxSessions`、CLI 未登录，见 [停止与结束](/air/sessions#停止与结束)。
+GUI 显示 **Session did not start** 和原因，最常见的是 `webui.publicURL` 未设置、会话数达到 `air.maxSessions`、CLI 未登录，见 [停止与结束](/air/sessions#停止与结束)。Pi 报 `has no order UID` 时，先在 Projects 页填写 [下单 UID](/projects#下单-uid)。
 
 </Accordion>
 
 <Accordion title="服务端重启后会话不见了">
 
 服务端关闭时结束所有运行中的会话，Provider 已保存的会话可从 **History** 继续，见 [服务端重启](/air/sessions#服务端重启)。
+
+</Accordion>
+
+<Accordion title="没有打开的会话自己停了">
+
+会话没有浏览器打开、Provider 也没有新输出，达到 `air.idleTimeoutHours` 后服务端自动停止它，之后可从 **History** 继续，见 [停止与结束](/air/sessions#停止与结束)。
 
 </Accordion>
 

@@ -2,7 +2,7 @@
 title: 一键部署
 description: 通过 WebUI Provisioning 向阿里云 ECS 批量安装并接入 SIREN 客户端
 icon: CloudUpload
-verifiedAgainst: v2.39.0
+verifiedAgainst: v2.45.0
 sources:
   - internal/server/webui/frontend/src/components/Provisioning.tsx
   - internal/server/webui/frontend/src/components/ConnectCommand.tsx
@@ -93,7 +93,7 @@ i-demo0004,203.0.113.11,db-1
 
 - **出站默认拒绝**：目标 ECS 出方向默认拒绝时无法回连，先 [配置出站](/onboard/egress)。
 - **动态出口**：单次探测只确认该次连接的出口 IP，后续连接换了公网地址仍可能连不上；SIREN 不会放行整个出口池。每次重试都重新探测。
-- **手动指定出口 IP**：SOAR 无法返回出口 IP，或系统不支持自动抓包（如需要第三方抓包驱动的 Windows）时，在目标行第二列填入核对过的公网出口 IP（可在主机上用 `curl ifconfig.co/ip` 获取），SIREN 跳过自动发现直接放行。
+- **手动指定出口 IP**：SOAR 无法返回出口 IP，或目标主机上的探测失败（报 `client installed but egress probe failed: <原因>; specify the egress IP manually`，原因由目标主机上的客户端给出）时，在目标行第二列填入核对过的公网出口 IP（可在主机上用 `curl ifconfig.co/ip` 获取），SIREN 跳过自动发现直接放行。
 
 <Callout title="自动化部署" type="info">
   MCP `deploy` 工具走同一套部署流程，见 [MCP 集成](/reference/mcp)。

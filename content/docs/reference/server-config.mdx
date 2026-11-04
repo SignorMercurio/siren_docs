@@ -2,7 +2,7 @@
 title: 服务端配置
 description: server_config.yaml 的全部配置项、默认值、命令行覆盖和环境变量
 icon: FileCog
-verifiedAgainst: v2.39.0
+verifiedAgainst: v2.45.0
 sources:
   - config/server_config.yaml
   - cmd/server/cli/root.go
@@ -21,6 +21,7 @@ sources:
   - internal/server/air_mcp.go
   - internal/server/air_history.go
   - internal/server/air_usage_report.go
+  - internal/server/air_settings_extensions.go
   - internal/server/console_browser.go
 ---
 
@@ -97,7 +98,7 @@ recon:
 
 consoleBrowser:
   sshTarget: ""                # 留空时不启用控制台浏览器
-  sshPort: 2222
+  sshPort: 0                   # 0 时使用 SSH 默认端口
   identityFile: ""
 
 egress:
@@ -138,7 +139,7 @@ air:
       agentDir: /root/.pi/agent
   usage:
     currency: CNY
-    prices:
+    prices:                    # 内置默认为空，以下为示例值
       - {model: claude-sonnet-5-5, input: 14.2, output: 71, cacheRead: 0.71, cacheWrite: 17.75, cacheWrite1h: 28.4}
       - {model: gpt-6.1-sol, input: 14.2, output: 71, cacheRead: 0.71, cacheWrite: 17.75}
 ```
@@ -179,7 +180,7 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 | --- | --- | --- | --- |
 | `webui.enabled` | bool | `true` | 是否提供 Web 控制台。关闭后 `/mcp` 仍按 `mcp.enabled` 提供；两者都关闭时只接受客户端连接 |
 | `webui.publicURL` | string | `""` | Agentic IR 会话访问 SIREN MCP 用的 HTTPS Origin；使用 Agentic IR 时必填。格式与 DNS 要求见 [webui.publicURL](/server#webuipublicurl) |
-| `webui.userDBPath` | string | `data/users.db` | WebUI 账号库（SQLite）。账号库不存在或没有账号时 Web 控制台不鉴权 |
+| `webui.userDBPath` | string | `data/users.db` | WebUI 账号库（SQLite），也保存登录会话。账号库不存在或没有账号时 Web 控制台不鉴权 |
 | `webui.dossierDir` | string | `""` | Dossier 静态文件目录，以 `/dossier/` 对外提供且不鉴权，见 [部署 Dossier](/server/dossier) |
 | `webui.projectsBaseDir` | string | `""`（工作目录） | 新建 Project 目录的基准路径，不存在时自动创建；已有 Project 后不要更改，见 [基准目录](/projects#基准目录) |
 
@@ -197,7 +198,7 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 | 键 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `consoleBrowser.sshTarget` | string | `""` | 控制台 Mac 的 SSH 目标，通常是反向隧道在服务端上的 `<用户名>@127.0.0.1`；留空时不启用 [控制台浏览器](/consoles) |
-| `consoleBrowser.sshPort` | int | `2222` | 连接 `sshTarget` 的端口；`0` 时使用 SSH 默认端口 |
+| `consoleBrowser.sshPort` | int | `0` | 连接 `sshTarget` 的端口；`0` 或负数时使用 SSH 默认端口 |
 | `consoleBrowser.identityFile` | string | `""` | 连接控制台 Mac 的私钥；留空时使用服务端用户的默认 SSH 密钥 |
 
 接入步骤见 [接入控制台 Mac](/consoles#接入控制台-mac)。
@@ -249,7 +250,7 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 
 | 键 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `air.provider` | string | `pi` | 浏览器所选 Provider 不可用时先回退到的 Provider：`codex`、`claude` 或 `pi` |
+| `air.provider` | string | `pi` | 浏览器还没选过 Provider 时使用的 Provider，所选 Provider 不可用时也先回退到它：`codex`、`claude` 或 `pi` |
 | `air.maxSessions` | int | `20` | GUI 与 Terminal 合计的并发会话上限，跨所有 Project；`0` 或负数表示不限制 |
 | `air.idleTimeoutHours` | int（小时） | `72` | 会话没有浏览器打开、Provider 也没有新输出达到该时长后自动停止；`0` 或负数表示不自动停止 |
 | `air.replayBufferBytes` | int（字节） | `4194304` | 每个会话的断线重连回放预算；`0` 或负数时使用默认的 4 MiB，不会关闭回放 |
@@ -300,6 +301,7 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 | `SOAR_DESCRIBE_QPS` | 查询剧本执行结果的速率上限，默认 `20` |
 | `SOAR_DESCRIBE_ATTEMPTS` | 查询剧本结果的最多尝试次数，默认 `20`，间隔 3 秒 |
 | `CODEX_HOME` | AIR 从 `<CODEX_HOME>/sessions` 读取 Codex 历史会话，未设置时为 `~/.codex/sessions` |
+| `CLAUDE_CONFIG_DIR` | **Settings** 从这里读取 Claude Code 的默认模型和 MCP 配置，未设置时用 `~/.claude` 和 `~/.claude.json` |
 | `LISTEN` / `PORT` / `CERT` / `KEY` | 覆盖同名顶层键，见 [优先级](#优先级) |
 
 `SOAR_*` 速率与次数变量须为正整数，无效时用默认值。修改启动环境后须重启服务端。
@@ -312,6 +314,8 @@ Agentic IR 启动 Provider CLI 时会剔除 MCP 凭证变量，其余环境变�
 
 | 键 | 安装包示例 | 内置默认值 | 影响 |
 | --- | --- | --- | --- |
+| `air.usage.prices` | 按公开标价填好的常用模型 | `[]` | 删除该键后 [Usage](/usage) 只计 token，不计费用 |
+| `consoleBrowser.sshPort` | `2222` | `0` | 删除该键后使用 SSH 默认端口 |
 | `egress.rules` | 三条规则，`siren_server_callback` 指向官方服务端 `47.111.170.208` | 无（必填） | 自建服务端部署前须改成自己的公网 IP 和端口；一键部署的客户端也连这个地址 |
 | `mcp.cmdBlacklist` | 30 条破坏性命令规则 | 无 | 删除该键即不拦截任何命令 |
 | `webui.dossierDir` | `/opt/siren/dossier` | `""` | 目录需单独部署，见 [部署 Dossier](/server/dossier) |

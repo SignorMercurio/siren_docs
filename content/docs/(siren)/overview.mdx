@@ -2,7 +2,7 @@
 title: SIREN 概述
 description: SIREN 是什么、由哪些部分组成、能做哪些事
 icon: BookOpen
-verifiedAgainst: v2.39.0
+verifiedAgainst: v2.45.0
 sources:
   - internal/server/webui/frontend/src/nav.ts
   - internal/server/webui/frontend/src/components/Sidebar.tsx
@@ -18,6 +18,9 @@ sources:
   - cmd/client/cli/info.go
   - internal/plugin/plugin.go
   - Makefile
+  - internal/server/webui/frontend/src/pages/CaseBoardPage.tsx
+  - internal/server/webui/frontend/src/pages/ConsolesPage.tsx
+  - config/server_config.yaml
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
@@ -49,6 +52,7 @@ SIREN（**S**wift **I**ncident **R**esponse **E**vidence **N**avigator）是面�
 | [Clients](/clients) | 在线客户端列表：编辑 Note、分配 Project，打开 Shell、Files、Recon；结案时 [Clean & terminate](/cleanup) |
 | Provisioning | 经 SOAR 操作阿里云 ECS：[Deploy SIREN](/onboard/provisioning)、**Allow access**、[Configure egress](/onboard/egress)，结案后 [Restore egress](/restore-egress) |
 | [Agentic IR](/air) | 在服务端运行 Codex、Claude Code 或 Pi，经 SIREN MCP 排查客户端，操作员审批和控制 |
+| [Case Board](/air/case-board) | 查看 AIR 记录的 Project 排查进度、攻击时间线和报告证据状态 |
 
 ### Tools：手工排查
 
@@ -59,6 +63,7 @@ SIREN（**S**wift **I**ncident **R**esponse **E**vidence **N**avigator）是面�
 | [AccessKey](/ak) | 经 SOAR 查询泄露 AccessKey 的云上调用记录，生成 `AK_*.md` 报告 |
 | [Shells](/shells) | 多标签交互式终端，切换页面不断开 |
 | [Files](/files) | 浏览、预览、下载和上传客户端主机上的文件 |
+| [Cloud Access](/consoles) | 管理 AIR 访问客户阿里云账号的控制台浏览器和 AccessKey，也可以在 WebUI 中直接操作控制台 |
 
 ### Evidence：证据与报告
 
@@ -90,7 +95,7 @@ SIREN（**S**wift **I**ncident **R**esponse **E**vidence **N**avigator）是面�
 
 - **服务端**把所有产出写在工作目录或 Project 目录中，不需要 OSS；AIR 的 Provider CLI 也在服务端运行。见 [安装服务端](/server)。
 - **客户端**是单个可执行文件，支持 Linux、Windows 和 macOS（见 [客户端平台](/onboard#客户端平台)），断线自动重连；Recon 只使用主机上已有的系统工具。
-- **外部依赖按功能启用**：只用客户端接入、Shell、Files、Recon 和 Artifacts 时不依赖外部服务；SOAR、Dossier、AIR Provider 只影响各自的功能。见 [前置条件与凭证](/server/prerequisites)。
+- **外部依赖按功能启用**：只用客户端接入、Shell、Files、Recon 和 Artifacts 时不依赖外部服务；SOAR、Dossier、AIR Provider 和控制台 Mac 只影响各自的功能。见 [前置条件与凭证](/server/prerequisites)。
 
 ### 本地模式
 

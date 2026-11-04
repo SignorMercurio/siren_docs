@@ -2,7 +2,7 @@
 title: Project 范围
 description: 按事件隔离客户端、AIR 会话和证据目录
 icon: FolderKanban
-verifiedAgainst: v2.39.0
+verifiedAgainst: v2.45.0
 sources:
   - internal/server/projects.go
   - internal/server/project_names.go
@@ -22,6 +22,9 @@ sources:
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
   - internal/server/webui/frontend/src/pages/UsagePage.tsx
   - internal/server/webui/frontend/src/App.tsx
+  - internal/server/webui/frontend/src/pages/CaseBoardPage.tsx
+  - internal/server/case_store.go
+  - internal/server/aliyun_keys.go
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
@@ -77,7 +80,7 @@ Project 目录都建在 `webui.projectsBaseDir`（或启动参数 `--webui-proje
 
 Projects 页是按状态分列的看板，四列依次是 **Responding**（处置中）、**Wrapping up**（收尾中）、**On hold**（暂时挂起）、**Done**（已完成）。
 
-每张卡片显示 Project 名称、负责人、下单 UID 和目录名。点击名称即切换到该 Project；点击目录名切换到该 Project 并在 [Artifacts](/artifacts) 中打开它的目录。
+每张卡片显示 Project 名称、负责人、下单 UID、控制台浏览器和目录名。点击名称即切换到该 Project；点击控制台浏览器（未添加时显示 **No console profiles**）切换到该 Project 并打开 [Cloud Access](/consoles)；点击目录名切换到该 Project 并在 [Artifacts](/artifacts) 中打开它的目录。
 
 - **改状态**：把卡片拖到另一列。鼠标悬停或用键盘聚焦到卡片时还会出现状态下拉框，可直接选择；触屏设备上下拉框一直显示。
 - **负责人**：点击卡片上的负责人（未设置时显示 **No owner**）填写名字，最多 64 个字符；清空即取消负责人。负责人是自由文本，不关联 WebUI 账号。
@@ -88,7 +91,7 @@ Projects 页是按状态分列的看板，四列依次是 **Responding**（处�
 
 - **Copy workspace path**：复制目录绝对路径。
 - **Rename project**：只改显示名，目录不动。
-- **Delete project**：删除 Project 元数据并解除所有客户端归属，目录和文件保留；删除当前 Project 后回到 Global。留下的目录不能再挂回新 Project，新建的 Project 总是另建带新编号的目录。Raven 为钉钉群自动创建的 Project 不能删除，见 [MCP 鉴权](/reference/mcp#鉴权)。
+- **Delete project**：删除 Project 元数据、[Case Board](/air/case-board) 和 [AccessKey](/consoles#accesskey)，并解除所有客户端归属，目录和文件保留；删除当前 Project 后回到 Global。留下的目录不能再挂回新 Project，新建的 Project 总是另建带新编号的目录。Raven 为钉钉群自动创建的 Project 不能删除，见 [MCP 鉴权](/reference/mcp#鉴权)。
 
 ### 下单 UID
 
@@ -115,7 +118,8 @@ Projects 页是按状态分列的看板，四列依次是 **Responding**（处�
 | --- | --- |
 | Clients | 只列本 Project 的客户端，不能分配 Project；**Recent activity** 只显示本 Project 的记录 |
 | Shells | 只能对本 Project 的客户端开 Shell；有打开的 Shell 时，切换范围前先确认，确认后这些 Shell 关闭 |
-| Agentic IR | 只有 Project 视图能启动会话，Global 中不能启动。新会话的工作目录是 Project 目录，MCP 端点是 `/mcp/project/<id>`；**Running** 和 **History** 只列本范围会话。切换范围后其他范围的 AIR 会话视图被关闭，会话仍在运行，切回后可从 **Running** 重新接入 |
+| Agentic IR | 只有 Project 视图能启动会话，Global 中不能启动。新会话的工作目录是 Project 目录，MCP 端点是 `/mcp/project/<id>`；**Running** 和 **History** 只列本范围会话。切换范围后其他范围的 AIR 会话视图被关闭，会话仍在运行，切回后可从 **Running** 重新接入。会话链接带 `?project=<id>`，打开时自动切换到该 Project |
+| Case Board | 显示本 Project 的排查进度；Global 中没有看板，提示先选择 Project |
 | Files、Investigations | 只能选本 Project 的客户端；AccessKey 见下文例外 |
 | Artifacts | 根目录是 Project 目录，链接形如 `#/artifacts/<路径>?project=<id>`，打开时自动切换到该 Project |
 | Reports | 只扫描 Project 目录；Global 下汇总服务端工作目录和所有 Project |
@@ -132,7 +136,7 @@ Project ID 形如 `project-<编号>`，可在 Artifacts 链接的 `?project=` �
 
 ## 数据存放位置
 
-Project 列表和客户端归属存于服务端工作目录下的 `data/projects.json`，Project 文件在 `<基准目录>/<目录名>/`。备份或迁移服务端时两处要一起保留。
+Project 列表和客户端归属存于服务端工作目录下的 `data/projects.json`，Case Board 和 Project AccessKey 分别在 `data/case/` 和 `data/aliyun/`，Project 文件在 `<基准目录>/<目录名>/`。备份或迁移服务端时这些位置要一起保留。
 
 ## 常见问题
 

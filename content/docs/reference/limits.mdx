@@ -2,8 +2,8 @@
 title: 限制速查
 description: SIREN 的大小、数量和超时上限一览
 icon: Gauge
-verifiedAgainst: v2.39.0
-dossierVerifiedAgainst: 8c1902c
+verifiedAgainst: v2.45.0
+dossierVerifiedAgainst: 550782c
 sources:
   - internal/server/clientnote/note.go
   - internal/server/project_names.go
@@ -76,6 +76,8 @@ sources:
   - internal/server/webui/webui_air_usage.go
   - internal/server/air_usage.go
   - internal/server/air_settings.go
+  - internal/server/console_browser.go
+  - internal/server/aliyun_keys.go
 ---
 
 SIREN 的大小、数量和超时上限，按功能分组。**配置项**为空的值固定不可改，可配置的键见 [服务端配置](/reference/server-config) 和 [客户端配置](/reference/client-config)。
@@ -87,6 +89,7 @@ SIREN 的大小、数量和超时上限，按功能分组。**配置项**为空�
 | 客户端备注 | 256 个字符 | | [Clients 页](/clients) |
 | Project 名称 | 128 个字符 | | [Projects](/projects) |
 | Project 负责人 | 64 个字符 | | [Projects](/projects) |
+| Project 下单 UID | 32 位数字 | | [Projects](/projects#下单-uid) |
 
 ## AI 用量
 
@@ -115,6 +118,7 @@ SIREN 的大小、数量和超时上限，按功能分组。**配置项**为空�
 | 下载单个文件 | 100 MiB | | [Artifacts](/artifacts) |
 | 下载目录（`.tar.gz`） | 普通文件合计 100 MiB | | [Artifacts](/artifacts) |
 | 上传单个文件 | 100 MiB | | [Artifacts](/artifacts) |
+| 按名称搜索 | 最多 200 条结果，遍历 100,000 个条目，搜索词 256 字节 | | [Artifacts](/artifacts) |
 
 ## Reports 与 Dossier
 
@@ -128,6 +132,14 @@ SIREN 的大小、数量和超时上限，按功能分组。**配置项**为空�
 | 加载、保存报告 | 15 秒 | | [Reports](/reports) |
 | 上传粘贴的图片 | 每张 45 秒 | | [Reports](/reports) |
 | 导出前等待图片和字体就绪 | 各 30 秒 | | [Reports](/reports) |
+
+## 控制台浏览器与 AccessKey
+
+| 限制 | 值 | 配置项 | 详见 |
+| --- | --- | --- | --- |
+| 控制台浏览器名称 | 32 个字符 | | [控制台浏览器](/consoles#添加浏览器) |
+| 添加、登录控制台浏览器 | 等待控制台 Mac 3 分钟 | | [控制台浏览器](/consoles#登录) |
+| AccessKey 名称 | 32 个字符 | | [控制台浏览器](/consoles#添加-accesskey) |
 
 ## 进程分析
 

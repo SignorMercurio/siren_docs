@@ -2,9 +2,12 @@
 title: 升级与数据
 description: 升级服务端和客户端、支持的平台、升级后要核对的配置，以及服务端数据的备份与迁移
 icon: CircleFadingArrowUp
-verifiedAgainst: v2.39.0
+verifiedAgainst: v2.45.0
 sources:
   - internal/server/air_settings.go
+  - internal/server/case_store.go
+  - internal/server/aliyun_keys.go
+  - internal/server/console_browser.go
   - internal/auth/sessions.go
   - internal/upgrade/
   - cmd/server/cli/upgrade.go
@@ -85,6 +88,8 @@ cd /opt/siren
 
 也可以重新运行服务端安装脚本，它保留已有的 `server_config.yaml` 和证书。
 
+Dossier 运行时不随服务端升级。从 v2.40.0 之前的版本升级时，同时 [重新发布 Dossier](/server/dossier#使用-make-deploy-发布)，否则无法保存报告。
+
 </Step>
 <Step>
 
@@ -155,11 +160,14 @@ diff /opt/siren/server_config.yaml /tmp/server_config.new.yaml
 | `data/client_notes.json` | 客户端 Note |
 | `data/egress.json` | **Configure egress** 的恢复记录。丢失后无法再用 [Restore egress](/restore-egress) 撤销已下发的出站规则 |
 | `data/air_settings.json` | [Settings](/webui#settings) 中的 AIR 全局默认值 |
+| `data/case/` | 各 Project 的 [Case Board](/air/case-board) |
+| `data/opencli/` | 各 Project 的控制台浏览器配置，由 SIREN 生成 |
+| `data/aliyun/` | 各 Project 的客户 [AccessKey](/consoles#accesskey)，明文保存 |
 | 工作目录中的其他文件 | Global 范围的 Artifacts，例如 Recon 结果和 AccessKey 报告 |
 | `webui.projectsBaseDir` 下的子目录 | 各 Project 的 Artifacts 和报告；未设置时位于工作目录下 |
 | `webui.dossierDir` | Dossier 静态文件，以及 Blank template 中粘贴的图片 |
 
-Agentic IR 的会话记录由各 Provider CLI 保存在服务端用户自己的目录中（Pi 为 `air.providers.pi.agentDir`），见 [准备 AIR Provider](/server/air-providers)。客户端主机上的文件见 [清理范围](/cleanup#清理范围)。
+Agentic IR 的会话记录由各 Provider CLI 保存在服务端用户自己的目录中（Pi 为 `air.providers.pi.agentDir`），见 [准备 AIR Provider](/server/air-providers)。控制台浏览器的凭据和登录状态保存在控制台 Mac 上，不在服务端。客户端主机上的文件见 [清理范围](/cleanup#清理范围)。
 
 ## 备份
 
@@ -173,7 +181,7 @@ Agentic IR 的会话记录由各 Provider CLI 保存在服务端用户自己的�
 3. 需要保留 AIR 会话历史时，一并备份各 Provider 的目录。
 4. 重新启动服务端。
 
-备份含 `.env` 凭证和全部取证材料，按敏感数据保管。
+备份含 `.env` 凭证、客户 AccessKey 和全部取证材料，按敏感数据保管。
 
 ## 迁移到另一台主机
 
@@ -203,6 +211,7 @@ Agentic IR 的会话记录由各 Provider CLI 保存在服务端用户自己的�
 - 安装并以服务端用户登录 AIR Provider CLI，见 [准备 AIR Provider](/server/air-providers)。
 - 在 `/etc/hosts` 中把 `webui.publicURL` 的域名解析到新主机的内网地址，见 [webui.publicURL](/server#webuipublicurl)。
 - 证书覆盖新的访问域名，见 [更换证书](/server#更换证书)。
+- 使用 [Cloud Access](/consoles) 时，安装 aliyun CLI，放置 `consoleBrowser.identityFile` 指向的私钥，并把控制台 Mac 的反向隧道改连新主机，见 [接入控制台 Mac](/consoles#接入控制台-mac)。
 
 </Step>
 <Step>

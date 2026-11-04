@@ -2,7 +2,7 @@
 title: 出站与入站放行
 description: 放行客户端访问服务端，并为出方向默认拒绝的 ECS 配置专用出站安全组
 icon: ArrowRightFromLine
-verifiedAgainst: v2.39.0
+verifiedAgainst: v2.45.0
 sources:
   - internal/server/webui/frontend/src/components/Provisioning.tsx
   - internal/server/cloud_operations.go
@@ -55,7 +55,7 @@ SOAR 以 `Throttling.User` 限流拒绝某次调用时，SIREN 依次等待约 2
   应用的出站规则完全来自服务端必填配置 `egress.rules`，确认框展示的就是将要授权的规则。默认三条：服务端回连（`siren_server_callback`，TCP 443）、客户端下载（`siren_client_download`，TCP 443）、阿里云基础服务（`alibaba_cloud_infrastructure`，全流量 `100.100.0.0/16`）；最多 20 条。改了服务端监听端口时，同步调整回连规则的端口。字段见 [配置文件](/reference/server-config)。
 </Callout>
 
-一键部署自动识别回连 IP 依赖 `egress.discovery`（云防火墙日志库），同样见 [配置文件](/reference/server-config)。为此它在目标主机上调用客户端隐藏命令 `siren probe-egress` 观察一次出站 TCP SYN（`--json` 输出结构化证据），该命令仅支持 Linux 和 Windows，需要 root 或管理员权限。
+一键部署自动识别回连 IP 依赖 `egress.discovery`（云防火墙日志库），同样见 [配置文件](/reference/server-config)。为此它在目标主机上调用客户端命令 [`siren probe-egress`](/reference/client-cli#probe-egress) 观察一次出站 TCP SYN，该命令仅支持 Linux 和 Windows，需要 root 或管理员权限。
 
 ## 持久化与恢复
 

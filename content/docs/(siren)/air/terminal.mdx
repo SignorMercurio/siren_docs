@@ -2,7 +2,7 @@
 title: Terminal 界面
 description: 在浏览器中使用 Provider 原生 TUI：适用场景、复制粘贴、图片、尺寸和重新连接
 icon: SquareTerminal
-verifiedAgainst: v2.39.0
+verifiedAgainst: v2.45.0
 sources:
   - internal/server/webui/frontend/src/components/AgentTerminalPanel.tsx
   - internal/server/webui/frontend/src/components/TerminalPanel.tsx
@@ -12,6 +12,7 @@ sources:
   - internal/server/agent_session_registry.go
   - internal/server/agent_session_lifecycle.go
   - internal/server/air_gui_provider.go
+  - internal/server/air_runtime.go
   - internal/server/air_terminal_cmd.go
   - internal/server/air_settings.go
   - internal/server/air_mcp.go
@@ -35,9 +36,9 @@ Terminal 界面在服务端的伪终端（PTY）中运行 Codex、Claude Code �
 
 ## Provider 在 Terminal 中的行为
 
-SIREN 只注入当前范围的 SIREN MCP、会话凭证、开场提示词或要继续的会话 ID，以及 [Settings](/webui#settings) 中的 AIR 默认值，其他一切按服务端用户的 CLI 配置和 `air.providers.<name>.args` 运行，见 [边界](/server/air-providers#边界)。因此：
+SIREN 只注入当前范围的 SIREN MCP、会话凭证、开场提示词或要继续的会话 ID、新建表单中选的模型和 [Settings](/webui#settings) 中的 AIR 默认值，并让 `aliyun` 和 `opencli` 使用本 Project 的 [云访问](/consoles) 配置，其他一切按服务端用户的 CLI 配置和 `air.providers.<name>.args` 运行，见 [边界](/server/air-providers#边界)。因此：
 
-- 权限、沙箱和审批由 CLI 决定；模型和推理强度取 Settings 中的 AIR 默认值，留空时也由 CLI 决定；Settings 中的附加指令排在 CLI 已配置的指令之后。需要确认的操作以 TUI 自身的提示出现，不生成 GUI 审批卡片，也不触发 Running 列表或浏览器标签页标题上的待处理提示；[系统通知](/air/sessions#系统通知) 只按输出是否静默判断。
+- 权限、沙箱和审批由 CLI 决定；模型和推理强度取上述值，留空时也由 CLI 决定（Pi 从百炼上的 Kimi K3 开始）；Settings 中的附加指令排在 CLI 已配置的指令之后。需要确认的操作以 TUI 自身的提示出现，不生成 GUI 审批卡片，也不触发左栏或浏览器标签页标题上的待处理提示；[系统通知](/air/sessions#系统通知) 只按输出是否静默判断。
 - SIREN 不附加证据引用约定，脚注也不渲染成来源卡片。需要可追溯的结论时，在提示词中要求 Agent 标注来源，或改用 GUI，见 [证据与报告](/air/evidence)。
 
 ## 复制与粘贴
@@ -70,7 +71,7 @@ SIREN 只注入当前范围的 SIREN MCP、会话凭证、开场提示词或要�
 要换一种界面继续：
 
 1. 在 **Running** 中停止该会话。
-2. 展开 **History**，打开该会话的只读记录。
+2. 在左栏的 **Today** 或 **Earlier** 中打开该会话的只读记录。
 3. 点击 **Continue session**（GUI）或 **Continue in Terminal**。
 
 <Callout title="Codex 新建的 Terminal 会话" type="warn">

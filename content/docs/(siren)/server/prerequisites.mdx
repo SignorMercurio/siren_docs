@@ -2,7 +2,7 @@
 title: 前置条件与凭证
 description: 按功能列出 SIREN Server 依赖的证书、账号、凭证和外部服务
 icon: ListChecks
-verifiedAgainst: v2.39.0
+verifiedAgainst: v2.45.0
 sources:
   - config/server_config.yaml
   - cmd/server/cli/root.go
@@ -15,6 +15,8 @@ sources:
   - internal/server/deployment_discovery.go
   - internal/server/webui/webui_dossier.go
   - internal/server/air_runtime.go
+  - internal/server/console_browser.go
+  - internal/server/aliyun_keys.go
   - internal/server/shell.go
   - pkg/utils/oss.go
   - config/config_linux.yaml
@@ -39,6 +41,8 @@ import { Callout } from "fumadocs-ui/components/callout";
 | [`webui.publicURL`](#webuipublicurl) | Agentic IR | Agentic IR 会话启动失败 |
 | [Dossier 目录](#dossier-目录) | Reports 页面、Dossier 报告编辑 | 报告无法在 Dossier 中打开 |
 | [AIR Provider CLI](#air-provider-cli) | Agentic IR | 对应 Provider 不可用 |
+| [控制台 Mac](#控制台-mac) | Cloud Access 的控制台浏览器 | 页面提示 `No console Mac is configured` |
+| [aliyun CLI](#aliyun-cli) | AIR 使用 Project 的 AccessKey | AIR 会话无法使用这些 AccessKey |
 | [OSS 凭证](#oss-凭证) | 本地模式上传 Recon 结果和文件 | 上传失败 |
 | [插件市场](#插件市场) | 客户端插件安装与更新 | 无法下载或更新插件 |
 
@@ -137,6 +141,20 @@ egress:
 ## AIR Provider CLI
 
 在控制主机上安装并登录 Codex、Claude Code 或 Pi CLI，由 `air.providers.<name>` 指定路径和参数，见 [准备 AIR Provider](/server/air-providers)。缺失时 Settings 的 **AIR runtime** 下显示对应 Provider 不可用及原因。
+
+AIR 会话只能在 Project 中启动，Global 视图中不能启动。Pi 会话还要求 Project 填写 [下单 UID](/projects#下单-uid)。
+
+## 控制台 Mac
+
+- **用于**：[Cloud Access](/consoles) 的控制台浏览器，AIR 通过它们操作客户云控制台。
+- **配置**：`consoleBrowser.*`，需要一台 macOS 主机和到服务端的反向 SSH 隧道，见 [接入控制台 Mac](/consoles#接入控制台-mac)。
+- **缺失时**：Cloud Access 页面提示 `No console Mac is configured`，其他功能不受影响。
+
+## aliyun CLI
+
+- **用于**：AIR 会话用 Project 的 [AccessKey](/consoles#accesskey) 查询客户阿里云账号。
+- **配置**：在控制主机上安装 `aliyun`，并让它位于 `siren_server` 的 `PATH` 中。服务端只在启动时查找它，安装后需要重启。
+- **缺失时**：Cloud Access 页面提示 `The SIREN server has no aliyun CLI`，AIR 会话无法使用这些 AccessKey。
 
 ## 网络
 

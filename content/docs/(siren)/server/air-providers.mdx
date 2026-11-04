@@ -2,7 +2,7 @@
 title: 准备 AIR Provider
 description: 在服务端安装并登录 Claude Code、Codex 或 Pi，供 WebUI 启动 Agentic IR 会话
 icon: Bot
-verifiedAgainst: v2.39.0
+verifiedAgainst: v2.45.0
 sources:
   - config/server_config.yaml
   - cmd/server/cli/root.go
@@ -125,7 +125,7 @@ Pi 复用服务端用户的全局 Pi 安装、插件、Skills 和配置，新会
    - 不要安装 `pi-mcp-adapter` 等 MCP 适配插件，它会取代 Pi 内置的 MCP 支持，使 SIREN MCP 无法接入。安装脚本不会删除 `<agentDir>/settings.json` 的 `packages` 中已有的插件，需要手工移除。
 
 <Callout title="不要只改 agentDir" type="warn">
-  安装脚本写入的 `models.json` 固定从 `/root/.pi/agent/auth.json` 读取密钥，而 SIREN 检查的是 `air.providers.pi.agentDir` 下的 `auth.json`。改了 Agent 目录却不同步 `models.json` 的读取路径，状态检查会通过，实际请求仍认证失败。
+  安装脚本写入的 `models.json` 中，Qwen Aegis 固定从 `/root/.pi/agent/auth.json` 读取密钥，而 SIREN 只检查 `air.providers.pi.agentDir` 下 `auth.json` 的 `bailian` 条目。改了 Agent 目录却不同步 `models.json` 的读取路径，状态检查会通过，切换到 Qwen Aegis 后请求仍认证失败。
 </Callout>
 
 Pi 的文件、Shell 和 MCP 操作直接执行，不产生权限审批。
@@ -159,7 +159,7 @@ Pi 的文件、Shell 和 MCP 操作直接执行，不产生权限审批。
 各键的类型和默认值见 [配置文件](/reference/server-config#air)。以下是需要额外说明的行为：
 
 - **`air.provider`**：回退 Provider。浏览器默认选用上次使用的 Provider（首次使用 `air.provider`），可在 **Settings** 的 **Default AIR provider** 中固定；所选 Provider 不可用时先回退到 `air.provider`，再回退到第一个可用的 Provider。
-- **`air.maxSessions`**（默认 `20`）：全服务端 AIR 会话上限，GUI 与 Terminal、所有 Project、Ask/Client/Account 和继续会话合计；超出时报 `agent session limit reached (N)`。`0` 或负数表示不限制。
+- **`air.maxSessions`**（默认 `20`）：全服务端 AIR 会话上限，GUI 与 Terminal、所有 Project、Ask/Client/Account、Fork 和继续会话合计；超出时报 `agent session limit reached (N)`。`0` 或负数表示不限制。
 - **`air.idleTimeoutHours`**（默认 `72`）：会话既没有浏览器打开、Provider 也没有新输出的时间达到该小时数后，服务端自动停止它，原因显示为 `session stopped after a long idle period`，会话记录仍可从 **History** 继续。`0` 或负数表示不自动停止。
 - **`air.replayBufferBytes`**（默认 4 MiB）：每个会话的断线重连回放预算，Terminal 按原始输出、GUI 按结构化事件计算。`0` 或负数时使用默认值，不会关闭回放。
 
@@ -190,7 +190,9 @@ Client 和 Account 入口用模板生成种子 prompt，Ask 入口直接发送�
 
 <Callout title="SIREN 只做这些" type="info">
   - 用 `cliPath` 和 `args` 启动 CLI，为所有入口注入当前范围的 SIREN MCP 和会话凭证，并按入口加入种子 prompt 或要继续的会话 ID。
-  - 加入 [Settings](/webui#settings) 中设置的 AIR 默认模型、推理强度和附加指令；附加指令排在 CLI 已配置的指令之后。
+  - 加入新建表单中选的模型，以及 [Settings](/webui#settings) 中设置的 AIR 默认模型、推理强度和附加指令；附加指令排在 CLI 已配置的指令之后。
+  - 服务端配置了控制台 Mac 或安装了 aliyun CLI 时，让会话中的 `opencli` 和 `aliyun` 只使用当前 Project 的 [云访问](/consoles) 配置，并在附加指令后说明用法。
+  - 启动 Pi 时把 `SIREN_ORDER_UID` 设为当前 Project 的下单 UID。
   - GUI 只展示 Provider 主动返回的审批和提问；“本会话允许”不写入 CLI 的用户级配置。
   - 不修改 Claude Code、Codex 的全局设置，也不替它们跳过权限确认。
   - 会话凭证随会话结束或服务端重启失效；长期 MCP 管理凭证不会注入 Provider。

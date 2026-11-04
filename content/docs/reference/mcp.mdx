@@ -2,7 +2,7 @@
 title: MCP
 description: SIREN MCP 的端点、鉴权、工具参数、结果回读、命令黑名单与审计
 icon: Plug
-verifiedAgainst: v2.39.0
+verifiedAgainst: v2.45.0
 sources:
   - internal/server/mcp.go
   - internal/server/mcp_http.go
@@ -18,6 +18,7 @@ sources:
   - internal/server/mcp_evidence.go
   - internal/server/mcp_case.go
   - internal/server/case_store.go
+  - internal/server/case_events.go
   - internal/server/mcp_recon.go
   - internal/server/mcp_deploy.go
   - internal/server/run_result_storage.go
@@ -74,7 +75,7 @@ MCP 由 [`server_config.yaml`](/reference/server-config) 中的 `mcp.enabled` �
 
 ### AIR 会话的凭证
 
-AIR 会话（GUI 或 Terminal）的 MCP 地址由 `webui.publicURL` 加 `/mcp` 或 `/mcp/project/<id>` 拼成。`webui.publicURL` 为空或不是纯 HTTPS Origin 时会话无法启动，分别报 `webui.publicURL is required for AIR MCP`、`webui.publicURL must be an absolute https URL` 或 `webui.publicURL must contain only an https origin`。
+AIR 会话（GUI 或 Terminal）只能在 Project 中启动，MCP 地址由 `webui.publicURL` 加 `/mcp/project/<id>` 拼成。`webui.publicURL` 为空或不是纯 HTTPS Origin 时会话无法启动，分别报 `webui.publicURL is required for AIR MCP`、`webui.publicURL must be an absolute https URL` 或 `webui.publicURL must contain only an https origin`。
 
 Provider 进程不会继承 `SIREN_MCP_ADMIN_TOKEN` 等长期 MCP 凭证，只拿到本会话凭证，且该凭证不会出现在命令行参数或 Provider 的持久配置中。SIREN 不预先放行任何 MCP 工具，调用前是否确认由 Provider 自身配置决定，见 [审批](/air/providers#审批)。
 
@@ -135,7 +136,7 @@ SIREN MCP 不提供告警查询工具。
 | `command` | 要执行的命令，最长 50 KiB |
 | `output_mode` | `auto` 或 `full`，省略时取服务端 `mcp.runOutputMode`（默认 `auto`），见 [长结果回读](#长结果回读) |
 
-命令先经 [命令黑名单](#命令黑名单) 检查；每次调用都写 [审计日志](#审计日志) 并返回 `audit_id`。标准输出和错误输出合计最多保留 16 MiB，超出部分丢弃并标记捕获不完整。时限见 [执行时限](#执行时限)。
+命令先经 [命令黑名单](#命令黑名单) 检查；每次调用都写 [审计日志](#审计日志) 并返回 `audit_id`。标准输出和错误输出合计最多保留 16 MiB，超出部分丢弃并标记捕获不完整。命令失败且没有输出时，文本结果写明 `outcome`、退出码和失败原因。时限见 [执行时限](#执行时限)。
 
 `outcome` 的常见取值如下，非 `success` 的结果都以工具错误返回：
 
