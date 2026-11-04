@@ -11,6 +11,25 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.44.0 <DateTag>2026-11-04</DateTag>
+
+### New Features
+
+- 新增 **Case Board** 页面。AIR 把排查项、结论和证据记录到 Project，页面显示排查清单、覆盖矩阵和实体关联图，见 [Case Board](/air/case-board)
+- 排查项标为 Confirmed 或 Refuted 时必须引用证据
+- 报告写完后证据发生变化，Case Board 标出需要复核的报告和排查项
+- AIR 可以在当前 Project 内搜索最近的命令结果，不必重跑命令，见 [`search_run_result`](/reference/mcp#search_run_result)
+
+### Improvement
+
+- 命令结果保留 24 小时，最多 4096 条、256 MiB，见 [限制](/reference/limits)
+
+### Bug Fixes
+
+- 登录中的控制台浏览器不再卡住 profile 列表
+- 登录检查后不再留下空白浏览器窗口
+- AIR 会话菜单在标题箭头下方打开
+
 ## v2.43.1 <DateTag>2026-11-03</DateTag>
 
 ### Bug Fixes
