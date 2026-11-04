@@ -77,6 +77,13 @@ Provider 需要操作员决定时，Agent 暂停并在时间线中插入卡片�
 
 所有 Provider 都提供 `/status`：显示连接、Provider、模型、SIREN 和 Provider 会话 ID、当前轮次、Project、上下文占用及额度。它随时可用，不发送给 Provider，也不写入 Provider 历史。其他命令见 [Provider 差异](/air/providers#gui-命令)。
 
+
+## Fork 会话
+
+运行中的 Chat 会话标题旁有 **Fork** 按钮，点击后在右侧打开或关闭侧边会话，Agent 运行中也可使用。第一条消息会把主会话当时的上下文复制成一个新会话，主会话不受影响，也看不到侧边的对话。
+
+Fork 是完整的 Chat 会话：可以多轮对话，继承工具和审批策略，用 Stop 按钮停止当前回合。它执行的操作是真实的。点击垃圾桶结束 Fork，下一条消息会重新从主会话复制。每个会话同时只有一个 Fork，结束后可在历史中查看。
+
 ## 粘贴图片
 
 在输入框中直接粘贴截图，随下一条消息发送，数量和大小限制见 [限制](/reference/limits#air)。当前会话不接受图片时提示 "This provider session does not accept pasted images"，各 Provider 的支持见 [Provider 差异](/air/providers#图片输入)。

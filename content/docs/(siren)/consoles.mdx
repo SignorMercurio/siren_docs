@@ -2,9 +2,10 @@
 title: 云访问
 description: 在 Cloud Access 页面为 Project 管理客户云控制台的独立浏览器和阿里云 AccessKey，以及 AIR 如何使用它们
 icon: AppWindow
-verifiedAgainst: v2.43.0
+verifiedAgainst: v2.45.0
 sources:
   - internal/server/webui/frontend/src/pages/ConsolesPage.tsx
+  - internal/server/webui/frontend/src/pages/ConsoleViewer.tsx
   - internal/server/webui/frontend/src/pages/AliyunKeysSection.tsx
   - internal/server/webui/webui_aliyun_keys.go
   - internal/server/aliyun_keys.go
@@ -21,7 +22,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 **Cloud Access** 页面管理 AIR 访问客户阿里云账号的两种凭据：控制台 Mac 上的浏览器，和客户提供的 [AccessKey](#accesskey)。
 
-控制台浏览器每个浏览器只登录一个客户的阿里云控制台账号（RAM 用户），各自保存登录状态，互不影响。你在 SIREN 中保存凭据、点击登录，不需要登录到那台 Mac；AIR 会话通过 opencli 操作这些浏览器。
+控制台浏览器每个浏览器只登录一个客户的阿里云控制台账号（RAM 用户），各自保存登录状态，互不影响。你在 SIREN 中保存凭据、点击登录，不需要登录到那台 Mac；AIR 会话通过 opencli 操作这些浏览器，你也可以在 WebUI 中[直接操作](#直接操作控制台)。
 
 一个 Project 可以有多个控制台浏览器，例如同一客户的生产账号和测试账号。每个浏览器只属于一个 Project。
 
@@ -76,6 +77,24 @@ RAM 用户没有 MFA 时，控制台会在密码之后提示绑定 MFA，SIREN �
 <Callout type="warn">
 结果为 **Refused**、短信验证、验证码或未知页面时，自动登录暂停，避免反复失败锁定 RAM 用户。替换凭据或手动点 **Sign in** 后恢复。
 </Callout>
+
+## 直接操作控制台
+
+浏览器运行时，点卡片上的 **Open console**（Global 视图中点行内的 **Open**）。控制台在新的浏览器标签页中打开，显示的是控制台 Mac 上这个浏览器的实时画面，可以用鼠标和键盘直接操作。
+
+- 顶部工具栏提供后退、刷新、地址栏和标签页切换，右侧的 **X** 关闭当前标签页。页面打开的新标签页会自动跟随。
+- `Cmd+C`（Windows 上为 `Ctrl+C`）把页面中选中的文字复制到你本机的剪贴板，`Cmd+V`（Windows 上为 `Ctrl+V`）粘贴你本机剪贴板的文字。
+- 页面弹出的确认框显示在工具栏下方，用 **OK** 或 **Cancel** 回应。
+- 切到其他标签页后画面暂停。没有操作时帧率自动降低。
+- 连接断开时页面显示 **Disconnected**。点 **Open Cloud Access** 回到 Cloud Access 页面。
+
+暂不支持上传和下载文件、页面原生下拉框，以及页面上的“复制”按钮。这些按钮写入的是控制台 Mac 的剪贴板，不是你本机的。
+
+<Callout type="warn">
+这里的操作都以该浏览器登录的客户账号执行。所有已登录 SIREN 的用户都能打开任意浏览器，服务端日志记录每次打开和关闭的用户。
+</Callout>
+
+升级到支持这项功能的版本后，已在运行的浏览器需要重启一次，否则打开时提示 `has no DevTools port: restart its browser`。
 
 ## AIR 如何使用
 
