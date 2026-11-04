@@ -1,6 +1,6 @@
 ---
 title: Case Board
-description: 查看攻击时间线、AIR 的排查进度和覆盖情况，以及报告写完后证据是否有变化
+description: 查看 AIR 的当前结论、等你处理的事项、排查进度和攻击时间线，以及报告写完后证据是否有变化
 icon: ListChecks
 verifiedAgainst: v2.43.1
 sources:
@@ -11,7 +11,8 @@ sources:
   - internal/server/webui/frontend/src/pages/CaseBoardPage.tsx
   - internal/server/webui/frontend/src/components/CaseAttackTimeline.tsx
   - internal/server/webui/frontend/src/components/CaseChecklist.tsx
-  - internal/server/webui/frontend/src/components/CaseCoverageMatrix.tsx
+  - internal/server/webui/frontend/src/components/CaseDimensionProgress.tsx
+  - internal/server/webui/frontend/src/components/CaseWaiting.tsx
   - internal/server/webui/frontend/src/components/CaseReportCoverage.tsx
   - internal/server/webui/frontend/src/caseBoard.ts
   - internal/server/webui/frontend/src/caseTimeline.ts
@@ -19,9 +20,21 @@ sources:
 
 **Case Board** 是一个 Project 的排查进度看板。AIR 在排查时写入，你在这里查看，页面本身不能修改。它在 **Respond** 分组下，需要先选择 Project。
 
-页面顶部显示未结项数量和进度条：绿色是已有结论，橙色是证据缺口，灰色是还在排查，红色是受阻。下方分为 **Timeline**、**Checklist**、**Entities** 和 **Coverage** 四个标签页，有事件时默认打开 Timeline。
+页面顶部显示 AIR 写的当前结论和各类排查项的数量。AIR 还没写结论时，这里显示未结项数量。
 
-SIREN 会检查 AIR 的写入：没有证据的排查项不能标为 Confirmed 或 Refuted，只有文件时间的事件不能标为已确认，参数见 [`case_update`](/reference/mcp#case_update)。
+有受阻项时，**Waiting on you** 列出每一项在等什么，每条最多显示两行。点击一条会跳到对应排查项并展开，展开后可以看完整原因。下方分为 **Progress** 和 **Timeline** 两个标签页。
+
+SIREN 会检查 AIR 的写入：没有证据或回答的排查项不能标为 Confirmed 或 Refuted，只有文件时间的事件不能标为已确认，参数见 [`case_update`](/reference/mcp#case_update)。
+
+## 排查中：看进度
+
+这部分在 **Progress** 标签页。上方每个节点是一个排查方向。节点颜色取这个方向最需要处理的状态：红色是有受阻项，灰色是还在排查，黄色是只剩证据缺口，绿色是全部已有结论。下方文字显示已结项数和总项数，鼠标悬停显示 settled、gap、open、blocked 的项数。**Not started** 表示这个方向还没有排查项。点击一个节点，下方清单只显示这个方向，再点一次取消。
+
+**Hosts with no items** 列出 Project 里还没有排查项或事件提到的主机。
+
+清单按 Needs work、Gaps、Settled 分组。问题下方直接显示回答、原因或下一步。受阻项的原因显示在 **Waiting on you** 中。展开一项，可以看到排查方向、已试的证据源和涉及的实体。证据显示为原文摘录，点击 **Open file** 在 [Artifacts](/artifacts) 中打开完整文件。
+
+写报告前先看是否还有 Blocked、Open、Active 或 Gap，再决定继续排查，还是在报告中说明缺口。
 
 ## 排查中：看攻击时间线
 
@@ -41,46 +54,13 @@ SIREN 会检查 AIR 的写入：没有证据的排查项不能标为 Confirmed �
 
 被推翻、重复或误写的事件不会删除，AIR 把它们标为撤回。点击 **Show N withdrawn** 可以查看。
 
-## 排查中：看实体关联
-
-关联图把排查涉及的实体按网络、身份、主机、文件和云资源分列。同一个排查项涉及的两个实体之间有一条线。
-
-| 线型 | 含义 |
-| --- | --- |
-| 实线 | 至少一个排查项已确认 |
-| 虚线 | 还在排查 |
-| 点线（橙色） | 查过但证据不足 |
-| 点线（灰色） | 已排除或不适用 |
-
-这部分在 **Entities** 标签页。点击实体或连线，下方显示相关的事件和排查项。再点一次或点 **Clear** 取消选择。实体之间还没有连线时，页面不显示关联图。
-
-## 排查中：看覆盖情况
-
-这部分在 **Coverage** 标签页。每行是一个主机或实体，每列是一个排查方向。
-
-| 单元格 | 含义 |
-| --- | --- |
-| Settled | 这里记录的排查项都有结论 |
-| Gap | 查过但证据不足 |
-| Pending | 还在排查 |
-| Blocked | 卡住了，需要别人提供信息 |
-| — | 没有记录，不代表查过且没有问题 |
-
-点击单元格，下方显示对应的排查项，以及关联这些排查项的事件。
-
-## 写报告前：看结论依据
-
-**Checklist** 标签页按 Needs work、Gaps、Settled 分组。展开一项，可以看到下一步、受阻原因、已试的证据源和状态历史。证据显示为原文摘录，点击 **Open file** 在 [Artifacts](/artifacts) 中打开完整文件。
-
-写报告前先看是否还有 Blocked、Open、Active 或 Gap，再决定继续排查，还是在报告中说明缺口。
-
 ## 交报告前：看报告是否落后
 
-AIR 写完报告后会登记它。报告显示在标签页上方。之后如果排查项的证据或结论有变化，或时间线事件有变化，报告会变成橙色提示：
+AIR 写完报告后会登记它。报告显示在标签页上方。之后如果排查项的证据、结论或回答有变化，或时间线事件有变化，报告会变成橙色提示：
 
 | 状态 | 含义 |
 | --- | --- |
 | Up to date | 报告写完后证据、结论和事件没有变化 |
-| Evidence changed | 有变化，**Items to review** 按 Checklist 和 Timeline 列出变化的编号 |
+| Evidence changed | 有变化，**Items to review** 按 Checklist 和 Timeline 列出变化的编号和内容摘要 |
 
-点击编号可以跳到对应内容并展开。看到 Evidence changed 时，让 AIR 按这些内容修订报告。修订后重新登记，状态回到 Up to date。点击报告路径可以打开报告。
+点击编号可以跳到对应内容并展开。看到 Evidence changed 时，让 AIR 按这些内容修订报告。修订后重新登记，状态回到 Up to date。点击报告文件名可以打开报告，鼠标悬停显示完整路径。
