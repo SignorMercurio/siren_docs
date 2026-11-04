@@ -106,7 +106,7 @@ Agent 通过 SIREN MCP 操作客户端，参数和限制见 [MCP 集成](/refere
 | `run_batch` | 在多台客户端上并发执行同一命令并按主机汇总 |
 | `read_run_result`、`search_run_result` | 回读或搜索命令输出的原文；Project 会话可查本 Project 已跑过的全部命令和输出，避免重复取证 |
 | `save_evidence` | 仅 Project 会话：把 `run` / `run_batch` 的原始输出原样保存到 `evidence/` 目录，供脚注引用 |
-| `case_read`、`case_update` | 仅 Project 会话：维护 [Case Board](/air/case-board) 上的排查清单 |
+| `case_read`、`case_update` | 仅 Project 会话：维护 [Case Board](/air/case-board) 上的排查清单和攻击时间线 |
 | `recon` | 在客户端上触发一次 [Recon](/recon)，结果保存到 Artifacts |
 | `deploy` | 通过 SOAR 向一台阿里云 ECS 部署 SIREN，并等待客户端连接 |
 
