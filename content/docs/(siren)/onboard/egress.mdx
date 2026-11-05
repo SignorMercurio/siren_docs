@@ -2,7 +2,7 @@
 title: 出站与入站放行
 description: 放行客户端访问服务端，并为出方向默认拒绝的 ECS 配置专用出站安全组
 icon: ArrowRightFromLine
-verifiedAgainst: v2.45.0
+verifiedAgainst: v2.45.3
 sources:
   - internal/server/webui/frontend/src/components/Provisioning.tsx
   - internal/server/cloud_operations.go
@@ -44,8 +44,12 @@ Allow access 和 Configure egress 由当前浏览器逐个目标执行，执行�
 
 执行时 SIREN 会：
 
-- 创建或复用专用安全组 `siren-egress-<instanceId>`（带 `siren:managed` 等标签），以 priority 1 写入出站规则并挂载到实例上，不移除已有安全组。
-- 把实例已有安全组中与这些目的地冲突的 priority-1 Drop 规则降到 priority 2，使放行生效，并记入恢复记录。
+- 创建专用安全组 `siren-egress-<instanceId>`（带 `siren:managed` 等标签），以 priority 1 写入出站规则并挂载到实例上，不移除已有安全组。
+
+以下情况会在写入前停止，不做任何修改：
+
+- 实例已有安全组中有与这些目的地冲突的 priority-1 Drop 规则。错误给出规则 ID。删除该规则或把优先级调到 2 及以上后重试。
+- 已存在未挂载到该实例的 `siren-egress-<instanceId>` 残留安全组。错误给出安全组 ID。删除后重试。
 
 SOAR 以 `Throttling.User` 限流拒绝某次调用时，SIREN 依次等待约 2、4、8、16 秒（各加最多一半的随机延迟）后重发同一调用；被限流的调用没有执行，重发不会重复修改。四次重试后仍被限流才报错，此时可在 [配置文件](/reference/server-config) 中调低 `SOAR_TRIGGER_QPS`。
 
@@ -59,4 +63,4 @@ SOAR 以 `Throttling.User` 限流拒绝某次调用时，SIREN 依次等待约 2
 
 ## 持久化与恢复
 
-Configure egress 在服务端保存恢复记录（含被降级的 Drop 规则），刷新页面或服务端重启后仍在。调查结束后用 **Restore egress** 撤销，见 [恢复出站规则](/restore-egress)。出站配置与恢复只能在 WebUI 中操作，没有对应的 MCP 工具。
+Configure egress 在服务端保存恢复记录，刷新页面或服务端重启后仍在。调查结束后用 **Restore egress** 撤销，见 [恢复出站规则](/restore-egress)。出站配置与恢复只能在 WebUI 中操作，没有对应的 MCP 工具。
