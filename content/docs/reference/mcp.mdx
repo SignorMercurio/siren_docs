@@ -2,7 +2,7 @@
 title: MCP
 description: SIREN MCP 的端点、鉴权、工具参数、结果回读、命令黑名单与审计
 icon: Plug
-verifiedAgainst: v2.45.0
+verifiedAgainst: v2.45.2
 sources:
   - internal/server/mcp.go
   - internal/server/mcp_http.go
@@ -246,8 +246,8 @@ Project 端点（`/mcp/project/<id>`）不传 `audit_id` 时，在本 Project �
 | `entities` | 已有实体的 `id`，或新实体的 `kind` 和 `value`。`kind` 为 `host`、`ip`、`domain`、`identity`、`file`、`resource`；`host` 的 `value` 是本 Project 的在线 Client ID |
 | `evidence` | 证据列表，见下文 |
 | `remove_entities`、`remove_evidence` | 先从列表移除的实体、证据编号 |
-| `answer` | 证据显示了什么。`confirmed`、`refuted`、`gap` 必填 |
-| `next_action` | 下一步，只用于 `open`、`active`、`blocked`，排查项关闭时清空 |
+| `answer` | 证据查实的内容，Case Board 显示为发现。`confirmed`、`refuted`、`gap` 必填 |
+| `next_action` | 一个具体的下一步，Case Board 显示在 Next steps。`open`、`active`、`blocked` 必填，排查项关闭时清空 |
 | `reason`、`tried_sources` | 原因、已试的证据源 |
 
 `entities`、`evidence`、`tried_sources` 追加到已有列表。文本字段最长 2,000 字节，列表最多 50 条。部分状态有必填内容：
@@ -257,7 +257,9 @@ Project 端点（`/mcp/project/<id>`）不传 `audit_id` 时，在本 Project �
 | `confirmed` | `answer`、实体和 `role` 为 `supports` 的证据 |
 | `refuted` | `answer`、实体和 `role` 为 `refutes` 的证据 |
 | `gap` | `answer`、`tried_sources` |
-| `blocked`、`not_applicable` | `reason` |
+| `open`、`active` | `next_action` |
+| `blocked` | `reason`、`next_action` |
+| `not_applicable` | `reason` |
 
 每条证据只用下面一种写法，`role` 为 `supports`、`refutes` 或 `baseline`，默认 `supports`：
 
