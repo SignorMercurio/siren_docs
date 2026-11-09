@@ -50,7 +50,7 @@ Claude Code 收到运行中的消息时，SIREN 先中断当前轮次再发送�
 
 ## 模型与推理强度
 
-空闲时点击状态条中的模型名称或输入 `/model` 切换，只作用于当前会话，不写入 Provider 配置。新会话使用 [新建表单](/air/sessions#选择模型和界面) 中选的模型；没有另选时用 [Settings](/webui#settings) 中 AIR 默认值指定的模型。推理强度取 Settings 中的值。没有指定时用 Provider 自己的默认值（Pi 从百炼上的 Kimi K3 开始，见 [准备 AIR Provider](/server/air-providers#pi)）。继续历史会话时，Codex 和 Claude Code 同样使用 Settings 中指定的值，Pi 保留会话原来的模型和思考等级。
+空闲时点击状态条中的模型名称或输入 `/model` 切换，只作用于当前会话，不写入 Provider 配置。新会话使用 [新建表单](/air/sessions#选择模型和界面) 中选的模型；没有另选时用 [Settings](/webui#settings) 中 AIR 默认值指定的模型。推理强度取 Settings 中的值。没有指定时用 Provider 自己的默认值（Pi 从百炼上的 DeepSeek V4.1 Flash 开始，见 [准备 AIR Provider](/server/air-providers#pi)）。继续历史会话时，Codex 和 Claude Code 同样使用 Settings 中指定的值，Pi 保留会话原来的模型和思考等级。
 
 - **Claude Code**：读取模型菜单失败时会话照常可用，只是没有模型选择器。
 - **Pi**：列出服务器上 Pi 已配置的模型；只有当前模型列出可选思考等级，切换模型后先沿用 Pi 自动调整的等级。
