@@ -11,6 +11,22 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.47.0 <DateTag>2026-11-09</DateTag>
+
+### Breaking Change
+
+- 移除 v2.46.0 的 **Case** 入口、Case Run、左栏 **Case** 分组、`case_handoff` 和 `blocked_by`，改为下面的多 Agent 分工。Settings 的 **Case roles** 改为 **Delegate workers**，不再设置 Lead
+- Case Board 排查项状态只剩 Open、Blocked、Gap、Confirmed、Ruled out；[`case_update`](/reference/mcp#case_update) 不再接受 `reason`、`tried_sources` 和证据的 `role`
+
+### New Features
+
+- AIR 新增多 Agent 分工（beta，在 Settings 的 **Personal** 标签开启 **Multi-agent delegation (beta)**）：会话用 [`delegate`](/reference/mcp#delegate) 把一个排查项交给 worker 会话，调用立即返回，worker 结束后结果自动发回。worker 缩进列在派出它的会话下面，可以只读查看进展，不能对话，见 [多 Agent 分工](/air/sessions#多-agent-分工)
+
+### Improvement
+
+- worker 和 Pi 新会话默认使用 DeepSeek V4.1 Flash，effort 为 max
+- 用量统计支持 Kimi K3.1 Pro 计价
+
 ## v2.46.0 <DateTag>2026-11-08</DateTag>
 
 ### New Features

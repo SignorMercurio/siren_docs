@@ -2,7 +2,7 @@
 title: MCP
 description: SIREN MCP 的端点、鉴权、工具参数、结果回读、命令黑名单与审计
 icon: Plug
-verifiedAgainst: v2.45.2
+verifiedAgainst: v2.47.0
 sources:
   - internal/server/mcp.go
   - internal/server/mcp_http.go
@@ -17,6 +17,7 @@ sources:
   - internal/server/mcp_run_streams.go
   - internal/server/mcp_evidence.go
   - internal/server/mcp_case.go
+  - internal/server/mcp_delegate.go
   - internal/server/case_store.go
   - internal/server/case_events.go
   - internal/server/mcp_recon.go
@@ -32,7 +33,7 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-SIREN Server 内置 [MCP](https://modelcontextprotocol.io/) 服务，提供 11 个工具（`save_evidence`、`case_read`、`case_update`、`case_handoff` 只在 Project 端点提供）：列出客户端、执行命令、回读和检索结果、保存证据、维护排查清单、触发 Recon 和部署 SIREN。[Agentic IR](/air) 自动接入它；本页供外部 MCP 客户端接入和排查时查阅。
+SIREN Server 内置 [MCP](https://modelcontextprotocol.io/) 服务，提供 11 个工具（`save_evidence`、`case_read`、`case_update` 只在 Project 端点提供，`delegate` 只在开启多 Agent 分工的 AIR GUI 会话中提供）：列出客户端、执行命令、回读和检索结果、保存证据、维护排查清单、派出 worker、触发 Recon 和部署 SIREN。[Agentic IR](/air) 自动接入它；本页供外部 MCP 客户端接入和排查时查阅。
 
 ## 端点
 
@@ -115,7 +116,7 @@ bearer_token_env_var = "SIREN_MCP_ADMIN_TOKEN"
 | `save_evidence` | **`audit_id`**、**`label`**、`stream` | 仅 Project 端点：把 `run` / `run_batch` 的原始输出原样保存到 Project 的 `evidence/` 目录 |
 | `case_read` | 无 | 仅 Project 端点：读取 [Case Board](/air/case-board) |
 | `case_update` | `summary`、`items`、`events`、`reports` | 仅 Project 端点：更新当前结论、排查清单和攻击时间线，登记报告覆盖的证据版本 |
-| `case_handoff` | **`note`**、`remaining` | 仅 Project 端点的 Case Run 角色会话：记录收尾说明和剩余排查项 |
+| `delegate` | **`item`**、**`prompt`** | 仅开启 [多 Agent 分工](/air/sessions#多-agent-分工) 的 AIR GUI 会话：把一个排查项交给 worker 会话，立即返回 |
 | `recon` | **`client_id`**、`profile` | 触发一次 Recon 并等待结果 |
 | `deploy` | **`uid`**、**`instance_id`**、`public_ip` | 通过 SOAR 向一台阿里云 ECS 部署 SIREN，等待客户端连接 |
 
@@ -243,28 +244,23 @@ Project 端点（`/mcp/project/<id>`）不传 `audit_id` 时，在本 Project �
 | `id` | 已有排查项的编号，如 `Q01` |
 | `question` | 要回答的问题；新建时必填 |
 | `dimension` | `lead`、`entry`、`credentials`、`execution_persistence`、`lateral_assets`、`impact_data`、`response_status`；新建时必填 |
-| `owner` | 负责这一项的 [Case Run](/air/sessions#case-run) 角色：`lead`、`entry`、`host`、`cloud`，不传表示 `lead`。角色会话只能改自己负责的项，新建项默认归自己；要交给其他角色时新建 `dimension` 为 `lead` 的项并指定 `owner`。角色会话不能写 `summary` |
-| `state` | `open`、`active`、`confirmed`、`refuted`、`gap`、`blocked`、`not_applicable`，默认 `open` |
+| `owner` | 负责这一项的角色：`lead`、`entry`、`host`、`cloud`，不传表示 `lead`。[`delegate`](#delegate) 按它决定 worker 的角色。worker 只能改分给自己的那一项，它新建的项归 `lead`；worker 不能写 `summary` |
+| `state` | `open`、`confirmed`、`refuted`、`gap`、`blocked`，默认 `open` |
 | `entities` | 已有实体的 `id`，或新实体的 `kind` 和 `value`。`kind` 为 `host`、`ip`、`domain`、`identity`、`file`、`resource`；`host` 的 `value` 是本 Project 的在线 Client ID |
 | `evidence` | 证据列表，见下文 |
 | `remove_entities`、`remove_evidence` | 先从列表移除的实体、证据编号 |
 | `answer` | 证据查实的内容，Case Board 显示为发现。`confirmed`、`refuted`、`gap` 必填 |
-| `next_action` | 一个具体的下一步，Case Board 显示在 Next steps。`open`、`active`、`blocked` 必填，排查项关闭时清空 |
-| `reason`、`tried_sources` | 原因、已试的证据源 |
-| `blocked_by` | `blocked` 项等待的排查项编号列表，整体替换；这些项全部关闭后 SIREN 自动把该项改回 `open` |
+| `next_action` | 一个具体的下一步，Case Board 显示在 Next steps。`open`、`blocked` 必填，`blocked` 写明谁要提供什么；排查项关闭时清空 |
 
-`entities`、`evidence`、`tried_sources` 追加到已有列表。文本字段最长 2,000 字节，列表最多 50 条。部分状态有必填内容：
+`entities`、`evidence` 追加到已有列表。`summary`、`answer`、`next_action` 分别最多 200、120、80 个字符，其他文本字段最长 2,000 字节，列表最多 50 条。部分状态有必填内容：
 
 | 状态 | 必须提供 |
 | --- | --- |
-| `confirmed` | `answer`、实体和 `role` 为 `supports` 的证据 |
-| `refuted` | `answer`、实体和 `role` 为 `refutes` 的证据 |
-| `gap` | `answer`、`tried_sources` |
-| `open`、`active` | `next_action` |
-| `blocked` | `reason`、`next_action` |
-| `not_applicable` | `reason` |
+| `confirmed`、`refuted` | `answer` 和证据 |
+| `gap` | `answer` |
+| `open`、`blocked` | `next_action` |
 
-每条证据只用下面一种写法，`role` 为 `supports`、`refutes` 或 `baseline`，默认 `supports`：
+每条证据只用下面一种写法：
 
 - `id`：复用已有证据，如 `CE01`。
 - `audit_id` 加 `label`（可选 `stream`）：SIREN 把结果原样保存到 `evidence/`，规则同 [`save_evidence`](#save_evidence)，重复提交不会报错。
@@ -289,7 +285,7 @@ Project 端点（`/mcp/project/<id>`）不传 `audit_id` 时，在本 Project �
 
 | 状态 | 必须提供 |
 | --- | --- |
-| `confirmed` | 实体和 `role` 为 `supports` 的证据；`time_basis` 不能是 `file_time` 或 `derived` |
+| `confirmed` | 实体和证据；`time_basis` 不能是 `file_time` 或 `derived` |
 | `inferred` | 证据和 `reason` |
 | `withdrawn` | `reason` |
 
@@ -302,9 +298,16 @@ Project 端点（`/mcp/project/<id>`）不传 `audit_id` 时，在本 Project �
 
 版本不能高于当前版本，同一份报告的版本不能回退。排查项的证据变化，状态进入、离开 `open` 和 `active` 以外的状态，或事件内容变化时，证据版本加 1，此前登记的报告显示为需要复核。修改事件的 `items` 不影响证据版本。
 
-### `case_handoff`
+### `delegate`
 
-只在 Project 端点提供，且只有 [Case Run](/air/sessions#case-run) 的 Entry、Host、Cloud 角色会话可以调用。`note` 用一句话写本会话查实了什么、卡在哪里；`remaining` 是本会话负责且仍为 `open`、`active`、`blocked` 的排查项编号。调用后 SIREN 在本轮结束时结束该会话，Lead 读取 Case Board 时看到这段说明。
+只在开启 [多 Agent 分工](/air/sessions#多-agent-分工) 的 AIR GUI 会话中提供，外部 MCP 客户端没有这个工具。
+
+| 参数 | 说明 |
+| --- | --- |
+| **`item`** | 要交出的排查项编号，如 `Q01`。该项必须是 `open`，`owner` 为 `entry`、`host` 或 `cloud`，且没有正在运行的 worker |
+| **`prompt`** | worker 的任务：要查清什么，以及调查对象、时间窗和已知关键事实，最多 2,000 个字符 |
+
+调用立即返回 worker 会话编号、排查项和角色。worker 只看得到 `prompt` 和 Case Board。worker 结束后，SIREN 把结果作为一条新消息发给调用方。同一会话同时最多 6 个 worker 在运行。
 
 ### `recon`
 

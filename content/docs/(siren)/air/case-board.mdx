@@ -2,7 +2,7 @@
 title: Case Board
 description: 查看 AIR 的当前结论、等你处理的事项、排查进度和攻击时间线，以及报告写完后证据是否有变化
 icon: ListChecks
-verifiedAgainst: v2.45.2
+verifiedAgainst: v2.47.0
 sources:
   - internal/server/mcp_case.go
   - internal/server/case_store.go
@@ -29,15 +29,15 @@ SIREN 会检查 AIR 的写入：没有证据或回答的排查项不能标为 Co
 
 这部分在 **Progress** 标签页，左边是发现，右边是下一步。
 
-左边按排查方向分组，列出 AIR 已查实、已排除、查不实和不适用的内容。分组标题前的节点颜色取这个方向最需要处理的状态：红色是有受阻项，灰色是还在排查，黄色是只剩证据缺口，绿色是全部已有结论。标题右侧显示已结项数和总项数。还没有排查项的方向显示 **not started**，排在最后。
+左边按排查方向分组，列出 AIR 已查实、已排除和查不实的内容。分组标题前的节点颜色取这个方向最需要处理的状态：红色是有受阻项，灰色是还在排查，黄色是只剩证据缺口，绿色是全部已有结论。标题右侧显示已结项数和总项数。还没有排查项的方向显示 **not started**，排在最后。
 
 **Hosts with no items** 列出 Project 里还没有排查项或事件提到的主机。
 
-右边的栏在页面滚动时保持可见。**Waiting on you** 列出需要你提供的内容，以及拿到后 AIR 要做什么。**Running** 是 AIR 正在做的事，**Queued** 是排在后面的事。
+右边的栏在页面滚动时保持可见。**Waiting on you** 列出需要你提供的内容，以及拿到后 AIR 要做什么。**Queued** 是 AIR 接下来要做的事。
 
-点击一条可以展开，看到它对应的问题、已试的证据源和涉及的实体。证据显示为原文摘录，点击 **Open file** 在 [Artifacts](/artifacts) 中打开完整文件。
+点击一条可以展开，看到它对应的问题和涉及的实体。证据显示为原文摘录，点击 **Open file** 在 [Artifacts](/artifacts) 中打开完整文件。
 
-写报告前先看是否还有 Blocked、Open、Active 或 Gap，再决定继续排查，还是在报告中说明缺口。
+写报告前先看是否还有 Blocked、Open 或 Gap，再决定继续排查，还是在报告中说明缺口。
 
 ## 排查中：看攻击时间线
 
