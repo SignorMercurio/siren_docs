@@ -45,15 +45,16 @@ sources:
 
 ## 入口模式
 
-表单顶部有三个入口模式，默认选中 **Ask**：
+表单顶部有四个入口模式，默认选中 **Ask**：
 
 | 模式 | 需要填写 | 会话开始时 |
 | --- | --- | --- |
 | **Ask** | 第一条消息 | 把你的消息原样发给 Agent，不绑定客户端 |
 | **Client** | 客户端、排查描述 | 把 Client ID 前缀和你的描述作为开场提示词 |
 | **Account** | **UID**、**Alert time range** | 让 Agent 先查该账号在时间范围内的告警，以此为排查起点。SIREN 不代为查询，能否查到取决于 Provider 自身的工具或 Skill |
+| **Case** | 再选 **Account** 或 **Client**，填写同上 | 启动多 Agent 的 Case Run，由 SIREN 按阶段启动多个角色会话，见 [Case Run](#case-run)。这是 beta 功能，入口在 [Settings](/webui#settings) 的 **Personal** 标签开启 **Multi-agent Case (beta)** 后才显示 |
 
-三种模式都注入当前范围的 SIREN MCP。开场提示词模板由运维人员配置，见 [Prompt 模板](/server/air-providers#prompt-模板)。在 [Clients 页](/clients) 点击某一行的 AIR 图标，会以 **Client** 模式选中该客户端。
+四种模式都注入当前范围的 SIREN MCP。开场提示词模板由运维人员配置，见 [Prompt 模板](/server/air-providers#prompt-模板)。在 [Clients 页](/clients) 点击某一行的 AIR 图标，会以 **Client** 模式选中该客户端。
 
 ### Account 时间范围
 
@@ -74,6 +75,7 @@ AIR 会话只能在 Project 视图中启动。会话的工作目录是该 Projec
 | 分组 | 内容 |
 | --- | --- |
 | **Needs you** | 等待审批或回答的会话，显示 **Approval** 或 **Needs input**；没有时不显示 |
+| **Case** | 本 Project 的 Case Run 及其运行中的角色会话，见 [Case Run](#case-run)；没有 Case Run 时不显示 |
 | **Running** | 其余运行中的会话 |
 | **Open** | 已打开但不属于上面各组的视图，例如已结束的会话；没有时不显示 |
 | **Today**、**Earlier** | 历史会话，见 [History](#history) |
@@ -125,6 +127,20 @@ GUI 会话等待审批或回答时移到左栏的 **Needs you** 分组；浏览�
 - Terminal：`Connection lost · the session may still be running on the server.`
 
 回放缓存有容量上限（`air.replayBufferBytes`，默认 4 MiB）。更早的内容已被挤出缓存时，GUI 时间线顶部显示 `Earlier activity is no longer in the replay buffer (N events dropped).`，点击 **Open full transcript** 只读打开 Provider 保存的完整记录；Terminal 见 [重新连接](/air/terminal#重新连接)。
+
+## Case Run
+
+**Case** 模式是 beta 功能，在 [Settings](/webui#settings) 的 **Personal** 标签开启 **Multi-agent Case (beta)** 后，新建会话页才显示这个入口。它不启动单个会话，而是启动一次 Case Run：SIREN 按阶段启动多个角色会话，一起推进同一个 [Case Board](/air/case-board)。每个 Project 同时只有一个 Case Run，再次 **Start Case** 会替换已结束的那一个。Pi 角色会话和普通 Pi 会话一样计费到 Project 的下单 UID。
+
+| 阶段 | SIREN 做什么 |
+| --- | --- |
+| **Kickoff** | 启动 **Lead** 会话。Lead 取告警或快照，建立排查清单并给每项指定负责角色；要等别的项先有结果的项标为 blocked 并写明等哪一项 |
+| **Investigating · 角色** | 按清单中的负责角色启动 **Entry**、**Host**、**Cloud** 会话取证，只写 Case Board，标题列出正在工作的角色，同一角色开了几个会话时带数量。每个会话最多分两项，一个角色的项多时并行开几个会话，全部角色同时最多 6 个会话；会话标题带它负责的项编号。每个会话独立调度：它的回合结束后，只要它的清单项自上次派出以来 Case Board 有进展且它还有未受阻的待办项，就立刻再次唤醒，不等其他会话；只补证据不算进展。回合结束的会话保留 10 分钟等再次唤醒，再次唤醒在原会话里继续；超过 10 分钟没有再唤醒就关闭，腾出会话名额，它的项之后交给新会话。blocked 项等的那一项有结果后自动回到 open 并唤醒负责角色，只等操作员的 blocked 项交给 Lead。每个回合最长 45 分钟，到 40 分钟时 SIREN 提醒角色把已有证据写回 Case Board 并收尾，超时后没写回的内容丢失。服务端会话数达到 `air.maxSessions` 时，Case Run 不会失败，每 30 秒重试启动，直到有名额 |
+| **Delivering** | 唤醒 Lead 裁决全部结论并交付，Lead 不自己取证。证据不够的项由 Lead 退回给负责角色，SIREN 唤醒对应角色处理完后再次唤醒 Lead。Lead 会话在交付后保留，可以继续对话或生成报告 |
+
+左栏 **Case** 分组的标题显示当前阶段和正在工作的角色，下面列出本次 Case Run 启动过的全部角色会话，标题为 `角色 · 调查对象`，worker 会话再带它负责的项编号；行尾显示会话状态：回合结束后等待再唤醒的显示收尾方式加 resting，已关闭的灰显并标明结束方式（Done、Handed off、Timed out 等）。点击运行中的会话即可打开查看，点击已关闭的会话打开它的 **History** 记录。每个角色用哪个 Provider、模型和 effort 在 [Settings](/webui#settings) 中设置。
+
+点击 **Case** 分组右侧的停止按钮并确认，即停止 Case Run：所有角色会话被终止，分组显示 **Stopped**。服务端重启后，进行中的 Case Run 显示 **Interrupted**；某个阶段出错时显示 **Failed** 和原因。这三种状态下分组右侧出现继续按钮，点击后从当前阶段重新开始，启动新的角色会话；已写入 Case Board 的内容保留。
 
 ## 停止与结束
 

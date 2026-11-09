@@ -11,6 +11,20 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.46.0 <DateTag>2026-11-08</DateTag>
+
+### New Features
+
+- AIR 新增 **Case** 入口（beta，在 Settings 的 **Personal** 标签开启 **Multi-agent Case (beta)** 后显示）：启动多 Agent 的 Case Run，由 SIREN 按阶段启动 Lead、Entry、Host、Cloud 角色会话，一起推进同一个 Case Board；一个角色的清单项多时并行开几个会话，每个会话最多两项，回合结束 10 分钟没再唤醒的会话自动关闭腾出名额，达到 `air.maxSessions` 时等待名额而不是失败。左栏 **Case** 分组显示阶段和本次 Case Run 的全部角色会话及其状态，可以停止和继续，见 [Case Run](/air/sessions#case-run)
+- Settings 新增 **Case roles**，设置每个角色的 Provider、模型和 effort，见 [Settings](/webui#settings)
+- Case Board 排查项记录负责角色，Progress 列表显示在维度旁
+- AIR 新增 [`case_handoff`](/reference/mcp#case_handoff)，角色会话收尾时记录一句说明和剩余项
+- Case Board 排查项新增 [`blocked_by`](/reference/mcp#case_update)：等待的排查项全部关闭后，SIREN 自动把它改回 open 并再派给负责角色
+
+### Improvement
+
+- 多个会话同时在一台主机上执行命令时，`run` 和 `run_batch` 先排队最多 90 秒，再报 busy
+
 ## v2.45.0 <DateTag>2026-11-04</DateTag>
 
 ### New Features
