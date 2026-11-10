@@ -2,7 +2,7 @@
 title: 启动与管理会话
 description: 选择模型和入口模式启动 AIR 会话，在左栏中重新接入或停止，并从 History 继续以前的会话
 icon: Workflow
-verifiedAgainst: v2.47.0
+verifiedAgainst: v2.48.0
 sources:
   - internal/server/webui/frontend/src/pages/AIRPage.tsx
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
@@ -35,10 +35,11 @@ sources:
 
 ## 选择模型和界面
 
-表单底部有模型菜单和 **Chat** / **Terminal** 切换：
+表单底部有模型菜单、**Chat** / **Terminal** 切换和 **Delegate to workers** 开关：
 
 - **模型菜单**：按 Provider（Codex、Claude、Pi）分组列出模型，选中模型即同时选定 Provider。标有 **default** 的是该 Provider 的默认模型，即 **Settings** 中的 AIR 默认模型，未设置时为 CLI 自身的默认值（Pi 为百炼上的 Kimi K3）。服务端不可用的 Provider 在分组标题旁显示原因，排查见 [检查可用性](/server/air-providers#检查可用性)；服务端读不到模型列表时，该 Provider 只显示 **Default model**。
 - **Chat / Terminal**：**Chat** 即 GUI 时间线，**Terminal** 运行 Provider 原生 TUI。某种界面不可用时页面自动改用另一种。
+- **Delegate to workers**（beta）：只在选中 **Chat** 时显示，默认关闭。打开后启动的会话可以把排查项交给 worker 会话，见 [多 Agent 分工](#多-agent-分工)。页面在当前浏览器记住上次的开关状态。
 
 所选模型只对这一个会话生效，不修改 **Settings**。页面在当前浏览器记住上次选择的 Provider、各 Provider 的模型和界面；要固定默认 Provider 和界面，在 **Settings** 的 **Default AIR provider** 和 **Default AIR surface** 中选择。所选 Provider 不可用时回退到服务端配置的 `air.provider`。
 
@@ -129,7 +130,7 @@ GUI 会话等待审批或回答时移到左栏的 **Needs you** 分组；浏览�
 
 ## 多 Agent 分工
 
-多 Agent 分工是 beta 功能。在 [Settings](/webui#settings) 的 **Personal** 标签把 **Multi-agent delegation (beta)** 设为 **On** 后，你之后新建的 GUI 会话可以调用 [`delegate`](/reference/mcp#delegate)，把 [Case Board](/air/case-board) 上的一个排查项交给 worker 会话取证。Terminal 会话没有这个工具。
+多 Agent 分工是 beta 功能，按会话开启：启动会话前在表单底部打开 **Delegate to workers**，这个会话就可以调用 [`delegate`](/reference/mcp#delegate)，把 [Case Board](/air/case-board) 上的一个排查项交给 worker 会话取证。Terminal 会话没有这个工具。
 
 派出 worker 的会话称为 Lead。分工方式和后台子 Agent 相同：
 
@@ -139,7 +140,7 @@ GUI 会话等待审批或回答时移到左栏的 **Needs you** 分组；浏览�
 - worker 结束后，SIREN 等 Lead 当前回合结束，再把结果发给 Lead：结束方式、排查项当前状态和 worker 的最后一条回复。几个 worker 同时结束时合成一条。
 - Lead 会话结束时，它还在运行的 worker 一并停止。
 
-左栏 **Running** 中，worker 缩进列在 Lead 下面，标题为 `排查项编号 · 角色`，行尾显示 Running、Completed、Failed 等状态。点击 worker 只读打开：运行中实时显示进展，结束后显示完整记录。worker 没有输入框，你不能和它对话，也不能继续它。
+左栏 **Running** 中，worker 缩进列在 Lead 下面，标题为 `排查项编号 · 角色`，行尾显示 Running、Completed、Failed 等状态。点击 worker 只读打开：运行中实时显示进展，结束后显示完整记录。worker 没有输入框，你不能和它对话，也不能继续它。worker 请求审批时 SIREN 自动拒绝；worker 提问时 SIREN 自动回复没有人能回答，让它用已有证据继续，并在最后一条回复中写明未决问题。
 
 要停止一个运行中的 worker，点击它那一行的停止按钮，在 **Stop worker** 对话框中确认。worker 的状态变为 Canceled，其他 worker 不受影响。Lead 会收到这一项的当前状态和 worker 已写回的内容。SIREN 同时告知 Lead 这是你手动停止的，要求它先向你说明现状，不原样重派这一项。worker 不出现在 **History** 中，Lead 结束后它的 worker 行一并消失。
 

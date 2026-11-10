@@ -92,7 +92,7 @@ Agentic IR 启动 Provider CLI 时会从子进程环境中剔除 `SIREN_MCP_ADMI
 
 `mcp.cmdBlacklist` 只检查 MCP 的 `run` 和 `run_batch`。Web 控制台的 Shells 和 Files、Agentic IR 中 Provider 自带的 Shell 工具（在控制主机上执行）都不受约束。
 
-无法编译的正则会被跳过且服务端照常启动，日志中记录 `mcp.blacklist_pattern.invalid` 警告；修改后请检查日志。匹配方式见 [命令黑名单](/reference/mcp#命令黑名单)。
+有一条正则无法编译时，服务端照常启动，但 `run` 和 `run_batch` 拦截全部命令，日志中记录 `mcp.blacklist_pattern.invalid` 错误；修改后请检查日志。匹配方式见 [命令黑名单](/reference/mcp#命令黑名单)。
 
 ## `/dossier/` 不鉴权
 

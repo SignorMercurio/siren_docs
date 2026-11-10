@@ -87,7 +87,7 @@ Profile 是命名的模块集合，只决定采集哪些模块，不改变超时
 | --- | --- | --- | --- | --- |
 | `default` | 标准完整采集 | `user` `ssh` `process` `network` `cron` `service` `env` `file` `rootkit` `application` | `user` `process` `network` `schtask` `env` `file` `application` | 同 Linux |
 | `quick` | 去掉耗时较长的 `file`，其余同 `default` | `user` `ssh` `process` `network` `cron` `service` `env` `rootkit` `application` | `user` `process` `network` `schtask` `env` `application` | 同 Linux |
-| `hunt` | 供 Agent 离线分析：以运行中的应用、中间件、容器和监听进程为中心，补充配置、日志、凭据和供应链证据 | `user` `ssh` `process` `network` `cron` `service` `env` `application` `topology` `supplychain` `config` `activity` `credential` | `user` `process` `network` `schtask` `env` `application` `topology` `supplychain` `config` `activity` `credential` | 同 Linux |
+| `hunt` | 供 Agent 离线分析：以运行中的应用、中间件、容器和监听进程为中心，补充配置、日志、凭据和供应链证据 | `user` `ssh` `process` `network` `cron` `service` `env` `rootkit` `application` `topology` `supplychain` `config` `activity` `credential` | `user` `process` `network` `schtask` `env` `application` `topology` `supplychain` `config` `activity` `credential` | 同 Linux |
 
 `hunt` 会复制部署材料和凭据文件元数据，Agent 通过 MCP 默认不能运行它，由运维人员在 WebUI 中运行；服务端设 `mcp.allowHuntRecon: true` 后才允许 Agent 运行，见 [MCP `recon`](/reference/mcp#recon)。
 
@@ -101,7 +101,7 @@ recon:
   profiles:
     default: [user, ssh, process, network, cron, service, env, file, rootkit, application]
     quick: [user, ssh, process, network, cron, service, env, rootkit, application]
-    hunt: [user, ssh, process, network, cron, service, env, application, topology, supplychain, config, activity, credential]
+    hunt: [user, ssh, process, network, cron, service, env, rootkit, application, topology, supplychain, config, activity, credential]
     netonly: [process, network]
 ```
 

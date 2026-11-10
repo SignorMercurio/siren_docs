@@ -2,7 +2,7 @@
 title: 客户端配置
 description: 客户端 config.yaml 的全部配置项、平台默认值、Profile 校验与插件开关
 icon: FileSliders
-verifiedAgainst: v2.45.0
+verifiedAgainst: v2.48.0
 sources:
   - config/config_linux.yaml
   - config/config_windows.yaml
@@ -35,11 +35,10 @@ import { Callout } from "fumadocs-ui/components/callout";
 从高到低：
 
 1. 命令行显式传入的参数：`siren client` 的 `-s` / `--server` 覆盖 `server`，`-p` / `--port` 覆盖 `port`。
-2. 与键名大写同名的环境变量，实际只对顶层键生效：`SERVER`、`PORT`。
-3. 配置文件。
-4. 内置默认值。
+2. 配置文件。
+3. 内置默认值。
 
-客户端不读取 `.env` 文件。
+客户端不从环境变量读取配置，也不读取 `.env` 文件。
 
 ### 生效时机
 
@@ -67,7 +66,7 @@ recon:
   profiles:
     default: [user, ssh, process, network, cron, service, env, file, rootkit, application]
     quick: [user, ssh, process, network, cron, service, env, rootkit, application]
-    hunt: [user, ssh, process, network, cron, service, env, application, topology, supplychain, config, activity, credential]
+    hunt: [user, ssh, process, network, cron, service, env, rootkit, application, topology, supplychain, config, activity, credential]
 
 plugins:
   marketplace: https://oss-siren.oss-cn-hongkong.aliyuncs.com/plugins
@@ -113,7 +112,7 @@ recon:
   profiles:
     default: [user, ssh, process, network, cron, service, env, file, rootkit, application]
     quick: [user, ssh, process, network, cron, service, env, rootkit, application]
-    hunt: [user, ssh, process, network, cron, service, env, application, topology, supplychain, config, activity, credential]
+    hunt: [user, ssh, process, network, cron, service, env, rootkit, application, topology, supplychain, config, activity, credential]
 
 plugins:
   marketplace: https://oss-siren.oss-cn-hongkong.aliyuncs.com/plugins
@@ -168,7 +167,7 @@ oss:
 没有全局开关。安装、启停和卸载见 [插件](/reference/plugins)。
 
 <Callout title="插件变更会重写 config.yaml" type="warn">
-  安装、启停或卸载插件时，客户端把当前生效的整份配置写回 `config.yaml`：注释被删除，键名变小写，命令行 `-s` / `-p` 或 `SERVER` / `PORT` 环境变量的值也写入文件。安装写入 `plugins.<name>: true`，卸载写入 `false`。写回前校验 Profile，会使某个 Profile 失效的变更整个被拒绝。
+  安装、启停或卸载插件时，客户端把当前生效的整份配置写回 `config.yaml`：注释被删除，键名变小写，命令行 `-s` / `-p` 的值也写入文件。安装写入 `plugins.<name>: true`，卸载写入 `false`。写回前校验 Profile，会使某个 Profile 失效的变更整个被拒绝。
 </Callout>
 
 ## oss

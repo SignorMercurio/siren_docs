@@ -2,7 +2,7 @@
 title: WebUI 导览
 description: Web 控制台的导航、范围切换和各页面用途
 icon: LayoutDashboard
-verifiedAgainst: v2.47.0
+verifiedAgainst: v2.48.0
 sources:
   - internal/server/webui/frontend/src/nav.ts
   - internal/server/webui/frontend/src/components/Sidebar.tsx
@@ -53,7 +53,6 @@ Web 控制台是使用 SIREN 的主要方式，浏览器直接访问 `https://<S
   - Agentic IR 默认 Provider：沿用上次（还没有选过时跟随服务端的 `air.provider`），或固定 Codex / Claude / Pi，单次会话仍可临时切换。
   - Agentic IR 默认界面：沿用上次，或固定 GUI / Terminal。
   - AIR 系统通知：默认开启，没在看的会话完成或等待时弹出浏览器通知，见 [系统通知](/air/sessions#系统通知)。
-  - **Multi-agent delegation (beta)**：默认关闭。开启后你新建的 GUI 会话可以把排查项交给 worker 会话，见 [多 Agent 分工](/air/sessions#多-agent-分工)。这个选项只影响你之后新建的会话。
   - Clients 列表刷新频率。
 - **AIR**：全部用户共用的 AIR 默认值，任何登录用户都可以修改，点击 **Save** 后对之后新启动的 GUI 和 Terminal 会话生效，已在运行的会话不受影响。
   - 每个 Provider 的默认模型和 effort。留空时沿用该 Provider 自己的配置，输入框和下拉框中灰色显示当前生效的值。新建会话时可以在模型菜单中为单个会话另选模型，见 [选择模型和界面](/air/sessions#选择模型和界面)。

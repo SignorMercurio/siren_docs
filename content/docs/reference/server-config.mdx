@@ -45,9 +45,10 @@ import { Callout } from "fumadocs-ui/components/callout";
 从高到低：
 
 1. 显式传入的 [命令行参数](#命令行参数)。
-2. 环境变量 `LISTEN`、`PORT`、`CERT`、`KEY`，覆盖同名顶层键。服务环境或 `.env` 中恰好有 `PORT` 时，服务端会监听这个端口。
-3. 配置文件。
-4. 内置默认值（下文各表的“默认值”列）。
+2. 配置文件。
+3. 内置默认值（下文各表的“默认值”列）。
+
+环境变量不覆盖配置键，只提供 [凭证和运行参数](#环境变量)。
 
 ### 生效时机
 
@@ -107,7 +108,7 @@ egress:
       ipProtocol: TCP
       destCidrIp: 203.0.113.10/32
       portRange: 443/443
-  discovery:
+  discovery:                   # 无内置默认值，以下为安装包自带的值
     uid: "1601097845544644"
     region: cn-hangzhou
     project: cloudfirewall-project-1601097845544644-cn-hangzhou
@@ -222,14 +223,14 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 
 ### egress.discovery
 
-部署未提供出口 IP 时用于查询云防火墙日志，见 [出口发现](/server/prerequisites#出口发现-egressdiscovery)。各字段可单独省略。
+部署未提供出口 IP 时用于查询云防火墙日志，见 [出口发现](/server/prerequisites#出口发现-egressdiscovery)。四个字段都没有内置默认值，缺任何一个时不做出口发现，部署提示手动指定出口 IP。
 
 | 键 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `egress.discovery.uid` | string | `1601097845544644` | 云防火墙日志所在的阿里云账号 UID，加引号以免被解析为数字 |
-| `egress.discovery.region` | string | `cn-hangzhou` | 日志服务地域 |
-| `egress.discovery.project` | string | `cloudfirewall-project-1601097845544644-cn-hangzhou` | 日志服务 Project |
-| `egress.discovery.logstore` | string | `cloudfirewall-logstore` | 日志服务 Logstore |
+| `egress.discovery.uid` | string | 无 | 云防火墙日志所在的阿里云账号 UID，加引号以免被解析为数字 |
+| `egress.discovery.region` | string | 无 | 日志服务地域 |
+| `egress.discovery.project` | string | 无 | 日志服务 Project |
+| `egress.discovery.logstore` | string | 无 | 日志服务 Logstore |
 
 ## mcp
 
@@ -302,8 +303,6 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 | `SOAR_DESCRIBE_ATTEMPTS` | 查询剧本结果的最多尝试次数，默认 `20`，间隔 3 秒 |
 | `CODEX_HOME` | AIR 从 `<CODEX_HOME>/sessions` 读取 Codex 历史会话，未设置时为 `~/.codex/sessions` |
 | `CLAUDE_CONFIG_DIR` | **Settings** 从这里读取 Claude Code 的默认模型和 MCP 配置，未设置时用 `~/.claude` 和 `~/.claude.json` |
-| `LISTEN` / `PORT` / `CERT` / `KEY` | 覆盖同名顶层键，见 [优先级](#优先级) |
-
 `SOAR_*` 速率与次数变量须为正整数，无效时用默认值。修改启动环境后须重启服务端。
 
 Agentic IR 启动 Provider CLI 时会剔除 MCP 凭证变量，其余环境变量原样传给 CLI，见 [MCP 鉴权](/server/security#mcp-鉴权)。
@@ -316,6 +315,7 @@ Agentic IR 启动 Provider CLI 时会剔除 MCP 凭证变量，其余环境变�
 | --- | --- | --- | --- |
 | `air.usage.prices` | 按公开标价填好的常用模型 | `[]` | 删除该键后 [Usage](/usage) 只计 token，不计费用 |
 | `consoleBrowser.sshPort` | `2222` | `0` | 删除该键后使用 SSH 默认端口 |
+| `egress.discovery.*` | 官方服务端的云防火墙日志位置 | 无 | 自建服务端须改成自己的账号和 Logstore；删除后不做出口发现 |
 | `egress.rules` | 三条规则，`siren_server_callback` 指向官方服务端 `47.111.170.208` | 无（必填） | 自建服务端部署前须改成自己的公网 IP 和端口；一键部署的客户端也连这个地址 |
 | `mcp.cmdBlacklist` | 30 条破坏性命令规则 | 无 | 删除该键即不拦截任何命令 |
 | `webui.dossierDir` | `/opt/siren/dossier` | `""` | 目录需单独部署，见 [部署 Dossier](/server/dossier) |

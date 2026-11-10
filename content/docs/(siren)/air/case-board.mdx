@@ -2,7 +2,7 @@
 title: Case Board
 description: 查看 AIR 的当前结论、等你处理的事项、排查进度和攻击时间线，以及报告写完后证据是否有变化
 icon: ListChecks
-verifiedAgainst: v2.47.0
+verifiedAgainst: v2.48.0
 sources:
   - internal/server/mcp_case.go
   - internal/server/case_store.go
@@ -35,7 +35,7 @@ SIREN 会检查 AIR 的写入：没有证据或回答的排查项不能标为 Co
 
 右边的栏在页面滚动时保持可见。**Waiting on you** 列出需要你提供的内容，以及拿到后 AIR 要做什么。**Queued** 是 AIR 接下来要做的事。
 
-点击一条可以展开，看到它对应的问题和涉及的实体。证据显示为原文摘录，点击 **Open file** 在 [Artifacts](/artifacts) 中打开完整文件。
+点击一条可以展开，看到它对应的问题和涉及的实体。文件路径、账号和资源带有所在主机时显示为 `主机名:值`，两台主机上的同名路径是两个实体。证据显示为原文摘录，点击 **Open file** 在 [Artifacts](/artifacts) 中打开完整文件。
 
 写报告前先看是否还有 Blocked、Open 或 Gap，再决定继续排查，还是在报告中说明缺口。
 

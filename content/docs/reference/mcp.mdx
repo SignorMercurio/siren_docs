@@ -2,9 +2,10 @@
 title: MCP
 description: SIREN MCP 的端点、鉴权、工具参数、结果回读、命令黑名单与审计
 icon: Plug
-verifiedAgainst: v2.47.0
+verifiedAgainst: v2.48.0
 sources:
   - internal/server/mcp.go
+  - internal/server/mcp_provisioning.go
   - internal/server/mcp_http.go
   - internal/server/mcp_auth.go
   - internal/server/group_projects.go
@@ -33,7 +34,7 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-SIREN Server 内置 [MCP](https://modelcontextprotocol.io/) 服务，提供 11 个工具（`save_evidence`、`case_read`、`case_update` 只在 Project 端点提供，`delegate` 只在开启多 Agent 分工的 AIR GUI 会话中提供）：列出客户端、执行命令、回读和检索结果、保存证据、维护排查清单、派出 worker、触发 Recon 和部署 SIREN。[Agentic IR](/air) 自动接入它；本页供外部 MCP 客户端接入和排查时查阅。
+SIREN Server 内置 [MCP](https://modelcontextprotocol.io/) 服务，提供 13 个工具（`save_evidence`、`case_read`、`case_update` 只在 Project 端点提供，`delegate` 只在开启多 Agent 分工的 AIR GUI 会话中提供）：列出客户端、执行命令、回读和检索结果、保存证据、维护排查清单、派出 worker、触发 Recon、部署 SIREN、放行客户端 IP 和配置出站规则。[Agentic IR](/air) 自动接入它；本页供外部 MCP 客户端接入和排查时查阅。
 
 ## 端点
 
@@ -119,6 +120,8 @@ bearer_token_env_var = "SIREN_MCP_ADMIN_TOKEN"
 | `delegate` | **`item`**、**`prompt`** | 仅开启 [多 Agent 分工](/air/sessions#多-agent-分工) 的 AIR GUI 会话：把一个排查项交给 worker 会话，立即返回 |
 | `recon` | **`client_id`**、`profile` | 触发一次 Recon 并等待结果 |
 | `deploy` | **`uid`**、**`instance_id`**、`public_ip` | 通过 SOAR 向一台阿里云 ECS 部署 SIREN，等待客户端连接 |
+| `allow` | **`ip`** | 在 SIREN 服务端安全组放行一个客户端公网 IP |
+| `egress` | **`uid`**、**`instance_id`** | 给一台阿里云 ECS 挂上 SIREN 专用出站安全组，放行它到 SIREN 的出方向访问 |
 
 SIREN MCP 不提供告警查询工具。
 
@@ -341,6 +344,30 @@ Project 端点（`/mcp/project/<id>`）不传 `audit_id` 时，在本 Project �
   `deploy` 会修改目标账号的安全组并在实例上安装软件。工具说明要求 Agent 只在用户明确要求时调用，但这只约束模型，不是 SIREN 的开关；调用前是否确认由 MCP 客户端或 Provider 的配置决定。
 </Callout>
 
+### `allow`
+
+| 参数 | 说明 |
+| --- | --- |
+| `ip` | 要放行的客户端公网 IP，必须是合法 IP |
+
+`allow` 与 WebUI 中 [Allow access](/onboard/egress#allow-access) 相同：在 SIREN 服务端安全组放行这个 IP。`deploy` 已经放行它验证过的回连 IP，不需要再调用 `allow`。
+
+### `egress`
+
+| 参数 | 说明 |
+| --- | --- |
+| `uid` | 拥有该实例的阿里云账号 UID |
+| `instance_id` | 目标 ECS 实例 ID |
+
+`egress` 与 WebUI 中 [Configure egress](/onboard/egress) 相同：给实例挂上 SIREN 专用出站安全组，按 `egress.rules` 放行。适用于 `deploy` 报告安装后连不上 SIREN 的实例。
+
+- 返回专用安全组 ID、实例 ID 和规则列表；配置过程中的警告在 `warnings` 中。
+- 每次配置留下一条恢复记录，在 WebUI 中用 [Restore egress](/restore-egress) 撤销。MCP 没有恢复工具。
+
+<Callout title="allow 和 egress 会写云端" type="warn">
+  两个工具都修改安全组。工具说明要求 Agent 只在用户明确要求、并给出确切 IP 或实例时调用。这只约束模型，不是 SIREN 的开关；调用前是否确认由 MCP 客户端或 Provider 的配置决定。
+</Callout>
+
 ## 长结果回读
 
 `run` 返回给 Agent 的是有界视图，原始输出保存在服务端，可用 `read_run_result` 和 `search_run_result` 按 `audit_id` 回读。回读只读已收到的结果，不会重新执行命令。
@@ -437,7 +464,7 @@ Project 端点（`/mcp/project/<id>`）不传 `audit_id` 时，在本 Project �
 修改黑名单：
 
 - 误报时只收窄命中的那条规则，不要清空整组。
-- 无法编译的正则会被跳过，并在每次 MCP 请求时记录 `mcp.blacklist_pattern.invalid` 警告；改完后检查日志，确认没有规则被跳过。
+- 有一条正则无法编译时，`run` 和 `run_batch` 拦截全部命令，返回 `command blocked by policy (matched: invalid mcp.cmdBlacklist pattern "<规则>")`，日志记录一条 `mcp.blacklist_pattern.invalid` 错误；改完后检查日志。
 - 配置只在启动时读取，修改后需重启服务端。
 
 ## 审计日志
@@ -447,13 +474,13 @@ MCP 日志写入服务端日志，组件为 `mcp`，可在 [Logs](/logs) 页按�
 | 事件 | 级别 | 主要字段 |
 | --- | --- | --- |
 | `mcp.tool.started` | Debug | `tool`、`project` |
-| `mcp.tool.finished` | 成功为 Info（`ls` 为 Debug），`send_error` / `deploy_error` 为 Error，其他为 Warning | `tool`、`project`、`outcome`、`duration_ms`、`client_id` |
+| `mcp.tool.finished` | 成功为 Info（`ls` 为 Debug），以 `_error` 结尾的 `outcome`（如 `send_error`、`deploy_error`、`egress_error`）为 Error，其他为 Warning | `tool`、`project`、`outcome`、`duration_ms`、`client_id` |
 | `mcp.run.requested` | Info | `audit_id`、`command`、`requested_client_id`、`project`、`tool`（`run` 或 `run_batch`）、`batch_id` |
 | `mcp.run.finished` | 成功为 Info，`send_error` 为 Error，其他为 Warning | 同上，另有 `outcome`、`duration_ms`、`client_id`、`matched_pattern`、`error` |
 
 - `project` 为 Project ID，Global 端点记为 `global`。
 - 每次 `run` 写同一 `audit_id` 的一对 `mcp.run.requested` / `mcp.run.finished`，被拦截、目标被拒绝、取消和超时的调用也不例外。
-- `run_batch` 每台主机各有一对记录，以 `batch_id` 关联；整批被黑名单拦截或目标解析失败时只有 `mcp.tool.finished`。
+- `run_batch` 每台主机各有一对记录，以 `batch_id` 关联；整批被黑名单拦截时写一条 `mcp.run_batch.blocked`（Warning，含 `command` 和 `matched_pattern`）和 `mcp.tool.finished`；目标解析失败时只有 `mcp.tool.finished`。
 - 日志含完整命令，不含命令输出；输出需在 24 小时内用 `read_run_result` 回读。
 - Debug 级记录只在 `logging.level` 为 `debug` 时保留。
 

@@ -2,7 +2,7 @@
 title: 恢复出站规则
 description: 撤销 Configure egress 对云端安全组所做的改动
 icon: Undo2
-verifiedAgainst: v2.45.3
+verifiedAgainst: v2.48.0
 sources:
   - internal/server/webui/frontend/src/components/EgressRecovery.tsx
   - internal/server/webui/frontend/src/components/Provisioning.tsx
@@ -24,7 +24,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ## 操作步骤
 
-1. 在 Provisioning 面板选择 **Restore** 标签，面板列出服务端保存的恢复记录。
+1. 在 Provisioning 面板选择 **Restore** 标签，面板列出还需要处理的恢复记录。已恢复的记录默认不显示，点击列表底部的 **Show N restored** 查看。
 2. 勾选要恢复的记录，每次最多 20 个实例。
 3. 点击 **Restore N instances**。
 
