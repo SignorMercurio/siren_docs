@@ -132,6 +132,8 @@ GUI 会话等待审批或回答时移到左栏的 **Needs you** 分组；浏览�
 
 多 Agent 分工是 beta 功能，按会话开启：启动会话前在表单底部打开 **Delegate to workers**，这个会话就可以调用 [`delegate`](/reference/mcp#delegate)，把 [Case Board](/air/case-board) 上的一个排查项交给 worker 会话取证。Terminal 会话没有这个工具。
 
+开关只对新会话生效。从 **History** 继续、**Continue** 或换界面重开的会话保留原来的角色：原来能分工的会话在 Chat 中继续时仍然可以，原来不能的不会因为开关打开而获得这个工具。
+
 派出 worker 的会话称为 Lead。分工方式和后台子 Agent 相同：
 
 - Lead 先把排查项的负责角色设为 Entry、Host 或 Cloud，再每项调用一次 `delegate`，写明要查清什么。`delegate` 立即返回，Lead 接着做自己的项，或结束回合。
