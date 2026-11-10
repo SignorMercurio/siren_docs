@@ -246,7 +246,7 @@ Project 端点（`/mcp/project/<id>`）不传 `audit_id` 时，在本 Project �
 | `dimension` | `lead`、`entry`、`credentials`、`execution_persistence`、`lateral_assets`、`impact_data`、`response_status`；新建时必填 |
 | `owner` | 负责这一项的角色：`lead`、`entry`、`host`、`cloud`，不传表示 `lead`。[`delegate`](#delegate) 按它决定 worker 的角色。worker 只能改分给自己的那一项，它新建的项归 `lead`；worker 不能写 `summary` |
 | `state` | `open`、`confirmed`、`refuted`、`gap`、`blocked`，默认 `open` |
-| `entities` | 已有实体的 `id`，或新实体的 `kind` 和 `value`。`kind` 为 `host`、`ip`、`domain`、`identity`、`file`、`resource`；`host` 的 `value` 是本 Project 的在线 Client ID |
+| `entities` | 已有实体的 `id`，或新实体的 `kind` 和 `value`。`kind` 为 `host`、`ip`、`domain`、`identity`、`file`、`resource`；`host` 的 `value` 是本 Project 的在线 Client ID。文件路径、本机账号、本机资源可以加 `host`，值是它所在主机的 Client ID：同一路径或账号在两台主机上是两个实体，Case Board 显示为 `主机名:路径`。文件哈希、IP 和域名不能加 `host` |
 | `evidence` | 证据列表，见下文 |
 | `remove_entities`、`remove_evidence` | 先从列表移除的实体、证据编号 |
 | `answer` | 证据查实的内容，Case Board 显示为发现。`confirmed`、`refuted`、`gap` 必填 |
