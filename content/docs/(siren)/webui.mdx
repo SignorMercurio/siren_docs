@@ -13,6 +13,7 @@ sources:
   - internal/server/air_settings.go
   - internal/server/air_settings_extensions.go
   - internal/server/webui/frontend/src/preferences.ts
+  - internal/server/webui/frontend/src/i18n/index.ts
   - internal/server/webui/frontend/src/air/airPreference.ts
   - internal/server/webui/frontend/src/pages/InvestigationsPage.tsx
   - internal/server/webui/frontend/src/pages/AIRPage.tsx
@@ -40,6 +41,8 @@ Web 控制台是使用 SIREN 的主要方式，浏览器直接访问 `https://<S
 
 每个页面、工具标签、AIR 会话和选中文件都有自己的 URL，可以刷新或分享。
 
+本文档统一使用英文界面的名称，中文界面的对应名称见 [界面语言](#界面语言)。
+
 ## Investigations
 
 需要等待结果的调查工具，分为 **AccessKey**、**Recon** 和 **Process Analysis** 三个标签，切换标签不丢失已有结果。见 [AccessKey 调查](/ak)、[自动化信息收集](/recon) 和 [进程分析](/process)。
@@ -49,6 +52,7 @@ Web 控制台是使用 SIREN 的主要方式，浏览器直接访问 `https://<S
 从左下角的账号菜单打开，分四个标签：
 
 - **Personal**：只保存在当前浏览器，不跟随账号同步。
+  - Language：界面语言，见 [界面语言](#界面语言)。
   - 启动时的 Project 范围：沿用上次的范围（刷新时各标签页保持自己的范围），或每次从 Global 开始。
   - Agentic IR 默认 Provider：沿用上次（还没有选过时跟随服务端的 `air.provider`），或固定 Codex / Claude / Pi，单次会话仍可临时切换。
   - Agentic IR 默认界面：沿用上次，或固定 GUI / Terminal。
@@ -61,3 +65,25 @@ Web 控制台是使用 SIREN 的主要方式，浏览器直接访问 `https://<S
   - 保存前别人已经改过时，页面提示 **Reload**；重新加载会用对方的版本替换你未保存的修改。
 - **MCP & Skills**：只读列出 AIR 会话可用的 MCP 服务器和服务端 `~/.agents/skills` 下的 Skills。MCP 服务器标出来源 Provider，SIREN 自己的 MCP 排在最前；页面不显示 MCP 的请求头、令牌和命令参数。
 - **Server**：只读的版本号、鉴权状态与当前用户、Dossier 目录，以及每个 AIR Provider 实际可用的界面；Provider 不可用时显示原因。
+
+## 界面语言
+
+WebUI 提供简体中文和英文两种界面语言。首次打开时界面跟随浏览器语言：浏览器语言是中文时显示简体中文，其他情况显示英文。
+
+在 [Settings](#settings) 的 **Personal** 标签第一行 **Language**（语言）中选择 **Follow browser**（跟随浏览器）、**English** 或 **简体中文**。
+
+- 换成另一种语言时页面刷新一次。正在运行的 AIR 会话保留在服务端，刷新后自动重新接入。
+- 每个浏览器各自保存语言选择。
+- 只有界面文案会翻译。服务端返回的错误信息、日志、Agent 输出、Case Board 内容和导出文件保持原文。
+
+中文界面的导航和入口名称对应如下。Agentic IR 以及 AIR、Recon、Dossier、SOAR、MCP 等专有名词在中文界面中保留英文。
+
+| 位置 | 英文界面 → 中文界面 |
+| --- | --- |
+| **Respond**（响应） | Clients → 客户端、Case Board → 案件看板 |
+| **Tools**（工具） | Shells → 命令行、Files → 文件、Investigations → 调查、Cloud Access → 云访问 |
+| **Evidence**（证据） | Artifacts → 产物、Reports → 报告 |
+| **System**（系统） | Projects → 项目、Usage → 用量、Logs → 日志 |
+| 范围菜单 | Project scope → 项目范围、Global → 全局、Manage projects → 管理项目 |
+| 账号菜单 | Settings → 设置、Docs → 文档、Feedback → 反馈 |
+| Settings 标签 | Personal → 个人、MCP & Skills → MCP 与技能、Server → 服务器 |
