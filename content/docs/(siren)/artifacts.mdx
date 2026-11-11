@@ -2,7 +2,7 @@
 title: Artifacts
 description: 浏览、预览、上传和整理服务端上的调查产出与证据文件
 icon: Archive
-verifiedAgainst: v2.45.0
+verifiedAgainst: v2.49.0
 sources:
   - internal/server/webui/frontend/src/pages/ArtifactsPage.tsx
   - internal/server/webui/frontend/src/components/FileBrowser.tsx
@@ -10,6 +10,7 @@ sources:
   - internal/server/webui/frontend/src/components/fileTreeModel.ts
   - internal/server/webui/frontend/src/components/FilePreview.tsx
   - internal/server/webui/frontend/src/components/FileDropUpload.tsx
+  - internal/server/webui/frontend/src/api.ts
   - internal/server/webui/frontend/src/router.ts
   - internal/server/webui/webui_artifacts.go
   - internal/server/webui/webui_download.go
@@ -62,10 +63,12 @@ Artifacts 页管理服务端上的证据目录：Recon 快照、AccessKey 报告
 
 点击文件树中的文件在右侧预览：
 
-- **文本**：5 MiB 以内直接显示。二进制文件显示 `Preview not supported for binary files`，下载后查看。
+- **文本**：5 MiB 以内直接显示，超过时提示 `file too large for preview (max 5 MiB)`。二进制文件显示 `Preview not supported for binary files`，下载后查看。
 - **Markdown**：`.md`、`.markdown` 渲染显示。报告中的相对链接在 Artifacts 中打开目标文件，见 [链接如何打开](/air/evidence#链接如何打开)。
-- **图片**：PNG、JPEG、GIF、WebP 可直接预览。
+- **图片**：PNG、JPEG、GIF、WebP 可直接预览，单个不超过 100 MiB。
 - **HTML**：不在页面中渲染，下载后用浏览器打开。
+
+文件无法打开时，预览区显示服务端给出的原因，例如 `open: permission denied`。图片能读取但浏览器无法解码时，提示下载后查看。
 
 文件树上方的搜索框（**Search...**）按名称在当前范围内查找文件和目录，包括尚未展开的目录，不区分大小写。结果以目录树显示，最多 200 条，超出时提示 `Showing the first matches only`。隐藏文件和服务端自身文件不会出现在结果中。在结果中打开文件后清空搜索，完整文件树会展开到该文件。
 

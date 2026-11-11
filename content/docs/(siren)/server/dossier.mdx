@@ -2,8 +2,8 @@
 title: 部署 Dossier
 description: 把 Dossier 报告编辑器部署到 SIREN 服务端，供 WebUI 打开和编辑报告
 icon: Upload
-verifiedAgainst: v2.45.0
-dossierVerifiedAgainst: 550782c
+verifiedAgainst: v2.49.0
+dossierVerifiedAgainst: 0fe15ef
 sources:
   - cmd/server/cli/root.go
   - config/server_config.yaml
@@ -70,12 +70,12 @@ make deploy-dry-run
 make deploy
 ```
 
-`make deploy` 把运行时发布到 `DOSSIER_DEPLOY_DIR`（默认 `SIREN:/opt/siren/dossier`，`SIREN` 是 ssh 主机名），并把中文模板 `report.md` 和英文模板 `report.en.md` 一起同步到 Sleuth skill 的模板目录 `SKILL_DIR`（默认 `../sleuth/skills/sleuth/assets`）。`SKILL_DIR` 不存在或不可写时，部署在动服务端之前中止。只需要其中一部分时：
+`make deploy` 把运行时发布到 `DOSSIER_DEPLOY_DIR`（默认 `SIREN:/opt/siren/dossier`，`SIREN` 是 ssh 主机名），并把中文模板 `report.md` 和英文模板 `report.en.md` 一起同步到 Dossier 报告 skill 的模板目录 `SKILL_DIR`（默认 `skills/dossier/assets`）。`SKILL_DIR` 不存在或不可写时，部署在动服务端之前中止。只需要其中一部分时：
 
 ```bash title="Dossier 仓库"
 make deploy-runtime                       # 只发布 SIREN 上的运行时
 make deploy-runtime-dry-run               # 预演运行时发布
-make deploy-skill                         # 只同步 Sleuth 模板
+make deploy-skill                         # 只同步报告 skill 模板
 DOSSIER_DEPLOY_DIR=siren-prod:/opt/siren/dossier make deploy-runtime
 ```
 

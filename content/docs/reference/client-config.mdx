@@ -2,7 +2,7 @@
 title: 客户端配置
 description: 客户端 config.yaml 的全部配置项、平台默认值、Profile 校验与插件开关
 icon: FileSliders
-verifiedAgainst: v2.48.0
+verifiedAgainst: v2.49.0
 sources:
   - config/config_linux.yaml
   - config/config_windows.yaml
@@ -139,7 +139,7 @@ oss:
 
 | 键 | 类型 | 内置默认值 | 说明 |
 | --- | --- | --- | --- |
-| `recon.commandTimeout` | int（秒） | `30` | 每条底层采集命令的超时，也用于服务端下发的远程命令（与服务端同名键取较小值）、插件执行和本地模式的 OSS 上传 |
+| `recon.commandTimeout` | int（秒） | `30` | 每条底层采集命令的超时，也用于服务端下发的远程命令（与服务端同名键取较小值）和插件执行 |
 | `recon.collectionTimeout` | int（秒） | `270` | 整个 Profile 的采集预算，远程 Recon 时与服务端下发的预算取较小值，见 [超时](/recon#超时) |
 | `recon.defaultProfile` | string | 无（必填） | 未指定 Profile 时使用的名称，必须是 `recon.profiles` 中已定义的 Profile |
 | `recon.profiles.<name>` | list | 无（必填） | 命名的模块列表，见下方校验规则 |

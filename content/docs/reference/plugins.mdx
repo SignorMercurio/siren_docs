@@ -2,7 +2,7 @@
 title: 插件
 description: recon 插件与 command 插件的启用方式、管理命令和内置插件
 icon: Puzzle
-verifiedAgainst: v2.45.0
+verifiedAgainst: v2.49.0
 sources:
   - internal/plugin/plugin.go
   - internal/plugin/manage.go
@@ -132,7 +132,7 @@ plugins:
 ./siren <plugin name> [args...]
 ```
 
-- 参数按空白切分后原样传入，不支持引号，参数中不能含空格。
+- 插件名之后的参数原样传入，由 shell 按引号切分；含空格的参数加引号。
 
 ## 在 WebUI 中使用
 
@@ -152,7 +152,7 @@ Files 单个文件最多下载 100 MiB；更大的文件可在客户端使用本
 | 输出 | stdout 和 stderr 合并；单次最多 16 MiB，在 Recon 中还受该模块剩余输出预算限制 |
 | setup 脚本 | 最长 5 分钟，输出上限 16 MiB |
 
-`jmap` 导出大堆、`chkrootkit` 全盘检查通常超过 30 秒，需在客户端 `config.yaml` 中调大 `recon.commandTimeout`，运行中的客户端需重启后生效；这个值同时作用于所有 Recon 采集命令、远程命令和本地 OSS 上传。在 Recon 中插件还受 `recon.collectionTimeout`（默认 270 秒）和服务端 `recon.responseTimeout` 限制，见 [Recon 超时](/recon#超时)。recon 插件超时或报错时该段落记为失败，快照变为 partial，其余模块照常保存。
+`jmap` 导出大堆、`chkrootkit` 全盘检查通常超过 30 秒，需在客户端 `config.yaml` 中调大 `recon.commandTimeout`，运行中的客户端需重启后生效；这个值同时作用于所有 Recon 采集命令和远程命令。在 Recon 中插件还受 `recon.collectionTimeout`（默认 270 秒）和服务端 `recon.responseTimeout` 限制，见 [Recon 超时](/recon#超时)。recon 插件超时或报错时该段落记为失败，快照变为 partial，其余模块照常保存。
 
 ## chkrootkit
 

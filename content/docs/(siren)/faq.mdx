@@ -2,7 +2,7 @@
 title: 常见问题
 description: 按使用流程整理的常见问题，每条指向负责说明的页面
 icon: BadgeQuestionMark
-verifiedAgainst: v2.45.0
+verifiedAgainst: v2.49.0
 sources:
   - cmd/server/cli/root.go
   - cmd/server/cli/upgrade.go
@@ -97,7 +97,7 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 
 <Accordion title="手动安装的客户端连不上">
 
-依次确认：服务端已放行该主机的出口 IP（[Allow access](/onboard/egress#allow-access)）；主机能访问服务端 TLS 端口；`-s`、`-p` 或 `config.yaml` 的 `server`、`port` 正确；两端版本一致。用部署模式启动的客户端，输出在安装目录的 `siren.log`（Windows 为 `siren.stderr.log`）。接入失败记录可在 [Logs](/logs#常用审计事件) 中搜索 `client.handshake_failed`。
+依次确认：服务端已放行该主机的出口 IP（[Allow access](/onboard/egress#allow-access)）；主机能访问服务端 TLS 端口；`-s`、`-p` 或 `config.yaml` 的 `server`、`port` 正确；两端版本一致。用部署模式启动的客户端，输出在安装目录的 `siren.log`（Windows 为 `siren.stderr.log`）。Windows 上部署模式报 `SIREN client exited during startup` 时，安装脚本已打印客户端的输出；提示 `siren.exe was removed after installation` 时，是杀毒软件或 EDR 删除了程序，把 `C:\Windows\Temp\siren` 加入其信任列表后重新运行安装脚本。接入失败记录可在 [Logs](/logs#常用审计事件) 中搜索 `client.handshake_failed`。
 
 </Accordion>
 

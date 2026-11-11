@@ -2,7 +2,7 @@
 title: Agentic 应急响应
 description: 在 WebUI 中让 Codex、Claude Code 或 Pi 通过 SIREN 排查在线主机
 icon: Brain
-verifiedAgainst: v2.45.0
+verifiedAgainst: v2.49.0
 sources:
   - internal/server/air_runtime.go
   - internal/server/webui/frontend/src/pages/AIRPage.tsx
@@ -18,6 +18,8 @@ sources:
   - internal/server/mcp_run_search.go
   - internal/server/mcp_case.go
   - internal/server/mcp_command_policy.go
+  - internal/server/mcp_delegate.go
+  - internal/server/mcp_provisioning.go
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
@@ -107,15 +109,18 @@ Agent 通过 SIREN MCP 操作客户端，参数和限制见 [MCP 集成](/refere
 | `read_run_result`、`search_run_result` | 回读或搜索命令输出的原文；Project 会话可查本 Project 近期的命令和输出，避免重复取证；保留期见 [限制](/reference/limits#mcp) |
 | `save_evidence` | 仅 Project 会话：把 `run` / `run_batch` 的原始输出原样保存到 `evidence/` 目录，供脚注引用 |
 | `case_read`、`case_update` | 仅 Project 会话：维护 [Case Board](/air/case-board) 上的排查清单和攻击时间线 |
+| `delegate` | 仅开启 [多 Agent 分工](/air/sessions#多-agent-分工) 的 GUI 会话：把一个排查项交给 worker 会话 |
 | `recon` | 在客户端上触发一次 [Recon](/recon)，结果保存到 Artifacts |
 | `deploy` | 通过 SOAR 向一台阿里云 ECS 部署 SIREN，并等待客户端连接 |
+| `allow` | 在 SIREN 服务端安全组放行一个客户端公网 IP |
+| `egress` | 给一台阿里云 ECS 挂上 SIREN 专用出站安全组，放行它到 SIREN 的出方向访问 |
 
 Project 配置了 [云访问](/consoles) 时，Agent 还可以用 `aliyun` 查询客户账号，用 `opencli` 操作客户云控制台。
 
 <Callout title="边界" type="warn">
   - **范围**：Project 会话只能看到和操作本 Project 的客户端。
   - **命令黑名单**：`run` 和 `run_batch` 下发前检查 [命令黑名单](/reference/mcp#命令黑名单)，命中时不执行。
-  - **`deploy`**：会修改安全组并在目标主机上安装软件。工具说明要求 Agent 只在你明确要求部署到某台实例时调用，调查请求本身不构成授权。这是给模型的约束，不是 SIREN 的硬开关；调用前是否需要审批取决于 Provider 配置。
+  - **`deploy`、`allow`、`egress`**：会修改安全组，`deploy` 还会在目标主机上安装软件。工具说明要求 Agent 只在你明确要求对某个 IP 或某台实例执行时调用，调查请求本身不构成授权。这是给模型的约束，不是 SIREN 的硬开关；调用前是否需要审批取决于 Provider 配置。
   - **Provider 自带的工具**：Agent 自己的 Shell、文件读写等工具直接在 SIREN 服务端上、以 `siren_server` 的系统用户和会话工作目录执行，不经过命令黑名单；是否需要审批由各 CLI 的配置决定，见 [Provider 差异](/air/providers)。
   - **凭证**：会话只拿到当前范围、随会话结束失效的 MCP 凭证，长期 MCP 管理凭证不会交给 Provider。本 Project 的阿里云 AccessKey 可由会话中的 `aliyun` 使用。
 </Callout>

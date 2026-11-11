@@ -2,7 +2,7 @@
 title: 插件开发
 description: 插件清单、程序约定、构建与发布到插件市场
 icon: Code
-verifiedAgainst: v2.45.0
+verifiedAgainst: v2.49.0
 sources:
   - internal/plugin/plugin.go
   - internal/plugin/manage.go
@@ -93,7 +93,7 @@ SIREN 客户端只发布这五个平台；`make build-plugins` 默认只构建�
 
 | 项 | recon 插件 | command 插件 |
 | --- | --- | --- |
-| 参数 | 无 | 用户输入按空白切分后作为命令行参数，不支持引号 |
+| 参数 | 无 | `siren <命令名>` 之后的参数原样传给插件，由 shell 按引号切分 |
 | 输出 | stdout 和 stderr 合并写入 Recon 快照，按 Markdown 原样嵌入报告，标题为 `Plugin: <name>`；需要等宽显示时由插件自己输出代码块围栏 | stdout 和 stderr 合并返回调用方 |
 | 非零退出 | 该段落记为失败，已有输出保留，快照变为 partial | 打印已有输出后报错 |
 

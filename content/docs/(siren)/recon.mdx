@@ -2,7 +2,7 @@
 title: 自动化信息收集
 description: 用 Recon 在客户端上采集一份有范围、有上限的主机快照，保存到 Artifacts
 icon: ScanSearch
-verifiedAgainst: v2.45.0
+verifiedAgainst: v2.49.0
 sources:
   - internal/server/webui/frontend/src/pages/InvestigationsPage.tsx
   - internal/server/webui/frontend/src/pages/InvestigationResults.tsx
@@ -28,7 +28,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 Recon 在目标主机上按 Profile 采集一份主机快照：账户、进程、网络、计划任务、启动项、环境变量、文件、应用配置等；`hunt` Profile 还采集应用拓扑、配置原文、近期应用日志和凭据材料。结果是权威的 `*.recon.jsonl` 快照和由它渲染的 Markdown 报告，保存到服务端 Artifacts，供人工浏览和 [Agentic IR](/air) 分析。
 
-Recon 只采集事实，不判断主机是否被入侵，也不做白名单、黑名单、矿工、Webshell、Rootkit 或漏洞判定。配置、凭据和依赖文本中疑似密钥、令牌、密码赋值的内容，只记录模式、行号、脱敏值和 SHA-256。
+Recon 只采集事实，不判断主机是否被入侵，也不做白名单、黑名单、矿工、Webshell、Rootkit 或漏洞判定。配置、凭据和依赖文本中疑似密钥、令牌、密码赋值的内容，只记录模式、行号、脱敏值和 SHA-256。客户端自身 OSS 凭证变量（`OSS_ACCESS_KEY_ID`、`OSS_ACCESS_KEY_SECRET`、`OSS_SESSION_TOKEN`）的值在全部采集文本中被遮盖。
 
 <Callout title="前置条件" type="info">
   客户端必须以 root（Linux、macOS）或管理员（Windows）身份运行，否则采集在开始前失败，报 `user with root permission required` 一类错误。快照包含环境变量、配置、历史记录和凭据原文，只应保存在受控的服务端目录中。
@@ -53,7 +53,7 @@ AIR 会话和外部 Agent 也可以调用 MCP 工具 `recon`（参数 `client_id
 - **同一客户端已有 Recon 在运行**：报 `recon already running`。每个客户端同时只能运行一个 Recon（WebUI 和 MCP 共用此限制），不同客户端可以并行。
 - **服务端等待超时**：超过 `recon.responseTimeout` 报 `recon timed out after ...`。客户端还没停下时立即重发会收到 `recon already in progress on client`，稍后重试即可。
 - **客户端断开**：报 `Recon failed: context canceled`。
-- **客户端报错**：如权限不足、Profile 不存在或引用了被禁用的插件，错误原文显示在结果区。
+- **客户端报错**：如权限不足、Profile 不存在、引用了被禁用的插件，或生成的快照文件缺失、过大，错误原文显示在结果区。
 
 ## 查看结果
 
@@ -133,6 +133,8 @@ recon:
 | `activity` | Linux、Windows、macOS | 当前运行应用和容器直接关联的近期本地日志尾部；不读取 Windows 事件日志 |
 | `credential` | Linux、Windows、macOS | Linux：shadow 账户的密码状态与密码策略、SSH 私钥、云 CLI、Kubernetes、Docker、数据库等客户端凭据文件；macOS：同 Linux 的客户端凭据文件和 PAM 配置，不读取目录服务中的密码 hash；Windows：密码策略、Credential Manager 元数据、AutoLogon、IIS 连接字符串等，不采集 SAM/SECURITY/LSA。凭据文件只记录元数据（路径、权限、属主、大小、修改时间、hash、私钥的公钥指纹、shadow 文件各密码状态的账户数），不保存文件内容；Windows 命令输出中的密码值被遮蔽，AutoLogon 只记录是否设置了默认密码 |
 
+Linux 的登录事件和 SSH 认证失败事件读取 `secure`、`auth` 日志及其轮转文件（含 gzip 压缩），按时间从旧到新合并后保留最新的部分；没有这些文件时改读 journald。
+
 Recon 只使用主机上已有的工具，不安装软件。工具缺失或权限不足时，对应 source 记为 unavailable，快照变为 partial。
 
 <Callout title="macOS 的完全磁盘访问" type="info">
@@ -143,7 +145,7 @@ Recon 只使用主机上已有的工具，不安装软件。工具缺失或权�
 
 | 配置项 | 位置 | 默认 | 作用 |
 | --- | --- | --- | --- |
-| `recon.commandTimeout` | 客户端 `config.yaml` | `30` 秒 | 每条底层采集命令的超时，超时只影响该命令的 source。也用于插件和本地 OSS 上传；远程 `run` 见 [执行时限](/reference/mcp#执行时限) |
+| `recon.commandTimeout` | 客户端 `config.yaml` | `30` 秒 | 每条底层采集命令的超时，超时只影响该命令的 source。也用于插件；本地 OSS 上传不受它限制，单次最多 30 分钟。远程 `run` 见 [执行时限](/reference/mcp#执行时限) |
 | `recon.collectionTimeout` | 客户端 `config.yaml` | `270` 秒 | 整个 Profile 的采集预算。用尽后停止，已完成部分照常保存，未执行的模块记录在快照中，快照为 partial |
 | `recon.responseTimeout` | 服务端 `server_config.yaml` | `300` 秒 | WebUI 和 MCP 等待客户端结果的上限。服务端下发的采集预算为 `responseTimeout - 30` 秒，客户端取它与 `collectionTimeout` 中较小的值 |
 

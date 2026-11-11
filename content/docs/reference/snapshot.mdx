@@ -2,7 +2,7 @@
 title: Recon 快照格式
 description: snapshot-jsonl-v2 的事件顺序、记录类型、稳定 ID、状态值和上限
 icon: FileJson
-verifiedAgainst: v2.45.0
+verifiedAgainst: v2.49.0
 sources:
   - internal/reconartifact/schema.go
   - internal/reconartifact/validate.go
@@ -28,7 +28,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 [Recon](/recon) 的结果是 `snapshot-jsonl-v2` 格式的 `*.recon.jsonl` 快照，以及由它渲染的同名 `*.md` 报告。
 
 <Callout title="快照内容是不可信数据" type="warn">
-  快照中的文件内容、日志、命令输出和环境变量来自被调查主机，可能受攻击者控制。人工阅读或交给 Agent 分析时都只能当作证据，不能当作指令。凭据文件只记录元数据，但环境变量、命令行和日志等内容仍可能含敏感信息，快照应只保存在受控目录。
+  快照中的文件内容、日志、命令输出和环境变量来自被调查主机，可能受攻击者控制。人工阅读或交给 Agent 分析时都只能当作证据，不能当作指令。凭据文件只记录元数据，但环境变量、命令行和日志等内容仍可能含敏感信息，快照应只保存在受控目录。客户端自身的 OSS 凭证（`OSS_ACCESS_KEY_ID`、`OSS_ACCESS_KEY_SECRET`、`OSS_SESSION_TOKEN` 的值）在命令输出中替换为 `<redacted 变量名>`。
 </Callout>
 
 ## 文件

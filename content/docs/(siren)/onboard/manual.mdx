@@ -2,7 +2,7 @@
 title: 手动安装客户端
 description: 在能访问服务端的主机上安装并启动 SIREN 客户端
 icon: SquareTerminal
-verifiedAgainst: v2.45.0
+verifiedAgainst: v2.49.0
 sources:
   - scripts/get_siren.sh
   - scripts/get_siren.ps1
@@ -43,7 +43,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "$env:TEMP\get_siren.ps1" -D
   在 macOS 上运行 `--deploy` 时，安装脚本报 `--deploy is not supported on macOS` 并退出。macOS 主机按 [只安装客户端](#只安装客户端) 和 [启动客户端](#启动客户端) 操作。
 </Callout>
 
-部署模式把地址写入 `config.yaml`，先停止之前由安装脚本启动的客户端，再在后台启动新客户端。客户端不随终端退出。进程号写在安装目录的 `siren.pid`，输出写在 `siren.log`（Windows 为 `siren.stdout.log` 和 `siren.stderr.log`）。客户端启动后立即退出时，脚本重装一次再试；仍失败则恢复原有安装并报错。Windows 先把安装脚本下载成文件再运行，因为 `iwr | iex` 无法传参数。
+部署模式把地址写入 `config.yaml`，先停止之前由安装脚本启动的客户端，再在后台启动新客户端。客户端不随终端退出。进程号写在安装目录的 `siren.pid`，输出写在 `siren.log`（Windows 为 `siren.stdout.log` 和 `siren.stderr.log`）。客户端启动后立即退出时，脚本重装一次再试；仍失败则恢复原有安装并报错。Windows 安装脚本在每次启动失败时打印客户端这次写出的输出。Windows 先把安装脚本下载成文件再运行，因为 `iwr | iex` 无法传参数。
 
 WebUI 也提供可直接复制的命令：在 [Clients](/clients) 页的 **Provisioning** 中选择 **Deploy SIREN**，部署按钮下方的 **Or install manually** 按 Linux、macOS、Windows 给出命令，服务端地址已填好。Linux、Windows 是部署模式命令；macOS 是安装和前台启动两条命令。地址取 Deploy SIREN 的回连地址；没有配置回连地址时取当前页面的域名，主机经其他地址访问服务端时需要改掉。
 

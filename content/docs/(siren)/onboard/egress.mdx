@@ -2,7 +2,7 @@
 title: 出站与入站放行
 description: 放行客户端访问服务端，并为出方向默认拒绝的 ECS 配置专用出站安全组
 icon: ArrowRightFromLine
-verifiedAgainst: v2.45.3
+verifiedAgainst: v2.49.0
 sources:
   - internal/server/webui/frontend/src/components/Provisioning.tsx
   - internal/server/cloud_operations.go
@@ -15,6 +15,7 @@ sources:
   - config/server_config.yaml
   - cmd/client/cli/probe_egress.go
   - internal/egressprobe/
+  - internal/server/mcp_provisioning.go
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
@@ -63,4 +64,4 @@ SOAR 以 `Throttling.User` 限流拒绝某次调用时，SIREN 依次等待约 2
 
 ## 持久化与恢复
 
-Configure egress 在服务端保存恢复记录，刷新页面或服务端重启后仍在。调查结束后用 **Restore egress** 撤销，见 [恢复出站规则](/restore-egress)。出站配置与恢复只能在 WebUI 中操作，没有对应的 MCP 工具。
+Configure egress 在服务端保存恢复记录，刷新页面或服务端重启后仍在。调查结束后用 **Restore egress** 撤销，见 [恢复出站规则](/restore-egress)。MCP 的 `egress` 工具执行同样的 Configure egress（Allow access 对应 `allow`），见 [MCP 集成](/reference/mcp)；恢复只能在 WebUI 中操作，没有对应的 MCP 工具。
