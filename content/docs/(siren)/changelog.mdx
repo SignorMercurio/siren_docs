@@ -11,6 +11,20 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.49.0 <DateTag>2026-11-11</DateTag>
+
+### New Features
+
+- WebUI 新增简体中文界面，默认跟随浏览器语言，可以在 Settings 的 **Language** 中切换，见 [界面语言](/webui#界面语言)
+
+### Improvement
+
+- Windows 安装脚本在客户端启动失败时显示客户端的输出；`siren.exe` 安装后被安全软件删除时，提示把安装目录加入该软件的信任列表
+
+### Bug Fixes
+
+- Linux 和 macOS 部署时，已停止但还未回收的旧客户端进程不再导致 `could not stop managed SIREN client` 报错
+
 ## v2.48.0 <DateTag>2026-11-10</DateTag>
 
 ### Breaking Change
