@@ -91,13 +91,13 @@ Projects 页是按状态分列的看板，四列依次是 **Responding**（处�
 
 - **Copy workspace path**：复制目录绝对路径。
 - **Rename project**：只改显示名，目录不动。
-- **Delete project**：删除 Project 元数据、[Case Board](/air/case-board) 和 [AccessKey](/consoles#accesskey)，并解除所有客户端归属，目录和文件保留；删除当前 Project 后回到 Global。留下的目录不能再挂回新 Project，新建的 Project 总是另建带新编号的目录。Raven 为钉钉群自动创建的 Project 不能删除，见 [MCP 鉴权](/reference/mcp#鉴权)。
+- **Delete project**：删除 Project 元数据、[Case Board](/air/case-board) 和 [AccessKey](/consoles#accesskey)，解除所有客户端归属，并停止这个 Project 中运行的 worker，目录和文件保留；删除当前 Project 后回到 Global。留下的目录不能再挂回新 Project，新建的 Project 总是另建带新编号的目录。Raven 为钉钉群自动创建的 Project 不能删除，见 [MCP 鉴权](/reference/mcp#鉴权)。
 
 ### 下单 UID
 
 阿里云百炼按 Project 的下单 UID 为 Pi 会话计费。SIREN 在启动 Pi 会话时读取当前 Project 的下单 UID。Claude Code 和 Codex 会话不使用下单 UID。
 
-- **没有下单 UID 时不能启动 Pi**：报 `project <名称> has no order UID; set it on the Projects page before starting Pi`。v2.40.4 之前建的 Project 和 Raven 为钉钉群自动创建的 Project 都没有下单 UID，在卡片上补填后即可启动。
+- **没有下单 UID 时不能启动 Pi**：报 `project <名称> has no order UID; set it on the Projects page before starting Pi`。Raven 为钉钉群自动创建的 Project 没有下单 UID，在卡片上补填后即可启动。
 - **修改只影响新会话**：运行中的 Pi 会话继续按启动时的 UID 计费；要让它改用新 UID，结束后重新开启会话。
 
 服务端的 Pi 配置也要支持按 Project 计费，见 [Pi](/server/air-providers#pi)。
