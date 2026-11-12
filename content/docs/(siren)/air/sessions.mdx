@@ -9,6 +9,7 @@ sources:
   - internal/server/webui/frontend/src/air/startGuard.ts
   - internal/server/webui/frontend/src/air/airPreference.ts
   - internal/server/webui/frontend/src/air/useAgentSessions.ts
+  - internal/server/webui/frontend/src/air/endReason.ts
   - internal/server/webui/frontend/src/air/notifications.ts
   - internal/server/webui/frontend/src/air/panelPersistence.ts
   - internal/server/webui/frontend/src/reconnectBudget.ts
@@ -156,13 +157,15 @@ GUI 会话等待审批或回答时移到左栏的 **Needs you** 分组；浏览�
 
 会话结束后，已打开的视图保留内容，顶部显示 **Session ended** 和原因：
 
-| 原因 | 含义 |
-| --- | --- |
-| `session stopped by an operator` | 有人在 Running 中停止了会话 |
-| `session ended: the agent process exited` | Provider 进程自行退出 |
-| `session ended: server shut down` | SIREN 服务端正在关闭 |
-| `session stopped after a long idle period` | 会话空闲超时，服务端自动停止了它 |
-| `unknown agent session` | 服务端上已没有该会话，通常因为服务端重启过 |
+| 原因 | 中文界面 | 含义 |
+| --- | --- | --- |
+| `session stopped by an operator` | `会话已由操作员停止` | 有人在 Running 中停止了会话 |
+| `session ended: the agent process exited` | `会话已结束：Agent 进程已退出` | Provider 进程自行退出 |
+| `session ended: server shut down` | `会话已结束：服务端已关闭` | SIREN 服务端正在关闭 |
+| `session stopped after a long idle period` | `会话长时间空闲，已自动停止` | 会话空闲超时，服务端自动停止了它 |
+| `unknown agent session` | `服务端没有这个 Agent 会话` | 服务端上已没有该会话，通常因为服务端重启过 |
+
+GUI 会话的 Provider 进程因错误退出时，原因后面附带 Provider 给出的错误原文。
 
 会话未能启动时，GUI 显示 **Session did not start**、原因和 **Retry** 按钮，Terminal 显示 **Session ended** 和错误原因。常见原因：
 
