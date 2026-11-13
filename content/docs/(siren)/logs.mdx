@@ -19,6 +19,7 @@ sources:
   - internal/server/webui/webui_shell.go
   - internal/server/mcp_audit.go
   - internal/server/mcp_run_results.go
+  - internal/server/mcp_run_file.go
   - internal/server/server.go
   - internal/server/handler.go
   - internal/server/webui/webui_console.go
@@ -76,7 +77,7 @@ WebUI 只记录失败的请求、成功的修改类操作和慢请求，不记�
 
 每次 `run` 调用有两条共享同一 `audit_id` 的记录：执行前的 `mcp.run.requested` 和结束时的 `mcp.run.finished`，被拦截、超时或执行失败的调用也有完成记录，由 `outcome` 说明结果；`run_batch` 中每台主机各有一个 `audit_id`。
 
-选择 `mcp` 组件后搜索命令片段、Client ID、outcome 或 `audit_id`。日志含完整命令但不含输出；输出通过 MCP 的 `read_run_result` 按 `audit_id` 回读，或用 `search_run_result` 在 Project 内搜索，最多保留 24 小时。字段含义见 [命令审计](/reference/mcp#审计日志)。
+选择 `mcp` 组件后搜索命令片段、Client ID、outcome 或 `audit_id`。日志含完整命令但不含输出。Project 端点的命令输出保存在该 Project 目录的 `runs/<audit_id>.txt` 中，见 [结果文件](/reference/mcp#结果文件)。字段含义见 [命令审计](/reference/mcp#审计日志)。
 
 <Callout title="日志包含敏感信息" type="warn">
   任何已登录账号都能查看全部日志，包括来访 IP、登录用户名、客户端地址和 MCP `run` 的完整命令。可调低 `logging.bufferSize` 或设为 `0` 关闭该页面，见 [Logs 包含敏感信息](/server/security#logs-包含敏感信息)。

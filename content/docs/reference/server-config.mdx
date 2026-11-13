@@ -12,6 +12,8 @@ sources:
   - internal/server/egress.go
   - internal/server/deployment_discovery.go
   - internal/server/mcp.go
+  - internal/server/mcp_run.go
+  - internal/protocol/run.go
   - internal/server/mcp_auth.go
   - internal/server/air.go
   - internal/server/agent_terminal.go
@@ -116,8 +118,7 @@ egress:
 
 mcp:
   enabled: true
-  runOutputMode: auto          # auto / full
-  cmdBlacklist: []             # 无内置默认值；安装包自带 30 条
+  cmdBlacklist: []             # 无内置默认值；安装包自带 37 条
   allowHuntRecon: false
 
 air:
@@ -190,7 +191,7 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 | 键 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `recon.responseTimeout` | int（秒） | `300` | WebUI、MCP 等远程 Recon 等待客户端结果的上限；下发的采集预算为该值减 30 秒，见 [超时](/recon#超时) |
-| `recon.commandTimeout` | int（秒） | `30` | MCP `run` / `run_batch` 下发命令的超时，与客户端的 `recon.commandTimeout` 取较小值 |
+| `recon.commandTimeout` | int（秒） | `30` | MCP `run` / `run_batch` 下发命令的默认时限，超过 120 秒时按 120 秒计；单次调用可用 `timeout_seconds` 另设，见 [执行时限](/reference/mcp#执行时限) |
 
 两个键为 `0` 或负数时使用默认值。客户端侧超时见 [客户端配置](/reference/client-config#recon)。
 
@@ -237,12 +238,11 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 | 键 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `mcp.enabled` | bool | `true` | 是否提供 `/mcp` 和 `/mcp/project/<id>`。为 `true` 时必须设置 `SIREN_MCP_ADMIN_TOKEN`，否则拒绝启动；关闭后 Agentic IR 无法使用 |
-| `mcp.runOutputMode` | string | `auto` | `run` 结果的默认返回方式：`auto` 超过 8 KiB 返回首尾预览；`full` 在 50 KiB 内返回完整结果。单次调用可用 `output_mode` 覆盖，见 [MCP](/reference/mcp) |
 | `mcp.allowHuntRecon` | bool | `false` | 为 `true` 时 MCP `recon` 才能运行 `hunt` Profile（含客户端默认 Profile 为 `hunt` 的情况）；为 `false` 时只能由运维人员在 WebUI 的 Recon 中运行，见 [MCP](/reference/mcp#recon) |
 | `mcp.cmdBlacklist` | list（正则） | 无 | MCP `run` / `run_batch` 下发前检查的命令黑名单；任一条表达式无法编译时拒绝所有命令。只作用于 MCP，见 [命令黑名单只作用于 MCP](/server/security#命令黑名单只作用于-mcp) |
 
 <Callout title="删除 cmdBlacklist 等于不设黑名单" type="warn">
-  `mcp.cmdBlacklist` 没有内置默认值。安装包自带的配置有 30 条拦截破坏性命令的规则；删除这个键或改用不含它的旧配置，MCP 将不拦截任何命令。
+  `mcp.cmdBlacklist` 没有内置默认值。安装包自带的配置有 37 条拦截破坏性命令的规则；删除这个键或改用不含它的旧配置，MCP 将不拦截任何命令。
 </Callout>
 
 ## air
@@ -317,5 +317,5 @@ Agentic IR 启动 Provider CLI 时会剔除 MCP 凭证变量，其余环境变�
 | `consoleBrowser.sshPort` | `2222` | `0` | 删除该键后使用 SSH 默认端口 |
 | `egress.discovery.*` | 官方服务端的云防火墙日志位置 | 无 | 自建服务端须改成自己的账号和 Logstore；删除后不做出口发现 |
 | `egress.rules` | 三条规则，`siren_server_callback` 指向官方服务端 `47.111.170.208` | 无（必填） | 自建服务端部署前须改成自己的公网 IP 和端口；一键部署的客户端也连这个地址 |
-| `mcp.cmdBlacklist` | 30 条破坏性命令规则 | 无 | 删除该键即不拦截任何命令 |
+| `mcp.cmdBlacklist` | 37 条破坏性命令规则 | 无 | 删除该键即不拦截任何命令 |
 | `webui.dossierDir` | `/opt/siren/dossier` | `""` | 目录需单独部署，见 [部署 Dossier](/server/dossier) |

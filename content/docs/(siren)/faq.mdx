@@ -90,8 +90,8 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 失败信息含 `no execution results found` 时，安装命令没有返回结果。SIREN 随后会查询该实例的云助手状态，并在失败信息中写明原因：
 
 - 云助手在线：主机可能无法下载客户端。先 Configure egress 再部署。
-- 云助手离线：失败信息会给出最后心跳时间。先 Configure egress；已经配置过时，检查主机防火墙或 EDR 是否隔离了主机。
-- 云助手从未上报：主机可能没有安装云助手。先安装云助手再部署。
+- 云助手离线：失败信息会给出最后心跳时间。请客户让云助手恢复在线，再重新部署。
+- 云助手从未上报：主机可能没有安装云助手。请客户安装云助手，再重新部署。
 
 </Accordion>
 

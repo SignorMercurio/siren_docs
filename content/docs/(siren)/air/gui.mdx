@@ -23,6 +23,8 @@ sources:
   - internal/server/air_gui_runtime.go
   - internal/server/air_history.go
   - internal/server/webui/webui_air.go
+  - internal/server/air_gui_claude_permissions.go
+  - internal/server/air_gui_codex_permissions.go
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
@@ -53,7 +55,7 @@ Provider 需要操作员决定时，Agent 暂停并在时间线中插入卡片�
 
 **审批卡**（Approval required）显示请求摘要，以及 Provider 提供的路径、命令、写入内容和其他参数。写入内容超过 20 行时只显示前 20 行，复制按钮可得到全文。底部按钮是 Provider 提供的选项，例如 **Allow once**、**Allow for session**、**Decline**，差异见 [Provider 差异](/air/providers#审批)。
 
-**提问卡**显示问题和选项，点击选项即作答，或点击 **Answer in your own words** 自由回答。
+**提问卡**显示问题、选项和选项说明，点击选项即作答，或点击 **Answer in your own words** 自由回答。Codex 和 Claude Code 的一次提问可以包含多个问题，每个问题一张卡片，全部回答后 Agent 才继续。
 
 处理后，卡片收起为一行决策记录（`Allowed once`、`Allowed for session`、`Declined`、`Cancelled`、`Expired` 或 `Answered`），刷新或在其他浏览器接入后仍可见。
 

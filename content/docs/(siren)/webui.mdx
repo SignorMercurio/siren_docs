@@ -7,6 +7,8 @@ sources:
   - internal/server/webui/frontend/src/nav.ts
   - internal/server/webui/frontend/src/components/Sidebar.tsx
   - internal/server/webui/frontend/src/sidebarShortcut.ts
+  - internal/server/webui/frontend/src/projectMenu.ts
+  - internal/server/webui/frontend/src/projectScope.ts
   - internal/server/webui/frontend/src/router.ts
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
   - internal/server/webui/frontend/src/pages/SettingsAIR.tsx
@@ -36,12 +38,34 @@ Web 控制台是使用 SIREN 的主要方式，浏览器直接访问 `https://<S
 
 导航之外还有两个入口：
 
-- **范围菜单**：侧栏顶部的 **Project scope**，在 Global 和各 Project 视图之间切换，**Manage projects** 也能打开 [Projects](/projects) 页面。
+- **范围菜单**：侧栏顶部的 **Project scope**，在 Global 和各 Project 视图之间切换，见 [范围菜单](#范围菜单)。
 - **账号菜单**：侧栏左下角，提供 [Settings](#settings)、本文档（**Docs**）、问题反馈（**Feedback**）和退出登录。
 
 每个页面、工具标签、AIR 会话和选中文件都有自己的 URL，可以刷新或分享。
 
 本文档统一使用英文界面的名称，中文界面的对应名称见 [界面语言](#界面语言)。
+
+## 范围菜单
+
+点击侧栏顶部的 **Project scope** 打开范围菜单。在桌面浏览器中，也可以在任意页面按 `⌘K`（Windows 和 Linux 上为 `Ctrl+K`）打开。焦点在输入框或终端中时，这个快捷键不生效。
+
+菜单顶部是 **Search projects** 搜索框，打开菜单后可以直接输入：
+
+- 搜索匹配 Project 名称、目录名、负责人和下单 UID，不区分大小写。
+- 搜索范围包括所有状态的 Project。
+- 按 Enter 切换到第一个匹配项。
+
+不输入搜索词时，**Global** 排在最前，Project 分组如下：
+
+| 分组 | 内容 |
+| --- | --- |
+| **Recent** | 当前 Project 排第一，其后是这个浏览器最近切换过的 Project，合计最多 5 个 |
+| **In progress** | 其余状态为 **Responding** 和 **Wrapping up** 的 Project |
+| **On hold**、**Done** | 默认折叠，显示 Project 数量；点击展开 |
+
+每个 Project 只出现在一个分组中。**On hold** 和 **Done** 的 Project 出现在 **Recent** 或搜索结果中时，行尾标出状态。
+
+菜单底部的 **Manage projects** 打开 [Projects](/projects) 页面。
 
 ## Investigations
 
@@ -85,6 +109,6 @@ WebUI 提供简体中文和英文两种界面语言。首次打开时界面跟�
 | **Tools**（工具） | Shells → 命令行、Files → 文件、Investigations → 调查、Cloud Access → 云访问 |
 | **Evidence**（证据） | Artifacts → 产物、Reports → 报告 |
 | **System**（系统） | Projects → 项目、Usage → 用量、Logs → 日志 |
-| 范围菜单 | Project scope → 项目范围、Global → 全局、Manage projects → 管理项目 |
+| 范围菜单 | Project scope → 项目范围、Search projects → 搜索项目、Global → 全局、Recent → 最近、In progress → 进行中、No matching projects → 没有匹配的项目、Manage projects → 管理项目 |
 | 账号菜单 | Settings → 设置、Docs → 文档、Feedback → 反馈 |
 | Settings 标签 | Personal → 个人、MCP & Skills → MCP 与技能、Server → 服务器 |

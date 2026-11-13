@@ -63,7 +63,7 @@ sources:
   - internal/server/run.go
   - internal/client/run.go
   - internal/server/mcp_run_results.go
-  - internal/server/mcp_run_search.go
+  - internal/server/mcp_run_file.go
   - internal/server/mcp_case.go
   - internal/server/case_store.go
   - internal/client/session_dispatch.go
@@ -228,19 +228,16 @@ Shell 没有空闲超时。
 | 限制 | 值 | 配置项 | 详见 |
 | --- | --- | --- | --- |
 | `run` / `run_batch` 命令长度 | 50 KiB | | [MCP](/reference/mcp) |
-| 单条命令时限 | 30 秒，取服务端与客户端配置的较小值，服务端再多等 10 秒 | 服务端和客户端 `recon.commandTimeout` | [MCP](/reference/mcp#执行时限) |
+| 单条命令时限 | 默认 30 秒，最多 120 秒，服务端再多等 10 秒 | 服务端 `recon.commandTimeout`，单次调用 `timeout_seconds` | [MCP](/reference/mcp#执行时限) |
 | 捕获的输出 | 标准输出与错误输出合计 16 MiB | | [MCP](/reference/mcp) |
-| `auto` 模式原样返回 | 8 KiB；更大时返回首尾各约 4 KiB | `mcp.runOutputMode` | [MCP](/reference/mcp) |
-| `full` 模式原样返回 | 50 KiB；更大时仍返回首尾预览 | `mcp.runOutputMode` | [MCP](/reference/mcp) |
-| 同一客户端同时执行的命令 | 1 条，MCP `run` 与 `run_batch` 共用；新命令排队最多 90 秒 | | [MCP](/reference/mcp#同一客户端的并发) |
+| `auto` 模式原样返回 | 8 KiB；更大时返回首尾各约 4 KiB | `output_mode` | [MCP](/reference/mcp#返回结果) |
+| `full` 模式原样返回 | 50 KiB；更大时仍返回首尾预览 | `output_mode` | [MCP](/reference/mcp#返回结果) |
+| 执行中命令暂存的输出 | 所有命令合计 256 MiB，超出时以 `memory_limit` 结束 | | [MCP](/reference/mcp#run) |
+| 同一客户端同时执行的命令 | 1 条，MCP `run` 与 `run_batch` 共用；新命令排队最多 130 秒 | | [MCP](/reference/mcp#同一客户端的并发) |
 | 客户端发送完成回复 | 30 秒，超时断开连接 | | [MCP](/reference/mcp#同一客户端的并发) |
 | `run_batch` 主机数 | 64 台 | | [MCP](/reference/mcp) |
 | `run_batch` 并发 | 默认 8，最多 16 | | [MCP](/reference/mcp) |
 | `run_batch` 每台主机预览 | 1 KiB，内联合计 50 KiB | | [MCP](/reference/mcp) |
-| `read_run_result` 单次读取 | 默认 8 KiB，最多 16 KiB | | [MCP](/reference/mcp#长结果回读) |
-| `search_run_result` | 最多 20 个匹配、正文 8 KiB、查询 1,024 字节、上下文默认 2 行最多 10 行 | | [MCP](/reference/mcp#长结果回读) |
-| `search_run_result` 不传 `audit_id` | 默认 20 次执行，最多 50 次；命令和匹配行各 240 字节、正文 8 KiB、查询 1,024 字节 | | [MCP](/reference/mcp#search_run_result) |
-| 可回读结果的保存 | 24 小时，合计 4096 条或 256 MiB，超出淘汰最早的 | | [MCP](/reference/mcp#结果保存) |
 | `recon` 返回的 Markdown 正文 | 2 MiB，完整内容见 `reportPath` 或 `snapshotPath` | | [MCP](/reference/mcp) |
 | `save_evidence` 的 `label` | 48 个字符 | | [MCP](/reference/mcp#save_evidence) |
 | `case_update` | 每次 50 个排查项、50 条事件、50 条报告；每个列表 50 条；文本 2,000 字节 | | [MCP](/reference/mcp#case_update) |

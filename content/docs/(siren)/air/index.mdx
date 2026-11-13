@@ -15,7 +15,7 @@ sources:
   - internal/server/mcp.go
   - internal/server/mcp_deploy.go
   - internal/server/mcp_evidence.go
-  - internal/server/mcp_run_search.go
+  - internal/server/mcp_run_file.go
   - internal/server/mcp_case.go
   - internal/server/mcp_command_policy.go
   - internal/server/mcp_delegate.go
@@ -106,7 +106,6 @@ Agent 通过 SIREN MCP 操作客户端，参数和限制见 [MCP 集成](/refere
 | `ls` | 列出当前范围内的在线客户端 |
 | `run` | 在一台客户端上执行命令 |
 | `run_batch` | 在多台客户端上并发执行同一命令并按主机汇总 |
-| `read_run_result`、`search_run_result` | 回读或搜索命令输出的原文；Project 会话可查本 Project 近期的命令和输出，避免重复取证；保留期见 [限制](/reference/limits#mcp) |
 | `save_evidence` | 仅 Project 会话：把 `run` / `run_batch` 的原始输出原样保存到 `evidence/` 目录，供脚注引用 |
 | `case_read`、`case_update` | 仅 Project 会话：维护 [Case Board](/air/case-board) 上的排查清单和攻击时间线 |
 | `delegate` | 仅开启 [多 Agent 分工](/air/sessions#多-agent-分工) 的 GUI 会话：把一个排查项交给 worker 会话 |
@@ -114,6 +113,8 @@ Agent 通过 SIREN MCP 操作客户端，参数和限制见 [MCP 集成](/refere
 | `deploy` | 通过 SOAR 向一台阿里云 ECS 部署 SIREN，并等待客户端连接 |
 | `allow` | 在 SIREN 服务端安全组放行一个客户端公网 IP |
 | `egress` | 给一台阿里云 ECS 挂上 SIREN 专用出站安全组，放行它到 SIREN 的出方向访问 |
+
+`run` 和 `run_batch` 的完整输出保存在 Project 目录的 `runs/<audit_id>.txt` 中，服务端重启后仍在。Agent 用自己的文件工具读取和搜索这些文件，避免重复取证，见 [结果文件](/reference/mcp#结果文件)。
 
 Project 配置了 [云访问](/consoles) 时，Agent 还可以用 `aliyun` 查询客户账号，用 `opencli` 操作客户云控制台。
 

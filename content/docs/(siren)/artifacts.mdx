@@ -20,6 +20,7 @@ sources:
   - internal/server/artifact_resolver.go
   - internal/server/artifact_mutations.go
   - internal/server/artifact_rename_*.go
+  - internal/server/mcp_run_file.go
   - internal/server/app.go
   - internal/server/handler.go
   - internal/server/handler_recon.go
@@ -56,6 +57,7 @@ Artifacts 页管理服务端上的证据目录：Recon 快照、AccessKey 报告
 | [Recon](/recon) | `SIREN_<主机名>_<时间戳>_client-<ID>_req-<请求号>.recon.jsonl`（权威快照）和同名 `.md` | 客户端所属 Project 的根目录，未归属时为 Global；与当前视图无关 |
 | [AccessKey 调查](/ak) | `AK_<UID>_<AccessKey ID>_<时间>.md` | 始终为 Global |
 | [Agentic IR](/air/evidence#报告存放位置) | Agent 生成的报告和 `evidence/` 目录 | 启动会话的 Project 的根目录 |
+| [MCP](/reference/mcp#结果文件) `run` / `run_batch` | `runs/<audit_id>.txt`（命令输出） | 调用所用 Project 端点的 Project 根目录；Global 端点不保存 |
 | Dossier 粘贴图片 | `<报告名>.assets/pasted/paste-<时间>-<序号>.<扩展名>` | 报告所在目录，见 [报告](/reports#粘贴图片) |
 | Artifacts 页 **Upload** | 上传的文件 | 页面顶部 **Target** 所示目录 |
 

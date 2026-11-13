@@ -11,6 +11,38 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.50.0 <DateTag>2026-11-13</DateTag>
+
+### Breaking Change
+
+- MCP 移除 `read_run_result` 和 `search_run_result`。Project 端点把 `run` 和 `run_batch` 每台主机的输出保存到 Project 目录的 `runs/<audit_id>.txt`，结果中写明路径，Agent 用自己的文件工具读取和搜索。结果文件不再 24 小时后过期，服务端重启后仍在；Global 端点不保存输出，见 [结果文件](/reference/mcp#结果文件)
+- 移除 `mcp.runOutputMode`，`run` 默认按 `auto` 返回，单次调用仍可用 `output_mode: full`，见 [返回结果](/reference/mcp#返回结果)
+- MCP 命令时限最多 120 秒，客户端 `config.yaml` 的 `recon.commandTimeout` 不再参与计算，见 [执行时限](/reference/mcp#执行时限)
+- 客户端日志改为分帧发送。v2.50.0 服务端会断开连上后写日志的旧版客户端，升级服务端时必须同时升级客户端，见 [版本一致](/upgrade#版本一致)
+
+### New Features
+
+- 范围菜单顶部新增 **Search projects**，按名称、目录名、负责人或下单 UID 搜索所有状态的 Project，按 Enter 切换到第一个匹配项。菜单按 **Recent**、**In progress** 分组，**On hold** 和 **Done** 默认折叠；桌面浏览器中按 `⌘K`（Windows 和 Linux 上为 `Ctrl+K`）随时打开，见 [范围菜单](/webui#范围菜单)
+- MCP `run` 和 `run_batch` 新增 `timeout_seconds`，单次调用可设 1–120 秒的时限，见 [执行时限](/reference/mcp#执行时限)
+- Claude Code GUI 会话使用 Claude Code 自带的提问：一次提问可以包含多个问题，每个问题一张卡片，选项附带说明，见 [审批与提问](/air/gui#审批与提问)
+
+### Improvement
+
+- 安装包自带的命令黑名单新增 Windows 破坏性命令规则，包括删除文件、结束进程、关机重启、停止或修改服务、清空磁盘和事件日志、修改本地账号、计划任务和防火墙；`cmd /c` 和 `powershell -Command` 包裹的命令也取出检查。已有服务端的 `server_config.yaml` 不随升级改变，需要从安装包模板复制新规则，见 [命令黑名单](/reference/mcp#命令黑名单) 和 [升级后核对配置](/upgrade#升级后核对配置)
+- Codex 和 Pi 等待一次 SIREN 工具调用最长 330 秒，耗时较长的 `recon` 和排队的 `run` 不再被 Provider 提前判为超时
+- 同一客户端上排队的 MCP 命令最多等待 130 秒，见 [同一客户端的并发](/reference/mcp#同一客户端的并发)
+- 一键部署时云助手离线或从未上报，失败信息改为请客户安装云助手或让它恢复在线后重新部署，不再建议 Configure egress，见 [一键部署](/onboard/provisioning#结果与记录)
+- 中文界面翻译 AIR 会话的结束原因，日期、时间和数字按界面语言格式显示，见 [界面语言](/webui#界面语言)
+- 部署结果面板把状态和 **View logs** 放在同一行，**Configure egress**、**Edit targets** 和重试按钮都在底部操作栏
+- [Recent activity](/clients#recent-activity) 中只有一个目标的部署记录不显示色块和计数；展开目标日志后，行上不再重复日志最后一行的原因
+- Clients 工具栏不再重复客户端总数，只在筛选后显示可见数和总数，如 `3 of 10`
+
+### Bug Fixes
+
+- 中文界面中，分段按钮（如 AIR 告警时间范围的 `14 天`）和 Clients、Usage 表头的文字不再换行
+- Cloud Access 的 **Open console** 按钮文字垂直居中
+- 切换 Project 后，Files 页不再为上一个 Project 的客户端发出请求
+
 ## v2.49.0 <DateTag>2026-11-11</DateTag>
 
 ### New Features
