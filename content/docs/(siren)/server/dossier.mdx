@@ -3,7 +3,7 @@ title: 部署 Dossier
 description: 把 Dossier 报告编辑器部署到 SIREN 服务端，供 WebUI 打开和编辑报告
 icon: Upload
 verifiedAgainst: v2.50.0
-dossierVerifiedAgainst: 32f16bd
+dossierVerifiedAgainst: 928cce5
 sources:
   - cmd/server/cli/root.go
   - config/server_config.yaml
@@ -41,7 +41,7 @@ Dossier 是纯静态的报告编辑器，不随 `siren_server` 打包。SIREN �
 | --- | --- |
 | `index.html` | 编辑器入口，缺失时视为未部署 |
 | `editor.js`、`editor.css` | 构建产物；`make deploy` 发布为带内容哈希的 `editor.<hash>.js`、`editor.<hash>.css` |
-| `report.md` | 默认中文报告模板，报告语言为中文时 **Blank template** 打开的就是它；英文模板已打包进 `editor.js` |
+| `report.md` | 默认中文报告模板，缺失时 **Blank template** 不可用；编辑器按报告语言打开打包进 `editor.js` 的中文或英文模板 |
 | `assets/` | 字体和图片等本地资源 |
 
 ## 使用 make deploy 发布
