@@ -2,8 +2,8 @@
 title: 部署 Dossier
 description: 把 Dossier 报告编辑器部署到 SIREN 服务端，供 WebUI 打开和编辑报告
 icon: Upload
-verifiedAgainst: v2.49.0
-dossierVerifiedAgainst: 0fe15ef
+verifiedAgainst: v2.50.0
+dossierVerifiedAgainst: 32f16bd
 sources:
   - cmd/server/cli/root.go
   - config/server_config.yaml
@@ -17,10 +17,9 @@ sources:
   - internal/server/webui/frontend/src/components/AIRToolResults.tsx
   - dossier:Makefile
   - dossier:package.json
-  - dossier:tools/prepare-deploy-runtime.mjs
-  - dossier:tools/runtime-transaction.mjs
-  - dossier:tools/skill-transaction.mjs
-  - dossier:tools/deploy-utils.mjs
+  - dossier:tools/deploy.mjs
+  - dossier:tools/dist.mjs
+  - dossier:tools/build-generation.mjs
   - dossier:tools/dist/
   - dossier:src/source-file.js
   - dossier:src/siren-adapter.js
@@ -41,13 +40,13 @@ Dossier 是纯静态的报告编辑器，不随 `siren_server` 打包。SIREN �
 | 文件 | 作用 |
 | --- | --- |
 | `index.html` | 编辑器入口，缺失时视为未部署 |
-| `editor.js`、`editor.css` | 构建产物 |
+| `editor.js`、`editor.css` | 构建产物；`make deploy` 发布为带内容哈希的 `editor.<hash>.js`、`editor.<hash>.css` |
 | `report.md` | 默认中文报告模板，报告语言为中文时 **Blank template** 打开的就是它；英文模板已打包进 `editor.js` |
 | `assets/` | 字体和图片等本地资源 |
 
 ## 使用 make deploy 发布
 
-从构建机远程发布，失败时自动回滚。
+从构建机远程发布。新的 `index.html` 最后一步才替换上线，此前任何一步失败，线上运行时保持不变。
 
 <Steps>
 <Step>
@@ -70,14 +69,13 @@ make deploy-dry-run
 make deploy
 ```
 
-`make deploy` 把运行时发布到 `DOSSIER_DEPLOY_DIR`（默认 `SIREN:/opt/siren/dossier`，`SIREN` 是 ssh 主机名），并把中文模板 `report.md` 和英文模板 `report.en.md` 一起同步到 Dossier 报告 skill 的模板目录 `SKILL_DIR`（默认 `skills/dossier/assets`）。`SKILL_DIR` 不存在或不可写时，部署在动服务端之前中止。只需要其中一部分时：
+`make deploy` 把运行时发布到 `DOSSIER_DEPLOY_DIR`（默认 `SIREN:/opt/siren/dossier`，`SIREN` 是 ssh 主机名）。发布到其他主机：
 
 ```bash title="Dossier 仓库"
-make deploy-runtime                       # 只发布 SIREN 上的运行时
-make deploy-runtime-dry-run               # 预演运行时发布
-make deploy-skill                         # 只同步报告 skill 模板
-DOSSIER_DEPLOY_DIR=siren-prod:/opt/siren/dossier make deploy-runtime
+DOSSIER_DEPLOY_DIR=siren-prod:/opt/siren/dossier make deploy
 ```
+
+Dossier 报告 skill 的模板副本 `skills/dossier/assets/` 由 `make build` 更新，不随 `make deploy` 发布。
 
 </Step>
 <Step>
@@ -89,7 +87,9 @@ DOSSIER_DEPLOY_DIR=siren-prod:/opt/siren/dossier make deploy-runtime
 </Step>
 </Steps>
 
-`DOSSIER_DEPLOY_DIR` 必须是 `host:/path` 形式的远程目标，最后一级目录名为 `dossier`；本地路径会被拒绝，同机部署请用 [手工复制](#手工复制)。目标必须是真实目录而非符号链接，且为空或是此前由 `make deploy` 发布过的目录（含 `.dossier-runtime` 标记文件）。发布会保留线上的 `assets/pasted/`。
+`DOSSIER_DEPLOY_DIR` 必须是 `host:/path` 形式的远程目标，最后一级目录名为 `dossier`；本地路径会被拒绝，同机部署请用 [手工复制](#手工复制)。目标必须是真实目录而非符号链接，且为空或是此前由 `make deploy` 发布过的目录（含 `.dossier-runtime` 标记文件）。发布会保留线上的 `assets/pasted/`。不要同时运行两次 `make deploy`。
+
+上一版入口保留为 `index.html.prev`，它引用的文件也保留。需要回退时，在服务端把 `index.html.prev` 改名为 `index.html`。
 
 ## 手工复制
 
@@ -141,7 +141,7 @@ webui:
 ## 注意事项
 
 - 除编辑器页面外，`/dossier/` 下的静态文件无需登录即可访问；读写报告仍需 WebUI 登录，见 [`/dossier/` 不鉴权](/server/security#dossier-不鉴权)。
-- **Blank template** 只读、不能保存。在其中粘贴的图片写入 `<dossierDir>/report.assets/pasted/`，不属于任何报告，下次 `make deploy` 时会被删除。正式报告请从 **Reports** 或 **Artifacts** 打开再编辑。
+- **Blank template** 只读、不能保存。在其中粘贴的图片写入 `<dossierDir>/report.assets/pasted/`，不属于任何报告。正式报告请从 **Reports** 或 **Artifacts** 打开再编辑。
 - Dossier 不随 `siren_server upgrade` 更新。SIREN v2.40.0 起，编辑器保存报告时要回传读取时的版本，服务端和 Dossier 运行时不配套时保存失败，例如报 `revision is required`。从更早的版本升级时，同时按上文重新发布 Dossier。
 - 在 SIREN 前面放代理时，按 [单一 TLS 端口](/server#单一-tls-端口) 只做四层透传，并转发整个端口。编辑器通过同源的 `/api/reports/*` 读写报告，只代理 `/dossier/` 会出现页面能打开、但读取或保存失败。
 

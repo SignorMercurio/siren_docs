@@ -2,7 +2,7 @@
 title: MCP
 description: SIREN MCP 的端点、鉴权、工具参数、结果文件、命令黑名单与审计
 icon: Plug
-verifiedAgainst: v2.48.0
+verifiedAgainst: v2.50.0
 sources:
   - internal/server/mcp.go
   - internal/server/mcp_provisioning.go
@@ -102,7 +102,10 @@ Provider 进程不会继承 `SIREN_MCP_ADMIN_TOKEN` 等长期 MCP 凭证，只�
 [mcp_servers.siren]
 url = "https://siren.example.com/mcp"
 bearer_token_env_var = "SIREN_MCP_ADMIN_TOKEN"
+tool_timeout_sec = 330
 ```
+
+`run` 排队和执行合计可超过 4 分钟，`recon` 最长等待 `recon.responseTimeout`（默认 300 秒）。把 MCP 客户端的工具超时设为不少于 330 秒。
 
 运行在 SIREN 服务端以外的客户端无法读取 Recon 的 JSONL 快照文件和 [结果文件](#结果文件)，只能拿到工具返回的摘要、预览和路径。
 
