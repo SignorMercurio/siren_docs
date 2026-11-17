@@ -24,7 +24,9 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ## 操作步骤
 
-1. 在 Provisioning 面板选择 **Restore** 标签，面板列出还需要处理的恢复记录。已恢复的记录默认不显示，点击列表底部的 **Show N restored** 查看。
+1. 在 Provisioning 面板选择 **Restore** 标签，面板按 UID 分组列出还需要处理的恢复记录。以下记录默认不显示：
+   - 已恢复的记录，点击列表底部的 **Show N restored** 查看。
+   - 客户端仍在线、状态为可恢复的记录，点击 **Show N still connected** 查看。恢复会切断这些客户端，应先 Clean。
 2. 勾选要恢复的记录，每次最多 20 个实例。
 3. 点击 **Restore N instances**。
 
