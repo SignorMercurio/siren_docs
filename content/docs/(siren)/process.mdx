@@ -21,7 +21,7 @@ sources:
 
 ## 打开方式
 
-- 侧栏 **Investigations** → **Process Analysis**。
+- 侧栏 **Investigations** → **Process analysis**。
 - [Clients](/clients#行内操作) 页客户端行的 **More actions** → **Process analysis**，预选这台客户端。
 - AIR 会话中带进程 ID 的 **Security Center alerts** 结果卡上点 **Inspect PID N**，预选告警主机对应的客户端并预填 **PID**，见 [GUI 时间线](/air/gui#结构化结果卡)。会话所在范围内必须恰好有一台匹配的在线 Linux 客户端，否则提示 `Process evidence needs one connected Linux client in the source workspace.`
 
@@ -41,18 +41,18 @@ Linux 进程名最长 15 个字符，按名称查询以此为准。要按命令�
 
 每次查询最多等待客户端 30 秒。页面保留最近 10 条结果，可在 **History** 中切换；刷新浏览器或切换 Project / Global 范围后清空。
 
-![Investigations 页的 Process Analysis 标签，按进程名查询](../../img/process-analysis.png)
+![Investigations 页的 Process analysis 标签，按进程名查询](../../img/process-analysis.png)
 
 ## 进程详情
 
 | 区块 | 内容 |
 | --- | --- |
-| **Parent Chain** | 从最上层祖先到当前进程的父进程链 |
+| **Parent process chain** | 从最上层祖先到当前进程的父进程链 |
 | 概要 | **User**、**State**、**CPU**、**Memory**、**Start** |
 | 路径 | **CWD**（工作目录）、**Command**（完整命令行）、**Executable**（可执行文件路径） |
 | **Network** | TCP / UDP 连接，按状态（如 `LISTEN`、`ESTAB`）分组，显示本地和远端地址 |
 | **Container** | 从 cgroup 识别的 Docker、containerd 或 podman 容器类型和 ID，Docker 另显示名称 |
-| **Startup Source** | PID 1 是 systemd 且进程属于某个服务时，显示服务名、状态、描述和 Unit 文件路径 |
+| **Startup source** | PID 1 是 systemd 且进程属于某个服务时，显示服务名、状态、描述和 Unit 文件路径 |
 
 CPU 和内存取自 `ps`，CPU 是进程整个生命周期的平均值，不是瞬时值。
 
@@ -78,7 +78,7 @@ CPU 和内存取自 `ps`，CPU 是进程整个生命周期的平均值，不是�
 
 端口查询只认 TCP `LISTEN`。确认端口确实在监听，且主机上有 `ss` 或 `lsof`。
 
-**Network 或 Startup Source 为空**
+**Network 或 Startup source 为空**
 
 网络连接依赖 `ss`（缺失时用 `lsof`），服务信息依赖 `systemctl`。缺少这些工具或不是 systemd 系统时，对应区块不显示。
 

@@ -16,7 +16,7 @@ sources:
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-**Restore egress** 撤销 [Configure egress](/onboard/egress) 对阿里云安全组的改动：把实例移出专用安全组，再删除该组及其中的放行规则。它不触碰实例原有的安全组；专用组里有后续人工添加的规则时，保留该组。入口是 Clients 页 **Provisioning** 面板的 **Restore** 标签（悬停显示全名 Restore egress）。
+**Restore egress** 撤销 [Configure egress](/onboard/egress) 对阿里云安全组的改动：把实例移出专用安全组，再删除该组及其中的放行规则。它不触碰实例原有的安全组；专用组里有后续人工添加的规则时，保留该组。入口是 Clients 页 **Provisioning** 面板的 **Restore egress** 标签。
 
 <Callout title="先 Clean 再 Restore" type="warn">
   恢复会撤销客户端回连所需的出方向放行，可能切断客户端。需要清理客户端时，先执行 [Clean](/cleanup)，再恢复（恢复不依赖客户端在线）。清理成功后面板会提示 **N cleaned clients have egress changes to restore. Review**，但不会自动执行。
@@ -24,7 +24,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 ## 操作步骤
 
-1. 在 Provisioning 面板选择 **Restore** 标签，面板按 UID 分组列出还需要处理的恢复记录。以下记录默认不显示：
+1. 在 Provisioning 面板选择 **Restore egress** 标签，面板按 UID 分组列出还需要处理的恢复记录。以下记录默认不显示：
    - 已恢复的记录，点击列表底部的 **Show N restored** 查看。
    - 客户端仍在线、状态为可恢复的记录，点击 **Show N still connected** 查看。恢复会切断这些客户端，应先 Clean。
 2. 勾选要恢复的记录，每次最多 20 个实例。
