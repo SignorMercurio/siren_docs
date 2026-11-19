@@ -117,7 +117,7 @@ Pi 复用服务端用户的全局 Pi 安装、插件、Skills 和配置，新会
 
    安装脚本配置了百炼上的 DeepSeek V4.1 Flash、Kimi K3、Kimi K3.1 Pro 和 GLM 5.3 Prime，以及可选的 Qwen Aegis。要在会话中切换到 Qwen Aegis，在 `auth.json` 中按同样格式加一条 `qwen-aegis`。
 
-   百炼按请求头 `x-dashscope-euid` 中的 `accountId` 计费。安装脚本写入的 `models.json` 中，`bailian` 的 `accountId` 为 `${SIREN_ORDER_UID}`；SIREN 启动 Pi 时把这个环境变量设为当前 Project 的 [下单 UID](/projects#下单-uid)。v2.40.4 之前安装的 Pi 仍写死旧账号，重新运行安装脚本即可更新。不要在 `models.json` 中改回固定 UID，否则所有 Project 都记到同一个账号。
+   百炼按请求头 `x-dashscope-euid` 中的 `accountId` 计费。安装脚本写入的 `models.json` 中，`bailian` 的 `accountId` 为 `${SIREN_ORDER_UID}`；SIREN 启动 Pi 时把这个环境变量设为当前 Project 的 [客户 UID](/projects#客户-uid)。v2.40.4 之前安装的 Pi 仍写死旧账号，重新运行安装脚本即可更新。不要在 `models.json` 中改回固定 UID，否则所有 Project 都记到同一个账号。
 
 3. SIREN 通过 Pi 内置的 MCP 支持为每个会话注册 SIREN MCP：
 
@@ -191,7 +191,7 @@ Client 和 Account 入口用模板生成种子 prompt，Ask 入口直接发送�
   - 用 `cliPath` 和 `args` 启动 CLI，为所有入口注入当前范围的 SIREN MCP 和会话凭证，并按入口加入种子 prompt 或要继续的会话 ID。
   - 加入新建表单中选的模型，以及 [Settings](/webui#settings) 中设置的 AIR 默认模型、推理强度和附加指令；附加指令排在 CLI 已配置的指令之后。
   - 服务端配置了控制台 Mac 或安装了 aliyun CLI 时，让会话中的 `opencli` 和 `aliyun` 只使用当前 Project 的 [云访问](/consoles) 配置，并在附加指令后说明用法。
-  - 启动 Pi 时把 `SIREN_ORDER_UID` 设为当前 Project 的下单 UID。
+  - 启动 Pi 时把 `SIREN_ORDER_UID` 设为当前 Project 的客户 UID。
   - GUI 只展示 Provider 主动返回的审批和提问；“本会话允许”不写入 CLI 的用户级配置。
   - 不修改 Claude Code、Codex 的全局设置，也不替它们跳过权限确认。
   - 会话凭证随会话结束或服务端重启失效；长期 MCP 管理凭证不会注入 Provider。
@@ -205,7 +205,7 @@ Client 和 Account 入口用模板生成种子 prompt，Ask 入口直接发送�
 
 - `webui.publicURL is required for AIR MCP`：未设置 `webui.publicURL`，见 [前置条件与凭证](/server/prerequisites)。
 - `agent session limit reached (N)`：已达 `air.maxSessions`，先在 **Running** 中停止不用的会话。
-- `project ... has no order UID`：当前 Project 没有下单 UID，Pi 不能启动。在 Projects 页的卡片上填写，见 [下单 UID](/projects#下单-uid)。
+- `project ... has no order UID`：当前 Project 没有客户 UID，Pi 不能启动。在 Projects 页的卡片上填写，见 [客户 UID](/projects#客户-uid)。
 - CLI 自身的登录或认证错误：用 `siren_server` 的系统用户重新登录该 CLI。
 
 </Accordion>

@@ -40,7 +40,7 @@ sources:
 
 - **模型菜单**：按 Provider（Codex、Claude、Pi）分组列出模型，选中模型即同时选定 Provider。标有 **default** 的是该 Provider 的默认模型，即 **Settings** 中的 AIR 默认模型，未设置时为 CLI 自身的默认值（Pi 为百炼上的 DeepSeek V4.1 Flash）。服务端不可用的 Provider 在分组标题旁显示原因，排查见 [检查可用性](/server/air-providers#检查可用性)；服务端读不到模型列表时，该 Provider 只显示 **Default model**。
 - **Chat / Terminal**：**Chat** 即 GUI 时间线，**Terminal** 运行 Provider 原生 TUI。某种界面不可用时页面自动改用另一种。
-- **Delegate to workers**（beta）：只在选中 **Chat** 时显示，默认关闭。打开后启动的会话可以把排查项交给 worker 会话，见 [多 Agent 分工](#多-agent-分工)。页面在当前浏览器记住上次的开关状态。
+- **Delegate to workers**（beta）：只在选中 **Chat** 时显示，默认打开。打开时启动的会话可以把排查项交给 worker 会话，见 [多 Agent 分工](#多-agent-分工)。页面在当前浏览器记住上次的开关状态。
 
 所选模型只对这一个会话生效，不修改 **Settings**。页面在当前浏览器记住上次选择的 Provider、各 Provider 的模型和界面；要固定默认 Provider 和界面，在 **Settings** 的 **Default AIR provider** 和 **Default AIR surface** 中选择。所选 Provider 不可用时回退到服务端配置的 `air.provider`。
 
@@ -81,7 +81,7 @@ AIR 会话只能在 Project 视图中启动。会话的工作目录是该 Projec
 | **Open** | 已打开但不属于上面各组的视图，例如已结束的会话；没有时不显示 |
 | **Today**、**Earlier** | 历史会话，见 [History](#history) |
 
-点击一行即打开该会话。SIREN 根据会话的第一条消息自动生成一个简短的中文标题，费用记在 Project 的订单 UID 上。生成之前、Project 没有订单 UID 或生成失败时，Ask 会话以首条消息为标题，Account 会话以 UID 为标题。Terminal 会话的标题从 Provider 会话记录中读取，读到之前（包括 SIREN 无法定位记录的新建 Codex Terminal 会话）显示入口模式和短会话 ID。列表刷新失败时显示 `List may be stale: ...`，其中可能包含已不存在的会话。
+点击一行即打开该会话。SIREN 根据会话的第一条消息自动生成一个简短的中文标题，费用记在 Project 的客户 UID 上。生成之前、Project 没有客户 UID 或生成失败时，Ask 会话以首条消息为标题，Account 会话以 UID 为标题。Terminal 会话的标题从 Provider 会话记录中读取，读到之前（包括 SIREN 无法定位记录的新建 Codex Terminal 会话）显示入口模式和短会话 ID。列表刷新失败时显示 `List may be stale: ...`，其中可能包含已不存在的会话。
 
 ## 会话标题栏
 
@@ -131,7 +131,7 @@ GUI 会话等待审批或回答时移到左栏的 **Needs you** 分组；浏览�
 
 ## 多 Agent 分工
 
-多 Agent 分工是 beta 功能，按会话开启：启动会话前在表单底部打开 **Delegate to workers**，这个会话就可以调用 [`delegate`](/reference/mcp#delegate)，把 [Case Board](/air/case-board) 上的一个排查项交给 worker 会话取证。Terminal 会话没有这个工具。
+多 Agent 分工是 beta 功能，按会话开启：启动会话时表单底部的 **Delegate to workers** 打开（默认如此），这个会话就可以调用 [`delegate`](/reference/mcp#delegate)，把 [Case Board](/air/case-board) 上的一个排查项交给 worker 会话取证。Terminal 会话没有这个工具。
 
 开关只对新会话生效。从 **History** 继续、**Continue** 或换界面重开的会话保留原来的角色：原来能分工的会话在 Chat 中继续时仍然可以，原来不能的不会因为开关打开而获得这个工具。
 
@@ -147,7 +147,7 @@ GUI 会话等待审批或回答时移到左栏的 **Needs you** 分组；浏览�
 
 要停止一个运行中的 worker，点击它那一行的停止按钮，在 **Stop worker** 对话框中确认。worker 的状态变为 Canceled，其他 worker 不受影响。Lead 会收到这一项的当前状态和 worker 已写回的内容。SIREN 同时告知 Lead 这是你手动停止的，要求它先向你说明现状，不原样重派这一项。worker 不出现在 **History** 中，Lead 结束后它的 worker 行一并消失。
 
-每个角色用哪个 Provider、模型和 effort 在 [Settings](/webui#settings) 的 **Delegate workers** 中设置。Pi worker 和普通 Pi 会话一样计费到 Project 的下单 UID。
+每个角色用哪个 Provider、模型和 effort 在 [Settings](/webui#settings) 的 **Delegate workers** 中设置。Pi worker 和普通 Pi 会话一样计费到 Project 的客户 UID。
 
 ## 停止与结束
 
@@ -173,7 +173,7 @@ GUI 会话的 Provider 进程因错误退出时，原因后面附带 Provider �
 | --- | --- |
 | `agent session limit reached (N)` | 全服务端同时运行的会话数（GUI、Terminal 和所有 Project 合计）已达上限。先在 Running 中停止不用的会话；上限见 [配置项](/server/air-providers#配置项) 中的 `air.maxSessions` |
 | `session <ID> is still running; stop it before resuming` | 要继续的历史会话仍在运行，见 [同一会话不能同时运行两份](/air/terminal#同一会话不能同时运行两份) |
-| `project ... has no order UID` | 当前 Project 没有下单 UID，Pi 不能启动，见 [下单 UID](/projects#下单-uid) |
+| `project ... has no order UID` | 当前 Project 没有客户 UID，Pi 不能启动，见 [客户 UID](/projects#客户-uid) |
 | `webui.publicURL is required for AIR MCP` 或 CLI 自身的登录错误 | 服务端准备不完整，见 [准备 AIR Provider](/server/air-providers#常见问题) |
 
 ### 服务端重启

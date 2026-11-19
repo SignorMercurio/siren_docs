@@ -65,10 +65,12 @@ Artifacts 页管理服务端上的证据目录：Recon 快照、AccessKey 报告
 
 点击文件树中的文件在右侧预览：
 
-- **文本**：5 MiB 以内直接显示，超过时提示 `file too large for preview (max 5 MiB)`。二进制文件显示 `Preview not supported for binary files`，下载后查看。
+- **文本**：5 MiB 以内直接显示，超过时提示 `file too large for preview (max 5 MiB)`。终端颜色等转义码只在显示时去掉，文件内容和行号不变。二进制文件显示 `Preview not supported for binary files`，下载后查看。
 - **Markdown**：`.md`、`.markdown` 渲染显示。报告中的相对链接在 Artifacts 中打开目标文件，见 [链接如何打开](/air/evidence#链接如何打开)。
 - **图片**：PNG、JPEG、GIF、WebP 可直接预览，单个不超过 100 MiB。
 - **HTML**：不在页面中渲染，下载后用浏览器打开。
+
+预览头部在路径下方显示文件大小、修改时间和 SHA-256，哈希旁的按钮复制它，便于写进报告。二进制文件和图片也显示这一行；超过 5 MiB 的文本文件不显示。
 
 文件无法打开时，预览区显示服务端给出的原因，例如 `open: permission denied`。图片能读取但浏览器无法解码时，提示下载后查看。
 

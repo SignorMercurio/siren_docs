@@ -20,6 +20,7 @@ sources:
   - internal/server/webui/frontend/src/projectMenu.ts
   - internal/server/webui/frontend/src/requestScope.ts
   - internal/server/webui/frontend/src/components/ClientsTable.tsx
+  - internal/server/webui/frontend/src/pages/ClientsPage.tsx
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
   - internal/server/webui/frontend/src/pages/UsagePage.tsx
   - internal/server/webui/frontend/src/App.tsx
@@ -33,7 +34,7 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 
 Project 把一次事件涉及的客户端、AIR 会话和证据文件放进同一范围，并在服务端固定一个目录；不选 Project 时处于 **Global** 范围。概念见 [核心概念](/concepts#global-与-project-范围)。
 
-Projects 页（`#/projects`）在侧栏 **System** 分组，也可以从侧栏顶部 **Project scope** 菜单的 **Manage projects** 进入。同一菜单用来切换 Global 和各 Project，可以按名称、目录名、负责人或下单 UID 搜索，见 [范围菜单](/webui#范围菜单)。
+Projects 页（`#/projects`）在侧栏 **System** 分组，也可以从侧栏顶部 **Project scope** 菜单的 **Manage projects** 进入。同一菜单用来切换 Global 和各 Project，可以按名称、目录名、负责人或客户 UID 搜索，见 [范围菜单](/webui#范围菜单)。
 
 ## 新建 Project
 
@@ -47,7 +48,7 @@ Projects 页（`#/projects`）在侧栏 **System** 分组，也可以从侧栏�
 
 填写 **Project name**（必填，最多 128 个字符）。**Folder name (optional)** 可留空，由服务端按名称生成；**Owner (optional)** 填负责人，最多 64 个字符，之后也能在看板上改。
 
-填写 **Customer order UID**（必填）：客户下单所用阿里云账号的 UID，只能是数字，最多 32 位。该 Project 中的 Pi 会话按这个 UID 计费，见 [下单 UID](#下单-uid)。
+填写 **Customer UID**（必填）：客户下单所用阿里云账号的 UID，只能是数字，最多 32 位。该 Project 中的 Pi 会话按这个 UID 计费，见 [客户 UID](#客户-uid)。
 
 </Step>
 <Step>
@@ -81,12 +82,12 @@ Project 目录都建在 `webui.projectsBaseDir`（或启动参数 `--webui-proje
 
 Projects 页是按状态分列的看板，四列依次是 **Responding**（处置中）、**Wrapping up**（收尾中）、**On hold**（暂时挂起）、**Done**（已完成）。
 
-每张卡片显示 Project 名称、负责人、下单 UID、控制台浏览器和目录名。点击名称即切换到该 Project；点击控制台浏览器（未添加时显示 **No console profiles**）切换到该 Project 并打开 [Cloud Access](/consoles)；点击目录名切换到该 Project 并在 [Artifacts](/artifacts) 中打开它的目录。
+每张卡片显示 Project 名称、负责人、客户 UID、控制台浏览器和目录名。点击名称即切换到该 Project；点击控制台浏览器（未添加时显示 **No console profiles**）切换到该 Project 并打开 [Cloud Access](/consoles)；点击目录名切换到该 Project 并在 [Artifacts](/artifacts) 中打开它的目录。
 
 - **改状态**：把卡片拖到另一列。鼠标悬停或用键盘聚焦到卡片时还会出现状态下拉框，可直接选择；触屏设备上下拉框一直显示。
 - **负责人**：点击卡片上的负责人（未设置时显示 **No owner**）填写名字，最多 64 个字符；清空即取消负责人。负责人是自由文本，不关联 WebUI 账号。
-- **下单 UID**：点击卡片上的下单 UID（未设置时显示 **No order UID**）修改，不能清空。
-- 状态、负责人和下单 UID 存在服务端，所有操作员看到的是同一块看板。
+- **客户 UID**：点击卡片上的客户 UID（未设置时显示 **No customer UID**）修改，不能清空。
+- 状态、负责人和客户 UID 存在服务端，所有操作员看到的是同一块看板。
 
 鼠标悬停在卡片上时显示三个按钮：
 
@@ -94,18 +95,23 @@ Projects 页是按状态分列的看板，四列依次是 **Responding**（处�
 - **Rename project**：只改显示名，目录不动。
 - **Delete project**：删除 Project 元数据、[Case Board](/air/case-board) 和 [AccessKey](/consoles#accesskey)，解除所有客户端归属，并停止这个 Project 中运行的 worker，目录和文件保留；删除当前 Project 后回到 Global。留下的目录不能再挂回新 Project，新建的 Project 总是另建带新编号的目录。Raven 为钉钉群自动创建的 Project 不能删除，见 [MCP 鉴权](/reference/mcp#鉴权)。
 
-### 下单 UID
+### 客户 UID
 
-阿里云百炼按 Project 的下单 UID 为 Pi 会话计费。SIREN 在启动 Pi 会话时读取当前 Project 的下单 UID。Claude Code 和 Codex 会话不使用下单 UID。
+阿里云百炼按 Project 的客户 UID 为 Pi 会话计费。SIREN 在启动 Pi 会话时读取当前 Project 的客户 UID。Claude Code 和 Codex 会话不使用客户 UID。
 
-- **没有下单 UID 时不能启动 Pi**：报 `project <名称> has no order UID; set it on the Projects page before starting Pi`。Raven 为钉钉群自动创建的 Project 没有下单 UID，在卡片上补填后即可启动。
+- **没有客户 UID 时不能启动 Pi**：报 `project <名称> has no order UID; set it on the Projects page before starting Pi`。Raven 为钉钉群自动创建的 Project 没有客户 UID，在卡片上补填后即可启动。
 - **修改只影响新会话**：运行中的 Pi 会话继续按启动时的 UID 计费；要让它改用新 UID，结束后重新开启会话。
 
 服务端的 Pi 配置也要支持按 Project 计费，见 [Pi](/server/air-providers#pi)。
 
 ## 分配客户端
 
-每个客户端最多归属一个 Project，归属按客户端稳定身份保存，重连或服务端重启后自动恢复。只能在 **Global** 范围分配：在 [Clients 页](/clients) 的 **Project** 列下拉框选择，或多选后用 **Assign project**；选 **Unassigned** 移回未归属。未归属的客户端只出现在 Global。**Clean & terminate** 会删除客户端身份，重新部署后需重新分配。
+每个客户端最多归属一个 Project，归属按客户端稳定身份保存，重连或服务端重启后自动恢复。两种分配方式：
+
+- **Global** 范围：在 [Clients 页](/clients) 的 **Project** 列下拉框选择，或多选后用 **Assign project**；选 **Unassigned** 移回未归属。移出或转到其他 Project 只能在这里做。
+- **Project** 视图：Clients 页的 **Unassigned clients** 区块列出未归属的在线客户端，点 **Add to this project** 加入当前 Project。
+
+**Clean & terminate** 会删除客户端身份，重新部署后需重新分配。
 
 ### 部署时自动归属
 
@@ -117,7 +123,7 @@ Projects 页是按状态分列的看板，四列依次是 **Responding**（处�
 
 | 页面 | Project 视图中的行为 |
 | --- | --- |
-| Clients | 只列本 Project 的客户端，不能分配 Project；**Recent activity** 只显示本 Project 的记录 |
+| Clients | 只列本 Project 的客户端，不能改归属；**Unassigned clients** 列出未归属的在线客户端，可加入本 Project；**Recent activity** 只显示本 Project 的记录 |
 | Shells | 只能对本 Project 的客户端开 Shell；有打开的 Shell 时，切换范围前先确认，确认后这些 Shell 关闭 |
 | Agentic IR | 只有 Project 视图能启动会话，Global 中不能启动。新会话的工作目录是 Project 目录，MCP 端点是 `/mcp/project/<id>`；**Running** 和 **History** 只列本范围会话。切换范围后其他范围的 AIR 会话视图被关闭，会话仍在运行，切回后可从 **Running** 重新接入。会话链接带 `?project=<id>`，打开时自动切换到该 Project |
 | Case Board | 显示本 Project 的排查进度；Global 中没有看板，提示先选择 Project |
@@ -141,5 +147,5 @@ Project 列表和客户端归属存于服务端工作目录下的 `data/projects
 
 ## 常见问题
 
-- **切到 Project 后客户端不见了**：客户端尚未归属该 Project，切回 Global 在 **Project** 列分配。
+- **切到 Project 后客户端不见了**：客户端尚未归属该 Project。未归属的在 Clients 页 **Unassigned clients** 中点 **Add to this project**；归属其他 Project 的切回 Global 在 **Project** 列改。
 - **启动后总是回到上次的 Project**：默认行为。刷新某个标签页时保持该标签页自己的范围，多个标签页可各开一个 Project 互不影响；新开的标签页沿用最后一次选择的范围。在 **Settings** → **Personal** 中把 **Startup project scope** 改为 **Global**，则每次从 Global 开始（只存于当前浏览器）。

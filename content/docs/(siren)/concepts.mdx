@@ -53,13 +53,13 @@ import conceptsLight from "../../img/concepts-light.webp";
 
 ## Global 与 Project 范围
 
-**Project** 是按事件划分的工作区，有名称、颜色、负责人、客户下单 UID、处置状态和服务端上的专用目录；每个客户端最多归属一个 Project。**Global** 是不选 Project 时的范围：能看到所有客户端，也是唯一能给客户端分配 Project 的地方。
+**Project** 是按事件划分的工作区，有名称、颜色、负责人、客户 UID、处置状态和服务端上的专用目录；每个客户端最多归属一个 Project。**Global** 是不选 Project 时的范围：能看到所有客户端，也是唯一能把客户端移出或转到其他 Project 的地方；Project 视图只能加入未归属的客户端。
 
 当前范围由侧栏顶部的 **Project scope** 菜单切换：
 
 | 页面 | Global | Project 视图 |
 | --- | --- | --- |
-| Clients | 全部客户端，可分配 Project | 只列本 Project 的客户端 |
+| Clients | 全部客户端，可分配 Project | 只列本 Project 的客户端，可加入未归属的客户端 |
 | Shells、Files、Investigations 的 Recon 和 Process analysis | 可选任意在线客户端 | 只能选本 Project 的客户端 |
 | Agentic IR | 不能启动会话，左栏列出全部会话 | 工作目录是 Project 目录，只能操作本 Project 的客户端 |
 | Artifacts | 根目录是服务端工作目录 | 根目录是 Project 目录 |
