@@ -38,7 +38,7 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 查看版本：
 
 - **服务端**：账号菜单 → **Settings**，**Server** 一栏的 **Version**。
-- **客户端**：[Clients](/clients#表格列) 页悬停 **Instance ID** 单元格，主机卡片中的 **Version**。
+- **客户端**：[Clients](/clients#表格列) 页悬停 **Host** 单元格，主机卡片中的 **Version**。
 - **命令行**：`siren --version`、`siren_server --version`。
 
 安装脚本、`upgrade` 子命令和一键部署都只取发布地址上的**最新**版本，不能指定版本或降级，所以新版本发布后新接入的客户端就会与旧服务端不一致。服务端启动时检查新版本，有新版本时日志提示 `new version available; run './siren_server upgrade' to upgrade`，看到后尽快把两端一起升级。

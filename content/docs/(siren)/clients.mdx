@@ -33,12 +33,12 @@ Clients 页（`#/clients`）是 WebUI 的默认首页，列出当前范围内的
 | 列 | 内容 |
 | --- | --- |
 | **ID** | Client ID，重连和服务端重启后不变，见 [核心概念](/concepts#siren-server-与-client) |
-| **Instance ID** | 阿里云 ECS 实例 ID；未上报时显示主机名 |
+| **Host** | 阿里云 ECS 实例 ID；没有实例 ID 时显示主机名，排序按显示的值 |
 | **Private IP** | 第一个内网 IP，有多个时附 `+N` |
 | **Project** | 所属 Project，未归属显示 **Unassigned**；仅 Global 范围下可编辑 |
 | **Note** | 客户端备注，点击编辑 |
 
-悬停 **Instance ID** 单元格会弹出主机卡片，显示 **Hostname**、**Version**、**Address**（客户端连接地址）和全部 **Private IP**。
+悬停 **Host** 单元格会弹出主机卡片，显示 **Hostname**、**Version**、**Address**（客户端连接地址）和全部 **Private IP**。
 
 ## 筛选与刷新
 
