@@ -22,7 +22,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 数据来自这些 Provider 在服务端留下的会话转录文件，与 AIR 历史会话读取的是同一批文件，因此也包含在服务端直接运行 CLI 的会话，以及 Usage 页面出现之前的会话。同一次模型调用出现在多个转录中（如继续会话或子 Agent）时只计一次。
 
-页面统计全部 Project，不随侧栏的 Project 范围切换；要只看某个 Project，用页面上的 Project 筛选。
+Project 筛选跟随侧栏的 Project 范围：选中某个 Project 时只统计该 Project；范围为 Global 时统计全部 Project。切换范围会把筛选改成新的范围。在页面上可以另选 Project 筛选，不影响侧栏的范围。
 
 ## 统计范围
 
@@ -55,7 +55,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 - **Daily**：每日柱状图，可切换 **Cost** / **Tokens**，左上角标出峰值；鼠标悬停在某天上，旁边浮出当天的日期、费用和 token 数。图下方按输入（Input）、缓存读取（Cache read）、缓存写入（Cache write）和输出（Output）分列 token 构成。
 - **By hour**：按星期和小时排列的热力图，颜色越深调用越多；悬停在格子上显示该小时的调用次数、token 数和费用。时间按服务端时区计算，时区标在右上角。
-- **Top sessions**：列出 5 个会话，可按 **Tokens**、**Cost** 或 **Active**（活跃时长）排序，默认按费用。每行显示会话标题、所属 Project、最后一次调用时间、Provider 和主要模型。点击标题，在 [Agentic IR](/air/sessions) 中以只读方式打开该会话的记录，并切换到它所属的 Project 范围；Project 已删除的会话不能打开。
+- **Top sessions**：列出 5 个会话，可按 **Tokens**、**Cost** 或 **Active**（活跃时长）排序，默认按费用。每行显示会话标题、所属 Project、最后一次调用时间、Provider 和主要模型。点击标题，在 [Agentic IR](/air/sessions) 中以只读方式打开该会话的记录，并切换到它所属的 Project 范围，Project 筛选随之改变；Project 已删除的会话不能打开。
 - **By project**、**By model**：按 Project 或按模型汇总。点击 **Cost** 或 **Tokens** 列头按该列从大到小排序，再点一次改为从小到大；默认按费用从大到小。**Share** 列显示该行在当前排序指标中的占比。范围内没有任何调用有单价时，按 **Cost** 排序和占比都改用 token 数。点击 **Export CSV** 按当前排序导出该表，包含费用、未计价调用数、各类 token 数和调用次数。
 
 ## 费用估算
