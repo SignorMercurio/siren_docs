@@ -4,6 +4,11 @@
   development.
 - Lead with visible behavior. Keep AIR, WebUI, and MCP implementation wiring in
   dedicated setup or maintainer pages.
+- Describe the UI as it behaves: name the real affordance (context menu, hover
+  control, button), and show only progress the server actually reports. Do not
+  invent substeps for a flow that returns one synchronous result.
+- Dossier report editing accepts `.md` files only; `.markdown` files get a
+  preview, not editing. Recheck the code before changing this claim.
 - Keep pages concise. Omit UI details readers can see on screen, internal
   mechanics, rare edge cases, and page previews or summaries. State each fact
   once in its canonical page (limits, config keys, MCP, snapshot format,
