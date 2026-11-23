@@ -2,7 +2,7 @@
 title: Provider 差异
 description: Codex、Claude Code 和 Pi 在 AIR GUI 中的审批、提问、命令、模型、额度和图片支持差异
 icon: Boxes
-verifiedAgainst: v2.50.0
+verifiedAgainst: v2.51.0
 sources:
   - internal/server/air_provider.go
   - internal/server/air_gui_provider.go
@@ -46,7 +46,7 @@ GUI 只在 Provider 主动请求确认时显示审批卡。是否需要确认由
 
 ## 运行中调整方向
 
-Claude Code 收到运行中的消息时，SIREN 先中断当前轮次再发送：被中断轮次中未完成的操作不再继续，等待中的审批被取消。
+Claude Code 收到运行中的消息时，SIREN 先中断当前轮次再发送：被中断轮次中未完成的操作不再继续，等待中的审批被取消。被中断的轮次不算失败：会话保持 **Working**，不发失败通知，[排队的消息](/air/gui#排队消息) 继续等待。
 
 ## 模型与推理强度
 

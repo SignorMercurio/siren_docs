@@ -11,6 +11,45 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.51.0 <DateTag>2026-11-23</DateTag>
+
+### Breaking Change
+
+- Recon 快照不再包含报告排版用的标题和代码围栏行，模块标题写在 `module_start`，`source_result` 的 `coverage` 只保留记录分类计数和错误码。旧版服务端会拒绝新版客户端的快照，升级时服务端和客户端必须一起升级，见 [Recon 快照格式](/reference/snapshot#source_result) 和 [版本一致](/upgrade#版本一致)
+
+### New Features
+
+- AIR Chat 会话支持排队消息：一轮运行中按 Cmd+Enter（Windows 和 Linux 上为 Ctrl+Enter）或点击 **Queue for the next turn**，消息在当前轮次完成后按顺序自动发送；排队的消息可以立即发送、编辑或移除，停止或失败后队列暂停，见 [排队消息](/air/gui#排队消息)
+- AIR Chat 时间线把结束的轮次折叠成最后的回复加一行 **Worked for …**，点击展开过程，见 [时间线结构](/air/gui#时间线结构)
+- AIR Chat 输入框为空时按 ↑ 取回发送过的请求；选中时间线中的文字后点击 **Quote**，把它作为引用块填入输入框，见 [发送请求与调整方向](/air/gui#发送请求与调整方向)
+- Agentic IR 左栏在会话运行一轮时显示 **Working**，你没在看的会话跑完后显示 **Completed** 或 **Failed**，见 [左栏](/air/sessions#左栏)
+- AIR 会话根据第一条消息自动生成简短的中文标题，重命名后的名称在会话结束后仍用于 History，见 [左栏](/air/sessions#左栏) 和 [重命名会话](/air/sessions#重命名会话)
+- 新建 Chat 会话时 **Delegate to workers** 默认打开，见 [多 Agent 分工](/air/sessions#多-agent-分工)
+- Pi 新增百炼上的 Qwen4 Max 模型，并计入 Usage 费用估算
+- Artifacts 的文件预览显示文件大小、修改时间和 SHA-256，哈希可以一键复制，见 [浏览与预览](/artifacts#浏览与预览)
+- 模型选择菜单支持按名称搜索，并在空间不足时改向另一侧展开
+- Clean 成功后自动恢复该客户端所在实例的出站规则，同一实例上还有其他在线客户端时跳过；自动恢复失败的记录留在 **Restore egress** 中手动重试，见 [恢复出站规则](/restore-egress)
+- **Restore egress** 的恢复记录按 UID 分组；客户端仍在线、状态为可恢复的记录默认不显示，避免恢复时切断客户端，见 [恢复出站规则](/restore-egress#操作步骤)
+- Case Board 只对照最新一份报告，各维度默认显示最新 3 条发现，其余折叠，见 [Case Board](/air/case-board)
+
+### Improvement
+
+- WebUI 改用暖色深色配色和单一紫色强调色，统一字号、控件高度和圆角；较长的说明文字改为换行，不再截断
+- Global 视图中从客户端行启动 AIR 时自动切换到该客户端所属的 Project；Project 的 Clients 页列出未分配的客户端并提供 **Add to this project**；Project 没有客户端时，AIR 新建表单给出提示并链接到 Clients
+- Clients 页的工具栏和表头在滚动时保持固定；显示实例 ID 或主机名的列改名为 **Host**，按显示的值排序，见 [表格列](/clients#表格列)
+- Usage 的 Project 筛选跟随侧栏的范围，见 [查看与筛选](/usage#查看与筛选)
+- Logs 的组件筛选显示界面中的名称，见 [查看与过滤](/logs#查看与过滤)
+- 填写有误的字段统一显示红色边框；连不上服务端时提示 `Cannot reach the SIREN server.`；**Customer order UID** 改名为 **Customer UID**
+- 安装包自带的 Usage 价格表新增 GPT-6.2 Astra、GPT-6.2 Sol、GPT-6.1 Terra、Claude Fable 5.2 等模型的单价。已有服务端的 `server_config.yaml` 不随升级改变，需要从安装包模板复制，见 [费用估算](/usage#费用估算) 和 [升级后核对配置](/upgrade#升级后核对配置)
+- Agent 用 `case_update` 关闭排查项时如果还带着 `next_action`，SIREN 自动清空它并提示为后续工作新建排查项，不再拒绝整次更新，见 [MCP 参考](/reference/mcp)
+- Agent 记录攻击事件时为每个攻击者动作单独建一条，并标注 ATT&CK 战术和技术，见 [Case Board](/air/case-board)
+
+### Bug Fixes
+
+- 从 History 继续的 Chat 会话显示之前的轮次，不再是空白的时间线
+- macOS 服务端上 Pi 的 Terminal 会话不再因 `timed out waiting 20s for Pi session handshake` 启动失败
+- 手机上打开会话后 Agentic IR 左栏自动收起，Usage 的筛选控件和 Files 的工具栏不再被截断
+
 ## v2.50.0 <DateTag>2026-11-13</DateTag>
 
 ### Breaking Change

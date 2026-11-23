@@ -2,7 +2,7 @@
 title: 启动与管理会话
 description: 选择模型和入口模式启动 AIR 会话，在左栏中重新接入或停止，并从 History 继续以前的会话
 icon: Workflow
-verifiedAgainst: v2.50.0
+verifiedAgainst: v2.51.0
 sources:
   - internal/server/webui/frontend/src/pages/AIRPage.tsx
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
@@ -80,6 +80,8 @@ AIR 会话只能在 Project 视图中启动。会话的工作目录是该 Projec
 | **Running** | 其余运行中的会话；Lead 派出的 worker 缩进列在 Lead 下面，见 [多 Agent 分工](#多-agent-分工) |
 | **Open** | 已打开但不属于上面各组的视图，例如已结束的会话；没有时不显示 |
 | **Today**、**Earlier** | 历史会话，见 [History](#history) |
+
+GUI 会话的一轮运行中，行尾显示 **Working**。你没在看的会话跑完一轮后，行尾显示 **Completed** 或 **Failed**，打开该会话后消失；这个标记只记在当前浏览器中，不受 [系统通知](#系统通知) 开关影响。
 
 点击一行即打开该会话。SIREN 根据会话的第一条消息自动生成一个简短的中文标题，费用记在 Project 的客户 UID 上。生成之前、Project 没有客户 UID 或生成失败时，Ask 会话以首条消息为标题，Account 会话以 UID 为标题。Terminal 会话的标题从 Provider 会话记录中读取，读到之前（包括 SIREN 无法定位记录的新建 Codex Terminal 会话）显示入口模式和短会话 ID。列表刷新失败时显示 `List may be stale: ...`，其中可能包含已不存在的会话。
 

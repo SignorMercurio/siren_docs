@@ -2,7 +2,7 @@
 title: Recon 快照格式
 description: snapshot-jsonl-v2 的事件顺序、记录类型、稳定 ID、状态值和上限
 icon: FileJson
-verifiedAgainst: v2.49.0
+verifiedAgainst: v2.51.0
 sources:
   - internal/reconartifact/schema.go
   - internal/reconartifact/validate.go
@@ -91,6 +91,13 @@ snapshot_end
 | `limits` | 本次采集生效的上限，键名见 [上限](#上限)；带有时间预算时还有 `collectionSeconds` |
 | `evidenceContent` | 计划执行的模块中有会把配置、凭证、载荷或日志内容写入记录的（`topology`、`supplychain`、`config`、`activity`、`credential`）时为 `true`，否则省略；为 `true` 时 Markdown 报告只生成紧凑摘要 |
 
+### module_start
+
+| 字段 | 说明 |
+| --- | --- |
+| `module` | 模块名 |
+| `metadata.title` | 模块在 Markdown 报告中的标题，必有 |
+
 ### record
 
 | 字段 | 说明 |
@@ -112,24 +119,20 @@ snapshot_end
 | `error` | 未完成的原因，最长 4 KiB |
 | `tool` | 实际使用的工具或采集方式，例如 `ip`、`procfs`、`filesystem` |
 | `durationMs` | 耗时 |
-| `metadata` | `kind`、`scope`、`startedAt`、`finishedAt`，按需包含 `timeWindow`、`limitType`、`presence` |
+| `format` | 只有插件 source 为 `text/markdown` |
+| `metadata` | `kind`、`scope`（source 在报告中的标题）、`startedAt`、`finishedAt`，按需包含 `label`、`timeWindow`、`limitType`、`presence` |
 | `coverage` | 覆盖情况，见下表 |
 
-`coverage` 的固定字段：
+`metadata.label` 决定报告的排版：有 `label` 的 source，每条记录渲染为 `label：内容` 列表项；没有时渲染为代码块。标题、代码围栏和标签前缀都由服务端渲染报告时生成，不作为记录写入快照。
+
+`coverage` 只放事件其他字段没有的内容：
 
 | 字段 | 说明 |
 | --- | --- |
-| `scope` | 检查范围的描述 |
-| `status`、`presence` | 与 `status`、`metadata.presence` 相同 |
-| `tool` | 同上 |
-| `recordLimit`、`moduleRecordLimit`、`moduleByteLimit` | 生效的记录数和字节上限 |
-| `structuredRecords`、`rawRecords`、`structuralRecords` | 三类记录的数量，之和等于 `recordCount` |
-| `parseStatus` | `structured`、`mixed`、`raw` 或 `not_applicable`，见 [解析程度](#解析程度) |
-| `limitType`、`limit` | 触发截断时出现 |
+| `structuredRecords`、`rawRecords`、`structuralRecords` | 三类记录的数量，之和等于 `recordCount`，见 [记录分类](#记录分类) |
 | `errorCode` | 未完成或按设计跳过时出现，见 [状态值](#状态值) |
-| `timeWindow` | 有时间窗口的 source 才有，例如最近 24 小时 |
 
-部分 source 还会附加自己的计数字段。
+部分 source 还会附加自己的计数字段。状态、工具和触发的上限看事件本身的 `status`、`tool`、`limit`，检查范围、时间窗口、上限类型和 `presence` 看 `metadata`，生效的各项上限看 `snapshot_start.limits`。
 
 ### module_end
 
@@ -162,7 +165,7 @@ snapshot_end
 | 字段 | 说明 |
 | --- | --- |
 | `rawText` | 采集器给出的单行显示文本，例如一行命令输出。证据文件和部分派生事实不带此字段 |
-| `structural` | `true` 表示报告排版用的标题或代码围栏行，不是证据，可跳过 |
+| `structural` | `true` 表示采集器的状态说明行，不是采集到的数据，可跳过 |
 | `parsed` | 仅 `fact`。`true` 表示除 `rawText` 外还有可查询的结构化字段 |
 
 记录不含 `risk`、`severity`、`verdict`、`weakPassword` 等判定字段，带有这类字段的快照会被拒绝。
@@ -278,7 +281,7 @@ snapshot_end
 | `not_present` | 已检查，目标不存在，例如主机没有安装某种容器运行时 |
 | `not_collected` | 按设计不采集，例如 Windows 的 SAM/SECURITY/LSA，或超出摘要预算的全文件哈希 |
 
-这两种情况 `status` 为 `ok`，`presence` 写在 `source_result` 的 `metadata.presence` 和 `coverage.presence`，不会让快照变成 partial。
+这两种情况 `status` 为 `ok`，`presence` 写在 `source_result` 的 `metadata.presence`，不会让快照变成 partial。
 
 **快照**
 
@@ -289,7 +292,7 @@ snapshot_end
 
 **截断**
 
-达到上限时 `truncated` 为 `true`，状态至少为 `partial`，`metadata.limitType` / `coverage.limitType` 指明哪个上限：
+达到上限时 `truncated` 为 `true`，状态至少为 `partial`，`metadata.limitType` 指明哪个上限：
 
 | limitType | 上限 |
 | --- | --- |
@@ -304,16 +307,9 @@ snapshot_end
 
 `coverage.errorCode` 为 `not_present`、`not_collected`、`collection_limit`（截断）、`timeout`、`collector_unavailable`、`collection_failed` 或 `collection_partial`。
 
-### 解析程度
+### 记录分类
 
-`parseStatus` 描述 source 的记录有多少可按字段查询：`entity`、`relation`、`evidence_file` 和 `parsed: true` 的 `fact` 计为 structured；其余 `fact` 和 `plugin_text` 计为 raw；`structural` 行单独计数。
-
-| parseStatus | 含义 |
-| --- | --- |
-| `structured` | 只有结构化记录 |
-| `mixed` | 两种都有 |
-| `raw` | 只有原文行 |
-| `not_applicable` | 没有证据记录 |
+`coverage` 的三个计数说明 source 的记录有多少可按字段查询：`entity`、`relation`、`evidence_file` 和 `parsed: true` 的 `fact` 计入 `structuredRecords`；其余 `fact` 和 `plugin_text` 计入 `rawRecords`；`structural` 行计入 `structuralRecords`。
 
 记录为原文不会使 source 变为 `partial`。
 

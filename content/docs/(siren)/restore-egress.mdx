@@ -2,7 +2,7 @@
 title: 恢复出站规则
 description: 撤销 Configure egress 对云端安全组所做的改动
 icon: Undo2
-verifiedAgainst: v2.50.0
+verifiedAgainst: v2.51.0
 sources:
   - internal/server/webui/frontend/src/components/EgressRecovery.tsx
   - internal/server/webui/frontend/src/components/Provisioning.tsx
@@ -18,8 +18,8 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 **Restore egress** 撤销 [Configure egress](/onboard/egress) 对阿里云安全组的改动：把实例移出专用安全组，再删除该组及其中的放行规则。它不触碰实例原有的安全组；专用组里有后续人工添加的规则时，保留该组。入口是 Clients 页 **Provisioning** 面板的 **Restore egress** 标签。
 
-<Callout title="先 Clean 再 Restore" type="warn">
-  恢复会撤销客户端回连所需的出方向放行，可能切断客户端。需要清理客户端时，先执行 [Clean](/cleanup)，再恢复（恢复不依赖客户端在线）。清理成功后面板会提示 **N cleaned clients have egress changes to restore. Review**，但不会自动执行。
+<Callout title="Clean 后自动恢复" type="warn">
+  恢复会撤销客户端回连所需的出方向放行，可能切断客户端。[Clean](/cleanup) 成功后，服务端自动恢复该客户端所在实例的出站规则；同一实例上还有其他在线客户端时不自动恢复。自动恢复失败的记录留在列表中，面板提示 **N cleaned clients have egress changes to restore. Review**，可手动重试。
 </Callout>
 
 ## 操作步骤

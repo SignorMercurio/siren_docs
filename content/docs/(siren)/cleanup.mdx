@@ -2,13 +2,14 @@
 title: 清理与结案
 description: 从受害主机移除 SIREN 客户端，并按清单收尾一次应急响应
 icon: ClipboardCheck
-verifiedAgainst: v2.50.0
+verifiedAgainst: v2.51.0
 sources:
   - internal/server/webui/frontend/src/components/ClientsTable.tsx
   - internal/server/webui/frontend/src/pages/ClientsPage.tsx
   - internal/server/webui/frontend/src/recentCleanups.ts
   - internal/server/webui/frontend/src/components/EgressRecovery.tsx
   - internal/server/cleanup_history.go
+  - internal/server/egress_manager.go
   - internal/server/webui/webui_cleanups.go
   - internal/server/handler.go
   - internal/client/cleanup.go
@@ -110,7 +111,7 @@ Linux 和 macOS 客户端在退出前删除全部目标。Windows 客户端立�
 
 1. **完成报告并导出材料**。在 [Reports](/reports) 中完成事件报告；需要保留 AIR 会话过程时在 GUI 中[导出 Markdown](/air/gui#导出-markdown)。还要从受害主机取回的文件用 [Files](/files) 下载，清理后无法再访问。
 2. **清理客户端**。对本次事件的所有客户端执行 [Clean & terminate](#在-webui-中清理)，在 Recent activity 中确认每条都是 **Files cleaned** 或 **Deletion scheduled**，其余状态登录主机核对。
-3. **恢复出站规则**。用过 **Configure egress** 时，在 Provisioning 面板的 **Restore egress** 标签中恢复，见 [恢复出站规则](/restore-egress)。必须在清理之后，因为恢复会切断客户端回连。**Allow access**（包括一键部署自动执行的那一步）添加的入方向放行没有恢复记录，Restore egress 不会撤销，不再需要时到云端手动移除。
+3. **恢复出站规则**。用过 **Configure egress** 时，清理成功后服务端自动恢复该实例的出站规则；同一实例上还有其他在线客户端时跳过。自动恢复失败时，在 Provisioning 面板的 **Restore egress** 标签中手动恢复，见 [恢复出站规则](/restore-egress)。**Allow access**（包括一键部署自动执行的那一步）添加的入方向放行没有恢复记录，Restore egress 不会撤销，不再需要时到云端手动移除。
 4. **收回云访问**。用过 [Cloud Access](/consoles) 时，删除本次事件的控制台浏览器和 AccessKey，并请客户禁用或删除这些 AccessKey。AccessKey 从 SIREN 删除后，在客户账号中仍然有效。
 5. **处理 Project**。可以在 Projects 看板上把它移到 **Done** 列，保留以便日后查阅；也可以点 **Delete project**：删除 Project 元数据、Case Board 和 AccessKey，解除客户端归属，并停止这个 Project 中运行的 worker。Project 目录和文件保留在服务端；控制台 Mac 上的浏览器也保留，在 Global 视图中显示 **No project**。见 [Project 范围](/projects#管理-project)。
 6. **按需备份**。证据和状态都在服务端，见 [备份](/upgrade#备份)。

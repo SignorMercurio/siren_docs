@@ -2,7 +2,7 @@
 title: GUI 时间线
 description: 在结构化时间线中跟踪 Agent 的操作、回答审批与提问、检索和导出会话
 icon: MessageSquareText
-verifiedAgainst: v2.50.0
+verifiedAgainst: v2.51.0
 sources:
   - internal/server/webui/frontend/src/components/AIRGUIChatPanel.tsx
   - internal/server/webui/frontend/src/components/AIRForkPanel.tsx
@@ -21,6 +21,8 @@ sources:
   - internal/server/webui/frontend/src/air/toolResults.ts
   - internal/server/webui/frontend/src/air/transcriptExport.ts
   - internal/server/air_gui_runtime.go
+  - internal/server/air_gui_queue.go
+  - internal/server/webui/frontend/src/air/composerText.ts
   - internal/server/air_history.go
   - internal/server/webui/webui_air.go
   - internal/server/air_gui_claude_permissions.go
@@ -35,6 +37,8 @@ GUI 是 AIR 会话的默认界面：SIREN 把 Provider 的事件按轮次整理�
 
 每一轮（turn）从操作员的请求开始，按发生顺序交错展示 Agent 的 Markdown 回复、操作记录（命令、文件、搜索、MCP 工具等）、**Plan** 进度、审批与提问卡片和 Provider 通知；特定工具的结果下方追加 [结构化结果卡](#结构化结果卡)。连续操作聚合为一行摘要，点击展开可查看完整命令、输入和输出；失败的操作标记 `failed`。点击操作中的文件路径，在该会话所属 Project 的 Artifacts 中打开。
 
+一轮结束后只留下最后的回复，之前的过程折叠成一行 **Worked for 2m 14s**（没有计时的轮次显示 **Work log**），其中有失败的操作时标出数量，点击展开。你看着跑完的最新一轮保持展开，下一轮开始后才折叠。回复之前不足两段过程的轮次、还有未处理审批或提问的轮次不折叠；检索命中折叠的内容时自动展开。
+
 ## 发送请求与调整方向
 
 在底部输入框按 Enter 发送，Shift+Enter 换行。手机（触屏且宽度不超过 768px 或高度不超过 500px）的软键盘没有 Shift+Enter，Enter 只换行，点击输入框右侧的发送按钮发送。
@@ -42,12 +46,30 @@ GUI 是 AIR 会话的默认界面：SIREN 把 Provider 的事件按轮次整理�
 Provider 给出提示建议时（见 [Provider 差异](/air/providers#对比总览)），会话空闲且输入框为空时以占位文字显示建议的下一条请求，按 Tab 或 → 填入输入框，可修改后再发送。
 
 - **空闲时**：开启新的一轮。
-- **运行中**：内容作为方向调整交给当前轮次，带 **Steered** 标签。各 Provider 的处理方式见 [Provider 差异](/air/providers#运行中调整方向)。
+- **运行中**：内容作为方向调整交给当前轮次，带 **Steered** 标签。各 Provider 的处理方式见 [Provider 差异](/air/providers#运行中调整方向)。要等这一轮结束后再发送，改用 [排队](#排队消息)。
 - **停止当前轮次**：点击输入框右侧的停止按钮，只停止这一轮，会话保持连接。Codex 和 Claude 中等待处理的审批与提问随之取消，记录为 `Cancelled`。结束整个会话见 [启动与管理会话](/air/sessions#停止与结束)。
+
+输入框为空时按 ↑ 取回上一条发送过的请求，继续按 ↑ 或 ↓ 在历史请求之间切换，修改后再发送。
+
+在时间线中选中一段文字，旁边出现 **Quote** 按钮，点击后选中的内容作为引用块填入输入框，在它下面写你的请求。
 
 <Callout title="调整方向不会撤销已完成的操作" type="warn">
   方向调整和停止只影响 Agent 之后的行为。已执行的命令、文件修改和对客户端的远程操作不会回滚，请在时间线中核对。
 </Callout>
+
+## 排队消息
+
+一轮运行中，按 Cmd+Enter（Windows 和 Linux 上为 Ctrl+Enter）或点击发送按钮左侧的 **Queue for the next turn** 按钮，消息不打断当前轮次，排在输入框上方。当前轮次完成后，SIREN 按顺序把排队的消息逐条作为新的一轮发出。带图片的消息显示图片数量。
+
+每条排队的消息右侧有三个按钮：
+
+- **Send now**：立即发送。运行中作为方向调整交给当前轮次，空闲时开启新的一轮。
+- **Edit queued message**：把文字取回输入框修改，按 Enter 保存，按 Esc 放弃；位置和图片不变。
+- **Remove queued message**：从队列中移除。
+
+点击停止按钮、一轮失败或 Provider 拒绝了自动发送之后，队列暂停，消息留在原处。发出下一条请求或点击 **Send now** 后，新的一轮完成时队列继续。
+
+队列保存在服务端，打开同一会话的所有人看到同一份队列，刷新后仍在；会话结束时队列清空。数量上限见 [限制](/reference/limits#air)。
 
 ## 审批与提问
 

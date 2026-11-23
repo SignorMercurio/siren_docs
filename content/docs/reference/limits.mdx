@@ -2,8 +2,8 @@
 title: 限制速查
 description: SIREN 的大小、数量和超时上限一览
 icon: Gauge
-verifiedAgainst: v2.50.0
-dossierVerifiedAgainst: 928cce5
+verifiedAgainst: v2.51.0
+dossierVerifiedAgainst: 720b802
 sources:
   - internal/server/clientnote/note.go
   - internal/server/project_names.go
@@ -214,6 +214,7 @@ Shell 没有空闲超时。
 | Settings 中的 AIR 附加指令 | 16 KiB | | [Settings](/webui#settings) |
 | 每个会话的回放缓存 | 4 MiB；`0` 或负数时使用默认值 | `air.replayBufferBytes` | [会话管理](/air/sessions) |
 | 粘贴图片 | PNG、JPEG、WebP、GIF；每条消息或每次粘贴 4 张，单张 8 MiB | | [GUI](/air/gui)、[Terminal](/air/terminal) |
+| 每个 GUI 会话排队的消息 | 20 条 | | [排队消息](/air/gui#排队消息) |
 | 断线自动重连 | 连续 5 次 | | [会话管理](/air/sessions) |
 | 会话历史列表 | 50 条 | | [会话管理](/air/sessions) |
 | 服务端关闭时等待 Provider 退出 | 5 秒 | | [会话管理](/air/sessions) |
