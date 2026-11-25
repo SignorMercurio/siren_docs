@@ -9,6 +9,9 @@
   `vX.(Y+1).0` section, written when that version ships. Recover pending patch
   changes from SIREN commits since the last minor release.
 - List what users notice; leave out internal details.
+- Write each entry as one sentence with at most one link. Merge related changes
+  into one entry, and leave out small visual tweaks. Details belong on the
+  linked page.
 - Update only the active release section unless the task explicitly includes
   older entries.
 - Preserve historical release notes and changelog entries unless the task

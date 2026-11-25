@@ -15,102 +15,87 @@ export const DateTag = ({ children }) => (
 
 ### Breaking Change
 
-- MCP `run` 的结果只有文本，不再返回 `path`、`body_start_line`、`complete` 等结构化字段。第一行写明 `audit_id`、`outcome`、退出码、结果文件和与正常执行不同的项，依赖结构化字段的外部 MCP 客户端改为读取这一行，见 [结果首行](/reference/mcp#结果首行)
+- MCP `run` 只返回文本，不再有 `path`、`complete` 等结构化字段，外部客户端改读结果首行，见 [结果首行](/reference/mcp#结果首行)
 
 ### New Features
 
-- AIR 新增常用请求：新建会话表单的输入框下方列出常用请求，Chat 输入框中有 **Quick prompts** 菜单，选中后填入输入框，不直接发送。列表在 Settings 的 **AIR** 标签中维护，内置排查告警、写阶段简报、写正式报告和审校报告四项，见 [入口模式](/air/sessions#入口模式)、[发送请求与调整方向](/air/gui#发送请求与调整方向) 和 [Settings](/webui#settings)
-- 会话菜单新增 **Copy session ID**，复制 Provider 自己的会话 ID，便于另一个 Agent 会话查找和读取这份会话记录，见 [会话标题栏](/air/sessions#会话标题栏)
-- Dossier 报告有了版本历史：SIREN 为每份报告保留最近 100 个版本，在编辑器版本菜单的 **版本历史** 中查看每一版的改动并恢复；同一菜单的 **升版本** 同时更新版本号和修订记录，见 [版本历史](/reports#版本历史)
-- Dossier 新增交付检查：**导出** → **交付检查** 由 SIREN 运行服务端 dossier Skill 的检查脚本，列出 FAIL 和 WARN；导出 PDF 时还有 FAIL 会先确认，见 [交付检查](/reports#交付检查) 和 [部署 Dossier](/server/dossier#交付检查)
-- AIR 或其他操作员改写了正在编辑的报告时，没有未保存修改的 Dossier 自动载入最新版本；有未保存修改时，保存前显示对方的改动，可以合并、用服务器版本或用自己的版本，见 [报告被别处修改](/reports#报告被别处修改)
-- Dossier 支持简报（frontmatter 中的 `kind: brief`）、日志证据块（围栏语言 `log` 的代码块）和截图占位（路径留空的图片），见 [简报](/reports/syntax#简报)、[日志证据块](/reports/syntax#日志证据块) 和 [截图占位](/reports/syntax#截图占位)
-- 以上 Dossier 功能需要 SIREN v2.52.0，并按 [部署 Dossier](/server/dossier) 重新发布 Dossier 运行时
+- AIR 新增常用请求：新建表单和 Chat 的 **Quick prompts** 菜单一键填入，内置项包括写成对客钉钉消息的「同步给客户」，列表在 Settings 的 **AIR** 标签中维护，见 [Settings](/webui#settings)
+- 会话菜单新增 **Copy session ID**，复制 Provider 的会话 ID，见 [会话标题栏](/air/sessions#会话标题栏)
+- 一个 Case Board 有多份报告时，每份报告只和自己覆盖的排查项比对是否过期，见 [Case Board](/air/case-board)
+- Dossier 新增版本历史、交付检查、简报、日志证据块和截图占位；别处改写正在编辑的报告时，自动载入或提示合并。这些功能需要重新发布 Dossier 运行时，见 [报告](/reports) 和 [部署 Dossier](/server/dossier)
 
 ### Improvement
 
-- AIR Chat 的队列暂停时显示 **Queue paused** 和 **Resume queue** 按钮，见 [排队消息](/air/gui#排队消息)
-- 离开 Chat 面板或切走浏览器标签页后再回来，第一个有新内容的轮次上方显示 **New since you left** 分隔线，见 [时间线结构](/air/gui#时间线结构)
-- AIR 会话空闲自动停止的默认时长从 72 小时改为 48 小时。已有服务端的 `server_config.yaml` 不随升级改变，仍写着 72 小时的需要手动修改 `air.idleTimeoutHours`，见 [服务端配置](/reference/server-config#air)
-- Pi 的 Kimi 模型换成百炼上的 Kimi K3.1 Pro Prime，安装包的 Usage 价格表加入它的单价。已安装的 Pi 重新运行安装脚本后生效；价格要从安装包模板复制到 `server_config.yaml`，见 [准备 AIR Provider](/server/air-providers#pi) 和 [费用估算](/usage#费用估算)
-- MCP `recon` 的结果最多内联 8 KiB 的 Markdown 报告，更长时从 `reportPath` 读取全文，见 [`recon`](/reference/mcp#recon)
-- MCP `case_read` 在看板全文超过 16 KiB 时只返回概要，全文写入 Project 目录下的 `case/board-r<revision>.txt`，见 [`case_read`](/reference/mcp#case_read)
-- Dossier 中比一页还高的图片按比例缩小到一页内，加载不了的图片在预览中显示它的路径，见 [图片](/reports/syntax#图片)
+- AIR Chat 队列暂停时显示 **Resume queue**，回到 Chat 时用 **New since you left** 标出新内容，见 [排队消息](/air/gui#排队消息)
+- AIR 会话空闲自动停止的默认时长改为 48 小时，已有服务端需手动修改 `air.idleTimeoutHours`，见 [服务端配置](/reference/server-config#air)
+- Pi 的 Kimi 模型换成 Kimi K3.1 Pro Prime，重新运行 Pi 安装脚本后生效，Usage 单价需从安装包模板复制，见 [准备 AIR Provider](/server/air-providers#pi)
+- MCP `recon` 和 `case_read` 的结果过长时只返回概要，全文写入文件，见 [MCP 参考](/reference/mcp)
+- MCP `case_update` 被拒时一次列出全部错误，`host` 实体也接受实例 ID、内网 IP 和主机名，见 [`case_update`](/reference/mcp#case_update)
+- MCP `run` 超时时，结果第二行给出处理办法，见 [结果首行](/reference/mcp#结果首行)
+- Dossier 中超过一页高的图片缩到一页内，加载失败的图片显示路径
 
 ### Bug Fixes
 
-- Dossier 报告中，响应阶段之后的 `####` 小节不再与第一个阶段重号，见 [章节与标题](/reports/syntax#章节与标题)
+- Claude Code 会话不再在约 60 秒时放弃等待耗时较长的 SIREN 工具调用
+- Dossier 响应阶段之后的 `####` 小节不再与第一个阶段重号
 
 ## v2.51.0 <DateTag>2026-11-23</DateTag>
 
 ### Breaking Change
 
-- Recon 快照不再包含报告排版用的标题和代码围栏行，模块标题写在 `module_start`，`source_result` 的 `coverage` 只保留记录分类计数和错误码。旧版服务端会拒绝新版客户端的快照，升级时服务端和客户端必须一起升级，见 [Recon 快照格式](/reference/snapshot#source_result) 和 [版本一致](/upgrade#版本一致)
+- Recon 快照格式变化，服务端和客户端必须一起升级，见 [版本一致](/upgrade#版本一致)
 
 ### New Features
 
-- AIR Chat 会话支持排队消息：一轮运行中按 Cmd+Enter（Windows 和 Linux 上为 Ctrl+Enter）或点击 **Queue for the next turn**，消息在当前轮次完成后按顺序自动发送；排队的消息可以立即发送、编辑或移除，停止或失败后队列暂停，见 [排队消息](/air/gui#排队消息)
-- AIR Chat 时间线把结束的轮次折叠成最后的回复加一行 **Worked for …**，点击展开过程，见 [时间线结构](/air/gui#时间线结构)
-- AIR Chat 输入框为空时按 ↑ 取回发送过的请求；选中时间线中的文字后点击 **Quote**，把它作为引用块填入输入框，见 [发送请求与调整方向](/air/gui#发送请求与调整方向)
-- Agentic IR 左栏在会话运行一轮时显示 **Working**，你没在看的会话跑完后显示 **Completed** 或 **Failed**，见 [左栏](/air/sessions#左栏)
-- AIR 会话根据第一条消息自动生成简短的中文标题，重命名后的名称在会话结束后仍用于 History，见 [左栏](/air/sessions#左栏) 和 [重命名会话](/air/sessions#重命名会话)
-- 新建 Chat 会话时 **Delegate to workers** 默认打开，见 [多 Agent 分工](/air/sessions#多-agent-分工)
-- Pi 新增百炼上的 Qwen4 Max 模型，并计入 Usage 费用估算
-- Artifacts 的文件预览显示文件大小、修改时间和 SHA-256，哈希可以一键复制，见 [浏览与预览](/artifacts#浏览与预览)
-- 模型选择菜单支持按名称搜索，并在空间不足时改向另一侧展开
-- Clean 成功后自动恢复该客户端所在实例的出站规则，同一实例上还有其他在线客户端时跳过；自动恢复失败的记录留在 **Restore egress** 中手动重试，见 [恢复出站规则](/restore-egress)
-- **Restore egress** 的恢复记录按 UID 分组；客户端仍在线、状态为可恢复的记录默认不显示，避免恢复时切断客户端，见 [恢复出站规则](/restore-egress#操作步骤)
-- Case Board 只对照最新一份报告，各维度默认显示最新 3 条发现，其余折叠，见 [Case Board](/air/case-board)
+- AIR Chat 支持排队消息：运行中按 Cmd+Enter（Windows 和 Linux 上为 Ctrl+Enter）把消息排到下一轮，见 [排队消息](/air/gui#排队消息)
+- AIR Chat 把结束的轮次折叠为最后的回复；输入框为空时按 ↑ 取回发过的请求，选中文字后点击 **Quote** 引用，见 [AIR GUI](/air/gui)
+- Agentic IR 左栏显示会话的 **Working**、**Completed** 或 **Failed** 状态，并按第一条消息自动生成中文标题，见 [左栏](/air/sessions#左栏)
+- 新建 Chat 会话默认打开 **Delegate to workers**，见 [多 Agent 分工](/air/sessions#多-agent-分工)
+- Clean 成功后自动恢复实例的出站规则，**Restore egress** 的记录按 UID 分组，见 [恢复出站规则](/restore-egress)
+- Case Board 只对照最新一份报告，各维度默认显示最新 3 条发现，见 [Case Board](/air/case-board)
+- Artifacts 的文件预览显示大小、修改时间和 SHA-256，见 [浏览与预览](/artifacts#浏览与预览)
+- Pi 新增百炼上的 Qwen4 Max 模型
 
 ### Improvement
 
-- WebUI 改用暖色深色配色和单一紫色强调色，统一字号、控件高度和圆角；较长的说明文字改为换行，不再截断
-- Global 视图中从客户端行启动 AIR 时自动切换到该客户端所属的 Project；Project 的 Clients 页列出未分配的客户端并提供 **Add to this project**；Project 没有客户端时，AIR 新建表单给出提示并链接到 Clients
-- Clients 页的工具栏和表头在滚动时保持固定；显示实例 ID 或主机名的列改名为 **Host**，按显示的值排序，见 [表格列](/clients#表格列)
-- Usage 的 Project 筛选跟随侧栏的范围，见 [查看与筛选](/usage#查看与筛选)
-- Logs 的组件筛选显示界面中的名称，见 [查看与过滤](/logs#查看与过滤)
-- 填写有误的字段统一显示红色边框；连不上服务端时提示 `Cannot reach the SIREN server.`；**Customer order UID** 改名为 **Customer UID**
-- 安装包自带的 Usage 价格表新增 GPT-6.2 Astra、GPT-6.2 Sol、GPT-6.1 Terra、Claude Fable 5.2 等模型的单价。已有服务端的 `server_config.yaml` 不随升级改变，需要从安装包模板复制，见 [费用估算](/usage#费用估算) 和 [升级后核对配置](/upgrade#升级后核对配置)
-- Agent 用 `case_update` 关闭排查项时如果还带着 `next_action`，SIREN 自动清空它并提示为后续工作新建排查项，不再拒绝整次更新，见 [MCP 参考](/reference/mcp)
-- Agent 记录攻击事件时为每个攻击者动作单独建一条，并标注 ATT&CK 战术和技术，见 [Case Board](/air/case-board)
+- WebUI 改用暖色深色配色和单一紫色强调色
+- 从 Global 视图启动 AIR 时自动切到客户端所属的 Project，Project 的 Clients 页可以加入未分配的客户端
+- Clients 页滚动时工具栏和表头保持固定，实例 ID 或主机名列改名为 **Host**，见 [表格列](/clients#表格列)
+- Usage 价格表新增 GPT-6.2 Astra、Claude Fable 5.2 等模型，已有服务端需从安装包模板复制，见 [费用估算](/usage#费用估算)
+- `case_update` 关闭排查项时自动清空残留的 `next_action`，不再拒绝整次更新
+- **Customer order UID** 改名为 **Customer UID**
 
 ### Bug Fixes
 
-- 从 History 继续的 Chat 会话显示之前的轮次，不再是空白的时间线
-- macOS 服务端上 Pi 的 Terminal 会话不再因 `timed out waiting 20s for Pi session handshake` 启动失败
-- 手机上打开会话后 Agentic IR 左栏自动收起，Usage 的筛选控件和 Files 的工具栏不再被截断
+- 从 History 继续的 Chat 会话显示之前的轮次
+- macOS 服务端上 Pi 的 Terminal 会话不再启动超时
+- 手机上 Agentic IR 左栏自动收起，Usage 和 Files 的控件不再被截断
 
 ## v2.50.0 <DateTag>2026-11-13</DateTag>
 
 ### Breaking Change
 
-- MCP 移除 `read_run_result` 和 `search_run_result`。Project 端点把 `run` 和 `run_batch` 每台主机的输出保存到 Project 目录的 `runs/<audit_id>.txt`，结果中写明路径，Agent 用自己的文件工具读取和搜索。结果文件不再 24 小时后过期，服务端重启后仍在；Global 端点不保存输出，见 [结果文件](/reference/mcp#结果文件)
-- 移除 `mcp.runOutputMode`，`run` 默认按 `auto` 返回，单次调用仍可用 `output_mode: full`，见 [返回结果](/reference/mcp#返回结果)
-- MCP 命令时限最多 120 秒，客户端 `config.yaml` 的 `recon.commandTimeout` 不再参与计算，见 [执行时限](/reference/mcp#执行时限)
-- 客户端日志改为分帧发送。v2.50.0 服务端会断开连上后写日志的旧版客户端，升级服务端时必须同时升级客户端，见 [版本一致](/upgrade#版本一致)
+- MCP 移除 `read_run_result` 和 `search_run_result`，`run` 的输出保存到 Project 目录的 `runs/<audit_id>.txt`，Agent 用文件工具读取，见 [结果文件](/reference/mcp#结果文件)
+- 移除 `mcp.runOutputMode`；MCP 命令时限最多 120 秒，不再参考客户端的 `recon.commandTimeout`，见 [执行时限](/reference/mcp#执行时限)
+- 客户端日志改为分帧发送，服务端和客户端必须一起升级，见 [版本一致](/upgrade#版本一致)
 
 ### New Features
 
-- 范围菜单顶部新增 **Search projects**，按名称、目录名、负责人或下单 UID 搜索所有状态的 Project，按 Enter 切换到第一个匹配项。菜单按 **Recent**、**In progress** 分组，**On hold** 和 **Done** 默认折叠；桌面浏览器中按 `⌘K`（Windows 和 Linux 上为 `Ctrl+K`）随时打开，见 [范围菜单](/webui#范围菜单)
-- MCP `run` 和 `run_batch` 新增 `timeout_seconds`，单次调用可设 1–120 秒的时限，见 [执行时限](/reference/mcp#执行时限)
-- Claude Code GUI 会话使用 Claude Code 自带的提问：一次提问可以包含多个问题，每个问题一张卡片，选项附带说明，见 [审批与提问](/air/gui#审批与提问)
+- 范围菜单新增 **Search projects**，按名称、负责人或 UID 搜索 Project，桌面浏览器中按 `⌘K`（Windows 和 Linux 上为 `Ctrl+K`）打开，见 [范围菜单](/webui#范围菜单)
+- MCP `run` 和 `run_batch` 新增 `timeout_seconds`，见 [执行时限](/reference/mcp#执行时限)
+- Claude Code GUI 会话的一次提问可以包含多个问题，见 [审批与提问](/air/gui#审批与提问)
 
 ### Improvement
 
-- 安装包自带的命令黑名单新增 Windows 破坏性命令规则，包括删除文件、结束进程、关机重启、停止或修改服务、清空磁盘和事件日志、修改本地账号、计划任务和防火墙；`cmd /c` 和 `powershell -Command` 包裹的命令也取出检查。已有服务端的 `server_config.yaml` 不随升级改变，需要从安装包模板复制新规则，见 [命令黑名单](/reference/mcp#命令黑名单) 和 [升级后核对配置](/upgrade#升级后核对配置)
-- Codex 和 Pi 等待一次 SIREN 工具调用最长 330 秒，耗时较长的 `recon` 和排队的 `run` 不再被 Provider 提前判为超时
-- 同一客户端上排队的 MCP 命令最多等待 130 秒，见 [同一客户端的并发](/reference/mcp#同一客户端的并发)
-- 一键部署时云助手离线或从未上报，失败信息改为请客户安装云助手或让它恢复在线后重新部署，不再建议 Configure egress，见 [一键部署](/onboard/provisioning#结果与记录)
-- 中文界面翻译 AIR 会话的结束原因，日期、时间和数字按界面语言格式显示，见 [界面语言](/webui#界面语言)
-- 部署结果面板把状态和 **View logs** 放在同一行，**Configure egress**、**Edit targets** 和重试按钮都在底部操作栏
-- [Recent activity](/clients#recent-activity) 中只有一个目标的部署记录不显示色块和计数；展开目标日志后，行上不再重复日志最后一行的原因
-- Clients 工具栏不再重复客户端总数，只在筛选后显示可见数和总数，如 `3 of 10`
+- 命令黑名单新增 Windows 破坏性命令规则，已有服务端需从安装包模板复制，见 [命令黑名单](/reference/mcp#命令黑名单)
+- Codex 和 Pi 等待一次 SIREN 工具调用最长 330 秒，同一客户端上排队的命令最多等待 130 秒，见 [同一客户端的并发](/reference/mcp#同一客户端的并发)
+- 一键部署遇到云助手离线时，提示客户恢复云助手后重新部署，见 [一键部署](/onboard/provisioning#结果与记录)
+- 中文界面翻译 AIR 会话的结束原因，日期和数字按界面语言格式显示
 
 ### Bug Fixes
 
-- 中文界面中，分段按钮（如 AIR 告警时间范围的 `14 天`）和 Clients、Usage 表头的文字不再换行
-- Cloud Access 的 **Open console** 按钮文字垂直居中
-- 切换 Project 后，Files 页不再为上一个 Project 的客户端发出请求
+- 中文界面的分段按钮和表头文字不再换行
+- 切换 Project 后，Files 页不再请求上一个 Project 的客户端
 
 ## v2.49.0 <DateTag>2026-11-11</DateTag>
 
@@ -130,28 +115,27 @@ export const DateTag = ({ children }) => (
 
 ### Breaking Change
 
-- 多 Agent 分工改为按会话开启：启动表单底部新增 **Delegate to workers** 开关，Settings 的 **Multi-agent delegation (beta)** 移除，原来的设置不迁移。开关只对新会话生效，继续或重开的会话保留原来的角色，见 [多 Agent 分工](/air/sessions#多-agent-分工)
-- 服务端和客户端不再从 `PORT`、`LISTEN`、`CERT`、`KEY`、`SERVER` 等环境变量读取配置，这些值只能来自配置文件和命令行参数，见 [服务端配置](/reference/server-config#优先级)
-- `egress.discovery` 不再有内置默认值，四个字段缺任何一个时不做出口发现，部署提示手动指定出口 IP，见 [出口发现](/server/prerequisites#出口发现-egressdiscovery)
-- `mcp.cmdBlacklist` 中有无法编译的正则时，`run` 和 `run_batch` 拦截全部命令，不再跳过这条规则，见 [命令黑名单](/reference/mcp#命令黑名单)
+- 多 Agent 分工改为按会话开启：启动表单新增 **Delegate to workers** 开关，Settings 中的全局开关移除，见 [多 Agent 分工](/air/sessions#多-agent-分工)
+- 服务端和客户端不再从 `PORT`、`SERVER` 等环境变量读取配置，见 [服务端配置](/reference/server-config#优先级)
+- `egress.discovery` 不再有内置默认值，缺字段时不做出口发现，见 [出口发现](/server/prerequisites#出口发现-egressdiscovery)
+- `mcp.cmdBlacklist` 中有无法编译的正则时，`run` 和 `run_batch` 拦截全部命令，见 [命令黑名单](/reference/mcp#命令黑名单)
 
 ### New Features
 
-- 可以单独停止一个运行中的 worker，Lead 会收到这一项的当前状态，见 [多 Agent 分工](/air/sessions#多-agent-分工)
-- MCP 新增 [`allow`](/reference/mcp#allow) 和 [`egress`](/reference/mcp#egress)，AIR 可以在你明确要求时放行客户端 IP、配置实例出站规则
-- Case Board 的文件路径、账号和资源实体可以带所在主机，显示为 `主机名:值`，见 [`case_update`](/reference/mcp#case_update)
+- 可以单独停止运行中的 worker，见 [多 Agent 分工](/air/sessions#多-agent-分工)
+- MCP 新增 `allow` 和 `egress`，AIR 可以在你明确要求时放行客户端 IP、配置出站规则，见 [`allow`](/reference/mcp#allow)
+- Case Board 的文件、账号和资源实体可以带所在主机，见 [`case_update`](/reference/mcp#case_update)
 
 ### Improvement
 
-- worker 把排查项涉及的实体和确认的攻击时间线事件一并写回 Case Board
-- worker 请求审批或提问时 SIREN 自动答复，不再一直等待
-- **Restore egress** 默认只显示还需要处理的记录，点击 **Show N restored** 查看已恢复的记录
+- worker 把实体和攻击事件写回 Case Board，请求审批或提问时由 SIREN 自动答复
+- **Restore egress** 默认只显示还需要处理的记录
 - Linux 和 macOS 的 `hunt` Profile 重新包含 `rootkit` 模块
-- Recon 读取轮转和 gzip 压缩的 `secure`、`auth` 日志，并遮盖采集文本中客户端自身的 OSS 凭证
+- Recon 读取轮转和压缩的 `secure`、`auth` 日志，并遮盖客户端自身的 OSS 凭证
 
 ### Bug Fixes
 
-- 客户端连接读取出错后结束会话，不再反复报错；Snapshot 文件缺失或过大时向服务端报告 Recon 失败
+- 客户端连接读取出错后结束会话，不再反复报错
 - 插件命令的参数不再被二次拆分
 - 修改客户端备注时检查客户端所属的 Project
 - MCP 审计日志不再包含命令输出
@@ -160,27 +144,23 @@ export const DateTag = ({ children }) => (
 
 ### Breaking Change
 
-- 移除 v2.46.0 的 **Case** 入口、Case Run、左栏 **Case** 分组、`case_handoff` 和 `blocked_by`，改为下面的多 Agent 分工。Settings 的 **Case roles** 改为 **Delegate workers**，不再设置 Lead
-- Case Board 排查项状态只剩 Open、Blocked、Gap、Confirmed、Ruled out；[`case_update`](/reference/mcp#case_update) 不再接受 `reason`、`tried_sources` 和证据的 `role`
+- 移除 v2.46.0 的 Case Run、`case_handoff` 和 `blocked_by`，改为下面的多 Agent 分工
+- Case Board 排查项状态只剩 Open、Blocked、Gap、Confirmed、Ruled out，见 [`case_update`](/reference/mcp#case_update)
 
 ### New Features
 
-- AIR 新增多 Agent 分工（beta，在 Settings 的 **Personal** 标签开启 **Multi-agent delegation (beta)**）：会话用 [`delegate`](/reference/mcp#delegate) 把一个排查项交给 worker 会话，调用立即返回，worker 结束后结果自动发回。worker 缩进列在派出它的会话下面，可以只读查看进展，不能对话，见 [多 Agent 分工](/air/sessions#多-agent-分工)
+- AIR 新增多 Agent 分工（beta）：会话用 `delegate` 把排查项交给 worker，worker 结束后结果自动发回，见 [多 Agent 分工](/air/sessions#多-agent-分工)
 
 ### Improvement
 
 - worker 和 Pi 新会话默认使用 DeepSeek V4.1 Flash，effort 为 max
-- 用量统计支持 Kimi K3.1 Pro 计价
+- Usage 支持 Kimi K3.1 Pro 计价
 
 ## v2.46.0 <DateTag>2026-11-08</DateTag>
 
 ### New Features
 
-- AIR 新增 **Case** 入口（beta，在 Settings 的 **Personal** 标签开启 **Multi-agent Case (beta)** 后显示）：启动多 Agent 的 Case Run，由 SIREN 按阶段启动 Lead、Entry、Host、Cloud 角色会话，一起推进同一个 Case Board；一个角色的清单项多时并行开几个会话，每个会话最多两项，回合结束 10 分钟没再唤醒的会话自动关闭腾出名额，达到 `air.maxSessions` 时等待名额而不是失败。左栏 **Case** 分组显示阶段和本次 Case Run 的全部角色会话及其状态，可以停止和继续，见 [Case Run](/air/sessions#case-run)
-- Settings 新增 **Case roles**，设置每个角色的 Provider、模型和 effort，见 [Settings](/webui#settings)
-- Case Board 排查项记录负责角色，Progress 列表显示在维度旁
-- AIR 新增 [`case_handoff`](/reference/mcp#case_handoff)，角色会话收尾时记录一句说明和剩余项
-- Case Board 排查项新增 [`blocked_by`](/reference/mcp#case_update)：等待的排查项全部关闭后，SIREN 自动把它改回 open 并再派给负责角色
+- AIR 新增 **Case** 入口（beta）：SIREN 按阶段启动 Lead、Entry、Host、Cloud 角色会话，一起推进同一个 Case Board。v2.47.0 已移除
 
 ### Improvement
 
@@ -190,10 +170,9 @@ export const DateTag = ({ children }) => (
 
 ### New Features
 
-- Cloud Access 新增 **Open console**，可以在新标签页中查看并直接操作客户云控制台，见 [直接操作控制台](/consoles#直接操作控制台)
-- AIR Chat 新增 **Fork** 侧边会话，复制主会话当时的上下文单独对话，主会话不受影响，见 [Fork 会话](/air/gui#fork-会话)
-- Case Board 显示攻击时间线，AIR 把事件记录到 Project，见 [Case Board](/air/case-board)
-- Case Board 覆盖矩阵的单元格可以查看关联事件
+- Cloud Access 新增 **Open console**，在新标签页中直接操作客户云控制台，见 [直接操作控制台](/consoles#直接操作控制台)
+- AIR Chat 新增 **Fork** 侧边会话，见 [Fork 会话](/air/gui#fork-会话)
+- Case Board 显示攻击时间线，覆盖矩阵的单元格可以查看关联事件，见 [Case Board](/air/case-board)
 
 ### Improvement
 
@@ -204,1124 +183,815 @@ export const DateTag = ({ children }) => (
 
 ### New Features
 
-- 新增 **Case Board** 页面。AIR 把排查项、结论和证据记录到 Project，页面显示排查清单、覆盖矩阵和实体关联图，见 [Case Board](/air/case-board)
+- 新增 **Case Board** 页面，显示 AIR 记录的排查清单、覆盖矩阵和实体关联图，证据变化后标出需要复核的报告，见 [Case Board](/air/case-board)
 - 排查项标为 Confirmed 或 Refuted 时必须引用证据
-- 报告写完后证据发生变化，Case Board 标出需要复核的报告和排查项
-- AIR 可以在当前 Project 内搜索最近的命令结果，不必重跑命令，见 `search_run_result`（v2.50.0 起改为 [结果文件](/reference/mcp#结果文件)）
-
-### Improvement
-
-- 命令结果保留 24 小时，最多 4096 条、256 MiB，见 [限制](/reference/limits)
+- AIR 可以搜索当前 Project 最近的命令结果，不必重跑。v2.50.0 起改为 [结果文件](/reference/mcp#结果文件)
 
 ### Bug Fixes
 
-- 登录中的控制台浏览器不再卡住 profile 列表
-- 登录检查后不再留下空白浏览器窗口
-- AIR 会话菜单在标题箭头下方打开
-
-## v2.43.1 <DateTag>2026-11-03</DateTag>
-
-### Bug Fixes
-
-- 用新版 Claude Code 跑的历史会话，只读时间线中不再多出一条以 `<system-reminder>` 开头的用户消息
-- 依次打开多条历史会话时，只读时间线不再越积越多：打开另一条历史会话时替换当前的只读时间线，**Agentic IR** 图标上的计数不再随之增加，见 [History](/air/sessions#history)
+- 登录中的控制台浏览器不再卡住 profile 列表，登录检查后不再留下空白窗口
+- 历史会话的只读时间线不再多出 `<system-reminder>` 消息，依次打开多条时不再越积越多，见 [History](/air/sessions#history)
 
 ## v2.43.0 <DateTag>2026-11-03</DateTag>
 
 ### Breaking Change
 
-- AIR 会话中的 `aliyun` 命令只使用 Project 的 AccessKey，不再读取服务端的 `~/.aliyun/config.json`。原来手工写在这个文件中的 profile，需要在对应 Project 中重新添加，见 [AccessKey](/consoles#accesskey)
+- AIR 会话中的 `aliyun` 只使用 Project 的 AccessKey，不再读取服务端的 `~/.aliyun/config.json`，见 [AccessKey](/consoles#accesskey)
 
 ### New Features
 
-- Project 可以配置客户提供的阿里云 AccessKey，一个 Project 可以有多对。AIR 会话用 aliyun CLI 查询客户账号时只使用本 Project 的 AccessKey，有多对时用 `--profile` 指定，会话启动后添加的 AccessKey 也立即可用，见 [AccessKey](/consoles#accesskey)
-- **Consoles** 页面改名为 **Cloud Access**，同时管理控制台浏览器和 AccessKey
+- Project 可以配置客户提供的阿里云 AccessKey，一个 Project 可以有多对，见 [AccessKey](/consoles#accesskey)
+- **Consoles** 页面改名为 **Cloud Access**
 
 ## v2.42.0 <DateTag>2026-11-03</DateTag>
 
 ### Breaking Change
 
-- AIR 的 Event 入口改为 **Account**：填写账号 UID，可选告警时间范围（最近 3、7、14、30 天或自定义，默认 30 天），会话先拉取该账号在范围内的告警，作为排查起点。按告警 ID、ECS 实例或云安全中心资产启动的方式已删除，见 [入口模式](/air/sessions#入口模式)
-- `air.prompt` 改为 UID 和时间范围两个占位符；`air.instancePrompt`、`air.assetPrompt`、`air.timeRangePrompt` 不再使用。配置文件中仍是旧模板时，升级后须改成新模板或删除该键，见 [Prompt 模板](/server/air-providers#prompt-模板)
+- AIR 的 Event 入口改为 **Account**，按账号 UID 和告警时间范围启动，见 [入口模式](/air/sessions#入口模式)
+- `air.prompt` 改为 UID 和时间范围两个占位符，旧模板须改写或删除，见 [Prompt 模板](/server/air-providers#prompt-模板)
 
 ### New Features
 
-- AIR 左栏按会话分组：**Needs you**、**Running**、**Open**、**Today**、**Earlier**，合并全部 Provider 的历史，可按 Provider 筛选和搜索，见 [左栏](/air/sessions#左栏)
-- 标签栏移除，会话上方改为标题栏：显示会话路径和 Provider，菜单中可重命名、复制链接、关闭视图或停止会话，并可在 Chat 和 Terminal 之间切换，见 [会话标题栏](/air/sessions#会话标题栏)
-- 新会话启动页直接选择模型：菜单按 Provider 分组，列出服务端 CLI 报告的模型，选中模型即选定 Provider，见 [选择模型和界面](/air/sessions#选择模型和界面)
-- 入口模式改名为 **Ask**、**Client**、**Account**。Ask 先写第一条消息再启动，消息原样发给 Agent；**Start** 按钮上显示 ⌘↩（Windows 和 Linux 上为 Ctrl ↩）快捷键
-- Chat 输入框改为卡片样式，模型和状态放在卡片内的工具栏中；你发送的消息以强调色气泡显示
-
-## v2.41.4 <DateTag>2026-11-03</DateTag>
-
-### Bug Fixes
-
-- 没有 MFA 的 RAM 用户也能自动登录控制台：SIREN 跳过控制台在密码之后显示的绑定 MFA 页面，不再误报为等待短信验证码。保存凭据时 MFA 密钥留空，见 [保存凭据](/consoles#保存凭据)
-
-## v2.41.3 <DateTag>2026-11-03</DateTag>
+- AIR 左栏按 **Needs you**、**Running**、**Open**、**Today**、**Earlier** 分组，合并全部 Provider 的历史，见 [左栏](/air/sessions#左栏)
+- 会话上方的标题栏取代标签栏，可以重命名、复制链接、停止会话和切换 Chat 与 Terminal，见 [会话标题栏](/air/sessions#会话标题栏)
+- 新会话启动页直接选择模型，选中模型即选定 Provider，见 [选择模型和界面](/air/sessions#选择模型和界面)
+- 入口模式改名为 **Ask**、**Client**、**Account**
+- 控制台账号用短信做 MFA 时也能登录，见 [登录](/consoles#登录)
+- 服务端每 10 分钟检查控制台浏览器，断开的浏览器自动重启并保留登录状态
 
 ### Bug Fixes
 
-- AIR 会话现在能识别 Project 的控制台浏览器名称和默认浏览器，不再去试控制台 Mac 上属于其他 Project 的浏览器，见 [AIR 如何使用](/consoles#air-如何使用)
-
-## v2.41.2 <DateTag>2026-11-03</DateTag>
-
-### New Features
-
-- 控制台账号用短信做 MFA 时也能登录：MFA 密钥留空，登录时 SIREN 让控制台发出验证码，在 5 分钟内点 **Enter SMS code** 输入即可，见 [登录](/consoles#登录)
-- 服务端每 10 分钟检查控制台浏览器，与 opencli 断开的浏览器自动重启，重启后保留登录状态
-- Consoles 的 Global 视图改为与 Project 卡片一致的样式：登录状态带状态点，每行一个下一步按钮，等待短信验证码的行突出显示
-
-### Bug Fixes
-
-- 服务端运行环境的 SSH 配置开启了连接复用时，访问控制台 Mac 不再复用其他密钥的连接，始终走为 SIREN 密钥设置的强制命令
+- 没有 MFA 的 RAM 用户也能自动登录控制台
+- AIR 会话不再尝试其他 Project 的控制台浏览器
+- 服务端 SSH 开启连接复用时，访问控制台 Mac 不再复用其他密钥的连接
 
 ## v2.41.0 <DateTag>2026-11-02</DateTag>
 
 ### Breaking Change
 
-- 新建 Project 必须填写客户下单所用阿里云账号的 UID，Pi 会话按这个 UID 在百炼计费；没有下单 UID 的 Project 不能启动 Pi，在 Projects 页的卡片上补填，见 [下单 UID](/projects#客户-uid)
-- AIR 会话只能在 Project 视图中启动，Global 下不再显示启动和继续按钮，见 [会话](/air/sessions)
-- Pi 新会话默认使用百炼上的 Kimi K3，思考等级默认 high，见 [Pi](/server/air-providers#pi)
+- 新建 Project 必须填写客户下单 UID，没有 UID 的 Project 不能启动 Pi，见 [客户 UID](/projects#客户-uid)
+- AIR 会话只能在 Project 视图中启动，见 [会话](/air/sessions)
+- Pi 新会话默认使用百炼上的 Kimi K3，见 [Pi](/server/air-providers#pi)
 
 ### New Features
 
-- 新增 **Consoles** 页面：在控制台 Mac 上为每个客户云控制台账号运行独立浏览器，在 SIREN 中保存凭据并一键登录，登录失效时自动重新登录。一个 Project 可以有多个浏览器，AIR 会话中的 opencli 只能使用本 Project 的浏览器，会话启动后添加的浏览器也立即可用，见 [云控制台浏览器](/consoles)
-- AIR 会话没有浏览器打开、Provider 也没有新输出达到 `air.idleTimeoutHours`（默认 72 小时）后自动停止，见 [停止与结束](/air/sessions#停止与结束)
-- AIR 标签栏新增复制链接按钮，在另一个浏览器中打开链接即进入同一会话或历史记录
-- **Or install manually** 中的命令改用安装脚本的部署模式，一步完成安装、写入服务端地址和后台启动，见 [安装并在后台启动](/onboard/manual#安装并在后台启动)
+- 新增 **Consoles** 页面：在控制台 Mac 上为每个客户云控制台账号运行独立浏览器，保存凭据并自动登录，见 [云控制台浏览器](/consoles)
+- AIR 会话没有人查看、也没有新输出达到 `air.idleTimeoutHours` 后自动停止，见 [停止与结束](/air/sessions#停止与结束)
+- **Or install manually** 的命令一步完成安装、写入服务端地址和后台启动，见 [安装并在后台启动](/onboard/manual#安装并在后台启动)
 
 ### Bug Fixes
 
-- 代码、命令和终端统一使用等宽字体，中文 Windows 上的 Chrome 不再显示为新宋体；终端等字体加载完成后再排版，字符不再错位
+- 中文 Windows 上的 Chrome 不再把代码和终端显示为新宋体
 
 ## v2.40.0 <DateTag>2026-10-30</DateTag>
 
 ### Breaking Change
 
-- AIR 的默认 Provider 改为 Pi，Pi 新会话默认使用阿里云百炼上的 DeepSeek V4.1 Flash。Pi 改为检查 `auth.json` 中的 `bailian` 密钥，没有时 Pi 不可用；安装脚本用 `BAILIAN_API_KEY` 写入它，见 [Pi](/server/air-providers#pi)。仍要以 Codex 为回退 Provider 时，在 `server_config.yaml` 中设 `air.provider: codex`
-- Dossier 报告的节号和阶段号一律按顺序自动分配，标题开头写的点分编号和 `::: phase` 后的编号会被去掉，只有 `{page slot=…}` 能固定节号，见 [报告语法](/reports/syntax)
+- AIR 默认 Provider 改为 Pi，默认模型为百炼上的 DeepSeek V4.1 Flash，安装脚本用 `BAILIAN_API_KEY` 写入密钥，见 [Pi](/server/air-providers#pi)
+- Dossier 的节号和阶段号一律按顺序自动分配，见 [报告语法](/reports/syntax)
 
 ### New Features
 
-- AIR 调查时按排查清单持续推进：一个方向受阻不会停止整个调查，清单还有可查的项时 Agent 不结束回合。调查底稿每轮更新当前结论、清单状态和最后更新时间，调查进行中即可在 Artifacts 中查看进展；正式报告仍在你确认后生成
-- WebUI 登录会话保存在账号库中，服务端重启后无需重新登录，见 [账号与安全边界](/server/security)
-- 登录页更新动画和登录卡片样式，登录失败时卡片晃动提示
-- **Artifacts** 的搜索框按名称在当前范围内查找文件和目录，包括尚未展开的目录，见 [浏览与预览](/artifacts#浏览与预览)
-- 中文统一使用简体中文字体，中英文和数字之间自动留出间距；复制按钮按下时有反馈
+- AIR 按排查清单持续推进，一个方向受阻不停止整个调查，调查底稿每轮更新进展
+- WebUI 登录会话在服务端重启后保留，见 [账号与安全边界](/server/security)
+- **Artifacts** 的搜索框可以查找尚未展开目录中的文件，见 [浏览与预览](/artifacts#浏览与预览)
 
 ### Bug Fixes
 
-- 一键部署的出口 IP 探测失败时，显示客户端给出的具体原因，不再只显示固定提示
-- 在 Dossier 中保存报告时，如果打开后 AIR 或其他操作员已改写同一份报告，保存会被拒绝，不再覆盖对方的修改；恢复的浏览器草稿同样适用，见 [保存失败](/reports#保存失败)
+- 一键部署的出口 IP 探测失败时显示具体原因
+- Dossier 保存时如果报告已被别处改写，保存被拒绝，不再覆盖对方的修改，见 [保存失败](/reports#保存失败)
 
 ## v2.39.0 <DateTag>2026-10-29</DateTag>
 
 ### Breaking Change
 
-- MCP 的 `recon` 默认不再运行 `hunt` Profile，指定 `hunt` 或客户端默认 Profile 为 `hunt` 时都会拒绝；运维人员在 WebUI 的 Recon 中照常运行。要让 Agent 自行运行，在 `server_config.yaml` 中设 `mcp.allowHuntRecon: true`，见 [`recon`](/reference/mcp#recon)
+- MCP `recon` 默认拒绝 `hunt` Profile，需要时设 `mcp.allowHuntRecon: true`，见 [`recon`](/reference/mcp#recon)
 
 ### New Features
 
-- **Settings** 新增 **AIR** 标签，为全部用户统一设置各 Provider 的默认模型和 effort，以及追加到每个会话系统提示词的 **Instructions**，对之后新启动的 GUI 和 Terminal 会话生效；新增只读的 **MCP & Skills** 标签，列出 AIR 会话可用的 MCP 服务器和 Skills，见 [Settings](/webui#settings)
-- **Usage** 页面顶部汇总 token、缓存命中率、调用次数、会话数和活跃时长，会话数下方显示每个会话 token 数的中位数和 p90；新增按星期和小时的调用热力图 **By hour**，以及可按 token、费用或活跃时长排序的 **Top sessions**，点击会话在 AIR 中打开它的记录；**By project** 和 **By model** 可以导出 CSV，见 [AI 用量](/usage)
-- Agentic IR 没有打开会话时，右侧列出当前范围内全部 Provider 的历史会话，显示每个会话的 token、调用次数和费用，可直接查看记录或继续，见 [没有打开会话时的历史表](/air/sessions#历史表)
-- **Provisioning** 的 **Deploy SIREN** 下方新增 **Or install manually**，按 Linux、macOS、Windows 给出已填好服务端地址的安装并连接命令，可直接复制，见 [手动安装客户端](/onboard/manual#安装客户端)
-- 登录过期时在当前页面上弹出登录框，重新登录后已打开的 Shell、AIR 会话和页面内容保持不变
-- 只有一个可选客户端时自动选中；**Provisioning** 有客户端在线时默认收起，并记住你的选择
-- 安装包自带配置的 `air.usage.prices` 增加 `glm-5.3-prime` 的单价；已有服务端需自行添加，见 [费用估算](/usage#费用估算)
+- Settings 新增 **AIR** 标签，统一设置默认模型、effort 和追加指令；**MCP & Skills** 标签列出可用的 MCP 和 Skills，见 [Settings](/webui#settings)
+- **Usage** 新增汇总指标、按小时热力图和 **Top sessions**，并可导出 CSV，见 [AI 用量](/usage)
+- Agentic IR 没有打开会话时列出历史会话及其 token 和费用，见 [历史表](/air/sessions#历史表)
+- **Provisioning** 新增 **Or install manually**，给出已填好服务端地址的安装命令，见 [手动安装客户端](/onboard/manual#安装并在后台启动)
+- 登录过期时在当前页弹出登录框，已打开的会话保持不变
 
 ### Bug Fixes
 
-- Recon 的凭据文件只记录元数据（路径、权限、属主、大小、修改时间、hash、私钥的公钥指纹、shadow 文件的账户数），不再保存文件内容；Windows 命令输出中的密码值被遮蔽，见 [模块](/recon#模块)
-- 服务端保存 Recon 快照后，客户端删除主机上的本地副本
-- 命令执行结束、Shell 或 AIR 终端关闭时，结束其启动的全部子进程，后台任务不再残留
-- 再次运行客户端安装脚本时，重新安装版本过期的客户端；Linux 安装脚本在固定的 OSS 地址解析失败时改用主机 DNS，Windows 安装脚本下载失败时自动重试，见 [手动安装客户端](/onboard/manual#安装客户端)
-- 一键部署的安装命令没有返回结果时，标出云助手的状态和可能原因，见 [结果与记录](/onboard/provisioning#结果与记录)
-- 单个页面出错时只影响该页面，其他页面和已打开的会话照常使用
-- 表单对话框在服务端接受修改后才关闭，失败时保留输入；错误提示停留 12 秒，鼠标悬停时不消失
-- AIR 的证据脚注只出现在对话回复中，不再写入 Agent 生成的文件
+- Recon 的凭据文件只记录元数据，不再保存内容；Windows 命令输出中的密码被遮蔽，见 [模块](/recon#模块)
+- 服务端保存 Recon 快照后，客户端删除本地副本
+- 命令结束或终端关闭时结束全部子进程
+- 客户端安装脚本重新安装过期的客户端，下载或 DNS 解析失败时重试
+- 单个页面出错不再影响其他页面
 
 ## v2.38.0 <DateTag>2026-10-26</DateTag>
 
 ### Breaking Change
 
-- 移除 AIR 的 Qoder Provider，AIR 只支持 Codex、Claude Code 和 Pi。Qoder 的历史会话不再列出；`server_config.yaml` 中的 `air.providers.qoder` 不再读取，可以删除；**Settings** 的默认 Provider 固定为 Qoder 时改回沿用上次，见 [Provider 差异](/air/providers)
+- 移除 AIR 的 Qoder Provider，`air.providers.qoder` 不再读取，见 [Provider 差异](/air/providers)
 
 ### New Features
 
-- 新增 **Usage** 页面（侧栏 **System** 分组），读取服务端上 Claude Code、Codex 和 Pi 的会话转录，按日期、Project、Provider 和模型统计 token 用量、调用次数和会话数，并按 `air.usage.prices` 中的单价估算费用；未配置单价的模型只计 token。安装包自带的配置已填好常用模型的标价，见 [AI 用量](/usage)
+- 新增 **Usage** 页面，按日期、Project、Provider 和模型统计 token 用量并估算费用，见 [AI 用量](/usage)
 - Projects 看板的列顺序改为 **Responding**、**Wrapping up**、**On hold**、**Done**，见 [管理 Project](/projects#管理-project)
 
 ### Bug Fixes
 
-- 修复 Project 很多时，侧栏 **Project scope** 菜单超出窗口、下方的 Project 无法选择的问题
+- Project 很多时，**Project scope** 菜单不再超出窗口
 
 ## v2.37.0 <DateTag>2026-10-21</DateTag>
 
 ### Breaking Change
 
-- AIR 的 Pi 固定为 Pi 1.0.0，改用 Pi 内置的 MCP 支持接入 SIREN MCP，不再提供子 Agent 和跨会话记忆，`air.providers.pi.memoryDir` 移除。已安装 Pi 的服务端重新运行 `scripts/install_pi_provider.sh`，并从 `<agentDir>/settings.json` 的 `packages` 中删除 `pi-mcp-adapter`、`pi-subagents` 和 `pi-memory`；`pi-mcp-adapter` 会取代 Pi 内置的 MCP 支持，使 SIREN MCP 无法接入，见 [Pi](/server/air-providers#pi)
+- Pi 固定为 1.0.0 并改用内置 MCP 支持，不再提供子 Agent 和跨会话记忆；已安装的服务端需重新运行安装脚本并删除旧扩展包，见 [Pi](/server/air-providers#pi)
 
 ### New Features
 
-- Clients 页 **Recent activity** 中，批量部署按目标显示结果：每个目标一个色块，后面按失败、超时、需手工确认、已连接等计数；展开后逐行列出每个目标的结果和原因，部署结束后需要处理的排在前面，点击目标查看它自己的日志，**Copy N failed IDs** 复制失败目标的实例 ID 以便重新部署，见 [Recent activity](/clients#recent-activity)
-- AIR 来源卡片直接显示脚注所引证据文件中的那几行，并标明是工具保存的原件、保存后被改动还是 Agent 自己写的文件；**Copy for report** 把这些行复制为可粘贴进报告的代码块；Artifacts 打开带行号的链接时高亮对应行，见 [在时间线中查看来源](/air/evidence#在时间线中查看来源)
-- MCP 新增 `save_evidence`（仅 Project 端点），把 `run` / `run_batch` 的原始输出连同命令、主机、时间和 SHA-256 原样保存到 Project 的 `evidence/` 目录；AIR GUI 会话要求 Agent 用它保存证据，多步结论先列时间线表格，报告中用代码块引用原文，见 [`save_evidence`](/reference/mcp#save_evidence)
-- macOS 客户端的 Recon 补齐 `cron`、`service`、`rootkit` 模块，提供与 Linux 相同的 `hunt` Profile，并采集登录与 SSH 认证失败事件、进程环境变量和数据卷文件扫描；另记录运行程序的签名与下载隔离属性、SIP、Gatekeeper、FileVault、TCC 授权和配置描述文件。授予客户端“完全磁盘访问”后采集才完整，见 [模块](/recon#模块) 和 [macOS 的完全磁盘访问](/onboard/manual#macos-的完全磁盘访问)
-- 未登录时打开 Dossier 报告链接，先跳到登录页，登录后回到该报告
+- Clients 的 **Recent activity** 按目标显示批量部署结果，可以复制失败目标的实例 ID，见 [Recent activity](/clients#recent-activity)
+- AIR 来源卡片直接显示脚注引用的证据行，并标明证据是否被改动，见 [在时间线中查看来源](/air/evidence#在时间线中查看来源)
+- MCP 新增 `save_evidence`，把命令原始输出连同命令、主机、时间和 SHA-256 保存到 `evidence/`，见 [`save_evidence`](/reference/mcp#save_evidence)
+- macOS 客户端的 Recon 提供与 Linux 相同的 `hunt` Profile，并采集签名、SIP、TCC 等系统安全状态，见 [模块](/recon#模块)
+- 未登录时打开 Dossier 报告链接，登录后回到该报告
 
 ### Bug Fixes
 
-- 客户端 Shell 不再加载主机上的 Shell 启动文件和 PowerShell 配置文件，主机上的 alias 和函数无法改写调查命令，见 [客户端上运行的 Shell](/shells#客户端上运行的-shell)
-- 修复安装或升级客户端、服务端和插件后，文件属主为构建机用户而不是 root 的问题
+- 客户端 Shell 不再加载主机上的 Shell 启动文件，主机上的 alias 无法改写调查命令，见 [客户端上运行的 Shell](/shells#客户端上运行的-shell)
+- 安装或升级后的文件属主为 root，不再是构建机用户
 
 ## v2.36.0 <DateTag>2026-10-20</DateTag>
 
 ### New Features
 
-- 客户端支持 macOS 12 及以上（Apple 芯片和 Intel）：用 `get_siren.sh` 加 `sudo` 安装，用 `siren upgrade` 升级；一键部署不支持 macOS，见 [手动安装客户端](/onboard/manual)
-- macOS 客户端的 Recon 提供 `default`、`quick` 两个 Profile，采集账户、SSH、进程、网络、环境变量、文件和应用信息；登录事件、SSH 认证失败事件、进程环境变量和文件扫描暂不采集，快照标记为 partial，见 [模块](/recon#模块)
-- MCP `run_batch` 的 `os` 参数可以用 `darwin` 筛选 macOS 客户端
-- AIR 适配手机：从左栏启动、接入或打开会话后左栏自动收起；GUI 输入框按 Enter 换行，点发送按钮发送；手机查看终端不再改变共享终端的行列数，见 [尺寸与滚动](/air/terminal#尺寸与滚动)
-- AIR 会话在你没在看时完成一轮或等待输入，浏览器会弹出系统通知，可在 **Settings** 的 **AIR notifications** 关闭，见 [系统通知](/air/sessions#系统通知)
-- Artifacts 和 Files 文件树支持把文件或目录拖到另一个目录中移动，见 [文件操作](/artifacts#文件操作)
-- Projects 看板卡片上的目录名可点击，切换到该 Project 并在 Artifacts 中打开它的目录
-- SOAR 限流（`Throttling.User`）时，出站规则配置和恢复会退避后自动重试，见 [Configure egress](/onboard/egress#configure-egress)
-- 对 **Needs attention** 的实例再次 Configure 时，会先自动恢复上次未完成的改动再重新配置
+- 客户端支持 macOS 12 及以上：手动安装，不支持一键部署，`run_batch` 可以用 `os: darwin` 筛选，见 [手动安装客户端](/onboard/manual)
+- AIR 适配手机，手机查看终端不再改变共享终端的行列数，见 [尺寸与滚动](/air/terminal#尺寸与滚动)
+- AIR 会话在你没在看时完成一轮或等待输入，浏览器弹出系统通知，见 [系统通知](/air/sessions#系统通知)
+- Artifacts 和 Files 文件树支持拖动移动，见 [文件操作](/artifacts#文件操作)
+- SOAR 限流时，出站规则的配置和恢复自动退避重试，见 [Configure egress](/onboard/egress#configure-egress)
 
 ### Bug Fixes
 
-- 修复某个采集项达到 2,000 条记录上限时，整次 Recon 报 `recon records exceed collection limits` 失败的问题
-- 修复刷新页面后多个标签页的 Project 范围互相覆盖的问题，现在每个标签页保持自己的范围
-- 修复 SIREN 自建的专用安全组在规则回读失败后无法恢复、提示 `dedicated group changed externally or rule snapshot incomplete; retained` 的问题，见 [记录状态](/restore-egress#记录状态)
+- 某个采集项达到 2,000 条上限时，Recon 不再整次失败
+- 多个浏览器标签页的 Project 范围不再互相覆盖
+- SIREN 自建的专用安全组在规则回读失败后可以恢复，见 [记录状态](/restore-egress#记录状态)
 
 ## v2.35.0 <DateTag>2026-10-19</DateTag>
 
 ### New Features
 
-- Projects 页改为看板，按 **Responding**、**On hold**、**Wrapping up**、**Done** 分列。拖动卡片改状态，悬停或聚焦卡片时也可以用状态下拉框；新建的 Project 在 **Responding** 列，已有 Project 升级后也显示在这一列，见 [管理 Project](/projects#管理-project)
-- Project 可以设置负责人：新建时选填，之后点击卡片上的负责人修改
-- Projects 加入侧栏 **System** 分组，**Project scope** 菜单中的 **Manage projects** 入口保留
-- 新建 Project 的目录名统一为 `<编号>-<创建日期>-<名称>`，如 `71-1014-上海甄云`，Global 的 Artifacts 中按创建顺序排列；手动填写的目录名只替换名称部分，已有目录不改名，见 [目录名规则](/projects#目录名规则)
-- AIR **Running** 中的会话可以重命名：点击行上的铅笔按钮，或双击会话标签、选中后按 `F2`。名称在同一范围内共享，清空即恢复自动标题，见 [重命名会话](/air/sessions#重命名会话)
-- Claude Code GUI 输入框为空时显示的提示建议，现在也可以按 `→` 采用（与 `Tab` 相同）；带修饰键的 `→` 保留原有行为
+- Projects 页改为看板，拖动卡片修改状态，见 [管理 Project](/projects#管理-project)
+- Project 可以设置负责人
+- 新建 Project 的目录名统一为 `<编号>-<创建日期>-<名称>`，见 [目录名规则](/projects#目录名规则)
+- AIR 运行中的会话可以重命名，见 [重命名会话](/air/sessions#重命名会话)
 
 ### Bug Fixes
 
-- 修复 Artifacts 和 Files 文件树中，上传和 **New Folder** 的 **Target** 无法回到根目录、连续新建目录会层层嵌套的问题。现在点选文件时 **Target** 变为文件所在目录，折叠目录时回到上一级，见 [文件操作](/artifacts#文件操作)
-- 修复 AIR GUI 回复中点击脚注编号无法打开来源卡片的问题
+- 上传和新建目录的 **Target** 可以回到根目录，连续新建目录不再层层嵌套，见 [文件操作](/artifacts#文件操作)
+- AIR GUI 回复中的脚注编号可以打开来源卡片
 
 ## v2.34.0 <DateTag>2026-10-09</DateTag>
 
 ### Breaking Change
 
-- 移除服务端 REPL 和端口转发。客户端管理、Shell、文件、Recon 和清理都在 WebUI 或 MCP 中完成；插件改在客户端本地用 `./siren plugins` 安装和启停，修改插件或 Profile 后重启客户端生效
-- 服务端不再读取终端输入，改为推荐以 systemd 服务运行，日志写入 journald，见 [用 systemd 启动](/server#用-systemd-启动)
-- 客户端和服务端必须同时升级；`egress.rules` 改为必填，`mcp.reconTimeout` 由 `recon.responseTimeout` 取代，旧版本的磁盘状态不再自动迁移
+- 移除服务端 REPL 和端口转发，插件改在客户端本地用 `./siren plugins` 管理
+- 服务端改为以 systemd 服务运行，日志写入 journald，见 [用 systemd 启动](/server#用-systemd-启动)
+- 客户端和服务端必须同时升级；`egress.rules` 改为必填，`mcp.reconTimeout` 由 `recon.responseTimeout` 取代
 
 ### New Features
 
-- AIR Terminal 中的 Manual 会话发出首条提问后，Running 列表以该提问作为标题（新开的 Codex Terminal 会话除外）
-- Claude Code GUI 会话可在状态栏切换模型和推理强度；Codex、Claude、Pi 切换前先校验所选项，切换期间暂缓发送
-- Reports 每行新增 **Open in Artifacts**，切换到报告所属 Project 并在 Artifacts 中定位源文件
+- Claude Code GUI 会话可以在状态栏切换模型和推理强度
+- Reports 每行新增 **Open in Artifacts**
 - 一键部署的客户端连接 `siren_server_callback` 规则中配置的服务端地址
-- Raven 群会话 MCP 凭证 `SIREN_MCP_RAVEN_TOKEN` 改为可选
-- 侧栏可用 `Cmd+B` / `Ctrl+B` 展开或折叠
+- 侧栏可以用 `Cmd+B`（Windows 和 Linux 上为 `Ctrl+B`）展开或折叠
 
-### Improvements
+### Improvement
 
-- 数据页面在宽屏上使用全部可用宽度，Settings 保持阅读宽度
-- AIR Running 会话卡片样式更新；时间线不再自动展开条目，折叠只作用于所在轮次
-- Codex 调用 SIREN MCP 工具是否需要确认改由操作者的 Codex 配置决定，GUI 中显示审批卡片
-- Logs 页面的组件列收窄，消息列更宽
+- Codex 调用 SIREN MCP 工具是否需要确认，改由操作者的 Codex 配置决定
+- 数据页面在宽屏上使用全部可用宽度
 
 ### Bug Fixes
 
-- 修复 AIR Terminal 重新连接后，Claude Code 等全屏 Provider 无法向上滚动的问题
-- 修复 AIR GUI 中 Provider 日志显示 ANSI 颜色码的问题
-- 服务端用户库、证书、配置文件和二进制不再出现在 Global Artifacts 中，也不能被下载、改名、删除或覆盖
-- 渲染的 Markdown 不再包含表单和按钮，WebUI 与 MCP 拒绝跨源修改请求，客户端 Shell 忽略剪贴板写入序列
+- AIR Terminal 重新连接后，Claude Code 等全屏 Provider 可以向上滚动
+- 服务端用户库、证书和配置文件不再出现在 Global Artifacts 中
+- 渲染的 Markdown 不再包含表单和按钮，WebUI 与 MCP 拒绝跨源修改请求
 - 服务端拒绝客户端未经请求或超出大小限制的消息
-- Artifacts 上传目标跟随当前 Project，上传按钮标明目标根目录；从链接打开文件时在目录树中展开并选中
-- 包含 `topology`、`supplychain`、`config`、`activity` 或 `credential` 模块的自定义 Profile 也生成紧凑 Markdown 摘要，不再把记录原文写入报告
-- Reports 不再列出 Dossier 运行时模板
-- 未配置 `air.customPromptPrefix` 时 Custom 会话使用内置前缀
-- 修复 Pi 会话重复启动时丢失 SIREN MCP 注册，以及 Windows 插件入口解析问题
 
 ## v2.33.0 <DateTag>2026-09-23</DateTag>
 
 ### New Features
 
-- 新增 **Reports** 页面替代左侧的 Dossier 外链：列出当前范围内符合 Dossier 规范的 Markdown 应急报告，Global 视图汇总工作目录和所有 Project 并标注归属；行尾 **Open in Dossier** 打开编辑，**Blank template** 打开只读默认模板，**Rescan** 手动重新扫描
-- AIR GUI 支持编号证据脚注：点击编号查看来源说明，并从卡片打开已保存的原文；每条回复下方保留可展开的来源列表
-- Claude Code、Codex、Qoder 与 Pi 的 GUI 会话采用统一证据约定，说明数据来源、采集时间和查看位置，并在权限允许时保存重要的临时命令或查询结果
-- AIR GUI 可在空闲时通过状态栏切换模型：Codex 可调整推理强度，Pi 可选择已配置的模型
+- 新增 **Reports** 页面，列出当前范围内的 Dossier 报告，可以直接在 Dossier 中打开
+- AIR GUI 支持编号证据脚注，点击编号查看来源并打开原文
+- AIR GUI 空闲时可以在状态栏切换模型
 
-### Improvements
+### Improvement
 
-- Markdown 报告预览支持脚注和同一工作区内的相对文件链接；导出会话时各条消息的脚注编号互不串位
-- 桌面侧栏默认折叠为图标，可展开并记住选择；悬停或键盘聚焦图标时显示名称
-- Provider 选项统一按 Codex、Claude、Pi、Qoder 排列，已保存的 Provider 偏好保留
-- Pi 新会话沿用操作者的思考默认设置，恢复会话时保留已选模型和思考等级
-- 客户端启动后 60 秒内以 2 秒间隔重试首次连接，缩短自动部署放行后的上线等待
-- Restore egress 对本次新建的专用安全组直接整组删除，不再依赖额外的查询权限；删除前仍核对人工修改
-- Restore egress 只对有执行 ID 的未决步骤提供 **Recheck execution**；恢复失败时指出实际阻塞的实例、操作和步骤
-- Provisioning 与恢复列表的布局、状态和进度展示更清晰，执行日志统一显示时间与级别
-- Artifacts 预览中的 Rename 按钮移到 Download 右侧，与右键菜单顺序一致
+- Markdown 报告预览支持脚注和相对文件链接
+- 桌面侧栏默认折叠为图标
+- 客户端启动后 60 秒内每 2 秒重试首次连接，部署后上线更快
+- Restore egress 直接删除本次新建的专用安全组，恢复失败时指出阻塞的实例和步骤
 
 ### Bug Fixes
 
-- 修复 SOAR 明确的限流拒绝被误判为结果未知、阻塞同账号出站规则恢复的问题
-- 修复 Configure egress 在 SOAR 执行成功、结果尚未返回时误报契约不匹配的问题；等待超时后保留执行标识供核对，避免重复提交云端修改
-- 修复 Qoder GUI 已结束的段落仍显示闪动光标，以及 Codex GUI 切换模型被拒绝的问题
+- SOAR 的限流拒绝不再被误判为结果未知
+- Configure egress 不再在 SOAR 结果尚未返回时误报契约不匹配
 
 ## v2.32.0 <DateTag>2026-09-16</DateTag>
 
 ### New Features
 
-- Clients 新增 **Restore egress**，可选择最多 20 条记录，恢复 Configure egress 产生的出站规则改动；记录在客户端离线、页面刷新及服务端重启后仍可使用
-- Clean 完成或已安排删除后，可通过快捷入口检查待恢复的出站规则，由用户手动执行
-- Linux、Windows 自动部署通过一次连接探测及云防火墙日志确认公网出口，不再依赖公共 IP 查询服务
-- 部署进度区分安装与探测、等待日志、放行和等待连接；自动发现失败时停止放行，可填写确认的出口 IP 重试
+- Clients 新增 **Restore egress**，恢复 Configure egress 改动的出站规则，记录在服务端重启后仍可用
+- Linux、Windows 自动部署通过连接探测和云防火墙日志确认公网出口，不再依赖公共 IP 查询服务
 
-### Improvements
+### Improvement
 
-- 恢复保留原有配置和后续人工修改；共用的 Drop 规则等待最后一台实例恢复后再还原，无法确认的改动保留并提示核对
-- 部署只为确认的出口 IPv4 添加 `/32` 和 SIREN 服务端口的入方向规则，不自动修改目标主机出方向策略
-- 缩短部署各步骤首次查询结果前的等待，结果就绪后立即继续
-- 修复 Windows 重复部署时旧进程清理失败，以及临时 hosts 条目清理异常
-- 自动部署同时核对客户端身份、来源地址和 Project 归属，确认实际上线后才标记成功；已有备注继续保留
-
-## v2.31.0 <DateTag>2026-09-15</DateTag>
-
-### New Features
-
-- 交互式 Shell 改走服务端主 TLS 端口（默认 TCP 443），不再需要额外放通随机端口；支持终端尺寸同步、Tab 补全、方向键和全屏终端程序
-- Clients 新增 **Recent activity**，统一展示近期部署与 WebUI、REPL 发起的清理结果，区分等待回报、文件已清理、延迟删除、失败和未收到回报；保留全服务端最近 20 条，按发起时的 Project 过滤，服务端重启后清空
-- Clients 主机详情 tooltip 新增客户端版本，旧客户端未上报时显示 **Not reported**
-
-### Improvements
-
-- Clients 的 **Provisioning** 统一提供 **Allow access**、**Configure egress** 和 **Deploy SIREN**，页内输入 1–20 个目标，自动去重、逐项展示结果，并支持仅重试失败目标
-- 部署支持每行填写 Instance ID、可选公网 IP 和备注；不再用 Instance ID 自动填充空备注，部署结束后立即刷新 Clients 列表
-- Configure egress 执行前列出即将下发的出方向规则，规则来自服务端配置 `egress.rules`；默认 SIREN 回连规则收窄为 TCP 443，已有安全组中的宽泛规则不会自动移除
-- 部署因重试耗尽或客户端始终未回连而失败时，提示先为该实例 Configure egress 再重新部署
-- Clean 先停止当前任务和交互会话再删除文件，并向服务端回报清理结果
-- Clients 行菜单新增 Recon，打开调查页面并选中该客户端；客户端选择器在没有备注时显示 Instance ID
-- 插件安装限制输出并在取消时终止子进程；chkrootkit 保留完整输出，并正确报告工具执行失败
-- 升级先完成新程序的复制和权限设置，再替换现有程序，准备失败时保留原有文件
+- 恢复出站规则时保留原有配置和后续人工修改，无法确认的改动保留并提示核对
+- 部署只为确认的出口 IPv4 添加 `/32` 入方向规则，不修改目标主机的出方向策略
+- 自动部署确认客户端实际上线后才标记成功
 
 ### Bug Fixes
 
-- 修复切换 Project 后旧的文件操作结果和 AIR 会话列表影响新视图的问题
-- 修复从 Clients 打开 Recon 或进程分析时调查页面标签反复切换的问题
-- 修复端口转发在读取同时返回数据和 EOF 时丢失末尾数据的问题
-- 修复窄屏主机详情超出卡片宽度、Clients 新增行时备注按钮抢焦点的问题
+- Windows 重复部署时能清理旧进程和临时 hosts 条目
 
-**升级说明：** 本版 Shell 协议需要服务端与客户端一起升级，不兼容旧版 Shell 连接。端口转发仍保留；从外部访问其服务端监听端口时，需要单独放通该端口。
+## v2.31.0 <DateTag>2026-09-15</DateTag>
+
+### Breaking Change
+
+- 交互式 Shell 改走服务端主 TLS 端口（默认 TCP 443），服务端和客户端必须一起升级
+
+### New Features
+
+- 交互式 Shell 支持终端尺寸同步、Tab 补全和全屏终端程序
+- Clients 新增 **Recent activity**，展示近期部署和清理结果
+- Clients 主机详情显示客户端版本
+
+### Improvement
+
+- **Provisioning** 统一提供 **Allow access**、**Configure egress** 和 **Deploy SIREN**，一次输入 1–20 个目标，可以只重试失败目标
+- Configure egress 执行前列出将下发的规则，默认回连规则收窄为 TCP 443
+- Clean 先停止当前任务和交互会话再删除文件，并回报清理结果
+- 升级先准备好新程序再替换，失败时保留原有文件
+
+### Bug Fixes
+
+- 切换 Project 后，旧的文件操作结果和 AIR 会话列表不再影响新视图
+- 从 Clients 打开 Recon 时，调查页面标签不再反复切换
+- 端口转发不再丢失末尾数据
 
 ## v2.30.0 <DateTag>2026-09-10</DateTag>
 
 ### New Features
 
-- `Client ID` 按客户端稳定身份持久保存，客户端重连和服务端重启后保持不变，也不会分配给其他主机
-- 客户端上线时上报主机名、内网 IP 和阿里云 ECS Instance ID；REPL 与 MCP 的 `ls` 显示这些字段，Clients 页面新增 Instance ID 和 Private IP 列，主机名、连接地址和完整 IP 列表放在 Instance ID 单元格的悬停卡片中，可从中复制
-- MCP 的 `run`、`recon` 等按客户端操作的工具可直接使用 Instance ID、内网 IP 或主机名指定目标；匹配到多台主机时返回候选 ID
-- 新增 MCP 工具 `run_batch`，在当前 Project 的多台客户端上并发执行同一命令并按主机汇总，每台主机都有独立的 `audit_id` 供 `read_run_result` 和 `search_run_result` 回读
+- `Client ID` 按客户端稳定身份持久保存，重连和服务端重启后不变
+- 客户端上线时上报主机名、内网 IP 和 ECS 实例 ID，Clients 页新增 Instance ID 和 Private IP 列
+- MCP 按客户端操作的工具可以用实例 ID、内网 IP 或主机名指定目标
+- MCP 新增 `run_batch`，在多台客户端上并发执行同一命令
 
-### Bugfix
+### Bug Fixes
 
-- Clients 页面的行操作菜单在点击空白处或按 Esc 后会关闭
-- Agentic IR 收起 History 后，Running 列表填满侧栏而不再留空
+- Clients 行操作菜单在点击空白处或按 Esc 后关闭
+- 收起 History 后，Running 列表填满侧栏
 
 ## v2.29.0 <DateTag>2026-09-09</DateTag>
 
+### Breaking Change
+
+- MCP 统一使用 Bearer 认证，拒绝跨 Project 访问；升级需配置服务端 MCP 凭证，并迁移运维客户端的 Header
+
 ### New Features
 
-- MCP 统一使用 Bearer 认证；跨项目访问、结果回读和部署抢占会被拒绝。升级需配置服务端 MCP 凭证并迁移运维客户端 Header，旧主机保留原归属，由管理员手工分配
-- AIR 的 Claude、Codex、Qoder、Pi GUI 与 Terminal 自动使用当前范围的会话凭证，结束后失效，保持原有工具审批设置
+- AIR 各 Provider 的 GUI 和 Terminal 会话自动使用当前范围的会话凭证，会话结束后失效
 
 ## v2.28.0 <DateTag>2026-09-08</DateTag>
 
 ### New Features
 
-- WebUI 每个页面都有独立的 URL 地址（如 `#/investigations/recon`、`#/artifacts/<路径>?project=<id>`），刷新、浏览器前进后退和分享链接都能回到同一位置；Investigations 记住当前工具、Agentic IR 记住当前会话、Artifacts 记住选中文件和 Project 范围，浏览器标签页标题随页面变化
-- 左侧导航按用途分组：Respond（Clients、Agentic IR）、Tools（Shells、Files、Investigations）、Evidence（Artifacts、Dossier）和 System（Logs）
-- Project 范围切换改为自绘菜单，并提供 **Manage projects** 入口进入 Projects 页面；Docs 入口移到左下角账号菜单
-- MCP `run` 在 Linux、macOS 和 Windows 客户端上支持合计 16 MiB 的双流输出，可分流回读、搜索，并报告捕获完整性与取消状态
-- `logging.output` 新增 `none`：不向终端输出日志，Logs 页面照常保留
-
-### Improvements
-
-- 登录页改版；Clients 列表用系统图标显示 Linux、Windows 和 macOS；侧栏突出显示 Agentic IR 入口
-- AIR 的 Claude 命令菜单直接显示 CLI 自带的命令描述
-- 插件更新先验证新版本再切换，失败时保留旧安装；安装命令拒绝覆盖已有插件，管理命令失败时返回非零退出码
-- 大目录采集分批读取条目，保留采集预算、取消和 partial 状态
-
-### Bug Fixes
-
-- 修复 Claude Code 等只读取 MCP structured content 的客户端看不到 `run`、结果回读、Recon 和部署正文的问题
-- 修复 AIR History 中 Codex 会话预览显示注入前言而非操作者首条 prompt 的问题
-- 修复 AIR Terminal 中 Claude Code 鼠标拖选复制失效、启动 GUI 会话偶发 `provider protocol closed`，以及恢复 Codex 会话时出现弃用警告的问题
-- 修复命令结束但输出尚未读完时误报捕获完整，以及长文件传输受五秒整体期限限制的问题
-- Dossier 静态服务拒绝根目录以下的符号链接和特殊文件
-
-## v2.27.0 <DateTag>2026-09-02</DateTag>
-
-### Feature
-
-- **AIR 图片粘贴**：GUI 和 Terminal 输入框支持直接粘贴图片（PNG、JPEG、WebP、GIF），由 SIREN 转交给 Provider 处理
+- WebUI 每个页面都有独立 URL，刷新、前进后退和分享链接都能回到同一位置
+- 左侧导航按 Respond、Tools、Evidence 和 System 分组
+- Project 范围菜单提供 **Manage projects** 入口
+- MCP `run` 支持合计 16 MiB 的 stdout 和 stderr 输出
+- `logging.output` 新增 `none`，不向终端输出日志
 
 ### Improvement
 
-- AIR 启动面板优化：Provider 图标悬停显示名称，模式入口增加说明文字，输入控件样式统一
-- Investigations 的 AccessKey、Recon 和 Process Analysis 面板增加用途说明
+- 插件更新先验证新版本再切换，失败时保留旧安装
+- 大目录采集分批读取，保留采集预算和 partial 状态
+
+### Bug Fixes
+
+- Claude Code 等只读取 MCP structured content 的客户端能看到 `run`、Recon 和部署的正文
+- AIR History 中 Codex 会话预览显示操作者的首条 prompt
+- AIR Terminal 中 Claude Code 的鼠标拖选复制恢复正常
+- Dossier 静态服务拒绝符号链接和特殊文件
+
+## v2.27.0 <DateTag>2026-09-02</DateTag>
+
+### New Features
+
+- AIR 的 GUI 和 Terminal 输入框支持粘贴图片
+
+### Improvement
+
 - Clients 页面没有在线客户端时显示三步引导
 
 ## v2.26.0 <DateTag>2026-08-31</DateTag>
 
-### Feature
+### New Features
 
-- **AIR 新增 Pi Provider**：支持 Qwen Aegis、SIREN MCP、Skills、子 Agent、记忆、Web 查询和长上下文管理
+- AIR 新增 Pi Provider
 
 ### Improvement
 
-- 会话结束时 GUI 与 Terminal 顶部显示 "Session ended" 及原因；Terminal 断线后提供 Reconnect 按钮
-- GUI 与 Terminal 最大并发会话数默认从 10 提升到 20（可通过 `air.maxSessions` 调整）
-- 四个 Provider 统一注入当前范围的 SIREN MCP
-- Provider 入口改为纯图标，窄窗口下仍可完整显示
+- 会话结束时显示结束原因，Terminal 断线后提供 **Reconnect**
+- AIR 最大并发会话数默认从 10 提高到 20，可用 `air.maxSessions` 调整
 
-### Bugfix
+### Bug Fixes
 
-- 修复 GUI 会话在 Provider 退出后仍显示运行态、Qoder 审批卡片挂起的问题
-- 修复终端回放缓冲被过度裁剪、Agent 崩溃时末段输出可能丢失的问题
-- 修复多台 ECS 共享出口 IP 时部署归属失败的问题
+- Provider 退出后，GUI 会话不再显示为运行中
+- Agent 崩溃时不再丢失末段终端输出
+- 多台 ECS 共用出口 IP 时，部署归属不再失败
 
 ## v2.25.0 <DateTag>2026-08-27</DateTag>
 
-### Feature
+### New Features
 
-- **AIR 时间线搜索**：新增 Cmd/Ctrl+F 搜索，可叠加失败、命令、文件等过滤条件，逐条高亮跳转
-- **AIR 时间线导出**：支持将当前会话时间线导出为 Markdown
+- AIR 时间线支持 Cmd+F（Windows 和 Linux 上为 Ctrl+F）搜索和过滤，并可导出为 Markdown
 - Hunt Profile 新增 `supplychain` 模块，记录运行中应用和容器的可执行文件摘要与依赖清单
 
 ### Improvement
 
-- AIR 时间线按调查轮次组织，统一时间戳和执行耗时，支持展开输入/输出和复制
-- 状态栏显示 Provider、模型、上下文与配额信息
-- 审批与提问解决后保留决策记录，刷新页面不丢失；有待处理事项时浏览器标签页标题显示提示
-- 断线重连时提示已丢弃的早期事件数量，可一键打开完整历史
-- 命令输出块支持换行与不换行切换，超过 30 行的输出标注总行数
+- AIR 时间线按调查轮次组织，状态栏显示 Provider、模型、上下文和配额
+- 审批与提问处理后保留决策记录，有待处理事项时浏览器标签页标题给出提示
 
 ## v2.24.0 <DateTag>2026-08-25</DateTag>
 
-### Feature
+### New Features
 
-- **MCP `run` 大结果分页读取**：结果超过 8 KiB 时返回首尾预览，Agent 可通过 `read_run_result` 按范围读取原文或搜索，无需重新执行命令
-- **MCP `run` 审计日志**：新增结构化审计日志，可在 Logs 页面按命令、客户端或执行结果查询
-
-### Improvement
-
-- 新增 `mcp.runOutputMode` 配置，默认 `auto` 按大小自动切换，`full` 恢复完整返回
+- MCP `run` 的结果超过 8 KiB 时返回首尾预览，Agent 可以按范围读取或搜索原文，不必重跑
+- MCP `run` 写入结构化审计日志，可以在 Logs 页面查询
 
 ## v2.23.0 <DateTag>2026-08-19</DateTag>
 
-### Feature
+### New Features
 
-- **Recon Snapshot JSONL v2**：新增权威证据格式，以固定记录类型表达主机、账户、服务、进程、容器等实体及其关系
-- **Hunt `activity` 模块**：采集运行中应用关联的近期本地日志
+- Recon 快照升级为 JSONL v2，用固定记录类型表达主机、账户、服务、进程、容器等实体及其关系
+- Hunt 新增 `activity` 模块，采集运行中应用的近期本地日志
 
 ### Improvement
 
-- Hunt 按 workload identity 归并应用实例，容器镜像端口、宿主机发布端口和真实 Socket 分开记录
-- Hunt Markdown 改为紧凑的拓扑与覆盖摘要，完整证据仅保存在 Snapshot JSONL
-- WebUI Settings 新增 AIR 默认 Provider 偏好
+- Hunt 的 Markdown 改为紧凑的拓扑与覆盖摘要，完整证据只保存在快照中
+- Settings 新增 AIR 默认 Provider
 
 ## v2.22.0 <DateTag>2026-08-19</DateTag>
 
-### Feature
+### New Features
 
-- **Recon 新增 `hunt` Profile**：采集应用与服务拓扑、配置与部署材料、凭据和密码策略
-- **Recon 新增 `topology`、`config`、`credential` 模块**：覆盖 Web/应用运行时、中间件和容器配置
+- Recon 新增 `hunt` Profile 和 `topology`、`config`、`credential` 模块，采集应用拓扑、配置和凭据
 
 ### Improvement
 
-- 配置与凭据原文只写入 Snapshot JSONL，Markdown 仅显示路径、权限和采集状态
+- 配置与凭据原文只写入快照，Markdown 只显示路径、权限和采集状态
 
 ## v2.21.0 <DateTag>2026-08-19</DateTag>
 
-### Feature
+### New Features
 
-- **Recon Snapshot JSONL v1**：新增权威格式（`.recon.jsonl`），服务端校验后确定性生成 Markdown
+- Recon 改用 JSONL 快照（`.recon.jsonl`），服务端校验后生成 Markdown
 
 ### Improvement
 
-- Recon 改为有界采集，每个 source、module 和整份快照均有硬限制，工具缺失或截断记录为 `unavailable` / `partial`
-- Recon 新增 270 秒 Profile 总采集预算
+- Recon 每个模块和整份快照都有采集上限，整个 Profile 最多采集 270 秒
 
 ## v2.20.0 <DateTag>2026-08-18</DateTag>
 
-### Feature
+### New Features
 
-- **Recon 支持命名 Profile**：`default` Profile 完整采集，`quick` Profile 跳过文件模块
-
-### Improvement
-
-- Qoder GUI 新增 `/model` 选择
+- Recon 支持命名 Profile：`default` 完整采集，`quick` 跳过文件模块
 
 ## v2.19.0 <DateTag>2026-08-13</DateTag>
 
-### Feature
+### New Features
 
-- **Configure egress 功能**：Clients 页面可为指定 ECS 创建或复用独立的 SIREN 出方向安全组
-- **Settings 页面**：可选择启动 Project、AIR 默认界面和刷新频率
+- Clients 新增 **Configure egress**，为指定 ECS 创建或复用 SIREN 专用的出方向安全组
+- 新增 **Settings** 页面，可以选择启动 Project、AIR 默认界面和刷新频率
 
 ### Improvement
 
-- Web 控制台左下角改为账号入口，集中收纳设置、反馈、版本号和退出登录
-- Settings 显示服务端版本、鉴权状态和各 AIR Provider 可用状态
-- AIR GUI 支持运行中发送补充要求调整后续方向
-- AIR GUI 新增斜杠命令菜单及 `/status`
-- AIR 记住当前浏览器选择的 GUI 或 Terminal，新建会话及刷新后保持
+- 左下角改为账号菜单，集中放置设置、版本号和退出登录
+- AIR GUI 支持在运行中发送补充要求，并新增斜杠命令菜单
 
 ## v2.18.0 <DateTag>2026-08-07</DateTag>
 
-### Feature
+### New Features
 
-- **Logs 页面**：Web 控制台新增 Logs 页面，可按级别、组件和关键词筛选服务日志，支持实时跟随和下载
+- 新增 **Logs** 页面，按级别、组件和关键词筛选服务日志，支持实时跟随和下载
 - AIR GUI 支持粘贴图片
 
-### Improvement
+### Bug Fixes
 
-- AIR 待处理的审批和提问会在标签页、时间线及输入框上方明确提示
-
-### Bugfix
-
-- 修复继续历史会话、发送失败和时间线跳转时可能丢失内容或位置的问题
-- 修复服务端发行包携带发布机 TLS 私钥的问题，首次安装改为在控制主机生成独立证书
+- 服务端发行包不再携带发布机的 TLS 私钥，首次安装时在控制主机生成证书
+- 继续历史会话或发送失败时，AIR 不再丢失内容
 
 ## v2.17.0 <DateTag>2026-08-03</DateTag>
 
 ### Breaking Change
 
-- WebUI、WebSocket、MCP 和远程客户端统一使用服务端主 TLS 端口，升级后需通过 HTTPS 访问
+- WebUI、WebSocket、MCP 和远程客户端统一使用服务端主 TLS 端口，升级后通过 HTTPS 访问
 
-### Feature
+### New Features
 
-- **AIR 结构化 GUI 时间线**：按顺序展示回复和操作记录，支持轮次导航、历史查看与续接、GUI 和 Terminal 切换
-- **MCP 新增 `deploy` 工具**：可按 UID 和 ECS Instance ID 发起部署，以客户端实际连接作为完成标准
+- AIR 新增 GUI 时间线，按顺序展示回复和操作，可以查看和续接历史会话
+- MCP 新增 `deploy`，按 UID 和 ECS 实例 ID 部署客户端
 
 ### Improvement
 
-- AIR 侧栏可折叠
 - 默认 Dossier 模板改为只读
 
 ## v2.16.0 <DateTag>2026-07-27</DateTag>
 
-### Feature
+### New Features
 
-- **AIR Event 模式扩展**：支持安全告警、ECS 实例和云安全中心资产三类目标，并可限定调查时间范围
-- 服务端日志支持配置级别、格式和输出位置
+- AIR 的 Event 模式支持安全告警、ECS 实例和云安全中心资产三类目标，并可限定时间范围
+- 服务端日志可以配置级别、格式和输出位置
 
 ### Improvement
 
-- Investigations 改为标签页布局，客户端选择器和 AIR 会话列表更易辨认
-- 移动端导航和页面布局适配
+- Investigations 改为标签页布局，WebUI 适配手机
 
 ## v2.15.0 <DateTag>2026-07-20</DateTag>
 
-### Feature
+### New Features
 
-- **Windows 旧系统兼容包**：支持 Windows 7 SP1 至 Windows 8.1 / Server 2008 R2 SP1 至 2012 R2
-- Artifacts 支持直接预览 PNG、JPEG、GIF 和 WebP 图片
+- 新增 Windows 旧系统兼容包，支持 Windows 7 SP1 至 8.1、Server 2008 R2 SP1 至 2012 R2
+- Artifacts 可以预览 PNG、JPEG、GIF 和 WebP 图片
 
 ### Improvement
 
-- 单机和批量部署以客户端实际连接为成功标准，可查看进行中任务和近期结果
-- 安装和升级会校验安装包，替换失败时恢复旧文件
+- 部署以客户端实际连接为成功标准
+- 安装和升级校验安装包，替换失败时恢复旧文件
 
 ## v2.14.0 <DateTag>2026-07-16</DateTag>
 
-### Feature
+### New Features
 
-- **多文件上传**：Files 和 Artifacts 支持一次拖入多个文件，可逐个处理重名冲突
-- **Clients 批量操作**：列表支持搜索、排序、多选，以及批量调整 Project 或清理客户端
+- Files 和 Artifacts 支持一次上传多个文件
+- Clients 列表支持搜索、排序、多选，以及批量调整 Project 或清理客户端
 
 ### Improvement
 
-- AIR 会话列表补充 Provider 和最近消息等信息，恢复前更容易确认会话
 - WebUI 登录有效期延长至 30 天
 
 ## v2.13.0 <DateTag>2026-07-08</DateTag>
 
-### Feature
+### New Features
 
-- **MCP 新增 `recon` 工具**：可在指定客户端发起信息收集并将报告保存到 Artifacts
+- MCP 新增 `recon`，在指定客户端上采集信息并把报告保存到 Artifacts
 - AIR 新增 Qoder Provider
 
 ### Improvement
 
-- Recon 移除内置可疑项判定，专注快速采集，由 AIR 结合上下文分析结果
+- Recon 不再判定可疑项，只做快速采集，由 AIR 结合上下文分析
 
 ## v2.12.0 <DateTag>2026-07-01</DateTag>
 
-### Feature
+### New Features
 
-- **AIR 浏览器内嵌终端**：可直接在 WebUI 中操作 Claude Code / Codex，回答提问并查看完整终端输出
-- **AIR 会话服务端托管**：刷新页面、切换页面或短暂断连后，可重新接入并回放此前输出
-- **AIR 模式整合**：入口整合为四种模式（Manual / Custom / Event / Resume）
+- AIR 在浏览器中内嵌终端，可以直接操作 Claude Code 和 Codex
+- AIR 会话由服务端托管，刷新或短暂断连后重新接入并回放输出
+- AIR 入口整合为 Manual、Custom、Event、Resume 四种模式
 
 ### Improvement
 
-- AIR 默认沿用操作者自己的 Claude Code / Codex 配置，不再替用户固定模型或权限
+- AIR 沿用操作者自己的 Claude Code 和 Codex 配置，不再固定模型或权限
 
 ## v2.11.0 <DateTag>2026-06-29</DateTag>
 
-### Feature
+### New Features
 
-- **Projects 工作区**：可按项目隔离客户端、AIR 会话和取证目录，Artifacts、AIR、Recon 和 Dossier 均支持 Project 作用域
-- **客户端 Project 归属**：可在 Clients 页面分配或移出 Project，客户端重连后继续保持归属
-- AIR 支持 Claude / Codex Provider 选择
-- Artifacts 支持新建目录
-- 批量部署支持目标备注
+- 新增 Projects，按项目隔离客户端、AIR 会话和取证目录
+- Clients 页面可以把客户端分配到 Project，重连后保持归属
+- AIR 可以选择 Claude 或 Codex
+- Artifacts 支持新建目录，批量部署支持目标备注
 
-### Bugfix
+### Bug Fixes
 
-- 修复 MCP 慢命令被提前判定超时的问题
+- MCP 慢命令不再被提前判为超时
 
 ## v2.10.0 <DateTag>2026-06-02</DateTag>
 
-### Feature
+### New Features
 
-- **Investigations 进程分析**：可按 PID、监听端口或进程名查询 Linux 客户端进程详情
-- **AIR 恢复历史会话**：可在 Resume 模式中继续已有的 AIR 会话
-
-### Improvement
-
-- WebUI 批量部署支持更大的目标列表
-
----
+- Investigations 新增进程分析，按 PID、监听端口或进程名查询 Linux 客户端的进程详情
+- AIR 可以在 Resume 模式中继续历史会话
 
 ## v2.9.0 <DateTag>2026-05-21</DateTag>
 
-### Feature
+### New Features
 
-- **WebUI Agentic IR 新界面**：浏览器中按顺序展示 AI 回复、工具调用和结果，并支持在同一会话继续追问；服务端 REPL 的 `air` 命令保持原有交互式体验
+- WebUI 新增 Agentic IR 界面，按顺序展示回复、工具调用和结果，可以在同一会话中追问
 
-### Bugfix
+### Bug Fixes
 
-- 修复客户端握手后断线时，重连等待时间可能过长的问题
-
----
+- 客户端握手后断线时，重连不再等待过久
 
 ## v2.8.0 <DateTag>2026-05-18</DateTag>
 
-### Feature
+### New Features
 
-- **客户端自动重连与稳定身份**：客户端会持久化本机身份，服务端短暂下线或升级重启后自动重新连接
+- 客户端保存本机身份，服务端重启或升级后自动重连并恢复备注。交互式 Shell、端口转发和执行中的命令需要重新打开
 
-### Improvement
+### Bug Fixes
 
-- 客户端备注按稳定身份持久化，重连后会恢复此前设置的备注
-- WebUI Shell 与 AIR 终端启动、尺寸同步、滚轮和隐藏标签页切换更加稳定
-- Recon 模块复用统一的命令执行与输出处理逻辑，减少不同平台模块之间的错误处理差异
-
-### Bugfix
-
-- 修复 WebUI AIR 终端文本选择和剪贴板复制在部分场景下失效的问题
-- 修复升级包解压、二进制替换和 SOAR 调用中的部分错误处理路径，失败时返回更明确的错误
-
-### Upgrade Notes
-
-- 自动重连只恢复客户端连接和备注元数据；交互式 Shell、端口转发和正在执行的命令属于当前连接上的活动会话，服务端重启后需要重新打开
-
----
+- AIR 终端的文本选择和复制恢复正常
 
 ## v2.7.0 <DateTag>2026-05-15</DateTag>
 
 ### Breaking Change
 
-- 移除本地与远程 `ti` 威胁情报沙箱上传入口，相关上传能力不再出现在 CLI、协议处理和 WebUI 调查流程中
+- 移除 `ti` 威胁情报沙箱上传
 
 ### Improvement
 
-- WebUI 与 MCP 的启停开关拆分：`mcp.enabled` 可在浏览器 WebUI 关闭时继续提供 `/mcp`，WebUI 也可在 MCP 关闭时单独运行
-- Dossier 左侧入口改为打开 `webui.dossierDir/report.md`，该目录可以位于服务端工作目录外；报告正文和粘贴图片仍通过受保护的 WebUI 报告接口读写
+- `mcp.enabled` 与 WebUI 开关分开，可以单独提供 `/mcp`
+- Dossier 入口打开 `webui.dossierDir/report.md`，该目录可以在服务端工作目录之外
 
-### Bugfix
+### Bug Fixes
 
-- 修复 MCP 在 Windows PowerShell 命令中丢失 `$_`，以及执行错误被吞掉的问题
-- 修复客户端文件浏览中 UTF-16 文本文件被当作二进制文件而无法预览的问题
-- 修复外部 Dossier 路径、默认报告路径和报告侧边资源解析中的边界问题
-
----
+- MCP 在 Windows PowerShell 命令中不再丢失 `$_`，执行错误不再被吞掉
+- Files 可以预览 UTF-16 文本文件
 
 ## v2.5.0 <DateTag>2026-05-14</DateTag>
 
-### Feature
+### Breaking Change
 
-- **WebUI 新增 Dossier 直接入口**：左侧导航可直接打开 Dossier，无需先在 Artifacts 中选中 Markdown 文件再进入编辑器
-- **Artifacts Markdown 报告接入 Dossier**：`.md` 报告可从 Artifacts 打开到 Dossier，直接进入编辑流程
+- 使用 Dossier 前需要部署 Dossier 编辑器和默认 `report.md`，见 [部署 Dossier](/server/dossier)
+- Artifacts 不再预览 HTML 报告，新报告建议用 Markdown 和 Dossier
 
-### Improvement
+### New Features
 
-- Dossier 未部署或路径配置错误时，WebUI 会显示错误提示，不再让用户直接进入浏览器 404 页面
-
-### Upgrade Notes
-
-- 使用 Dossier 前需要先部署 Dossier 编辑器文件和默认 `report.md`，默认目录为 `/opt/siren/dossier`，自定义路径请参考 [部署 Dossier](/server/dossier)
-- Artifacts 不再直接预览 HTML 报告；历史 HTML 报告可下载后查看，新的应急报告建议使用 Markdown + Dossier
-
----
+- WebUI 左侧导航新增 Dossier 入口，Artifacts 中的 `.md` 报告可以在 Dossier 中打开
 
 ## v2.4.0 <DateTag>2026-05-11</DateTag>
 
-### Feature
+### New Features
 
-- **服务端 REPL 新增 `deploy-batch` 命令**：支持对同一 Alibaba Cloud UID 下的 2-20 台 ECS 批量部署 SIREN 客户端，目标格式为 `instanceId` 或 `instanceId,publicIp`
-- **WebUI Clients 页面支持批量部署**：Deploy SIREN 区域新增 Single / Batch 模式切换，Batch 模式可按行输入实例 ID 与可选公网 IP，运行结果按目标逐台流式展示
+- 服务端 REPL 新增 `deploy-batch`，WebUI 的 Clients 页面支持批量部署，一次部署同一 UID 下的 2–20 台 ECS
 
 ### Improvement
 
-- 批量部署固定并发 3 台，单台失败不会中断后续目标，最终按输入顺序汇总成功/失败结果
-- Clients 页面的 allow 与 deploy 操作区重新布局，放行、单机部署、批量部署的输入和运行状态更易扫描
-
-### Bugfix
-
-- Artifacts 的 HTML 报告预览支持同目录资源与下载链接，打开旧报告时更稳定
-
----
+- 批量部署并发 3 台，单台失败不中断其他目标
 
 ## v2.3.0 <DateTag>2026-04-29</DateTag>
 
-### Feature
+### New Features
 
-- **WebUI 新增 Files 页面**：在浏览器中选择在线客户端后，可直接浏览该客户端本机文件系统；Linux/macOS 默认从 `/` 打开，Windows 默认从 `C:\` 打开
-- **客户端文件支持预览、下载与上传**：文本文件可在线预览，二进制文件会明确提示不可预览；普通文件可下载到本地，也可上传单个文件到当前目录，单文件上限为 100 MiB
-- **Clients 列表新增 Files 快捷入口**：每个客户端行提供文件浏览按钮，可从客户端列表直接跳转到对应客户端的 Files 页面
-
-### Improvement
-
-- Files 与 Artifacts 共用一致的文件浏览交互：树形目录、刷新、文件预览、下载、可拖拽目录宽度
-- 目录读取失败、文件过大、二进制预览等情况会返回明确的错误或提示
-
-### Bugfix
-
-- 修复端口转发参数超出 `1..65535` 时错误信息显示为 `%!w(<nil>)` 的问题，改为返回可读的端口范围错误
-
----
+- WebUI 新增 **Files** 页面，浏览在线客户端的文件系统，预览、下载和上传文件（单文件最大 100 MiB）
 
 ## v2.2.0 <DateTag>2026-04-29</DateTag>
 
-### Feature
+### New Features
 
-- **WebUI 新增 Investigations 页面**：在浏览器内统一执行 AccessKey 调查与客户端 Recon，不再需要回到服务端 REPL 操作
-- **AccessKey 调查迁移到 WebUI**：输入 UID、AccessKey ID 与 Region 后由服务端复用现有 SOAR 剧本生成 Markdown 报告；运行完成后可直接跳转到 Artifacts 查看完整报告
-- **Recon 支持 WebUI 触发与阶段化进度展示**：选择在线客户端即可下发 Recon，WebUI 会展示 `Recon.Basic`、`Recon.User`、`Recon.Upload` 等服务端解析后的阶段状态，并在报告生成后跳转到对应 artifact
-- **Artifacts Markdown 预览新增悬浮目录**：Markdown 报告包含多个章节时自动生成 TOC，点击目录项可跳转到对应章节；窄屏下目录会降级为正文顶部导航
+- WebUI 新增 **Investigations** 页面，在浏览器中执行 AccessKey 调查和 Recon，并显示进度
+- Artifacts 的 Markdown 预览显示目录
 
 ### Improvement
 
-- WebUI 调查流程的等待态改为真实可观测状态：AK 调查展示 SOAR playbook 运行中，Recon 展示客户端实际回传阶段
-- Recon 报告在服务端本地保留一份，并继续按配置上传 OSS，便于远程部署时通过 Artifacts 页面直接打开
-- Investigation 结果面板增加空状态说明、字段占位提示和更清晰的打开 Artifacts 入口
+- Recon 报告在服务端本地保留一份，同时按配置上传 OSS
 
-### Bugfix
+### Bug Fixes
 
-- 修复远程部署环境下 Recon OSS 上传实际成功但 WebUI 仍显示卡在上传阶段的问题
-- 修复 WebUI 打开 artifact 链接时无法正确跳转到生成报告的问题
-
----
+- Recon 上传 OSS 成功后，WebUI 不再卡在上传阶段
 
 ## v2.1.0 <DateTag>2026-04-24</DateTag>
 
-### Feature
+### New Features
 
-- **Artifacts 页面支持整目录打包下载**：文件树每个目录行悬停显示下载图标，点击以 tar.gz 流式下载；dotfile 与 dotdir 自动排除
-- **Artifacts 页面原生预览 HTML 报告**：针对 Agentic IR 等场景生成的 HTML 报告，可直接在浏览器中查看，并支持同目录下的 CSS、JS、字体、图片等相对资源
-- 目录下载按钮支持键盘导航
+- Artifacts 可以把整个目录打包为 tar.gz 下载，并可以预览 HTML 报告
 
-### Bugfix
+### Bug Fixes
 
-- 修复 Agentic IR 初始化失败时服务端仍继续运行的问题，改为启动时直接退出
-- 修复会话 token 生成失败时 `panic` 的问题，改为返回错误并以 500 响应
-- 修复部分 HTML 报告在 Artifacts 中预览异常的问题
-- 修复 WebUI 客户端 shell 与 AIR WebSocket 握手未校验 Origin 头的问题
-- 修复信息收集插件执行错误被吞掉的问题
-- 修复 TI 文件上传可能因无超时导致长时间挂起的问题
-- 修复 OSS 与 SOAR 客户端在凭证重置与消息处理并发时可能出现的 nil 指针与数据竞争问题
-
----
+- WebUI 的 Shell 和 AIR WebSocket 握手校验 Origin
+- 信息收集插件的执行错误不再被吞掉
+- TI 文件上传不再无超时挂起
 
 ## v2.0.0 <DateTag>2026-04-17</DateTag>
 
-### Feature
-
-- **全新 WebUI：浏览器访问 SIREN 服务端，支持客户端列表、备注编辑、交互式 Shell、Agentic IR 自动应急响应、SOAR 命令调用（allow/deploy/clean）、Artifacts 取证文件浏览**
-    - Shell 页面支持多标签 WebSocket 终端，切换页面时会话不中断
-    - Agentic IR 页面内嵌 Claude Code CLI，基于 PTY 在浏览器里完成全程自动响应
-    - Artifacts 文件浏览器支持 Markdown 渲染、文件下载，文件树宽度可拖拽调整并持久化
-- 服务端、客户端启动时打印 banner 显示版本信息
-
 ### Breaking Change
 
-- MCP 服务合并到 WebUI 端口（默认 `:8080`），移除 `mcpPort` 配置和 `--mcp-port` 参数。MCP 客户端 URL 需指向 `http://<host>:8080/mcp`
+- MCP 合并到 WebUI 端口（默认 `:8080`），移除 `mcpPort` 和 `--mcp-port`，MCP 客户端改用 `http://<host>:8080/mcp`
 
-### Bugfix
+### New Features
 
-- 修复 Artifacts 打开大二进制文件时显示红色"failed to read"错误的问题，改为友好的"不支持预览"提示
-- 修复 Artifacts 浏览 Markdown 时文件树跟随滚动的问题
-- Makefile 目标依赖修正：pack → build、release → pack、deploy → build、update → clean
-
----
+- 新增 WebUI：客户端列表、备注、交互式 Shell、Agentic IR、allow/deploy/clean 和 Artifacts 文件浏览
 
 ## v1.16.0 <DateTag>2026-04-14</DateTag>
 
-### Feature
+### New Features
 
-- `deploy` 命令支持跳过公网 IP 查询，提升受害主机出口 IP 获取稳定性
+- `deploy` 可以跳过公网 IP 查询
 
-### Bugfix
+### Bug Fixes
 
-- 修复 MCP 工具 `run` 黑名单过于严格的问题
-- 修复按下 `Ctrl+C` 直接退出服务端的问题
-- 修复自动升级功能中潜在的路径穿越漏洞
-
----
+- 按 `Ctrl+C` 不再直接退出服务端
+- 修复自动升级中的路径穿越漏洞
+- MCP `run` 的黑名单不再过于严格
 
 ## v1.15.0 <DateTag>2026-03-25</DateTag>
 
-### Feature
+### New Features
 
-- MCP 工具 `run` 支持配置命令黑名单
+- MCP `run` 支持命令黑名单
 - 服务端支持从 `.env` 加载环境变量
-- 远程模式新增子命令 `reload`：命令客户端主动重载配置
-- `air` 功能支持自由调查模式（使用自定义 prompt，不依赖安全告警）
-- 信息收集新增伪造时间戳相关检测项
+- 远程模式新增 `reload`，让客户端重载配置
+- `air` 支持不依赖告警的自由调查模式
 
-### Bugfix
+### Bug Fixes
 
-- 修复 MCP 工具 `run` 无法并发调用的问题
-
----
+- MCP `run` 可以并发调用
 
 ## v1.14.0 <DateTag>2026-02-08</DateTag>
 
-### Feature
+### New Features
 
-- **新增插件系统，客户端/服务端均可通过 `plugins` 命令管理插件**
-    - 命令插件：为客户端、服务端新增一项子命令
-    - 信息收集插件：为信息收集功能新增一项检查项，可引入外部工具
-- AK 泄露排查信息富化，覆盖更多场景并设置默认 region
-- 支持通过 OpenClaw 调用
+- 新增插件系统，用 `plugins` 命令管理命令插件和信息收集插件
+- AK 泄露排查覆盖更多场景
 
-### Bugfix
+### Bug Fixes
 
-- 修复远程模式下 `env` 命令设置环境变量后不生效的问题
-- 修复 `jdump` 命令中的 PID 参数 bug
-- 修复 MCP 服务中的 `mcpResponse` 在工具调用后未重置的问题
-- 其他多项 bug 修复与代码优化
-
----
+- 远程模式下 `env` 设置的环境变量生效
+- `jdump` 的 PID 参数解析正确
 
 ## v1.13.0 <DateTag>2026-01-06</DateTag>
 
-### Feature
+### New Features
 
-- 本地 & 远程模式新增子命令 `info`：展示任意 PID/进程名/端口对应的进程信息
-- 远程模式子命令 `shell` 支持终端尺寸自适应
-- 规避云安全中心"异常的伪终端 Shell 创建行为"等告警
-- 信息收集报告默认上传至 OSS 的 `latest` 目录
-- OSS 上传进度条显示优化
+- 新增 `info`，查看 PID、进程名或端口对应的进程信息
+- 远程模式的 `shell` 自适应终端尺寸，并避免触发云安全中心的伪终端告警
+- 信息收集报告默认上传到 OSS 的 `latest` 目录
 
-### Bugfix
+### Bug Fixes
 
-- 一键下载脚本 OSS 地址更新
-- MkDocs 站点稳定性与样式优化
-- 修复 `shell` 运行时阻塞客户端响应其他命令的 bug
-
----
+- `shell` 运行时不再阻塞客户端响应其他命令
 
 ## v1.12.0 <DateTag>2025-12-18</DateTag>
 
-### Feature
+### New Features
 
-- 远程模式子命令 `shell` 使用独立信道和界面
-- 客户端、服务端均支持通过 `upgrade` 命令一键升级
+- 远程模式的 `shell` 使用独立信道
+- 客户端和服务端支持用 `upgrade` 一键升级
 - 信息收集支持系统软件包完整性校验
 
-### Bugfix
+### Bug Fixes
 
-- Linux 下依赖工具安装失败时，避免阻塞后续运行
-
----
+- Linux 下依赖工具安装失败时不再阻塞运行
 
 ## v1.11.0 <DateTag>2025-12-12</DateTag>
 
-### Feature
+### New Features
 
-- 帮助信息与自动补全优化
-- 远程模式新增子命令 `ak`：基于 SOAR 平台能力，一键调查 AK 调用记录
-- 远程模式新增子命令 `note`：为客户端添加备注，可在 `ls` 中显示
-- 远程模式子命令 `clean` 支持主动终止客户端进程，实现完全清理
+- 远程模式新增 `ak`，通过 SOAR 调查 AK 调用记录
+- 远程模式新增 `note`，为客户端添加备注
+- `clean` 可以终止客户端进程
 
-### Bugfix
+### Bug Fixes
 
-- 修复终端显示尺寸异常问题
-- 修复由云墙规则延迟导致的首次 deploy 无法回连问题
-
----
+- 首次 `deploy` 不再因云防火墙规则延迟而无法回连
 
 ## v1.10.0 <DateTag>2025-11-06</DateTag>
 
-### Feature
+### New Features
 
-- 远程模式新增子命令 `deploy`：基于 SOAR 平台能力，通过云助手在阿里云 ECS 上一键部署并启动客户端
-- 远程模式新增子命令 `allow`：基于 SOAR 平台能力，一键放行受害主机出口 IP 访问控制主机
+- 远程模式新增 `deploy`，通过云助手在阿里云 ECS 上一键部署客户端
+- 远程模式新增 `allow`，一键放行受害主机出口 IP
 
-### Bugfix
+### Bug Fixes
 
-- 修复子命令 `clean` 在 Windows 下无法删除可执行文件自身的问题，当前在所有平台均会删除整个可执行文件所在目录
-
----
+- `clean` 在所有平台上删除客户端所在目录，包括 Windows
 
 ## v1.9.0 <DateTag>2025-10-30</DateTag>
 
-### Feature
+### New Features
 
-- **【重要】远程模式新增子命令 `air`：使用大模型 CLI 进行自动化应急响应**
-- MCP 服务器新增工具 `get_alarm_detail`，可基于 SOAR 平台能力获取指定的安全告警详情
-- 子命令 `shell` 在 Windows 客户端支持全交互式终端（基于 WinPTY）
-- 优化 Linux 客户端终端大小设置
+- 远程模式新增 `air`，用大模型 CLI 自动化应急响应
+- MCP 新增 `get_alarm_detail`，获取安全告警详情
+- Windows 客户端的 `shell` 支持全交互式终端
 
-### Bugfix
+### Bug Fixes
 
-- 修复下载脚本中下载链接错误
-- 调整 Windows 平台客户端打包方式，使用 zip 格式
-- 修复子命令 `shell` 在 Windows 客户端的终端交互 bug
-- 修复子命令 `recon` 命令执行超时机制部分情况下失效的问题
-
----
+- Windows 客户端改为 zip 包
+- `recon` 的命令超时在所有情况下生效
 
 ## v1.8.0 <DateTag>2025-09-12</DateTag>
 
-### Feature
+### New Features
 
-- 子命令 `recon` 全面支持 Windows 客户端
-- Unix/Windows 配置文件分离
-
-### Bugfix
-
-- 修复子命令 `recon` 输出结果模块之间顺序错误的问题
-
----
+- `recon` 支持 Windows 客户端
+- Unix 和 Windows 使用不同的配置文件
 
 ## v1.7.0 <DateTag>2025-08-25</DateTag>
 
-### Feature
+### New Features
 
-- 子命令 `run` 添加 Windows 支持
-- 子命令 `recon` 执行命令时新增超时机制，默认 30s 超时
-
----
+- `run` 支持 Windows
+- `recon` 执行命令默认 30 秒超时
 
 ## v1.6.0 <DateTag>2025-07-30</DateTag>
 
-### Feature
+### New Features
 
-- 工具下载方式优化，支持命令行一键安装
-- 客户端/服务端添加版本号信息
-- 远程模式新增子命令 `run`：在指定客户端执行命令获取返回结果
-- 新增 MCP 支持，服务端启动时同时启动 MCP 服务器，支持获取客户端信息（对应子命令 `ls`）、在客户端上执行命令（对应子命令 `run`）
-
-### Bugfix
-
-- 修复部分子命令参数解析错误的问题
-
----
+- 支持命令行一键安装
+- 远程模式新增 `run`，在指定客户端上执行命令
+- 新增 MCP 服务器，可以列出客户端和执行命令
 
 ## v1.5.0 <DateTag>2025-06-25</DateTag>
 
-### Feature
+### New Features
 
-- 客户端支持 Windows 平台，当前仅支持远程 shell 功能
-- 客户端列表显示 OS 信息、端口转发列表显示客户端 ID 信息
-- 本地/远程模式新增子命令 `jdump`：对指定 Java 进程进行堆内存转储
-- 端口转发添加并发连接支持、相关代码可维护性优化
-- 网络连接增加超时取消机制
-
----
+- 客户端支持 Windows，当前只支持远程 shell
+- 新增 `jdump`，转储指定 Java 进程的堆内存
+- 端口转发支持并发连接
 
 ## v1.4.0 <DateTag>2025-05-28</DateTag>
 
-### Feature
+### New Features
 
-- 远程模式新增本地端口转发功能相关子命令
-    - `forward`：开始本地端口转发
-    - `stopforward`：停止本地端口转发
-    - `lsforward`：查看本地端口转发列表
-- 子命令 `recon` 生成的文档以 `SIREN_` 开头，`clean` 在清理时逻辑一致
-
-### Bugfix
-
-- 多项端口转发相关 bug 修复
-
----
+- 远程模式新增端口转发：`forward`、`stopforward`、`lsforward`
+- `recon` 生成的文档以 `SIREN_` 开头
 
 ## v1.3.0 <DateTag>2025-05-15</DateTag>
 
-### Feature
+### New Features
 
-- 远程模式-服务端：命令行交互方式优化，支持方向键操作、终端快捷键等
-- 远程模式通信流量默认使用 TLS 协议加密
-- 远程模式-服务端：新增子命令 `!` 支持执行本地命令
-- 远程模式-服务端：新增子命令 `env` 支持直接设置环境变量
-
----
+- 服务端命令行支持方向键和终端快捷键
+- 远程模式的通信默认用 TLS 加密
+- 服务端新增 `!` 执行本地命令，新增 `env` 设置环境变量
 
 ## v1.2.0 <DateTag>2025-05-13</DateTag>
 
-### Feature
+### New Features
 
-- 可疑文件检查项逻辑更新
-- 远程模式相关参数支持通过配置文件设置
-- 远程模式下客户端-服务器通信支持标准消息、Raw 消息两种消息格式传输
+- 远程模式的参数可以写在配置文件中
 
-### Bugfix
+### Bug Fixes
 
-- 修复 macOS 下打包的 tar.gz 压缩包在 Linux 下解压异常问题
-- 修复远程模式下子命令 `recon` 运行出错的问题
-
----
+- 远程模式下 `recon` 运行正常
 
 ## v1.1.0 <DateTag>2025-04-08</DateTag>
 
-### Feature
+### New Features
 
-- 远程模式-服务端：优化 `ls` 命令展示方式
-- 通信协议升级，提高传输效率、避免特殊字符混淆
-- 支持服务端断连时主动关闭客户端
-
----
+- 服务端断连时客户端主动退出
 
 ## v1.0.0 <DateTag>2025-03-31</DateTag>
 
-### Feature
+### New Features
 
-- **【重要】新增远程模式，支持 C/S 架构，可以从服务端下发信息收集指令至客户端（详见说明文档）**
-- 远程模式新增子命令 `shell`：支持访问客户端主机的**全交互式** shell（支持 vim、top 等交互式命令、方向键等）
-
-### Bugfix
-
-- 修复键入 Ctrl+D 导致程序未退出的问题
-- 修复输入 `exit` 后服务端阻塞的问题
-- 修复并发场景下信道冲突、协议冲突的问题
-
----
+- 新增远程模式：服务端向客户端下发信息收集指令
+- 远程模式新增 `shell`，访问客户端主机的全交互式 shell
 
 ## v0.7.0 <DateTag>2025-03-26</DateTag>
 
-### Feature
+### New Features
 
-- 部分检查项增加最大输出行数限制
-- 优化 AI 分析 prompt
-- CLI 语言全部使用英语，避免 VNC 等特定场景下的编码问题
-
-### Bugfix
-
-- 修复 AI 分析流式输出未生效的问题
-
----
+- CLI 全部使用英语，避免 VNC 等场景下的编码问题
 
 ## v0.6.0 <DateTag>2025-03-19</DateTag>
 
-### Feature
+### New Features
 
-- MkDocs 结果展示页支持针对每一个检测项的 AI 分析功能
-- 多项信息收集命令查询性能优化、边界情况处理
-- `clean` 支持清理配置文件、生成的文档文件
-
-### Bugfix
-
-- 包含多项信息收集命令与过滤规则 bug 修复，增强对 CentOS/Debian 系统适配
-
----
+- 结果展示页支持对每个检测项做 AI 分析
+- `clean` 可以清理配置文件和生成的文档
 
 ## v0.5.0 <DateTag>2025-03-14</DateTag>
 
-### Feature
+### New Features
 
-- 新增配置文件支持：基于 viper 实现，允许读取自定义 YAML 配置文件
-- 信息收集过滤规则、OSS 配置等迁移至配置文件
-- 支持通过配置文件开关信息收集项大类
-- 工具获取方式由公网 OSS 下载二进制文件更新为下载包含二进制文件与配置文件的压缩包
-
-### Bugfix
-
-- 包含多项 bug 修复，包括 grep 正则匹配选项错误、OSS 上传文件本地路径错误、viper 配置加载问题等
-
----
+- 支持 YAML 配置文件，信息收集过滤规则和 OSS 配置写在配置文件中
+- 工具改为下载包含二进制和配置文件的压缩包
 
 ## v0.4.0 <DateTag>2025-03-11</DateTag>
 
-### Feature
+### New Features
 
-- 新增子命令 `upload`：支持将任意本地文件上传至 OSS
-- 新增子命令 `ti`：支持将任意本地文件上传至威胁情报沙箱分析，返回分析结果 URL
-- `clean` 支持清理威胁情报 API Key 相关环境变量，并新增二次确认过程
-- 容器列表检查项新增 crictl 与 podman 支持
-
----
+- 新增 `upload`，把本地文件上传到 OSS
+- 新增 `ti`，把本地文件上传到威胁情报沙箱
+- 容器列表支持 crictl 和 podman
 
 ## v0.3.0 <DateTag>2025-03-07</DateTag>
 
-### Feature
+### New Features
 
-- 新增信息收集项：常见挖矿进程检测
-- 使用 cobra 重构了代码以支持子命令等功能
-- 新增子命令 `clean`：支持一键痕迹清理功能，可清理 OSS 访问凭证相关环境变量、可执行文件自身
-- 基于云存储网关与极速同步功能，实现信息收集结果上传至 OSS 后 1 分钟内同步至 MkDocs 展示
-
-### Bugfix
-
-- 修复 PHP Webshell 检测模块中引号被误转义的问题
-- 修复可疑命令黑名单过度匹配的问题
-
----
+- 新增常见挖矿进程检测
+- 新增 `clean`，一键清理 OSS 凭证和可执行文件
+- 信息收集结果上传 OSS 后 1 分钟内可在展示页查看
 
 ## v0.2.0 <DateTag>2025-03-05</DateTag>
 
-### Feature
+### New Features
 
-- 新增信息收集项大类：Webshell 检测、应用安全
-- 信息收集结果支持自动上传至 OSS，并通过 MkDocs 展示
-- MkDocs 展示相关样式优化
-- 支持直接通过公网 OSS 链接下载工具
-
-### Bugfix
-
-- 修复 OSS 上传使用 AK 权限问题，并收敛至最小权限
-
----
+- 新增 Webshell 检测和应用安全检查
+- 信息收集结果自动上传 OSS 并在展示页查看
 
 ## v0.1.0 <DateTag>2025-03-04</DateTag>
 
-### Feature
+### New Features
 
-- 初版发布，支持 Linux 下主机关键信息收集
-    - 基础系统信息
-    - 用户
-    - SSH
-    - 进程
-    - 网络
-    - 计划任务
-    - 服务与启动项
-    - 环境变量
-    - 文件
-    - Rootkit
-- 信息收集结果保存至本地 Markdown
-
-### Bugfix
-
-- 修复部分检查项无结果时直接显示报错信息的问题
+- 首个版本，在 Linux 上收集系统、用户、SSH、进程、网络、计划任务、服务、环境变量、文件和 Rootkit 信息，结果保存为本地 Markdown
