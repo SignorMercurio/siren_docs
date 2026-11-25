@@ -2,7 +2,7 @@
 title: GUI 时间线
 description: 在结构化时间线中跟踪 Agent 的操作、回答审批与提问、检索和导出会话
 icon: MessageSquareText
-verifiedAgainst: v2.51.0
+verifiedAgainst: v2.52.0
 sources:
   - internal/server/webui/frontend/src/components/AIRGUIChatPanel.tsx
   - internal/server/webui/frontend/src/components/AIRForkPanel.tsx
@@ -16,6 +16,7 @@ sources:
   - internal/server/webui/frontend/src/airCommands.ts
   - internal/server/webui/frontend/src/airTimeline.ts
   - internal/server/webui/frontend/src/air/useAIRComposer.ts
+  - internal/server/webui/frontend/src/components/AIRQuickPrompts.tsx
   - internal/server/webui/frontend/src/imagePaste.ts
   - internal/server/webui/frontend/src/components/AIRToolResults.tsx
   - internal/server/webui/frontend/src/air/toolResults.ts
@@ -39,6 +40,8 @@ GUI 是 AIR 会话的默认界面：SIREN 把 Provider 的事件按轮次整理�
 
 一轮结束后只留下最后的回复，之前的过程折叠成一行 **Worked for 2m 14s**（没有计时的轮次显示 **Work log**），其中有失败的操作时标出数量，点击展开。你看着跑完的最新一轮保持展开，下一轮开始后才折叠。回复之前不足两段过程的轮次、还有未处理审批或提问的轮次不折叠；检索命中折叠的内容时自动展开。
 
+离开 Chat 面板或切走浏览器标签页后再回来，第一个有新内容的轮次上方显示 **New since you left** 分隔线，它保持在原处，直到你再次离开。
+
 ## 发送请求与调整方向
 
 在底部输入框按 Enter 发送，Shift+Enter 换行。手机（触屏且宽度不超过 768px 或高度不超过 500px）的软键盘没有 Shift+Enter，Enter 只换行，点击输入框右侧的发送按钮发送。
@@ -48,6 +51,8 @@ Provider 给出提示建议时（见 [Provider 差异](/air/providers#对比总�
 - **空闲时**：开启新的一轮。
 - **运行中**：内容作为方向调整交给当前轮次，带 **Steered** 标签。各 Provider 的处理方式见 [Provider 差异](/air/providers#运行中调整方向)。要等这一轮结束后再发送，改用 [排队](#排队消息)。
 - **停止当前轮次**：点击输入框右侧的停止按钮，只停止这一轮，会话保持连接。Codex 和 Claude 中等待处理的审批与提问随之取消，记录为 `Cancelled`。结束整个会话见 [启动与管理会话](/air/sessions#停止与结束)。
+
+输入框中的 **Quick prompts** 按钮列出常用请求。选中一项，它的文字追加到输入框末尾，不直接发送。列表在 [Settings](/webui#settings) 中维护，没有常用请求时不显示这个按钮。
 
 输入框为空时按 ↑ 取回上一条发送过的请求，继续按 ↑ 或 ↓ 在历史请求之间切换，修改后再发送。
 
@@ -67,7 +72,7 @@ Provider 给出提示建议时（见 [Provider 差异](/air/providers#对比总�
 - **Edit queued message**：把文字取回输入框修改，按 Enter 保存，按 Esc 放弃；位置和图片不变。
 - **Remove queued message**：从队列中移除。
 
-点击停止按钮、一轮失败或 Provider 拒绝了自动发送之后，队列暂停，消息留在原处。发出下一条请求或点击 **Send now** 后，新的一轮完成时队列继续。
+点击停止按钮、一轮失败或 Provider 拒绝了自动发送之后，队列暂停，消息留在原处，队列顶部显示 **Queue paused**。点击旁边的 **Resume queue** 发出第一条排队的消息；也可以发出新请求或点击某一条的 **Send now**。新的一轮开始后队列恢复，之后每轮完成时继续逐条发送。
 
 队列保存在服务端，打开同一会话的所有人看到同一份队列，刷新后仍在；会话结束时队列清空。数量上限见 [限制](/reference/limits#air)。
 

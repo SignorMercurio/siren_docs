@@ -2,8 +2,8 @@
 title: 限制速查
 description: SIREN 的大小、数量和超时上限一览
 icon: Gauge
-verifiedAgainst: v2.51.0
-dossierVerifiedAgainst: 720b802
+verifiedAgainst: v2.52.0
+dossierVerifiedAgainst: 9dc0530
 sources:
   - internal/server/clientnote/note.go
   - internal/server/project_names.go
@@ -17,6 +17,8 @@ sources:
   - internal/server/webui/webui_artifacts.go
   - internal/server/artifact_dossier.go
   - internal/server/webui/webui_reports.go
+  - internal/server/report_history.go
+  - dossier:src/delivery-check.js
   - dossier:src/siren-adapter.js
   - dossier:src/source-panel.js
   - dossier:src/pages.js
@@ -133,6 +135,8 @@ SIREN 的大小、数量和超时上限，按功能分组。**配置项**为空�
 | 识别报告时读取的文件开头 | 16 KiB，frontmatter 须在此范围内 | | [Reports](/reports) |
 | 粘贴图片 | 单张 100 MiB | | [Reports](/reports) |
 | 加载、保存报告 | 15 秒 | | [Reports](/reports) |
+| 每份报告保留的历史版本 | 100 个，超出时删除最早的 | | [版本历史](/reports#版本历史) |
+| 交付检查 | 15 秒 | | [交付检查](/reports#交付检查) |
 | 上传粘贴的图片 | 每张 45 秒 | | [Reports](/reports) |
 | 导出前等待图片和字体就绪 | 各 30 秒 | | [Reports](/reports) |
 
@@ -206,12 +210,13 @@ Shell 没有空闲超时。
 | 限制 | 值 | 配置项 | 详见 |
 | --- | --- | --- | --- |
 | 同时运行的会话 | 20 个，全服务端合计；`0` 或负数不限制 | `air.maxSessions` | [会话管理](/air/sessions) |
-| 会话空闲自动停止 | 72 小时没有浏览器打开且 Provider 没有新输出；`0` 或负数不自动停止 | `air.idleTimeoutHours` | [停止与结束](/air/sessions#停止与结束) |
+| 会话空闲自动停止 | 48 小时没有浏览器打开且 Provider 没有新输出；`0` 或负数不自动停止 | `air.idleTimeoutHours` | [停止与结束](/air/sessions#停止与结束) |
 | 每个 Lead 同时运行的 worker | 6 个 | | [多 Agent 分工](/air/sessions#多-agent-分工) |
 | worker 回合 | 45 分钟，结束后会话关闭 | | [多 Agent 分工](/air/sessions#多-agent-分工) |
 | 会话名称 | 80 个字符 | | [重命名会话](/air/sessions#重命名会话) |
 | Settings 中的 AIR 默认模型 | 128 个字符 | | [Settings](/webui#settings) |
 | Settings 中的 AIR 附加指令 | 16 KiB | | [Settings](/webui#settings) |
+| Settings 中的常用请求 | 12 项；名称 24 个字符，文本 4 KiB | | [Settings](/webui#settings) |
 | 每个会话的回放缓存 | 4 MiB；`0` 或负数时使用默认值 | `air.replayBufferBytes` | [会话管理](/air/sessions) |
 | 粘贴图片 | PNG、JPEG、WebP、GIF；每条消息或每次粘贴 4 张，单张 8 MiB | | [GUI](/air/gui)、[Terminal](/air/terminal) |
 | 每个 GUI 会话排队的消息 | 20 条 | | [排队消息](/air/gui#排队消息) |
@@ -240,6 +245,7 @@ Shell 没有空闲超时。
 | `run_batch` 并发 | 默认 8，最多 16 | | [MCP](/reference/mcp) |
 | `run_batch` 每台主机预览 | 1 KiB，内联合计 50 KiB | | [MCP](/reference/mcp) |
 | `recon` 返回的 Markdown 正文 | 8 KiB，完整内容见 `reportPath` 或 `snapshotPath` | | [MCP](/reference/mcp) |
+| `case_read` 内联的看板全文 | 16 KiB，更大时只返回概要，全文写入文件 | | [MCP](/reference/mcp#case_read) |
 | `save_evidence` 的 `label` | 48 个字符 | | [MCP](/reference/mcp#save_evidence) |
 | `case_update` | 每次 50 个排查项、50 条事件、50 条报告；每个列表 50 条；文本 2,000 字节 | | [MCP](/reference/mcp#case_update) |
 | `delegate` 的 `prompt` | 2,000 个字符 | | [MCP](/reference/mcp#delegate) |

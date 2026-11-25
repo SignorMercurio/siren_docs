@@ -2,7 +2,7 @@
 title: 启动与管理会话
 description: 选择模型和入口模式启动 AIR 会话，在左栏中重新接入或停止，并从 History 继续以前的会话
 icon: Workflow
-verifiedAgainst: v2.51.0
+verifiedAgainst: v2.52.0
 sources:
   - internal/server/webui/frontend/src/pages/AIRPage.tsx
   - internal/server/webui/frontend/src/pages/SettingsPage.tsx
@@ -16,6 +16,7 @@ sources:
   - internal/server/webui/frontend/src/router.ts
   - internal/server/webui/frontend/src/components/AIRSessionListItem.tsx
   - internal/server/webui/frontend/src/components/AIRLaunchModelSelect.tsx
+  - internal/server/webui/frontend/src/components/AIRQuickPrompts.tsx
   - internal/server/webui/frontend/src/components/AIRHistoryTable.tsx
   - internal/server/webui/frontend/src/components/AIRGUIChatPanel.tsx
   - internal/server/webui/frontend/src/components/ClientsTable.tsx
@@ -58,6 +59,8 @@ sources:
 
 三种模式都注入当前范围的 SIREN MCP。开场提示词模板由运维人员配置，见 [Prompt 模板](/server/air-providers#prompt-模板)。在 [Clients 页](/clients) 点击某一行的 AIR 图标，会以 **Client** 模式选中该客户端。
 
+**Ask** 和 **Client** 模式的输入框下方列出 **Quick prompts**（常用请求）。点击一项，它的文字追加到输入框末尾，不直接发送。列表在 [Settings](/webui#settings) 中维护。
+
 ### Account 时间范围
 
 **Alert time range** 默认为 **30d**，可选 **3d**、**7d**、**14d**、**30d** 或 **Custom**。选 **Custom** 时必须填 **From**，**To** 默认为当前时间。时间按字面值写入提示词，不做时区换算。
@@ -91,6 +94,7 @@ GUI 会话的一轮运行中，行尾显示 **Working**。你没在看的会话�
 
 - **Rename**：重命名运行中的会话，见 [重命名会话](#重命名会话)。
 - **Copy link**：复制当前会话的链接。链接带有会话所在的 Project 范围，在另一个浏览器中打开时自动切换到该范围，并打开同一个运行中的会话或历史记录。也可以直接分享或收藏地址栏中的地址。
+- **Copy session ID**：复制 Provider 自己的会话 ID，即该会话记录文件的 ID，可交给另一个 Agent 会话查找和读取这份记录。运行中的会话和 worker 在 Provider 启动之前没有这个 ID，此项不可点击。
 - **Close view**：只关闭视图，不停止会话。刷新浏览器后已打开的视图自动恢复。
 - **Stop session**：结束会话，见 [停止与结束](#停止与结束)。
 

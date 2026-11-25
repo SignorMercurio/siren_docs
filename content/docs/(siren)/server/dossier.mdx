@@ -2,14 +2,15 @@
 title: 部署 Dossier
 description: 把 Dossier 报告编辑器部署到 SIREN 服务端，供 WebUI 打开和编辑报告
 icon: Upload
-verifiedAgainst: v2.51.0
-dossierVerifiedAgainst: 720b802
+verifiedAgainst: v2.52.0
+dossierVerifiedAgainst: 9dc0530
 sources:
   - cmd/server/cli/root.go
   - config/server_config.yaml
   - internal/server/webui/webui_dossier.go
   - internal/server/webui/webui_dossier_reports.go
   - internal/server/webui/webui_reports.go
+  - internal/server/report_check.go
   - internal/server/artifact_dossier.go
   - internal/server/webui/frontend/src/hooks/useDossierStatus.ts
   - internal/server/webui/frontend/src/pages/ReportsPage.tsx
@@ -138,11 +139,20 @@ webui:
 
 3. **Reports** 页的 **Blank template** 应能打开模板。只缺 `report.md` 时它不可点击，原因为 `Dossier default report is not deployed at ...`。
 
+## 交付检查
+
+Dossier 的 [交付检查](/reports#交付检查) 由 SIREN 运行服务端用户的 dossier Skill 中的检查脚本 `~/.agents/skills/dossier/scripts/check_report.py`，与 AIR 交付报告前运行的是同一个脚本。前提：
+
+- 服务端用户的 `~/.agents/skills/` 下装有 dossier Skill，[Settings](/webui#settings) 的 **MCP & Skills** 标签中可以看到它。
+- 控制主机上有 `python3`。
+
+SIREN 在临时目录中检查编辑器发来的文本，不读取也不改动报告文件。更新检查规则只需更新服务端的 dossier Skill，不需要重新发布 Dossier 或重启服务端。
+
 ## 注意事项
 
 - 除编辑器页面外，`/dossier/` 下的静态文件无需登录即可访问；读写报告仍需 WebUI 登录，见 [`/dossier/` 不鉴权](/server/security#dossier-不鉴权)。
 - **Blank template** 只读、不能保存。在其中粘贴的图片写入 `<dossierDir>/report.assets/pasted/`，不属于任何报告。正式报告请从 **Reports** 或 **Artifacts** 打开再编辑。
-- Dossier 不随 `siren_server upgrade` 更新。SIREN v2.40.0 起，编辑器保存报告时要回传读取时的版本，服务端和 Dossier 运行时不配套时保存失败，例如报 `revision is required`。从更早的版本升级时，同时按上文重新发布 Dossier。
+- Dossier 不随 `siren_server upgrade` 更新。SIREN v2.40.0 起，编辑器保存报告时要回传读取时的版本，服务端和 Dossier 运行时不配套时保存失败，例如报 `revision is required`。从更早的版本升级时，同时按上文重新发布 Dossier。报告的版本历史和交付检查需要 SIREN v2.52.0 或更新版本，服务端较旧时 Dossier 提示升级 SIREN。
 - 在 SIREN 前面放代理时，按 [单一 TLS 端口](/server#单一-tls-端口) 只做四层透传，并转发整个端口。编辑器通过同源的 `/api/reports/*` 读写报告，只代理 `/dossier/` 会出现页面能打开、但读取或保存失败。
 
 ## 本地离线使用

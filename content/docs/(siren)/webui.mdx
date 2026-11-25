@@ -2,7 +2,7 @@
 title: WebUI 导览
 description: Web 控制台的导航、范围切换和各页面用途
 icon: LayoutDashboard
-verifiedAgainst: v2.51.0
+verifiedAgainst: v2.52.0
 sources:
   - internal/server/webui/frontend/src/nav.ts
   - internal/server/webui/frontend/src/components/Sidebar.tsx
@@ -86,6 +86,7 @@ Web 控制台是使用 SIREN 的主要方式，浏览器直接访问 `https://<S
   - 每个 Provider 的默认模型和 effort。留空时沿用该 Provider 自己的配置，输入框和下拉框中灰色显示当前生效的值。新建会话时可以在模型菜单中为单个会话另选模型，见 [选择模型和界面](/air/sessions#选择模型和界面)。
   - **Delegate workers**：[多 Agent 分工](/air/sessions#多-agent-分工) 中 **Entry**、**Host**、**Cloud** worker 各用哪个 Provider、模型和 effort。留空时用内置默认值：三个角色都用 Pi 的 DeepSeek V4.1 Flash，effort 为 max。换了 Provider 后，模型和 effort 按新 Provider 重新填写。
   - **Instructions**：追加到每个 AIR 会话系统提示词的文字，排在 Provider 自身配置的指令之后。
+  - **Quick prompts**：新建会话表单和 Chat 输入框中的常用请求，每项有名称和文本，点击 **Add quick prompt** 添加。从没保存过时显示内置的四项：排查告警、写阶段简报、写正式报告、审校报告。保存后立即生效，其他已打开的页面刷新后更新；删除全部并保存后，不再显示常用请求。
   - 保存前别人已经改过时，页面提示 **Reload**；重新加载会用对方的版本替换你未保存的修改。
 - **MCP & Skills**：只读列出 AIR 会话可用的 MCP 服务器和服务端 `~/.agents/skills` 下的 Skills。MCP 服务器标出来源 Provider，SIREN 自己的 MCP 排在最前；页面不显示 MCP 的请求头、令牌和命令参数。
 - **Server**：只读的版本号、鉴权状态与当前用户、Dossier 目录，以及每个 AIR Provider 实际可用的界面；Provider 不可用时显示原因。

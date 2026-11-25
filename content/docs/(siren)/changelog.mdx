@@ -11,6 +11,36 @@ export const DateTag = ({ children }) => (
   </span>
 );
 
+## v2.52.0 <DateTag>2026-11-25</DateTag>
+
+### Breaking Change
+
+- MCP `run` 的结果只有文本，不再返回 `path`、`body_start_line`、`complete` 等结构化字段。第一行写明 `audit_id`、`outcome`、退出码、结果文件和与正常执行不同的项，依赖结构化字段的外部 MCP 客户端改为读取这一行，见 [结果首行](/reference/mcp#结果首行)
+
+### New Features
+
+- AIR 新增常用请求：新建会话表单的输入框下方列出常用请求，Chat 输入框中有 **Quick prompts** 菜单，选中后填入输入框，不直接发送。列表在 Settings 的 **AIR** 标签中维护，内置排查告警、写阶段简报、写正式报告和审校报告四项，见 [入口模式](/air/sessions#入口模式)、[发送请求与调整方向](/air/gui#发送请求与调整方向) 和 [Settings](/webui#settings)
+- 会话菜单新增 **Copy session ID**，复制 Provider 自己的会话 ID，便于另一个 Agent 会话查找和读取这份会话记录，见 [会话标题栏](/air/sessions#会话标题栏)
+- Dossier 报告有了版本历史：SIREN 为每份报告保留最近 100 个版本，在编辑器版本菜单的 **版本历史** 中查看每一版的改动并恢复；同一菜单的 **升版本** 同时更新版本号和修订记录，见 [版本历史](/reports#版本历史)
+- Dossier 新增交付检查：**导出** → **交付检查** 由 SIREN 运行服务端 dossier Skill 的检查脚本，列出 FAIL 和 WARN；导出 PDF 时还有 FAIL 会先确认，见 [交付检查](/reports#交付检查) 和 [部署 Dossier](/server/dossier#交付检查)
+- AIR 或其他操作员改写了正在编辑的报告时，没有未保存修改的 Dossier 自动载入最新版本；有未保存修改时，保存前显示对方的改动，可以合并、用服务器版本或用自己的版本，见 [报告被别处修改](/reports#报告被别处修改)
+- Dossier 支持简报（frontmatter 中的 `kind: brief`）、日志证据块（围栏语言 `log` 的代码块）和截图占位（路径留空的图片），见 [简报](/reports/syntax#简报)、[日志证据块](/reports/syntax#日志证据块) 和 [截图占位](/reports/syntax#截图占位)
+- 以上 Dossier 功能需要 SIREN v2.52.0，并按 [部署 Dossier](/server/dossier) 重新发布 Dossier 运行时
+
+### Improvement
+
+- AIR Chat 的队列暂停时显示 **Queue paused** 和 **Resume queue** 按钮，见 [排队消息](/air/gui#排队消息)
+- 离开 Chat 面板或切走浏览器标签页后再回来，第一个有新内容的轮次上方显示 **New since you left** 分隔线，见 [时间线结构](/air/gui#时间线结构)
+- AIR 会话空闲自动停止的默认时长从 72 小时改为 48 小时。已有服务端的 `server_config.yaml` 不随升级改变，仍写着 72 小时的需要手动修改 `air.idleTimeoutHours`，见 [服务端配置](/reference/server-config#air)
+- Pi 的 Kimi 模型换成百炼上的 Kimi K3.1 Pro Prime，安装包的 Usage 价格表加入它的单价。已安装的 Pi 重新运行安装脚本后生效；价格要从安装包模板复制到 `server_config.yaml`，见 [准备 AIR Provider](/server/air-providers#pi) 和 [费用估算](/usage#费用估算)
+- MCP `recon` 的结果最多内联 8 KiB 的 Markdown 报告，更长时从 `reportPath` 读取全文，见 [`recon`](/reference/mcp#recon)
+- MCP `case_read` 在看板全文超过 16 KiB 时只返回概要，全文写入 Project 目录下的 `case/board-r<revision>.txt`，见 [`case_read`](/reference/mcp#case_read)
+- Dossier 中比一页还高的图片按比例缩小到一页内，加载不了的图片在预览中显示它的路径，见 [图片](/reports/syntax#图片)
+
+### Bug Fixes
+
+- Dossier 报告中，响应阶段之后的 `####` 小节不再与第一个阶段重号，见 [章节与标题](/reports/syntax#章节与标题)
+
 ## v2.51.0 <DateTag>2026-11-23</DateTag>
 
 ### Breaking Change

@@ -2,7 +2,7 @@
 title: Artifacts
 description: 浏览、预览、上传和整理服务端上的调查产出与证据文件
 icon: Archive
-verifiedAgainst: v2.51.0
+verifiedAgainst: v2.52.0
 sources:
   - internal/server/webui/frontend/src/pages/ArtifactsPage.tsx
   - internal/server/webui/frontend/src/components/FileBrowser.tsx
@@ -119,7 +119,7 @@ Artifacts 页管理服务端上的证据目录：Recon 快照、AccessKey 报告
 
 ## 在 Dossier 中编辑
 
-选中 `.md` 文件后点 **Dossier**，在新标签页用 Dossier 编辑，保存直接写回该文件；文件在打开后被改写时保存会被拒绝，见 [保存失败](/reports#保存失败)。部署见 [部署 Dossier](/server/dossier)，编辑、粘贴图片和导出见 [报告](/reports)。
+选中 `.md` 文件后点 **Dossier**，在新标签页用 Dossier 编辑，保存直接写回该文件；文件在打开后被别处改写时，保存前先处理冲突，见 [报告被别处修改](/reports#报告被别处修改)。部署见 [部署 Dossier](/server/dossier)，编辑、粘贴图片和导出见 [报告](/reports)。
 
 ## 分享链接
 

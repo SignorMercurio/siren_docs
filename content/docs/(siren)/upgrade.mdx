@@ -2,10 +2,11 @@
 title: 升级与数据
 description: 升级服务端和客户端、支持的平台、升级后要核对的配置，以及服务端数据的备份与迁移
 icon: CircleFadingArrowUp
-verifiedAgainst: v2.51.0
+verifiedAgainst: v2.52.0
 sources:
   - internal/server/air_settings.go
   - internal/server/case_store.go
+  - internal/server/report_history.go
   - internal/server/aliyun_keys.go
   - internal/server/console_browser.go
   - internal/auth/sessions.go
@@ -161,6 +162,7 @@ diff /opt/siren/server_config.yaml /tmp/server_config.new.yaml
 | `data/egress.json` | **Configure egress** 的恢复记录。丢失后无法再用 [Restore egress](/restore-egress) 撤销已下发的出站规则 |
 | `data/air_settings.json` | [Settings](/webui#settings) 中的 AIR 全局默认值 |
 | `data/case/` | 各 Project 的 [Case Board](/air/case-board) |
+| `data/report_history/` | 各报告最近 100 个 [历史版本](/reports#版本历史)。删除或移动报告后，旧版本仍留在这里 |
 | `data/opencli/` | 各 Project 的控制台浏览器配置，由 SIREN 生成 |
 | `data/aliyun/` | 各 Project 的客户 [AccessKey](/consoles#accesskey)，明文保存 |
 | 工作目录中的其他文件 | Global 范围的 Artifacts，例如 Recon 结果和 AccessKey 报告 |

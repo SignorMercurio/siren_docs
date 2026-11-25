@@ -2,8 +2,8 @@
 title: 报告语法
 description: Dossier Markdown 速查：frontmatter、章节、分页、正文和结构块
 icon: BookOpenText
-verifiedAgainst: v2.51.0
-dossierVerifiedAgainst: 720b802
+verifiedAgainst: v2.52.0
+dossierVerifiedAgainst: 9dc0530
 sources:
   - dossier:src/source.js
   - dossier:src/source-syntax.js
@@ -16,9 +16,11 @@ sources:
   - dossier:src/report-schema.json
   - dossier:src/toc.js
   - dossier:src/styles/report.css
+  - dossier:src/report-kind.js
+  - dossier:brief.md
 ---
 
-Dossier Markdown 是普通 Markdown 正文加少量报告专用的 `:::` 结构块，不是 MDX，不支持 JSX 组件。编辑器 **帮助** 中有同一份语法说明和结构块模板。创建、编辑和导出见 [报告](/reports)。
+Dossier Markdown 是普通 Markdown 正文加少量报告专用的 `:::` 结构块，不是 MDX，不支持 JSX 组件。编辑器工具栏的 **?**（帮助）中有同一份语法说明和结构块模板。创建、编辑和导出见 [报告](/reports)。
 
 ## Frontmatter
 
@@ -30,6 +32,25 @@ Dossier Markdown 是普通 Markdown 正文加少量报告专用的 `:::` 结构�
 | `{date:slash}` | `2026/10/08` |
 | `{date:slash-pad}` | `2026 / 10 / 08` |
 | `{sir-seq}`、`{version}` | 对应字段值 |
+
+### 简报
+
+frontmatter 中加一行 `kind: brief`，文档按阶段简报渲染。`brief` 是唯一取值，正式报告不写这一行。
+
+```md
+---
+kind: brief
+date: 20261008
+sir-seq: 01
+version: 1.0
+client: 示例客户
+---
+```
+
+- 没有封面、法律声明、目录、服务概述和版权页。首页以报头开始，显示 Logo、报告编号和 `cover-hero` 中的标题；`sev` 和 `cover-meta` 不显示。
+- 每个 `##` 章是一个编号小节，接在同一页中，不另起一页。其他内容与正式报告相同。
+- 简报中 `{page slot=…}` 不生效。简报没有修订记录，[升版本](/reports#版本历史) 只改 `version`。
+- 离线使用时，文件菜单的 **新建简报** 载入中文简报模板。
 
 ## 章节与标题
 
@@ -43,11 +64,11 @@ Dossier Markdown 是普通 Markdown 正文加少量报告专用的 `:::` 结构�
 - 英文标题可选，写成 `中文 / English`，`/` 两侧各留一个空格。
 - 英文报告的章标题只写英文，与英文模板一致，如 `## Event Overview`、`## Technical Analysis`。切换语言见 [报告语言](/reports#报告语言)。
 - `###` 末尾加 `{page}`，该节从新页开始；`{page slot=3.4}` 同时固定节号。`{page}` 只对 `###` 生效。
-- 节号按源码顺序自动分配，只有 `{page slot=…}` 能固定。标题开头写的点分编号（`### 3.1 排查过程`）会从标题中去掉，不影响节号；开头的整数（`#### 7 月早期失陷`）保留在标题中。
+- 节号按源码顺序自动分配，只有 `{page slot=…}` 能固定。一章内的 `###` 节和 [`phase`](#phase) 阶段共用一套节号；阶段之后或第一个 `###` 之前的 `####` 取下一个节号（阶段 4.1–4.3 之后为 4.4），不作为子节。标题开头写的点分编号（`### 3.1 排查过程`）会从标题中去掉，不影响节号；开头的整数（`#### 7 月早期失陷`）保留在标题中。
 
 ## 分页
 
-内容按固定页高自动分页。长列表、表格、时间线和阶段任务列表可以跨页拆分；图片、资产卡、callout、键值块、阶段标题和代码块放不下时整体移到下一页。
+内容按固定页高自动分页。长列表、表格、时间线、阶段任务列表和 [日志证据块](#日志证据块) 可以跨页拆分；图片、资产卡、callout、键值块、阶段标题和代码块放不下时整体移到下一页。
 
 `{break}` 单独一行强制换页。`{gap}` 单独一行插入留白，可写 `{gap size=lg}`，`size` 可选 `sm`、`md`（默认）、`lg`。
 
@@ -66,6 +87,20 @@ Dossier Markdown 是普通 Markdown 正文加少量报告专用的 `:::` 结构�
 - 列表用 `-`，嵌套缩进两个空格；有序列表写 `1.` 或 `1)`。任务复选框 `[x]` 已完成、`[/]` 进行中、`[ ]` 未开始。
 - 链接可以是相对路径、`http:`、`https:` 或 `mailto:`；导出的 PDF 中相对路径链接打不开，见 [导出](/reports#导出)。
 - 代码块中的长行自动折行，不会超出页面。
+
+### 日志证据块
+
+围栏语言写 `log`，代码块成为日志证据块，用于引用查询到的日志记录：
+
+````md
+```log source="WAF 访问日志" window="2026/10/08 09:00-09:30"
+09:12:06 GET /api/auth/getTestToken 200 642
+09:12:08 GET /api/system/user/getInfo 200 1830
+```
+````
+
+- `source` 写记录来源，`window` 写查询的时间范围，都是可选的纯文本，显示在块的标题栏。
+- 每行一条记录。与普通代码块不同，日志证据块可以在记录之间跨页，续页重复标题栏。
 
 ### 键值行
 
@@ -87,7 +122,18 @@ Dossier Markdown 是普通 Markdown 正文加少量报告专用的 `:::` 结构�
 
 - 默认全宽（即 `{size=full}`），小图加 `{size=sm}` 或 `{size=md}`。
 - `{caption="…"}` 在图片下方显示图注。图注是纯文本，避免出现 `}`。
+- 比一页还高的图片按比例缩小到一页内。加载不了的图片在预览中显示它的路径。
 - 图片地址只能是相对路径的本地文件或 base64 图片数据，其他协议和以 `//` 开头的地址都会被拒绝。在 SIREN 中，本地图片还必须位于 `<报告名>.assets/` 目录内，见 [粘贴图片](/reports#粘贴图片)。
+
+### 截图占位
+
+路径留空的图片是截图占位，图注写明这张截图要显示什么：
+
+```md
+![](){caption="图 2 | WAF 日志中 09:12 的两次请求"}
+```
+
+截图占位渲染为标有 **待补截图** 的虚线框，在 **待填** 中计数，导出 PDF 时会先确认，并按原样打印。光标在这一行时粘贴图片，路径自动填入，见 [粘贴图片](/reports#粘贴图片)。
 
 ### 写作提示注释
 

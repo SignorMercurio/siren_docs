@@ -2,7 +2,7 @@
 title: 服务端配置
 description: server_config.yaml 的全部配置项、默认值、命令行覆盖和环境变量
 icon: FileCog
-verifiedAgainst: v2.51.0
+verifiedAgainst: v2.52.0
 sources:
   - config/server_config.yaml
   - cmd/server/cli/root.go
@@ -124,7 +124,7 @@ mcp:
 air:
   provider: pi                 # codex / claude / pi
   maxSessions: 20
-  idleTimeoutHours: 72
+  idleTimeoutHours: 48
   replayBufferBytes: 4194304
   prompt: 启动安全应急响应，UID：%s。请先获取该账号%s的告警，作为排查起点。
   customPromptPrefix: 在 SIREN Client %d 上启动安全应急响应。
@@ -253,7 +253,7 @@ SIREN 不写日志文件也不轮转，Logs 页面缓冲重启即清空。按 [�
 | --- | --- | --- | --- |
 | `air.provider` | string | `pi` | 浏览器还没选过 Provider 时使用的 Provider，所选 Provider 不可用时也先回退到它：`codex`、`claude` 或 `pi` |
 | `air.maxSessions` | int | `20` | GUI 与 Terminal 合计的并发会话上限，跨所有 Project；`0` 或负数表示不限制 |
-| `air.idleTimeoutHours` | int（小时） | `72` | 会话没有浏览器打开、Provider 也没有新输出达到该时长后自动停止；`0` 或负数表示不自动停止 |
+| `air.idleTimeoutHours` | int（小时） | `48` | 会话没有浏览器打开、Provider 也没有新输出达到该时长后自动停止；`0` 或负数表示不自动停止 |
 | `air.replayBufferBytes` | int（字节） | `4194304` | 每个会话的断线重连回放预算；`0` 或负数时使用默认的 4 MiB，不会关闭回放 |
 | `air.prompt` | string | `启动安全应急响应，UID：%s。请先获取该账号%s的告警，作为排查起点。` | Account 入口的种子 prompt，占位符为 UID 和时间范围，见 [Prompt 模板](/server/air-providers#prompt-模板) |
 | `air.customPromptPrefix` | string | `在 SIREN Client %d 上启动安全应急响应。` | Client 入口加在用户 prompt 前的前缀 |

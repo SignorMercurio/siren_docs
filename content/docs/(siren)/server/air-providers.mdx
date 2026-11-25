@@ -2,7 +2,7 @@
 title: 准备 AIR Provider
 description: 在服务端安装并登录 Claude Code、Codex 或 Pi，供 WebUI 启动 Agentic IR 会话
 icon: Bot
-verifiedAgainst: v2.51.0
+verifiedAgainst: v2.52.0
 sources:
   - config/server_config.yaml
   - cmd/server/cli/root.go
@@ -68,7 +68,7 @@ Agentic IR（AIR）会话运行在服务端上：`siren_server` 以自身系统�
 air:
   provider: pi
   maxSessions: 20
-  idleTimeoutHours: 72
+  idleTimeoutHours: 48
   replayBufferBytes: 4194304
   providers:
     claude:
@@ -115,7 +115,7 @@ Pi 复用服务端用户的全局 Pi 安装、插件、Skills 和配置，新会
    }
    ```
 
-   安装脚本配置了百炼上的 DeepSeek V4.1 Flash、Kimi K3、Kimi K3.1 Pro、GLM 5.3 Prime 和 Qwen4 Max，以及可选的 Qwen Aegis。要在会话中切换到 Qwen Aegis，在 `auth.json` 中按同样格式加一条 `qwen-aegis`。
+   安装脚本配置了百炼上的 DeepSeek V4.1 Flash、Kimi K3、Kimi K3.1 Pro Prime、GLM 5.3 Prime 和 Qwen4 Max，以及可选的 Qwen Aegis。要在会话中切换到 Qwen Aegis，在 `auth.json` 中按同样格式加一条 `qwen-aegis`。
 
    百炼按请求头 `x-dashscope-euid` 中的 `accountId` 计费。安装脚本写入的 `models.json` 中，`bailian` 的 `accountId` 为 `${SIREN_ORDER_UID}`；SIREN 启动 Pi 时把这个环境变量设为当前 Project 的 [客户 UID](/projects#客户-uid)。v2.40.4 之前安装的 Pi 仍写死旧账号，重新运行安装脚本即可更新。不要在 `models.json` 中改回固定 UID，否则所有 Project 都记到同一个账号。
 
@@ -159,7 +159,7 @@ Pi 的文件、Shell 和 MCP 操作直接执行，不产生权限审批。
 
 - **`air.provider`**：回退 Provider。浏览器默认选用上次使用的 Provider（首次使用 `air.provider`），可在 **Settings** 的 **Default AIR provider** 中固定；所选 Provider 不可用时先回退到 `air.provider`，再回退到第一个可用的 Provider。
 - **`air.maxSessions`**（默认 `20`）：全服务端 AIR 会话上限，GUI 与 Terminal、所有 Project、Ask/Client/Account、Fork、worker 和继续会话合计；超出时报 `agent session limit reached (N)`。`0` 或负数表示不限制。
-- **`air.idleTimeoutHours`**（默认 `72`）：会话既没有浏览器打开、Provider 也没有新输出的时间达到该小时数后，服务端自动停止它，原因显示为 `session stopped after a long idle period`，会话记录仍可从 **History** 继续。`0` 或负数表示不自动停止。
+- **`air.idleTimeoutHours`**（默认 `48`）：会话既没有浏览器打开、Provider 也没有新输出的时间达到该小时数后，服务端自动停止它，原因显示为 `session stopped after a long idle period`，会话记录仍可从 **History** 继续。`0` 或负数表示不自动停止。
 - **`air.replayBufferBytes`**（默认 4 MiB）：每个会话的断线重连回放预算，Terminal 按原始输出、GUI 按结构化事件计算。`0` 或负数时使用默认值，不会关闭回放。
 
 ### Provider 参数
