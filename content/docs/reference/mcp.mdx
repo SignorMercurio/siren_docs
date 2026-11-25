@@ -202,7 +202,7 @@ SIREN MCP 不提供告警查询工具。
 
 ### `case_update`
 
-只在 Project 端点提供。`summary`、`items`、`events` 和 `reports` 至少传一个，一次调用全部成功或全部不生效。文本结果末尾列出未结项和还没有排查项的方向。
+只在 Project 端点提供。`summary`、`items`、`events` 和 `reports` 至少传一个，一次调用全部成功或全部不生效。被拒时错误信息列出所有出错的项，每条带 `items[i]`、`events[i]` 这类位置；实体和证据引用先查，引用都通过后再查各字段。文本结果末尾列出未结项和还没有排查项的方向。
 
 `summary` 是当前结论，用一至三句写定性和影响。
 
@@ -215,7 +215,7 @@ SIREN MCP 不提供告警查询工具。
 | `dimension` | `lead`、`entry`、`credentials`、`execution_persistence`、`lateral_assets`、`impact_data`、`response_status`；新建时必填 |
 | `owner` | 负责这一项的角色：`lead`、`entry`、`host`、`cloud`，不传表示 `lead`。[`delegate`](#delegate) 按它决定 worker 的角色。worker 只能改分给自己的那一项，它新建的项归 `lead`；worker 不能写 `summary` |
 | `state` | `open`、`confirmed`、`refuted`、`gap`、`blocked`，默认 `open` |
-| `entities` | 已有实体的 `id`，或新实体的 `kind` 和 `value`。`kind` 为 `host`、`ip`、`domain`、`identity`、`file`、`resource`；`host` 的 `value` 是本 Project 的在线 Client ID。文件路径、本机账号、本机资源可以加 `host`，值是它所在主机的 Client ID：同一路径或账号在两台主机上是两个实体，Case Board 显示为 `主机名:路径`。文件哈希、IP 和域名不能加 `host` |
+| `entities` | 已有实体的 `id`，或新实体的 `kind` 和 `value`。`kind` 为 `host`、`ip`、`domain`、`identity`、`file`、`resource`；`host` 的 `value` 是本 Project 的在线客户端，写法同 `run` 的 `client_id`（Client ID、Instance ID、主机名或内网 IP）。文件路径、本机账号、本机资源可以加 `host`，值是它所在主机，写法相同：同一路径或账号在两台主机上是两个实体，Case Board 显示为 `主机名:路径`。文件哈希、IP 和域名不能加 `host` |
 | `evidence` | 证据列表，见下文 |
 | `remove_entities`、`remove_evidence` | 先从列表移除的实体、证据编号 |
 | `answer` | 证据查实的内容，Case Board 显示为发现。`confirmed`、`refuted`、`gap` 必填 |
@@ -368,7 +368,7 @@ SIREN run audit_id=<id>; outcome=success; exit_code=0; file=runs/<id>.txt from l
 | `file` | 结果文件相对于 Project 目录的路径，即 `runs/<audit_id>.txt`，以及输出开始的行号；Global 端点和写入失败时没有 |
 | `storage_error` | 结果文件未能写入的原因，形如 `write_failed: <错误>` |
 
-只有和正常执行不同的项才出现。输出从第二行开始；首尾预览另有一行 `Preview:`，写明展示和省略的字节范围。完整的执行元数据（含两路输出的哈希）记在 [审计日志](#审计日志) 中。
+只有和正常执行不同的项才出现。输出从第二行开始；超时的结果在第二行先给出处理办法（缩小命令范围，或把命令放到后台写文件、之后再读），首尾预览另有一行 `Preview:`，写明展示和省略的字节范围。完整的执行元数据（含两路输出的哈希）记在 [审计日志](#审计日志) 中。
 
 ### 结果文件
 
