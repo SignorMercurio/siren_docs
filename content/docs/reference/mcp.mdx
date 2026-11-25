@@ -198,11 +198,11 @@ SIREN MCP 不提供告警查询工具。
 
 只在 Project 端点提供，没有参数。文本结果列出 [Case Board](/air/case-board) 的当前结论、排查项、攻击时间线事件、它们引用的实体和证据，以及已登记的报告。结构化结果是 `text`、`revision` 和 `evidence_version`。
 
+全文超过 16 KiB 时，文本结果只给概要：当前结论、`open` 和 `blocked` 的排查项、各状态已结项的数量，以及已登记的报告。全文写入 Project 目录下的 `case/board-r<revision>.txt`，每行一条，结构化结果的 `board_path` 给出这个路径。已结项、时间线事件和证据路径按编号（如 `Q12`、`TL03`、`CE07`）在文件里查。同一 revision 的全文不变，文件写入后不再覆盖。
+
 ### `case_update`
 
 只在 Project 端点提供。`summary`、`items`、`events` 和 `reports` 至少传一个，一次调用全部成功或全部不生效。文本结果末尾列出未结项和还没有排查项的方向。
-
-如果同一实体的同一维度已有三项记为 `refuted` 或 `gap`，没有 `supports` 证据，且仍有 `open` 或 `active` 的项，`case_update` 和 `case_read` 的文本结果都会给出 `Repeated direction` 提示。这条提示只建议换证据源或假设，不限制后续操作。
 
 `summary` 是当前结论，用一至三句写定性和影响。
 
@@ -265,7 +265,7 @@ SIREN MCP 不提供告警查询工具。
 | `path` | Project 内的 Dossier 报告路径 |
 | `evidence_version` | 写报告前 `case_read` 返回的 `evidence_version` |
 
-版本不能高于当前版本，同一份报告的版本不能回退。排查项的证据变化，状态进入、离开 `open` 和 `active` 以外的状态，或事件内容变化时，证据版本加 1，此前登记的报告显示为需要复核。修改事件的 `items` 不影响证据版本。
+版本不能高于当前版本，同一份报告的版本不能回退。排查项的证据或状态变化、不在 `open` 状态的排查项回答变化，或事件内容变化时，证据版本加 1，此前登记的报告显示为需要复核。修改事件的 `items` 不影响证据版本。
 
 ### `delegate`
 
