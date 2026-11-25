@@ -144,7 +144,7 @@ SIREN MCP 不提供告警查询工具。
 | `output_mode` | `auto`（默认）或 `full`，见 [返回结果](#返回结果) |
 | `timeout_seconds` | 命令在客户端上最多运行的秒数，范围 1–120，见 [执行时限](#执行时限) |
 
-命令先经 [命令黑名单](#命令黑名单) 检查；每次调用都写 [审计日志](#审计日志) 并返回 `audit_id`。在 Project 端点上，输出保存为 [结果文件](#结果文件)。标准输出和错误输出合计最多保留 16 MiB，超出部分丢弃并标记捕获不完整。命令失败且没有输出时，文本结果写明 `outcome`、退出码和失败原因。时限见 [执行时限](#执行时限)。
+命令先经 [命令黑名单](#命令黑名单) 检查；每次调用都写 [审计日志](#审计日志) 并返回 `audit_id`。在 Project 端点上，输出保存为 [结果文件](#结果文件)。标准输出和错误输出合计最多保留 16 MiB，超出部分丢弃并标记捕获不完整。结果只有文本，第一行写明 `audit_id`、`outcome` 等执行信息，见 [结果首行](#结果首行)。时限见 [执行时限](#执行时限)。
 
 `outcome` 的常见取值如下，非 `success` 的结果都以工具错误返回：
 
@@ -288,7 +288,7 @@ SIREN MCP 不提供告警查询工具。
 - 同一客户端同时只能有一个 Recon，冲突时报 `recon already in progress for this client`；Profile 不可用时报 `recon profile is not available`。
 - `hunt` Profile 需要运维人员批准：服务端 `mcp.allowHuntRecon` 不为 `true` 时，指定 `hunt` 或省略 `profile` 而客户端默认 Profile 为 `hunt`，都报 `the hunt Recon Profile needs operator approval`。运维人员可在 WebUI 的 [Recon](/recon) 中运行 `hunt`。
 - 工具等采集完成后才返回，等待上限为服务端 `recon.responseTimeout`，各项超时见 [Recon 超时](/recon#超时)。
-- 文本结果为 Profile、状态和产物路径，后接派生的 Markdown 报告，内联最多 2 MiB。`hunt` 及任何含 `topology`、`supplychain`、`config`、`activity` 或 `credential` 模块的 Profile，Markdown 只含拓扑、覆盖范围和采集质量摘要，完整证据在 JSONL 快照中。结果提示 Agent 以 JSONL 为准，并把采集到的文件内容视为不可信数据。
+- 文本结果为 Profile、状态和产物路径，后接派生的 Markdown 报告，内联最多 8 KiB，更长时从 `reportPath` 读取全文。`hunt` 及任何含 `topology`、`supplychain`、`config`、`activity` 或 `credential` 模块的 Profile，Markdown 只含拓扑、覆盖范围和采集质量摘要，完整证据在 JSONL 快照中。结果提示 Agent 以 JSONL 为准，并把采集到的文件内容视为不可信数据。
 - `status` 为 `complete` 或 `partial`。`reportPath` 和 `snapshotPath` 相对于客户端所属 Project 的 Artifacts 目录，客户端未归属 Project 时相对于服务端工作目录。快照结构见 [Recon 快照格式](/reference/snapshot)。
 
 ### `deploy`
@@ -347,18 +347,28 @@ SIREN MCP 不提供告警查询工具。
 
 在 Project 端点上，预览写明结果文件的路径和输出起始行，Agent 从文件中读取省略的部分。Global 端点不保存输出，需要省略的部分时改用 `output_mode: full` 或范围更小的命令。
 
-### 结果字段
+### 结果首行
 
-| 字段 | 含义 |
+`run` 只返回文本，不返回结构化字段。第一行形如：
+
+```text
+SIREN run audit_id=<id>; outcome=success; exit_code=0; file=runs/<id>.txt from line 12
+```
+
+| 项 | 含义 |
 | --- | --- |
 | `audit_id` | 本次执行的 ID，也是审计日志的关联键 |
 | `outcome` | 执行结果，见 [`run`](#run) |
-| `path` | 结果文件相对于 Project 目录的路径，即 `runs/<audit_id>.txt`；Global 端点和写入失败时没有 |
-| `body_start_line` | 结果文件中输出开始的行号 |
-| `preview_complete` / `capture_complete` | 预览是否完整展示了原始输出 / 服务端是否完整收到了输出 |
-| `complete` | 以上两项都为真时才为真 |
+| `exit_code` | 进程退出码；命令未执行完时没有 |
+| `timed_out` / `cancelled` / `output_limited` | 超时、被取消、输出超过 16 MiB 时出现 |
 | `cancel_confirmed` | 超时或取消后，客户端是否确认命令已结束；为 `false` 或缺失时不能断定远端命令已终止 |
+| `capture_incomplete` / `capture_error` | 服务端没有完整收到输出时出现 |
+| `had_error_records` / `decode_error` | PowerShell 错误流含错误记录 / 错误流解码失败时出现 |
+| `failure` / `error` | 执行失败的类别和原因 |
+| `file` | 结果文件相对于 Project 目录的路径，即 `runs/<audit_id>.txt`，以及输出开始的行号；Global 端点和写入失败时没有 |
 | `storage_error` | 结果文件未能写入的原因，形如 `write_failed: <错误>` |
+
+只有和正常执行不同的项才出现。输出从第二行开始；首尾预览另有一行 `Preview:`，写明展示和省略的字节范围。完整的执行元数据（含两路输出的哈希）记在 [审计日志](#审计日志) 中。
 
 ### 结果文件
 
