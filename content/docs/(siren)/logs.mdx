@@ -63,7 +63,7 @@ SIREN 不写日志文件；长期留存见 [日志格式与留存](/reference/se
 | 客户端接入与断开 | `client.connected`、`client.disconnected`、`client.handshake_failed` | `client_id`、`remote_addr`、`os`、`project` |
 | WebUI 登录 | `auth.login.success`、`auth.login.failed`、`auth.login.rate_limited`、`auth.logout.success` | `user`、`remote_ip` |
 | 浏览器 Shell | `shell.session.started`、`shell.session.ended`、`shell.session.request_failed` | `user`、`client_id`、`project`、`duration_ms`、结束原因 `reason` |
-| MCP 命令执行 | `mcp.run.requested`、`mcp.run.finished` | `audit_id`、`command`、`client_id`、`outcome` |
+| MCP 命令执行 | `mcp.run.requested`、`mcp.run.finished` | `audit_id`、`command`、`client_id`、`outcome`、`session_id` |
 | 云控制台操作 | `console.view.started`、`console.view.ended` | `user`、`profile`、`duration_ms` |
 | Project AccessKey | `aliyun.key.added`、`aliyun.key.removed` | `project`、`name` |
 | AIR 全局默认值 | `air.settings.updated` | `user`、`revision`、各 Provider 和各 worker 角色的模型和 effort、附加指令字节数 `instructions_bytes`、常用请求数 `prompts` |

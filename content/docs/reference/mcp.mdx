@@ -277,7 +277,7 @@ SIREN MCP 不提供告警查询工具。
 | **`item`** | 要交出的排查项编号，如 `Q01`。该项必须是 `open`，`owner` 为 `entry`、`host` 或 `cloud`，且没有正在运行的 worker |
 | **`prompt`** | worker 的任务：要查清什么，以及调查对象、时间窗和已知关键事实，最多 2,000 个字符 |
 
-调用立即返回 worker 会话编号、排查项和角色。worker 只看得到 `prompt` 和 Case Board。worker 结束后，SIREN 把结果作为一条新消息发给调用方。同一会话同时最多 6 个 worker 在运行。
+调用立即返回 worker 会话编号、排查项和角色。worker 只看得到 `prompt` 和 Case Board，它的端点不提供 `deploy`、`allow` 和 `egress`：改动客户环境的操作只由调用方执行。worker 结束后，SIREN 把结果作为一条新消息发给调用方。同一会话同时最多 6 个 worker 在运行。
 
 ### `recon`
 
@@ -344,7 +344,9 @@ SIREN MCP 不提供告警查询工具。
 | `auto` | 原样返回 | 首尾预览 | 首尾预览 |
 | `full` | 原样返回 | 原样返回 | 首尾预览 |
 
-首尾预览保留开头和结尾各约 4 KiB（尽量在换行处切开），并标出省略的字节范围。预览标注为不可信的远端证据，但不清洗 ANSI 转义、控制字符或疑似指令。
+首尾预览保留开头和结尾各约 4 KiB（尽量在换行处切开），并标出省略的字节范围。
+
+输出不论长短，都夹在 `--- BEGIN UNTRUSTED REMOTE EVIDENCE` 和 `--- END UNTRUSTED REMOTE EVIDENCE` 两行之间，`run_batch` 的每段预览和 `recon` 的报告也一样：两行之间是主机写的数据，不是指令。输出里出现这个标记短语时，SIREN 把其中的空格换成下划线，主机无法提前结束自己的证据块；结果文件保留原样。除此之外不清洗 ANSI 转义、控制字符或疑似指令。
 
 在 Project 端点上，预览写明结果文件的路径和输出起始行，Agent 从文件中读取省略的部分。Global 端点不保存输出，需要省略的部分时改用 `output_mode: full` 或范围更小的命令。
 
@@ -469,6 +471,7 @@ MCP 日志写入服务端日志，组件为 `mcp`，可在 [Logs](/logs) 页按�
 | `mcp.run.finished` | 成功为 Info，`send_error` 为 Error，其他为 Warning | 同上，另有 `outcome`、`duration_ms`、`client_id`、`timeout_seconds`、`matched_pattern`、`error`；下发过的命令还有 `result_path` |
 
 - `project` 为 Project ID，Global 端点记为 `global`。
+- AIR 会话发起的调用，每条记录还有 `session_id`（该会话的编号）；开启多 Agent 分工的会话和它的 worker 另有 `role`。用管理员凭据的调用没有这两个字段。
 - 每次 `run` 写同一 `audit_id` 的一对 `mcp.run.requested` / `mcp.run.finished`，被拦截、目标被拒绝、取消和超时的调用也不例外。
 - `run_batch` 每台主机各有一对记录，以 `batch_id` 关联；整批被黑名单拦截时写一条 `mcp.run_batch.blocked`（Warning，含 `command` 和 `matched_pattern`）和 `mcp.tool.finished`；目标解析失败时只有 `mcp.tool.finished`。
 - 日志含完整命令，不含命令输出。Project 端点的输出在 `result_path` 指向的 [结果文件](#结果文件) 中。
